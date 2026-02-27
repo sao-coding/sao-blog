@@ -1,0 +1,44 @@
+{
+  "name": "sao-blog",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @sao-blog/db db:push",
+    "db:studio": "turbo -F @sao-blog/db db:studio",
+    "db:generate": "turbo -F @sao-blog/db db:generate",
+    "db:migrate": "turbo -F @sao-blog/db db:migrate",
+    "db:start": "turbo -F @sao-blog/db db:start",
+    "db:watch": "turbo -F @sao-blog/db db:watch",
+    "db:stop": "turbo -F @sao-blog/db db:stop",
+    "db:down": "turbo -F @sao-blog/db db:down",
+    "prepare": "husky",
+    "ruler:apply": "pnpm dlx @intellectronica/ruler@latest apply --local-only"
+  },
+  "dependencies": {
+    "@sao-blog/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@sao-blog/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.6.3",
+    "typescript": "catalog:"
+  },
+  "lint-staged": {
+    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""
+  },
+  "packageManager": "pnpm@10.30.3"
+}

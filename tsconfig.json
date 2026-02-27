@@ -1,0 +1,3 @@
+{
+  "extends": "@sao-blog/config/tsconfig.base.json"
+}

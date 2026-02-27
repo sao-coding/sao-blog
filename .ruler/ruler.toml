@@ -1,0 +1,24 @@
+# Ruler Configuration File
+# See https://okigu.com/ruler for documentation.
+
+# Default agents to run when --agents is not specified
+default_agents = [
+  "agentsmd",
+  "claude",
+  "cline",
+  "codex",
+  "copilot",
+  "cursor",
+  "firebase",
+  "gemini-cli",
+  "opencode",
+  "roo",
+  "windsurf",
+  "kiro",
+  "kilocode",
+]
+
+# --- Global .gitignore Configuration ---
+[gitignore]
+# Enable/disable automatic .gitignore updates (default: true)
+enabled = true

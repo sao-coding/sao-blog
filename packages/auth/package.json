@@ -1,0 +1,25 @@
+{
+  "name": "@sao-blog/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@better-auth/expo": "catalog:",
+    "@sao-blog/db": "workspace:*",
+    "@sao-blog/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@sao-blog/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
