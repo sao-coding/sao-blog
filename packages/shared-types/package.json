@@ -1,0 +1,11 @@
+{
+  "name": "@sao-blog/shared-types",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "types": "router/index.d.mts",
+  "devDependencies": {
+    "zod": "^4.3.6",
+    "@orpc/server": "^1.13.5"
+  }
+}

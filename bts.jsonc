@@ -19,7 +19,14 @@
   "backend": "elysia",
   "runtime": "bun",
   "frontend": ["next", "native-uniwind"],
-  "addons": ["turborepo", "husky", "pwa", "ruler", "skills", "mcp"],
+  "addons": [
+		"turborepo",
+		"husky",
+		"pwa",
+		"ruler",
+		"mcp",
+		"skills"
+	],
   "examples": [],
   "auth": "better-auth",
   "payments": "none",

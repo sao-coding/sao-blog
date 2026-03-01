@@ -1,9 +1,10 @@
 import { expo } from "@better-auth/expo";
 import { db } from "@sao-blog/db";
-import * as schema from "@sao-blog/db/schema/auth";
+import * as schema from "@sao-blog/db/schema/index";
 import { env } from "@sao-blog/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { openAPI, apiKey, admin, username } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -28,5 +29,13 @@ export const auth = betterAuth({
       httpOnly: true,
     },
   },
-  plugins: [expo()],
+  plugins: [    
+    admin(),
+    username(),
+    openAPI(),
+    expo(), 
+    apiKey({
+      enableSessionForAPIKeys: true
+    })
+  ],
 });

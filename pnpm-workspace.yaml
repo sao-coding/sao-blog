@@ -1,18 +1,25 @@
 packages:
   - apps/*
   - packages/*
+
 catalog:
-  dotenv: ^17.2.2
-  zod: ^4.1.13
-  typescript: ^5
-  "@types/bun": ^1.3.4
-  elysia: ^1.4.21
-  "@orpc/server": ^1.12.2
-  "@orpc/openapi": ^1.12.2
-  "@orpc/zod": ^1.12.2
+  '@better-auth/expo': ^1.4.18
+  '@orpc/client': ^1.12.2
+  '@orpc/openapi': ^1.12.2
+  '@orpc/server': ^1.12.2
+  '@orpc/tanstack-query': ^1.12.2
+  '@orpc/zod': ^1.12.2
+  '@tanstack/react-form': ^1.28.0
+  '@tanstack/react-query': ^5.90.12
+  '@types/bun': ^1.3.4
   better-auth: ^1.4.18
-  "@orpc/tanstack-query": ^1.12.2
-  "@orpc/client": ^1.12.2
-  "@tanstack/react-query": ^5.90.12
-  "@tanstack/react-form": ^1.28.0
-  "@better-auth/expo": ^1.4.18
+  dotenv: ^17.2.2
+  elysia: ^1.4.26
+  typescript: ^5
+  zod: ^4.1.13
+
+onlyBuiltDependencies:
+  - esbuild
+  - msw
+  - sharp
+  - unrs-resolver
