@@ -6,7 +6,7 @@ catalog:
   '@better-auth/expo': ^1.4.18
   '@orpc/client': ^1.12.2
   '@orpc/openapi': ^1.12.2
-  '@orpc/server': ^1.12.2
+  '@orpc/server': ^1.13.5
   '@orpc/tanstack-query': ^1.12.2
   '@orpc/zod': ^1.12.2
   '@tanstack/react-form': ^1.28.0

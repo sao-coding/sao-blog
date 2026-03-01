@@ -1,0 +1,27 @@
+.sao-link {
+  @apply underline decoration-[oklch(0.2103_0.0059_285.89_/_.2)] underline-offset-3;
+  @apply bg-linear-to-r from-teal-500 to-teal-500 bg-size-[0_1.5px] bg-no-repeat bg-[left_1.3em];
+  @apply transition-all duration-250;
+  @apply hover:bg-size-[100%_1.5px] hover:no-underline;
+  @variant dark {
+    @apply decoration-[oklch(0.9674_0.0013_286.37_/_.2)];
+  }
+}
+/* rgb(24 24 27/.2) */
+/* oklch(0.9674 0.0013 286.37 / 20%) */
+/* oklch(0.2103 0.0059 285.89 / 20%) */
+
+.note-card-enter {
+  animation: note-card-rise 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes note-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

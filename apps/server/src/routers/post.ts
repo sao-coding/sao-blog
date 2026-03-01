@@ -2,10 +2,12 @@ import { protectedProcedure, publicProcedure } from "@/orpc/index";
 import { db } from "@sao-blog/db";
 import { posts, categories, postTags, tags, user } from "@sao-blog/db/schema/index";
 import { type TagModel } from "@sao-blog/db/schema/index";
-import { PostsResponseSchema, createPostSchema } from "../schema/post";
+import { PostResponseSchema, PostsResponseSchema, createPostSchema } from "../schema/post";
 import { eq, inArray } from "drizzle-orm";
+import z from "zod";
 
 const getPosts = publicProcedure
+    .route({ method: "GET", path: "/posts" })
     .output(PostsResponseSchema)
     .handler(async () => {
     // 1) 先用 left join 取得 posts、author、category（若有）
@@ -57,16 +59,55 @@ const getPosts = publicProcedure
     }
 });
 
-const createPost = protectedProcedure
-    .input(createPostSchema)
-    .handler(async ({ input, context }) => {
-        // const { title, content } = input;
-        const userId = context.session?.user.id;
+// 獲取單篇文章
+const getPost = publicProcedure
+    .route({ method: "GET", path: "/posts/:id" })
+    .input(z.object({ id: z.string() }))
+    .output(PostResponseSchema)
+    .handler(async ({ input }) => {
+        const { id } = input;
+        console.log(`Fetching post with id: ${id}`);
+        // 1) 先用 left join 取得 post、author、category（若有）
+        const [row] = await db
+            .select({ post: posts, author: user, category: categories })
+            .from(posts)
+            .innerJoin(user, eq(posts.authorId, user.id))
+            .leftJoin(categories, eq(posts.categoryId, categories.id))
+            .where(eq(posts.slug, id))
+            .limit(1);
 
-        return {};
+        if (!row) {
+            return {
+                status: "error",
+                message: "文章不存在",
+                data: null,
+            };
+        }
+
+        // 2) 再查該 post 的 tags（透過 post_tags join tags）
+        const tagRows = await db
+            .select({ tag: tags })
+            .from(postTags)
+            .leftJoin(tags, eq(postTags.tagId, tags.id))
+            .where(eq(postTags.postId, row.post.id));
+
+        const tagsByPost = tagRows.map((tr) => tr.tag).filter((t): t is TagModel => t !== null);
+
+        const { post, author, category} = row;
+    
+        return {
+            status: "success",
+            message: "文章取得成功",
+            data: {
+                ...post,
+                author,
+                category,
+                tags: tagsByPost,
+            },
+        };
     });
 
 export default {
     getPosts,
-    createPost,
+    getPost
 };

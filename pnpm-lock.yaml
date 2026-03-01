@@ -16,7 +16,7 @@ catalogs:
       specifier: ^1.12.2
       version: 1.13.5
     '@orpc/server':
-      specifier: ^1.12.2
+      specifier: ^1.13.5
       version: 1.13.5
     '@orpc/tanstack-query':
       specifier: ^1.12.2
@@ -105,6 +105,9 @@ importers:
       '@orpc/client':
         specifier: ^1.13.5
         version: 1.13.5
+      '@orpc/server':
+        specifier: 'catalog:'
+        version: 1.13.5(ws@8.19.0)
       '@orpc/tanstack-query':
         specifier: ^1.13.5
         version: 1.13.5(@orpc/client@1.13.5)(@tanstack/query-core@5.90.20)

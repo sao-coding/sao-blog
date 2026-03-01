@@ -125,5 +125,6 @@ export const createPostSchema = z.object({
 });
 
 export const PostsResponseSchema = createApiResponseSchema(z.array(postSchema));
+export const PostResponseSchema = createApiResponseSchema(postSchema.nullable());
 export type Post = z.infer<typeof postSchema>;
 export type CreatePostInput = z.infer<typeof createPostSchema>;

@@ -60,10 +60,10 @@ const app = new Elysia()
     },
   )
   .all(
-    "/api-reference*",
+    "/api*",
     async (context) => {
       const { response } = await apiHandler.handle(context.request, {
-        prefix: "/api-reference",
+        prefix: "/api",
         context: await createContext({ context }),
       });
       return response ?? new Response("Not Found", { status: 404 });
