@@ -1,7 +1,7 @@
 import { publicProcedure } from "@/orpc/index";
 import { db } from "@sao-blog/db";
-import { notes } from "@sao-blog/db/schema/index";
-import { eq, desc, asc, and, lt, gt } from "drizzle-orm";
+import { notes, topics, user } from "@sao-blog/db/schema/index";
+import { eq, desc, asc, and, lt, gt, inArray } from "drizzle-orm";
 import z from "zod";
 
 // notes?id= 獲取日記列表（用於首頁或日記列表頁面）
@@ -34,18 +34,20 @@ const getNotes = publicProcedure
         }
         // 1. 獲取當前日記
         const currentNote = await db
-            .select()
+            .select({ createdAt: notes.createdAt })
             .from(notes)
             .where(and(eq(notes.id, noteId), eq(notes.status, true)))
             .limit(1);
 
+        const  currentNoteCreatedAt = currentNote[0]!.createdAt;
+
         // 2. 目前日記的前面 4 篇（較舊的日記）
-        const prevNotes = await db
+        const prevNotesQuery = await db
             .select({ id: notes.id })
             .from(notes)
             .where(
                 and(
-                    lt(notes.createdAt, currentNote[0].createdAt),
+                    lt(notes.createdAt, currentNoteCreatedAt),
                     eq(notes.status, true)
                 )
             )
@@ -53,30 +55,57 @@ const getNotes = publicProcedure
             .limit(4);
 
         // 3. 目前日記的後面 4 篇（較新的日記）
-        const nextNotes = await db
+        const nextNotesQuery = await db
             .select({ id: notes.id })
             .from(notes)
             .where(
                 and(
-                    gt(notes.createdAt, currentNote[0].createdAt),
+                    gt(notes.createdAt, currentNoteCreatedAt),
                     eq(notes.status, true)
                 )
             )
             .orderBy(asc(notes.createdAt))
             .limit(4);
+
+        const [prevNotes, nextNotes] = await Promise.all([prevNotesQuery, nextNotesQuery]);
+
+        const nodeIds = [
+            ...prevNotes.map(note => note.id),
+            noteId,
+            ...nextNotes.map(note => note.id),
+        ]
+
+        const notesList = await db
+            .select({
+                notes,
+                user,
+                topics
+            })
+            .from(notes)
+            .leftJoin(user, eq(user.id, notes.authorId))
+            .leftJoin(topics, eq(topics.id, notes.topicId))
+            .where(
+                and(
+                    eq(notes.status, true),
+                    inArray(notes.id, nodeIds)
+                )
+            )
+            .orderBy(desc(notes.createdAt))
             
         return {
             status: "success",
             message: "日記列表取得成功",
-            data: {
-                current: currentNote[0],
-                prev: prevNotes,
-                next: nextNotes,
-            }
+            data: notesList.map(note => ({
+                id: note.notes.id,
+                title: note.notes.title,
+                createdAt: note.notes.createdAt,
+                content: note.notes.content,
+                author: note.user,
+                topic: note.topics,
+            }))
                
             }
-        };
-    });
+        })
 
 // /notes/latest
 // 獲取最新日記的 ID（用於首頁重定向）
