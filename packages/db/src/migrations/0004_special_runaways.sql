@@ -1,0 +1,1 @@
+ALTER TABLE "comments" RENAME COLUMN "type" TO "ref_type";
