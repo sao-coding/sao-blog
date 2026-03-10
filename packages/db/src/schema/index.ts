@@ -233,13 +233,17 @@ export const notes = pgTable('notes', {
     .notNull(),
 })
 
+export const commentRefTypeEnum = pgEnum('comment_ref_type', ['post', 'note', 'page', 'recently'])
+export const commentSourceEnum = pgEnum('comment_source', ['guest', 'google', 'github'])
+
 export const comments = pgTable(
   'comments',
   {
     id: uuid('id')
       .primaryKey()
       .$defaultFn(() => uuidv7()),
-    postId: varchar('post_id', { length: 256 }).notNull(),
+    refType: commentRefTypeEnum('ref_type').notNull(),
+    refId: uuid('ref_id').notNull(), // 文章或日記的 ID
     displayUsername: varchar('display_username', { length: 100 }).notNull(),
     email: varchar('email', { length: 256 }).notNull(),
     website: varchar('website', { length: 512 }),
@@ -248,6 +252,14 @@ export const comments = pgTable(
     likes: integer('likes').default(0).notNull(),
     dislikes: integer('dislikes').default(0).notNull(),
     deleted: boolean('deleted').default(false).notNull(),
+    pin: boolean('pin').default(false).notNull(),
+    // 留言來源：對應 account.providerId（例如 'guest', 'local', 'google', 'facebook'）
+    source: commentSourceEnum('source').notNull().default('guest'),
+    // 若為已登入使用者，存放對應 user.id；訪客則為 null
+    userId: uuid('user_id').references(() => user.id, { onDelete: 'set null' }),
+    ip: varchar('ip', { length: 45 }), // 支援 IPv6
+    agent: varchar('agent', { length: 512 }),
+    location: varchar('location', { length: 256 }), // 根據 IP 解析出的地理位置
     createdAt: timestamp('created_at', { withTimezone: true })
       .$defaultFn(() => new Date())
       .notNull(),
@@ -256,15 +268,17 @@ export const comments = pgTable(
       .notNull(),
   },
   (table) => [
-    index('comments_post_id_idx').on(table.postId),
+    index('comments_ref_id_idx').on(table.refId),
     index('comments_thread_idx').on(table.thread),
     index('comments_created_at_idx').on(table.createdAt),
-    index('comments_post_created_idx').on(table.postId, table.createdAt),
+    index('comments_ref_created_idx').on(table.refId, table.createdAt),
+    index('comments_user_idx').on(table.userId),
+    index('comments_source_idx').on(table.source),
   ]
 )
 
-export const rates = pgTable(
-  'rates',
+export const commentLikes = pgTable(
+  'comment_likes',
   {
     userId: varchar('user_id', { length: 256 }).notNull(),
     commentId: uuid('comment_id').notNull(),
@@ -272,7 +286,7 @@ export const rates = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.userId, table.commentId] }),
-    index('rates_comment_idx').on(table.commentId),
+    index('comment_idx').on(table.commentId),
   ]
 )
 
@@ -427,6 +441,10 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   }),
   replies: many(comments, {
     relationName: 'comments_thread',
+  }),
+  user: one(user, {
+    fields: [comments.userId],
+    references: [user.id],
   }),
 }))
 
