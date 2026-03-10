@@ -101,6 +101,7 @@ export default async function Page({
 
   return (
     <PostClientPage
+      postId={data.id}
       showToc={showToc}
       toc={scope.toc || []}
       metaData={{

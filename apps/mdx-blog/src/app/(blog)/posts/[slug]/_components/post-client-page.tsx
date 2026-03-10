@@ -11,6 +11,7 @@ import { CommentSection } from '@/components/comment'
 
 type PostClientPageProps = {
   children: ReactNode
+  postId: string
   showToc: boolean
   toc: TocItem[]
   metaData: {
@@ -23,6 +24,7 @@ type PostClientPageProps = {
 
 export function PostClientPage({
   children,
+  postId,
   showToc,
   toc,
   metaData,
@@ -49,7 +51,7 @@ export function PostClientPage({
           <article className="prose dark:prose-invert max-w-full" ref={targetRef}>
             {children}
           </article>
-          <CommentSection postId="article-slug" lazyLoad />
+          <CommentSection postId={postId} lazyLoad />
         </div>
         <div className="relative hidden lg:block">
           {!isMobile && showToc && <TableOfContent toc={toc} targetRef={targetRef} />}
