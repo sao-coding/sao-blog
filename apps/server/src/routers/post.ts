@@ -61,7 +61,7 @@ const getPosts = publicProcedure
 
 // 獲取單篇文章
 const getPost = publicProcedure
-    .route({ method: "GET", path: "/posts/:id" })
+    .route({ method: "GET", path: "/posts/{id}" })
     .input(z.object({ id: z.string() }))
     .output(PostResponseSchema)
     .handler(async ({ input }) => {

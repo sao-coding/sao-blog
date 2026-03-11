@@ -130,7 +130,7 @@ const getNoteLatest = publicProcedure
 
 // 獲取單篇日記的詳細內容（用於日記頁面）
 const getNote = publicProcedure
-    .route({ method: "GET", path: "/notes/:id" })
+    .route({ method: "GET", path: "/notes/{id}" })
     .input(z.object({
         id: z.string(),
     }))
