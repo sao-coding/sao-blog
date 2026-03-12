@@ -5,245 +5,6 @@ import * as better_auth0 from "better-auth";
 
 //#region src/routers/index.d.ts
 declare const appRouter: {
-  healthCheck: _orpc_server0.DecoratedProcedure<{
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    } | null;
-  } & Record<never, never>, {
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    } | null;
-  }, _orpc_server0.Schema<unknown, unknown>, _orpc_server0.Schema<string, string>, Record<never, never>, Record<never, never>>;
-  privateData: _orpc_server0.DecoratedProcedure<_orpc_server0.MergedInitialContext<{
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    } | null;
-  } & Record<never, never>, {
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    } | null;
-  } & Record<never, never>, {
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    } | null;
-  }>, _orpc_server0.MergedCurrentContext<{
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    } | null;
-  }, {
-    session: {
-      session: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        expiresAt: Date;
-        token: string;
-        ipAddress?: string | null | undefined | undefined;
-        userAgent?: string | null | undefined | undefined;
-        impersonatedBy?: string | null | undefined;
-      };
-      user: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        emailVerified: boolean;
-        name: string;
-        image?: string | null | undefined | undefined;
-        banned: boolean | null | undefined;
-        role?: string | null | undefined;
-        banReason?: string | null | undefined;
-        banExpires?: Date | null | undefined;
-        username?: string | null | undefined;
-        displayUsername?: string | null | undefined;
-      };
-    };
-  }>, _orpc_server0.Schema<unknown, unknown>, _orpc_server0.Schema<{
-    message: string;
-    user: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      email: string;
-      emailVerified: boolean;
-      name: string;
-      image?: string | null | undefined | undefined;
-      banned: boolean | null | undefined;
-      role?: string | null | undefined;
-      banReason?: string | null | undefined;
-      banExpires?: Date | null | undefined;
-      username?: string | null | undefined;
-      displayUsername?: string | null | undefined;
-    };
-  }, {
-    message: string;
-    user: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      email: string;
-      emailVerified: boolean;
-      name: string;
-      image?: string | null | undefined | undefined;
-      banned: boolean | null | undefined;
-      role?: string | null | undefined;
-      banReason?: string | null | undefined;
-      banExpires?: Date | null | undefined;
-      username?: string | null | undefined;
-      displayUsername?: string | null | undefined;
-    };
-  }>, Record<never, never>, Record<never, never>>;
   post: {
     getPosts: _orpc_server0.DecoratedProcedure<{
       session: {
@@ -867,6 +628,649 @@ declare const appRouter: {
         createdAt: Date;
         updatedAt: Date;
       } | null;
+    }>, Record<never, never>, Record<never, never>>;
+  };
+  comment: {
+    getComments: _orpc_server0.DecoratedProcedure<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }, zod0.ZodObject<{
+      type: zod0.ZodEnum<{
+        post: "post";
+        note: "note";
+        page: "page";
+        recently: "recently";
+      }>;
+      refId: zod0.ZodString;
+    }, better_auth0.$strip>, zod0.ZodObject<{
+      status: zod0.ZodEnum<{
+        error: "error";
+        success: "success";
+      }>;
+      message: zod0.ZodString;
+      meta: zod0.ZodOptional<zod0.ZodUndefined>;
+      data: zod0.ZodArray<zod0.ZodObject<{
+        id: zod0.ZodUUID;
+        refType: zod0.ZodEnum<{
+          post: "post";
+          note: "note";
+          page: "page";
+          recently: "recently";
+        }>;
+        refId: zod0.ZodString;
+        displayUsername: zod0.ZodString;
+        email: zod0.ZodString;
+        website: zod0.ZodNullable<zod0.ZodString>;
+        content: zod0.ZodString;
+        thread: zod0.ZodNullable<zod0.ZodString>;
+        likes: zod0.ZodNumber;
+        dislikes: zod0.ZodNumber;
+        deleted: zod0.ZodBoolean;
+        pin: zod0.ZodBoolean;
+        source: zod0.ZodEnum<{
+          guest: "guest";
+          google: "google";
+          github: "github";
+        }>;
+        userId: zod0.ZodNullable<zod0.ZodString>;
+        ip: zod0.ZodNullable<zod0.ZodString>;
+        agent: zod0.ZodNullable<zod0.ZodString>;
+        location: zod0.ZodNullable<zod0.ZodString>;
+        createdAt: zod0.ZodDate;
+        updatedAt: zod0.ZodDate;
+      }, better_auth0.$strip>>;
+    }, better_auth0.$strip>, Record<never, never>, Record<never, never>>;
+    createComment: _orpc_server0.DecoratedProcedure<_orpc_server0.MergedInitialContext<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }>, _orpc_server0.MergedCurrentContext<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      };
+    }>, zod0.ZodObject<{
+      type: zod0.ZodEnum<{
+        post: "post";
+        note: "note";
+        page: "page";
+      }>;
+      refId: zod0.ZodString;
+      displayUsername: zod0.ZodString;
+      email: zod0.ZodString;
+      source: zod0.ZodEnum<{
+        guest: "guest";
+        google: "google";
+        github: "github";
+      }>;
+      content: zod0.ZodString;
+      thread: zod0.ZodOptional<zod0.ZodString>;
+    }, better_auth0.$strip>, _orpc_server0.Schema<{
+      status: string;
+      message: string;
+      data: {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        content: string;
+        displayUsername: string;
+        email: string;
+        pin: boolean;
+        location: string | null;
+        refType: "post" | "note" | "page" | "recently";
+        refId: string;
+        website: string | null;
+        thread: string | null;
+        likes: number;
+        dislikes: number;
+        deleted: boolean;
+        source: "guest" | "google" | "github";
+        userId: string | null;
+        ip: string | null;
+        agent: string | null;
+      } | undefined;
+    }, {
+      status: string;
+      message: string;
+      data: {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        content: string;
+        displayUsername: string;
+        email: string;
+        pin: boolean;
+        location: string | null;
+        refType: "post" | "note" | "page" | "recently";
+        refId: string;
+        website: string | null;
+        thread: string | null;
+        likes: number;
+        dislikes: number;
+        deleted: boolean;
+        source: "guest" | "google" | "github";
+        userId: string | null;
+        ip: string | null;
+        agent: string | null;
+      } | undefined;
+    }>, Record<never, never>, Record<never, never>>;
+    deleteComment: _orpc_server0.DecoratedProcedure<_orpc_server0.MergedInitialContext<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }>, _orpc_server0.MergedCurrentContext<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      };
+    }>, zod0.ZodObject<{
+      id: zod0.ZodUUID;
+    }, better_auth0.$strip>, _orpc_server0.Schema<{
+      status: string;
+      message: string;
+    }, {
+      status: string;
+      message: string;
+    }>, Record<never, never>, Record<never, never>>;
+    likeComment: _orpc_server0.DecoratedProcedure<_orpc_server0.MergedInitialContext<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    } & Record<never, never>, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }>, _orpc_server0.MergedCurrentContext<{
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      } | null;
+    }, {
+      session: {
+        session: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          userId: string;
+          expiresAt: Date;
+          token: string;
+          ipAddress?: string | null | undefined | undefined;
+          userAgent?: string | null | undefined | undefined;
+          impersonatedBy?: string | null | undefined;
+        };
+        user: {
+          id: string;
+          createdAt: Date;
+          updatedAt: Date;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+          image?: string | null | undefined | undefined;
+          banned: boolean | null | undefined;
+          role?: string | null | undefined;
+          banReason?: string | null | undefined;
+          banExpires?: Date | null | undefined;
+          username?: string | null | undefined;
+          displayUsername?: string | null | undefined;
+        };
+      };
+    }>, zod0.ZodObject<{
+      id: zod0.ZodUUID;
+      like: zod0.ZodBoolean;
+    }, better_auth0.$strip>, _orpc_server0.Schema<{
+      status: string;
+      message: string;
+      data?: undefined;
+    } | {
+      status: string;
+      message: string;
+      data: {
+        userId: string;
+        commentId: string;
+        like: boolean;
+      };
+    }, {
+      status: string;
+      message: string;
+      data?: undefined;
+    } | {
+      status: string;
+      message: string;
+      data: {
+        userId: string;
+        commentId: string;
+        like: boolean;
+      };
     }>, Record<never, never>, Record<never, never>>;
   };
 };

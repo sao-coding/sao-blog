@@ -122,6 +122,8 @@ const env = createEnv({
 		DATABASE_URL: z.string().min(1),
 		BETTER_AUTH_SECRET: z.string().min(32),
 		BETTER_AUTH_URL: z.url(),
+		GITHUB_CLIENT_ID: z.string().min(1),
+		GITHUB_CLIENT_SECRET: z.string().min(1),
 		CORS_ORIGIN: z.url(),
 		NODE_ENV: z.enum([
 			"development",
@@ -214,6 +216,9 @@ var schema_exports = /* @__PURE__ */ __export({
 	apikey: () => apikey,
 	categories: () => categories,
 	categoriesRelations: () => categoriesRelations,
+	commentLikes: () => commentLikes,
+	commentRefTypeEnum: () => commentRefTypeEnum,
+	commentSourceEnum: () => commentSourceEnum,
 	comments: () => comments,
 	commentsRelations: () => commentsRelations,
 	notes: () => notes,
@@ -222,7 +227,6 @@ var schema_exports = /* @__PURE__ */ __export({
 	postTagsRelations: () => postTagsRelations,
 	posts: () => posts,
 	postsRelations: () => postsRelations,
-	rates: () => rates,
 	session: () => session,
 	tags: () => tags,
 	tagsRelations: () => tagsRelations,
@@ -330,9 +334,21 @@ const notes = pgTable("notes", {
 	createdAt: timestamp("created_at", { withTimezone: true }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
 });
+const commentRefTypeEnum = pgEnum("comment_ref_type", [
+	"post",
+	"note",
+	"page",
+	"recently"
+]);
+const commentSourceEnum = pgEnum("comment_source", [
+	"guest",
+	"google",
+	"github"
+]);
 const comments = pgTable("comments", {
 	id: uuid("id").primaryKey().$defaultFn(() => v7_default()),
-	postId: varchar("post_id", { length: 256 }).notNull(),
+	refType: commentRefTypeEnum("ref_type").notNull(),
+	refId: uuid("ref_id").notNull(),
 	displayUsername: varchar("display_username", { length: 100 }).notNull(),
 	email: varchar("email", { length: 256 }).notNull(),
 	website: varchar("website", { length: 512 }),
@@ -341,19 +357,27 @@ const comments = pgTable("comments", {
 	likes: integer("likes").default(0).notNull(),
 	dislikes: integer("dislikes").default(0).notNull(),
 	deleted: boolean("deleted").default(false).notNull(),
+	pin: boolean("pin").default(false).notNull(),
+	source: commentSourceEnum("source").notNull().default("guest"),
+	userId: uuid("user_id").references(() => user.id, { onDelete: "set null" }),
+	ip: varchar("ip", { length: 45 }),
+	agent: varchar("agent", { length: 512 }),
+	location: varchar("location", { length: 256 }),
 	createdAt: timestamp("created_at", { withTimezone: true }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true }).$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
 }, (table) => [
-	index("comments_post_id_idx").on(table.postId),
+	index("comments_ref_id_idx").on(table.refId),
 	index("comments_thread_idx").on(table.thread),
 	index("comments_created_at_idx").on(table.createdAt),
-	index("comments_post_created_idx").on(table.postId, table.createdAt)
+	index("comments_ref_created_idx").on(table.refId, table.createdAt),
+	index("comments_user_idx").on(table.userId),
+	index("comments_source_idx").on(table.source)
 ]);
-const rates = pgTable("rates", {
+const commentLikes = pgTable("comment_likes", {
 	userId: varchar("user_id", { length: 256 }).notNull(),
 	commentId: uuid("comment_id").notNull(),
 	like: boolean("like").notNull()
-}, (table) => [primaryKey({ columns: [table.userId, table.commentId] }), index("rates_comment_idx").on(table.commentId)]);
+}, (table) => [primaryKey({ columns: [table.userId, table.commentId] }), index("comment_idx").on(table.commentId)]);
 const user = pgTable("user", {
 	id: uuid("id").primaryKey().$defaultFn(() => v7_default()),
 	username: text("username").unique(),
@@ -463,7 +487,11 @@ const commentsRelations = relations(comments, ({ one, many }) => ({
 		references: [comments.id],
 		relationName: "comments_thread"
 	}),
-	replies: many(comments, { relationName: "comments_thread" })
+	replies: many(comments, { relationName: "comments_thread" }),
+	user: one(user, {
+		fields: [comments.userId],
+		references: [user.id]
+	})
 }));
 
 //#endregion
@@ -588,7 +616,7 @@ const getPosts = publicProcedure.route({
 });
 const getPost = publicProcedure.route({
 	method: "GET",
-	path: "/posts/:id"
+	path: "/posts/{id}"
 }).input(z$1.object({ id: z$1.string() })).output(PostResponseSchema).handler(async ({ input }) => {
 	const { id } = input;
 	console.log(`Fetching post with id: ${id}`);
@@ -677,7 +705,7 @@ const getNoteLatest = publicProcedure.route({
 });
 const getNote = publicProcedure.route({
 	method: "GET",
-	path: "/notes/:id"
+	path: "/notes/{id}"
 }).input(z$1.object({ id: z$1.string() })).handler(async ({ input }) => {
 	const noteId = input.id;
 	return {
@@ -693,19 +721,180 @@ var note_default = {
 };
 
 //#endregion
+//#region src/schema/comment.ts
+const commentSchema = z.object({
+	id: z.uuid(),
+	refType: z.enum([
+		"post",
+		"note",
+		"page",
+		"recently"
+	]),
+	refId: z.string(),
+	displayUsername: z.string(),
+	email: z.string().email(),
+	website: z.string().url().nullable(),
+	content: z.string(),
+	thread: z.string().nullable(),
+	likes: z.number(),
+	dislikes: z.number(),
+	deleted: z.boolean(),
+	pin: z.boolean(),
+	source: z.enum([
+		"guest",
+		"google",
+		"github"
+	]),
+	userId: z.string().nullable(),
+	ip: z.string().nullable(),
+	agent: z.string().nullable(),
+	location: z.string().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date()
+});
+const CommentResponseSchema = createApiResponseSchema(commentSchema);
+const CommentsResponseSchema = createApiResponseSchema(z.array(commentSchema));
+
+//#endregion
+//#region src/routers/comment.ts
+const getComments = publicProcedure.route({
+	method: "GET",
+	path: "/comments/{refId}"
+}).input(z$1.object({
+	type: z$1.enum([
+		"post",
+		"note",
+		"page",
+		"recently"
+	]),
+	refId: z$1.string()
+})).output(CommentsResponseSchema).handler(async ({ input }) => {
+	const { type, refId } = input;
+	return {
+		status: "success",
+		message: "留言列表取得成功",
+		data: (await db.select().from(comments).where(and(eq(comments.refId, refId), eq(comments.refType, type))).orderBy(desc(comments.createdAt))).map((comment) => ({
+			...comment,
+			content: comment.deleted ? "[此評論已被刪除]" : comment.content
+		}))
+	};
+});
+const createComment = protectedProcedure.route({
+	method: "POST",
+	path: "/comments"
+}).input(z$1.object({
+	type: z$1.enum([
+		"post",
+		"note",
+		"page"
+	]),
+	refId: z$1.string(),
+	displayUsername: z$1.string(),
+	email: z$1.string().email(),
+	source: z$1.enum([
+		"guest",
+		"google",
+		"github"
+	]),
+	content: z$1.string().min(1),
+	thread: z$1.string().optional()
+})).handler(async ({ input, context }) => {
+	const { type, refId, displayUsername, email, content, source, thread } = input;
+	const userId = context.session?.user.id ?? null;
+	const [newComment] = await db.insert(comments).values({
+		refType: type,
+		refId,
+		displayUsername,
+		email,
+		content,
+		userId,
+		source,
+		thread
+	}).returning();
+	return {
+		status: "success",
+		message: "留言創建成功",
+		data: newComment
+	};
+});
+const deleteComment = protectedProcedure.route({
+	method: "DELETE",
+	path: "/comments/{id}"
+}).input(z$1.object({ id: z$1.uuid() })).handler(async ({ input, context }) => {
+	const { id } = input;
+	const userId = context.session?.user.id ?? null;
+	await db.update(comments).set({ deleted: true }).where(and(eq(comments.id, id), eq(comments.userId, userId)));
+	return {
+		status: "success",
+		message: "留言刪除成功"
+	};
+});
+const likeComment = protectedProcedure.route({
+	method: "POST",
+	path: "/comments/{id}/like"
+}).input(z$1.object({
+	id: z$1.uuid(),
+	like: z$1.boolean()
+})).handler(async ({ input, context }) => {
+	const { id, like } = input;
+	const userId = context.session?.user.id ?? null;
+	if (!userId) return {
+		status: "error",
+		message: "未登入"
+	};
+	const comment = await db.query.comments.findFirst({ where: (comment$1) => eq(comment$1.id, id) });
+	if (!comment) return {
+		status: "error",
+		message: "留言不存在"
+	};
+	const existingLike = await db.query.commentLikes.findFirst({ where: (like$1) => and(eq(like$1.commentId, id), eq(like$1.userId, userId)) });
+	if (existingLike) if (existingLike.like === like) {
+		await db.delete(commentLikes).where(and(eq(commentLikes.commentId, id), eq(commentLikes.userId, userId)));
+		await db.update(comments).set({
+			likes: comment.likes - (like ? 1 : 0),
+			dislikes: comment.dislikes - (like ? 0 : 1)
+		}).where(eq(comments.id, id));
+	} else {
+		await db.update(commentLikes).set({ like }).where(and(eq(commentLikes.commentId, id), eq(commentLikes.userId, userId)));
+		await db.update(comments).set({
+			likes: comment.likes + (like ? 1 : -1),
+			dislikes: comment.dislikes + (like ? -1 : 1)
+		}).where(eq(comments.id, id));
+	}
+	else {
+		await db.insert(commentLikes).values({
+			commentId: id,
+			userId,
+			like
+		});
+		await db.update(comments).set({
+			likes: comment.likes + (like ? 1 : 0),
+			dislikes: comment.dislikes + (like ? 0 : 1)
+		}).where(eq(comments.id, id));
+	}
+	return {
+		status: "success",
+		message: "操作成功",
+		data: {
+			userId,
+			commentId: id,
+			like
+		}
+	};
+});
+const commentRouter = {
+	getComments,
+	createComment,
+	deleteComment,
+	likeComment
+};
+
+//#endregion
 //#region src/routers/index.ts
 const appRouter = {
-	healthCheck: publicProcedure.handler(() => {
-		return "OK";
-	}),
-	privateData: protectedProcedure.handler(({ context }) => {
-		return {
-			message: "This is private",
-			user: context.session?.user
-		};
-	}),
 	post: post_default,
-	note: note_default
+	note: note_default,
+	comment: commentRouter
 };
 
 //#endregion
