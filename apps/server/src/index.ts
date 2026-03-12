@@ -15,7 +15,7 @@ const rpcHandler = new RPCHandler(appRouter, {
     onError((error) => {
       console.error(error);
     }),
-  ],
+  ]
 });
 const apiHandler = new OpenAPIHandler(appRouter, {
   plugins: [
