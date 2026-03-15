@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3002",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
@@ -16,7 +16,6 @@
     "@icons-pack/react-simple-icons": "^13.8.0",
     "@monaco-editor/react": "^4.7.0",
     "@orpc/client": "^1.13.5",
-    "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "^1.13.5",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
