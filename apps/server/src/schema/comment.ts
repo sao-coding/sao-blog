@@ -10,6 +10,7 @@ export const commentSchema = z.object({
     website: z.string().url().nullable(), // 留言者的網站（可選）
     content: z.string(), // 留言內容
     thread: z.string().nullable(), // 留言串 ID（可選）
+    liked: z.boolean().nullable(), // 當前用戶是否點贊（如果已登入）
     likes: z.number(), // 攢的數量
     dislikes: z.number(), // 踩的數量
     deleted: z.boolean(), // 是否已刪除

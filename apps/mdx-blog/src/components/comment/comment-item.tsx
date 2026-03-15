@@ -25,7 +25,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-tw'
 
 import { cn } from '@/lib/utils'
-import type { Comment, VoteType } from '@/types/comment'
+import type { Comment } from '@/types/comment'  // ✅ 移除 VoteType（不再需要）
 import type { CommentFormValues } from '@/schemas/comment'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -38,8 +38,7 @@ dayjs.extend(relativeTime)
 interface CommentItemProps {
   /** 留言資料 */
   comment: Comment
-  /** 使用者投票狀態表 */
-  userVotes: Record<string, VoteType>
+  // ✅ 移除 userVotes：按讚狀態改由 comment.liked 提供
   /** 按讚回調 */
   onLike: (commentId: string) => void
   /** 倒讚回調 */
@@ -88,7 +87,6 @@ function getAvatarColor(displayUsername: string): string {
  */
 export function CommentItem({
   comment,
-  userVotes,
   onLike,
   onDislike,
   onReply,
@@ -97,7 +95,6 @@ export function CommentItem({
   const [showReplies, setShowReplies] = useState(false)
   const [showReplyForm, setShowReplyForm] = useState(false)
 
-  const currentVote = userVotes[comment.id] ?? null
   const hasReplies = comment.replies.length > 0
 
   /** 處理回覆送出 */
@@ -161,7 +158,7 @@ export function CommentItem({
 
           {/* 操作按鈕列 */}
           <div className="flex items-center gap-1 pt-1">
-            {/* 按讚 */}
+            {/* 按讚：active 狀態由 comment.liked 決定 */}
             <Button
               type="button"
               variant="ghost"
@@ -169,7 +166,7 @@ export function CommentItem({
               onClick={() => onLike(comment.id)}
               className={cn(
                 'gap-1 text-muted-foreground',
-                currentVote === 'like' && 'text-primary'
+                comment.liked && 'text-primary'  // ✅ 改用 comment.liked
               )}
               aria-label="按讚"
             >
@@ -179,16 +176,13 @@ export function CommentItem({
               )}
             </Button>
 
-            {/* 倒讚 */}
+            {/* 倒讚：API 目前無 disliked 欄位，不顯示 active 狀態 */}
             <Button
               type="button"
               variant="ghost"
               size="xs"
               onClick={() => onDislike(comment.id)}
-              className={cn(
-                'gap-1 text-muted-foreground',
-                currentVote === 'dislike' && 'text-destructive'
-              )}
+              className="gap-1 text-muted-foreground"
               aria-label="倒讚"
             >
               <ThumbsDownIcon className="size-3.5" />
@@ -272,7 +266,7 @@ export function CommentItem({
                     <CommentItem
                       key={reply.id}
                       comment={reply}
-                      userVotes={userVotes}
+                      // ✅ 不再傳 userVotes
                       onLike={onLike}
                       onDislike={onDislike}
                       onReply={onReply}

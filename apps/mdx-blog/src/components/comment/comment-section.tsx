@@ -1,69 +1,38 @@
-/**
- * 留言區主元件
- *
- * 整合留言表單、留言列表、排序、按讚/倒讚、回覆等功能。
- * 支援 lazyLoad 參數控制是否在快滑到留言區時才載入。
- * 顯示留言數與回覆數統計。
- *
- * 注意：目前後端接口未實現，使用模擬資料。
- * 與後端交互相關代碼已在相關位置注明「後端對接待補充」。
- *
- * @module components/comment/comment-section
- */
-
 'use client'
 
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useInView } from 'motion/react'
 import { MessageCircleIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { usePathname } from 'next/navigation'
 
-import type { Comment, CommentSortOrder, VoteType } from '@/types/comment'
+import type { CommentSortOrder, FlatComment, VoteType } from '@/types/comment'
 import type { CommentFormValues } from '@/schemas/comment'
+import { orpc } from '@/lib/orpc'
 import { cn } from '@/lib/utils'
 import { countCommentsAndReplies } from './constants'
 import { CommentForm } from './comment-form'
 import { CommentList } from './comment-list'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { resolveRefType, toCommentTree } from '@/utils/comment'
+
+// ── 型別 ─────────────────────────────────────────────────────────────────────
 
 interface CommentSectionProps {
-  /** 文章或頁面 ID（用於後端對接） */
   postId: string
-  /** 是否啟用延遲載入（快滑到時才載入） */
   lazyLoad?: boolean
-  /** 額外的 className */
   className?: string
 }
 
-/**
- * 生成唯一 ID
- * @returns 唯一 ID 字串
- */
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-}
+// getComments API response 的 cache 型別
+// 請依照你的實際 API response 型別調整
+type CommentsCache = { data: FlatComment[] } | undefined
 
-/**
- * 留言區主元件
- *
- * 功能包含：
- * - 留言表單（支援 Markdown、Emoji）
- * - 留言列表（支援排序、按讚、倒讚、回覆）
- * - 留言/回覆統計
- * - 可選的延遲載入
- *
- * @param props - 留言區屬性
- * @returns 留言區元件
- */
-export function CommentSection({
-  postId,
-  lazyLoad = false,
-  className,
-}: CommentSectionProps) {
+// ── CommentSection（lazy wrapper）────────────────────────────────────────────
+
+export function CommentSection({ postId, lazyLoad = false, className }: CommentSectionProps) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sentinelRef, { once: true, margin: '200px' })
-
-  // 如果啟用 lazyLoad 且尚未進入視野，只渲染哨兵元素
   const shouldRender = !lazyLoad || isInView
 
   return (
@@ -80,311 +49,169 @@ export function CommentSection({
   )
 }
 
-/**
- * 留言區核心內容元件
- *
- * 管理留言資料狀態、投票狀態、排序等。
- * 後端對接待補充：目前所有操作均為前端本地狀態操作。
- */
+// ── CommentSectionContent ────────────────────────────────────────────────────
 
 function CommentSectionContent({ postId }: { postId: string }) {
-  // 後端對接待補充：改為從 API 獲取留言資料，使用 postId 作為查詢參數
-  // const [comments, setComments] = useState<Comment[]>(MOCK_COMMENTS)
+  const pathname = usePathname()
+  const refType = resolveRefType(pathname)
   const [sortOrder, setSortOrder] = useState<CommentSortOrder>('newest')
-  const [userVotes, setUserVotes] = useState<Record<string, VoteType>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const queryClient = useQueryClient()
 
+  // ── 讀取留言 ──────────────────────────────────────────────────────────────
 
-  const { data: comments = [] } = useQuery<Comment[]>({
-    queryKey: ['comments', postId],
-    queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments?postId=${postId}`)
-      if (!res.ok) {
-        throw new Error('Failed to fetch comments')
-      }
-      const data = await res.json()
-      return data.data
-    }
-  })
+  const queryKey = orpc.comment.getComments.key({ input: { type: refType, refId: postId } })
 
-  /** 計算留言與回覆統計 */
-  const { commentsCount, repliesCount } = useMemo(
-    () => countCommentsAndReplies(comments),
-    [comments]
+  const { data: commentsResponse, isLoading, isError } = useQuery(
+    orpc.comment.getComments.queryOptions({ input: { type: refType, refId: postId } })
   )
 
-  /**
-   * 遞迴地在留言樹中新增回覆
-   * @param commentsList - 留言陣列
-   * @param parentId - 父留言 ID
-   * @param newReply - 新回覆
-   * @returns 更新後的留言陣列
-   */
-  const addReplyToTree = useCallback(
-    (commentsList: Comment[], parentId: string, newReply: Comment): Comment[] => {
-      return commentsList.map((comment) => {
-        if (comment.id === parentId) {
-          return {
-            ...comment,
-            replies: [...comment.replies, newReply],
-          }
-        }
-        if (comment.replies.length > 0) {
-          return {
-            ...comment,
-            replies: addReplyToTree(comment.replies, parentId, newReply),
-          }
-        }
-        return comment
-      })
-    },
-    []
+  const comments = toCommentTree(
+    (commentsResponse?.data as FlatComment[] | undefined) ?? []
   )
 
-  /**
-   * 遞迴地更新留言樹中指定留言的投票數
-   * @param commentsList - 留言陣列
-   * @param commentId - 留言 ID
-   * @param field - 要更新的欄位
-   * @param delta - 變化量
-   * @returns 更新後的留言陣列
-   */
-  const updateVoteInTree = useCallback(
-    (
-      commentsList: Comment[],
-      commentId: string,
-      field: 'likes' | 'dislikes',
-      delta: number
-    ): Comment[] => {
-      return commentsList.map((comment) => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            [field]: Math.max(0, comment[field] + delta),
-          }
-        }
-        if (comment.replies.length > 0) {
-          return {
-            ...comment,
-            replies: updateVoteInTree(comment.replies, commentId, field, delta),
-          }
-        }
-        return comment
-      })
-    },
-    []
-  )
+  const { commentsCount, repliesCount } = countCommentsAndReplies(comments)
 
-  /**
-   * 送出新留言
-   * 後端對接待補充：改為呼叫 API 新增留言
-   */
-  const handleSubmitComment = useCallback(
-    async (data: CommentFormValues) => {
-      setIsSubmitting(true)
+  // ── 新增留言 ──────────────────────────────────────────────────────────────
 
-      try {
-        // 後端對接待補充：呼叫 API 新增留言
-
-        const newComment: Comment = {
-          id: generateId(),
-          displayUsername: data.displayUsername,
-          email: data.email,
-          website: data.website || undefined,
-          content: data.content,
-          createdAt: new Date().toISOString(),
-          likes: 0,
-          dislikes: 0,
-          replies: [],
-          parentId: null,
-        }
-
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...newComment, postId }),
-        })
-
-
-        // setComments((prev) => [newComment, ...prev])
+  const createCommentMutation = useMutation(
+    orpc.comment.createComment.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey })
         toast.success('留言已送出！')
-      } catch {
-        toast.error('送出失敗，請稍後再試')
-      } finally {
-        setIsSubmitting(false)
-      }
-    },
-    [/* 後端對接待補充：加入 _postId */]
+      },
+      onError: () => toast.error('送出失敗，請稍後再試'),
+    })
   )
 
-  /**
-   * 送出回覆
-   * 後端對接待補充：改為呼叫 API 新增回覆
-   */
-  // const handleReply = useCallback(
-  //   async (parentId: string, data: CommentFormValues) => {
-  //     try {
-  //       // 後端對接待補充：呼叫 API 新增回覆
-  //       // const response = await fetch(`/api/comments/${parentId}/replies`, {
-  //       //   method: 'POST',
-  //       //   headers: { 'Content-Type': 'application/json' },
-  //       //   body: JSON.stringify({ ...data, postId }),
-  //       // })
-
-  //       const res = await fetch(`/api/comments/${parentId}/replies`, {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ ...data, postId }),
-  //       })
-
-  //       const newReply: Comment = {
-  //         id: generateId(),
-  //         displayUsername: data.displayUsername,
-  //         email: data.email,
-  //         website: data.website || undefined,
-  //         content: data.content,
-  //         createdAt: new Date().toISOString(),
-  //         likes: 0,
-  //         dislikes: 0,
-  //         replies: [],
-  //         parentId,
-  //       }
-
-  //       // setComments((prev) => addReplyToTree(prev, parentId, newReply))
-
-  //       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-
-
-  //       toast.success('回覆已送出！')
-  //     } catch {
-  //       toast.error('回覆失敗，請稍後再試')
-  //     }
-  //   },
-  //   [addReplyToTree]
-  // )
-
-  const { mutate } =  useMutation({
-    mutationFn: async ({ parentId, data }: { parentId: string; data: CommentFormValues }) => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments/${parentId}/replies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, postId }),
+  const handleSubmitComment = async (data: CommentFormValues) => {
+    try {
+      await createCommentMutation.mutateAsync({
+        type: refType,
+        refId: postId,
+        displayUsername: data.displayUsername,
+        email: data.email,
+        source: 'guest',
+        content: data.content,
       })
-      if (!res.ok) {
-        throw new Error('Failed to submit reply')
-      }
-      return res.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-      toast.success('回覆已送出！')
+    } catch {
+      // Toast is handled in mutation onError.
     }
-  })
-
-  const handleReply = (parentId: string, data: CommentFormValues) => {
-    mutate({ parentId, data })
   }
 
-/**
- * 處理按讚
- * 後端對接待補充：改為呼叫 API 更新按讚
- */
-const handleLike = useCallback(
-  (commentId: string) => {
-    const currentVote = userVotes[commentId] ?? null
+  const handleReply = async (parentId: string, data: CommentFormValues) => {
+    try {
+      await createCommentMutation.mutateAsync({
+        type: refType,
+        refId: postId,
+        displayUsername: data.displayUsername,
+        email: data.email,
+        source: 'guest',
+        content: data.content,
+        thread: parentId,
+      })
+    } catch {
+      // Toast is handled in mutation onError.
+    }
+  }
 
-    setUserVotes((prev) => {
-      if (currentVote === 'like') {
-        // 取消按讚
-        return { ...prev, [commentId]: null }
-      }
-      return { ...prev, [commentId]: 'like' }
-    })
+  // ── 按讚／倒讚（optimistic update via cache）─────────────────────────────
+  //
+  // 策略：
+  //   onMutate  → 取 snapshot、直接修改 cache（立即反映 UI）
+  //   onError   → 用 snapshot rollback
+  //   onSettled → invalidate 讓 server 資料同步（success 也要 invalidate
+  //               確保 likes 數字正確，但因為 optimistic 已更新，
+  //               使用者感受不到 loading）
 
-    setComments((prev) => {
-      let updated = prev
+  const likeCommentMutation = useMutation({
+    ...orpc.comment.likeComment.mutationOptions(),
 
-      if (currentVote === 'like') {
-        // 取消按讚：likes -1
-        updated = updateVoteInTree(updated, commentId, 'likes', -1)
-      } else {
-        // 新增按讚：likes +1
-        updated = updateVoteInTree(updated, commentId, 'likes', 1)
-        if (currentVote === 'dislike') {
-          // 原本是倒讚，先取消倒讚：dislikes -1
-          updated = updateVoteInTree(updated, commentId, 'dislikes', -1)
+    onMutate: async ({ id: commentId, like }: { id: string; like: boolean }) => {
+      await queryClient.cancelQueries({ queryKey })
+      const previousData = queryClient.getQueryData<CommentsCache>(queryKey)
+
+      queryClient.setQueryData<CommentsCache>(queryKey, (old) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.map((comment) => {
+            if (comment.id !== commentId) return comment
+
+            if (like) {
+              // toggle 按讚
+              const toggled = !comment.liked
+              return {
+                ...comment,
+                liked: toggled,
+                likes: toggled ? comment.likes + 1 : comment.likes - 1,
+              }
+            } else {
+              // 倒讚：API 目前無 disliked 狀態，只更新數字
+              return {
+                ...comment,
+                dislikes: comment.dislikes + 1,
+              }
+            }
+          }),
         }
+      })
+
+      return { previousData }
+    },
+
+    onError: (_err, _vars, context) => {
+      // Rollback
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(queryKey, context.previousData)
       }
+      toast.error('操作失敗，請稍後再試')
+    },
 
-      return updated
-    })
-  },
-  [userVotes, updateVoteInTree]
-)
+    onSettled: () => {
+      // 成功或失敗都 invalidate，確保最終與 server 同步
+      queryClient.invalidateQueries({ queryKey })
+    },
+  })
 
-/**
- * 處理倒讚
- * 後端對接待補充：改為呼叫 API 更新倒讚
- */
-const handleDislike = useCallback(
-  (commentId: string) => {
-    const currentVote = userVotes[commentId] ?? null
+  const handleLike = useCallback(
+    (commentId: string) => likeCommentMutation.mutate({ id: commentId, like: true }),
+    [likeCommentMutation]
+  )
 
-    setUserVotes((prev) => {
-      if (currentVote === 'dislike') {
-        // 取消倒讚
-        return { ...prev, [commentId]: null }
-      }
-      return { ...prev, [commentId]: 'dislike' }
-    })
+  const handleDislike = useCallback(
+    (commentId: string) => likeCommentMutation.mutate({ id: commentId, like: false }),
+    [likeCommentMutation]
+  )
 
-    setComments((prev) => {
-      let updated = prev
+  // ── Render ────────────────────────────────────────────────────────────────
 
-      if (currentVote === 'dislike') {
-        // 取消倒讚：dislikes -1
-        updated = updateVoteInTree(updated, commentId, 'dislikes', -1)
-      } else {
-        // 新增倒讚：dislikes +1
-        updated = updateVoteInTree(updated, commentId, 'dislikes', 1)
-        if (currentVote === 'like') {
-          // 原本是按讚，先取消按讚：likes -1
-          updated = updateVoteInTree(updated, commentId, 'likes', -1)
-        }
-      }
+  return (
+    <div className="space-y-6 mt-12">
+      <div className="flex items-center gap-2">
+        <MessageCircleIcon className="size-5 text-foreground" />
+        <h2 className="text-lg font-semibold text-foreground">留言區</h2>
+        <span className="text-sm text-muted-foreground">
+          {commentsCount} 則留言
+          {repliesCount > 0 && ` · ${repliesCount} 則回覆`}
+        </span>
+      </div>
 
-      return updated
-    })
-  },
-  [userVotes, updateVoteInTree]
-)
+      <CommentForm
+        onSubmit={handleSubmitComment}
+        isSubmitting={createCommentMutation.isPending}
+      />
 
-return (
-  <div className="space-y-6 mt-12">
-    {/* 標題與統計 */}
-    <div className="flex items-center gap-2">
-      <MessageCircleIcon className="size-5 text-foreground" />
-      <h2 className="text-lg font-semibold text-foreground">留言區</h2>
-      <span className="text-sm text-muted-foreground">
-        {commentsCount} 則留言
-        {repliesCount > 0 && ` · ${repliesCount} 則回覆`}
-      </span>
+      {isLoading && <p className="text-sm text-muted-foreground">留言載入中...</p>}
+      {isError && <p className="text-sm text-destructive">留言載入失敗，請稍後再試。</p>}
+
+      <CommentList
+        comments={comments}
+        sortOrder={sortOrder}
+        onSortChange={setSortOrder}
+        onLike={handleLike}
+        onDislike={handleDislike}
+        onReply={handleReply}
+      />
     </div>
-
-    {/* 留言表單 */}
-    <CommentForm onSubmit={handleSubmitComment} isSubmitting={isSubmitting} />
-
-    {/* 留言列表 */}
-    <CommentList
-      comments={comments}
-      sortOrder={sortOrder}
-      onSortChange={setSortOrder}
-      userVotes={userVotes}
-      onLike={handleLike}
-      onDislike={handleDislike}
-      onReply={handleReply}
-    />
-  </div>
-)
+  )
 }

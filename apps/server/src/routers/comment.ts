@@ -1,6 +1,6 @@
 import { protectedProcedure, publicProcedure } from "@/orpc/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { comments, commentLikes } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { CommentsResponseSchema } from "@/schema/comment";
@@ -9,12 +9,13 @@ import { CommentsResponseSchema } from "@/schema/comment";
 const getComments = publicProcedure
     .route({ method: "GET", path: "/comments/{refId}" })
     .input(z.object({
-        type: z.enum(["post", "note", "page", "recently"]), // 留言對象的類型（文章、日記、頁面或最近留言）
-        refId: z.string(), // 文章、日記或頁面的 ID（如果 type 是 recently，則 refId 可為任意值或不傳）
+        type: z.enum(["post", "note", "page", "recently"]),
+        refId: z.string(),
     }))
     .output(CommentsResponseSchema)
-    .handler(async ({ input }) => {
+    .handler(async ({ input, context }) => {
         const { type, refId } = input;
+        const userId = context.session?.user.id ?? null;
 
         const commentsList = await db
             .select()
@@ -25,20 +26,39 @@ const getComments = publicProcedure
             ))
             .orderBy(desc(comments.createdAt));
 
+        // 若已登入，批次查詢此用戶對這些留言的按讚紀錄
+        let likedMap = new Map<string, boolean>();
+        if (userId && commentsList.length > 0) {
+            const commentIds = commentsList.map(c => c.id);
+            const likeRecords = await db
+                .select()
+                .from(commentLikes)
+                .where(and(
+                    eq(commentLikes.userId, userId),
+                    inArray(commentLikes.commentId, commentIds)
+                ));
+
+            likeRecords.forEach(r => likedMap.set(r.commentId, r.like));
+        }
+
         const processedComments = commentsList.map(comment => ({
             ...comment,
             content: comment.deleted ? "[此評論已被刪除]" : comment.content,
+            liked: userId
+                ? (likedMap.has(comment.id) ? likedMap.get(comment.id)! : null)
+                : null,
         }));
 
         return {
             status: "success",
             message: "留言列表取得成功",
+            meta: undefined,
             data: processedComments,
         }
     });
 
 // 創建留言
-const createComment = protectedProcedure
+const createComment = publicProcedure
     .route({ method: "POST", path: "/comments" })
     .input(z.object({
         type: z.enum(["post", "note", "page"]), // 留言對象的類型（文章、日記或頁面）
@@ -72,14 +92,20 @@ const createComment = protectedProcedure
     })
 
 // 刪除留言 軟刪除
-const deleteComment = protectedProcedure
+const deleteComment = publicProcedure
     .route({ method: "DELETE", path: "/comments/{id}" })
     .input(z.object({
         id: z.uuid(),
     }))
     .handler(async ({ input, context }) => {
         const { id } = input;
-        const userId = context.session?.user.id ?? null;
+        const userId = context.session?.user.id
+        if (!userId) {
+            return {
+                status: "error",
+                message: "未登入",
+            }
+        }
 
         await db.update(comments)
             .set({ deleted: true })
@@ -197,7 +223,7 @@ const likeComment = protectedProcedure
         }
     })
 
-export const commentRouter = {
+export default {
     getComments,
     createComment,
     deleteComment,
