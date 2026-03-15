@@ -1,10 +1,15 @@
 import { ORPCError, os } from "@orpc/server";
 import "dotenv/config";
-import z$1, { z } from "zod";
+import * as z$2 from "zod";
+import z, { z as z$1 } from "zod";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { boolean, index, integer, pgEnum, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { and, asc, desc, eq, gt, inArray, lt, relations } from "drizzle-orm";
 import { randomFillSync } from "node:crypto";
+import { HIDE_METADATA, betterAuth } from "better-auth";
+import { APIError, createAuthEndpoint } from "better-auth/api";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin, apiKey, openAPI, username } from "better-auth/plugins";
 
 //#region rolldown:runtime
 var __defProp = Object.defineProperty;
@@ -119,13 +124,13 @@ function createEnv(opts) {
 //#region ../../packages/env/src/server.ts
 const env = createEnv({
 	server: {
-		DATABASE_URL: z.string().min(1),
-		BETTER_AUTH_SECRET: z.string().min(32),
-		BETTER_AUTH_URL: z.url(),
-		GITHUB_CLIENT_ID: z.string().min(1),
-		GITHUB_CLIENT_SECRET: z.string().min(1),
-		CORS_ORIGIN: z.url(),
-		NODE_ENV: z.enum([
+		DATABASE_URL: z$1.string().min(1),
+		BETTER_AUTH_SECRET: z$1.string().min(32),
+		BETTER_AUTH_URL: z$1.url(),
+		GITHUB_CLIENT_ID: z$1.string().min(1),
+		GITHUB_CLIENT_SECRET: z$1.string().min(1),
+		CORS_ORIGIN: z$1.string().transform((val) => JSON.parse(val)).pipe(z$1.array(z$1.url())),
+		NODE_ENV: z$1.enum([
 			"development",
 			"production",
 			"test"
@@ -500,83 +505,83 @@ const db = drizzle(env.DATABASE_URL, { schema: schema_exports });
 
 //#endregion
 //#region src/schema/api.ts
-const createApiResponseSchema = (dataSchema, metaSchema) => z.object({
-	status: z.enum(["success", "error"]),
-	message: z.string(),
-	meta: metaSchema ? metaSchema.optional() : z.undefined().optional(),
+const createApiResponseSchema = (dataSchema, metaSchema = z$1.undefined()) => z$1.object({
+	status: z$1.enum(["success", "error"]),
+	message: z$1.string(),
+	meta: metaSchema,
 	data: dataSchema
 });
 
 //#endregion
 //#region src/schema/post.ts
-const postSchema = z.object({
-	id: z.string(),
-	title: z.string(),
-	summary: z.string().nullable(),
-	content: z.string(),
-	slug: z.string(),
-	cover: z.string().nullable(),
-	status: z.enum([
+const postSchema = z$1.object({
+	id: z$1.string(),
+	title: z$1.string(),
+	summary: z$1.string().nullable(),
+	content: z$1.string(),
+	slug: z$1.string(),
+	cover: z$1.string().nullable(),
+	status: z$1.enum([
 		"draft",
 		"published",
 		"archived"
 	]),
-	viewCount: z.number(),
-	likeCount: z.number(),
-	commentCount: z.number(),
-	allowComments: z.boolean(),
-	pin: z.boolean(),
-	pinOrder: z.number(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-	category: z.object({
-		id: z.string(),
-		name: z.string(),
-		slug: z.string(),
-		description: z.string().nullable(),
-		color: z.string().nullable(),
-		parentId: z.string().nullable(),
-		sortOrder: z.number(),
-		postCount: z.number(),
-		createdAt: z.date(),
-		updatedAt: z.date()
+	viewCount: z$1.number(),
+	likeCount: z$1.number(),
+	commentCount: z$1.number(),
+	allowComments: z$1.boolean(),
+	pin: z$1.boolean(),
+	pinOrder: z$1.number(),
+	createdAt: z$1.date(),
+	updatedAt: z$1.date(),
+	category: z$1.object({
+		id: z$1.string(),
+		name: z$1.string(),
+		slug: z$1.string(),
+		description: z$1.string().nullable(),
+		color: z$1.string().nullable(),
+		parentId: z$1.string().nullable(),
+		sortOrder: z$1.number(),
+		postCount: z$1.number(),
+		createdAt: z$1.date(),
+		updatedAt: z$1.date()
 	}).nullable(),
-	tags: z.array(z.object({
-		id: z.string(),
-		name: z.string(),
-		slug: z.string(),
-		description: z.string().nullable(),
-		color: z.string().nullable(),
-		postCount: z.number().optional(),
-		createdAt: z.date(),
-		updatedAt: z.date()
+	tags: z$1.array(z$1.object({
+		id: z$1.string(),
+		name: z$1.string(),
+		slug: z$1.string(),
+		description: z$1.string().nullable(),
+		color: z$1.string().nullable(),
+		postCount: z$1.number().optional(),
+		createdAt: z$1.date(),
+		updatedAt: z$1.date()
 	})),
-	author: z.object({
-		id: z.string(),
-		username: z.string().nullable(),
-		displayUsername: z.string().nullable(),
-		name: z.string().nullable(),
-		email: z.string(),
-		emailVerified: z.boolean(),
-		image: z.string().nullable(),
-		role: z.string().nullable(),
-		banned: z.boolean().nullable(),
-		banReason: z.string().nullable(),
-		banExpires: z.date().nullable(),
-		createdAt: z.date(),
-		updatedAt: z.date()
+	author: z$1.object({
+		id: z$1.string(),
+		username: z$1.string().nullable(),
+		displayUsername: z$1.string().nullable(),
+		name: z$1.string().nullable(),
+		email: z$1.string(),
+		emailVerified: z$1.boolean(),
+		image: z$1.string().nullable(),
+		role: z$1.string().nullable(),
+		banned: z$1.boolean().nullable(),
+		banReason: z$1.string().nullable(),
+		banExpires: z$1.date().nullable(),
+		createdAt: z$1.date(),
+		updatedAt: z$1.date()
 	})
 });
-const createPostSchema = z.object({
-	title: z.string(),
-	content: z.string()
+const createPostSchema = z$1.object({
+	title: z$1.string(),
+	content: z$1.string()
 });
-const PostsResponseSchema = createApiResponseSchema(z.array(postSchema));
+const PostsResponseSchema = createApiResponseSchema(z$1.array(postSchema));
 const PostResponseSchema = createApiResponseSchema(postSchema.nullable());
 
 //#endregion
 //#region src/routers/post.ts
-const getPosts = publicProcedure.route({
+const getPosts$1 = publicProcedure.route({
 	method: "GET",
 	path: "/posts"
 }).output(PostsResponseSchema).handler(async () => {
@@ -602,6 +607,7 @@ const getPosts = publicProcedure.route({
 	return {
 		status: "success",
 		message: "文章列表取得成功",
+		meta: void 0,
 		data: rows.map((r) => {
 			const { post, author, category } = r;
 			const tags$1 = tagsByPost.get(String(post.id)) ?? [];
@@ -617,7 +623,7 @@ const getPosts = publicProcedure.route({
 const getPost = publicProcedure.route({
 	method: "GET",
 	path: "/posts/{id}"
-}).input(z$1.object({ id: z$1.string() })).output(PostResponseSchema).handler(async ({ input }) => {
+}).input(z.object({ id: z.string() })).output(PostResponseSchema).handler(async ({ input }) => {
 	const { id } = input;
 	console.log(`Fetching post with id: ${id}`);
 	const [row] = await db.select({
@@ -628,6 +634,7 @@ const getPost = publicProcedure.route({
 	if (!row) return {
 		status: "error",
 		message: "文章不存在",
+		meta: void 0,
 		data: null
 	};
 	const tagsByPost = (await db.select({ tag: tags }).from(postTags).leftJoin(tags, eq(postTags.tagId, tags.id)).where(eq(postTags.postId, row.post.id))).map((tr) => tr.tag).filter((t) => t !== null);
@@ -635,6 +642,7 @@ const getPost = publicProcedure.route({
 	return {
 		status: "success",
 		message: "文章取得成功",
+		meta: void 0,
 		data: {
 			...post,
 			author,
@@ -644,7 +652,7 @@ const getPost = publicProcedure.route({
 	};
 });
 var post_default = {
-	getPosts,
+	getPosts: getPosts$1,
 	getPost
 };
 
@@ -653,7 +661,7 @@ var post_default = {
 const getNotes = publicProcedure.route({
 	method: "GET",
 	path: "/notes"
-}).input(z$1.object({ id: z$1.string().optional() })).handler(async ({ input }) => {
+}).input(z.object({ id: z.string().optional() })).handler(async ({ input }) => {
 	const noteId = input.id;
 	if (!noteId) {
 		const notesList = await db.select().from(notes).where(eq(notes.status, true)).orderBy(desc(notes.createdAt)).limit(9);
@@ -706,7 +714,7 @@ const getNoteLatest = publicProcedure.route({
 const getNote = publicProcedure.route({
 	method: "GET",
 	path: "/notes/{id}"
-}).input(z$1.object({ id: z$1.string() })).handler(async ({ input }) => {
+}).input(z.object({ id: z.string() })).handler(async ({ input }) => {
 	const noteId = input.id;
 	return {
 		status: "success",
@@ -722,82 +730,92 @@ var note_default = {
 
 //#endregion
 //#region src/schema/comment.ts
-const commentSchema = z.object({
-	id: z.uuid(),
-	refType: z.enum([
+const commentSchema = z$1.object({
+	id: z$1.uuid(),
+	refType: z$1.enum([
 		"post",
 		"note",
 		"page",
 		"recently"
 	]),
-	refId: z.string(),
-	displayUsername: z.string(),
-	email: z.string().email(),
-	website: z.string().url().nullable(),
-	content: z.string(),
-	thread: z.string().nullable(),
-	likes: z.number(),
-	dislikes: z.number(),
-	deleted: z.boolean(),
-	pin: z.boolean(),
-	source: z.enum([
+	refId: z$1.string(),
+	displayUsername: z$1.string(),
+	email: z$1.string().email(),
+	website: z$1.string().url().nullable(),
+	content: z$1.string(),
+	thread: z$1.string().nullable(),
+	liked: z$1.boolean().nullable(),
+	likes: z$1.number(),
+	dislikes: z$1.number(),
+	deleted: z$1.boolean(),
+	pin: z$1.boolean(),
+	source: z$1.enum([
 		"guest",
 		"google",
 		"github"
 	]),
-	userId: z.string().nullable(),
-	ip: z.string().nullable(),
-	agent: z.string().nullable(),
-	location: z.string().nullable(),
-	createdAt: z.date(),
-	updatedAt: z.date()
+	userId: z$1.string().nullable(),
+	ip: z$1.string().nullable(),
+	agent: z$1.string().nullable(),
+	location: z$1.string().nullable(),
+	createdAt: z$1.date(),
+	updatedAt: z$1.date()
 });
 const CommentResponseSchema = createApiResponseSchema(commentSchema);
-const CommentsResponseSchema = createApiResponseSchema(z.array(commentSchema));
+const CommentsResponseSchema = createApiResponseSchema(z$1.array(commentSchema));
 
 //#endregion
 //#region src/routers/comment.ts
 const getComments = publicProcedure.route({
 	method: "GET",
 	path: "/comments/{refId}"
-}).input(z$1.object({
-	type: z$1.enum([
+}).input(z.object({
+	type: z.enum([
 		"post",
 		"note",
 		"page",
 		"recently"
 	]),
-	refId: z$1.string()
-})).output(CommentsResponseSchema).handler(async ({ input }) => {
+	refId: z.string()
+})).output(CommentsResponseSchema).handler(async ({ input, context }) => {
 	const { type, refId } = input;
+	const userId = context.session?.user.id ?? null;
+	const commentsList = await db.select().from(comments).where(and(eq(comments.refId, refId), eq(comments.refType, type))).orderBy(desc(comments.createdAt));
+	let likedMap = /* @__PURE__ */ new Map();
+	if (userId && commentsList.length > 0) {
+		const commentIds = commentsList.map((c) => c.id);
+		(await db.select().from(commentLikes).where(and(eq(commentLikes.userId, userId), inArray(commentLikes.commentId, commentIds)))).forEach((r) => likedMap.set(r.commentId, r.like));
+	}
 	return {
 		status: "success",
 		message: "留言列表取得成功",
-		data: (await db.select().from(comments).where(and(eq(comments.refId, refId), eq(comments.refType, type))).orderBy(desc(comments.createdAt))).map((comment) => ({
+		meta: void 0,
+		data: commentsList.map((comment) => ({
 			...comment,
-			content: comment.deleted ? "[此評論已被刪除]" : comment.content
+			content: comment.deleted ? "[此評論已被刪除]" : comment.content,
+			liked: userId ? likedMap.has(comment.id) ? likedMap.get(comment.id) : null : null
 		}))
 	};
 });
-const createComment = protectedProcedure.route({
+const createComment = publicProcedure.route({
 	method: "POST",
 	path: "/comments"
-}).input(z$1.object({
-	type: z$1.enum([
+}).input(z.object({
+	type: z.enum([
 		"post",
 		"note",
 		"page"
 	]),
-	refId: z$1.string(),
-	displayUsername: z$1.string(),
-	email: z$1.string().email(),
-	source: z$1.enum([
+	refId: z.string(),
+	displayUsername: z.string(),
+	email: z.string().email(),
+	source: z.enum([
 		"guest",
 		"google",
 		"github"
 	]),
-	content: z$1.string().min(1),
-	thread: z$1.string().optional()
+	content: z.string().min(1),
+	thread: z.string().optional()
 })).handler(async ({ input, context }) => {
 	const { type, refId, displayUsername, email, content, source, thread } = input;
 	const userId = context.session?.user.id ?? null;
@@ -817,12 +835,16 @@ const createComment = protectedProcedure.route({
 		data: newComment
 	};
 });
-const deleteComment = protectedProcedure.route({
+const deleteComment = publicProcedure.route({
 	method: "DELETE",
 	path: "/comments/{id}"
-}).input(z$1.object({ id: z$1.uuid() })).handler(async ({ input, context }) => {
+}).input(z.object({ id: z.uuid() })).handler(async ({ input, context }) => {
 	const { id } = input;
-	const userId = context.session?.user.id ?? null;
+	const userId = context.session?.user.id;
+	if (!userId) return {
+		status: "error",
+		message: "未登入"
+	};
 	await db.update(comments).set({ deleted: true }).where(and(eq(comments.id, id), eq(comments.userId, userId)));
 	return {
 		status: "success",
@@ -832,9 +854,9 @@ const deleteComment = protectedProcedure.route({
 const likeComment = protectedProcedure.route({
 	method: "POST",
 	path: "/comments/{id}/like"
-}).input(z$1.object({
-	id: z$1.uuid(),
-	like: z$1.boolean()
+}).input(z.object({
+	id: z.uuid(),
+	like: z.boolean()
 })).handler(async ({ input, context }) => {
 	const { id, like } = input;
 	const userId = context.session?.user.id ?? null;
@@ -882,7 +904,7 @@ const likeComment = protectedProcedure.route({
 		}
 	};
 });
-const commentRouter = {
+var comment_default = {
 	getComments,
 	createComment,
 	deleteComment,
@@ -890,11 +912,803 @@ const commentRouter = {
 };
 
 //#endregion
+//#region ../../node_modules/.pnpm/@better-auth+core@1.4.19_@b_ce27142bc9376bc27e5ac142474d4150/node_modules/@better-auth/core/dist/context/global.mjs
+const symbol = Symbol.for("better-auth:global");
+
+//#endregion
+//#region ../../node_modules/.pnpm/@better-auth+core@1.4.19_@b_ce27142bc9376bc27e5ac142474d4150/node_modules/@better-auth/core/dist/async_hooks/index.mjs
+const AsyncLocalStoragePromise = import(
+	/* @vite-ignore */
+	/* webpackIgnore: true */
+	"node:async_hooks"
+).then((mod) => mod.AsyncLocalStorage).catch((err) => {
+	if ("AsyncLocalStorage" in globalThis) return globalThis.AsyncLocalStorage;
+	if (typeof window !== "undefined") return null;
+	console.warn("[better-auth] Warning: AsyncLocalStorage is not available in this environment. Some features may not work as expected.");
+	console.warn("[better-auth] Please read more about this warning at https://better-auth.com/docs/installation#mount-handler");
+	console.warn("[better-auth] If you are using Cloudflare Workers, please see: https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag");
+	throw err;
+});
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/error.mjs
+function isErrorStackTraceLimitWritable() {
+	const desc$1 = Object.getOwnPropertyDescriptor(Error, "stackTraceLimit");
+	if (desc$1 === void 0) return Object.isExtensible(Error);
+	return Object.prototype.hasOwnProperty.call(desc$1, "writable") ? desc$1.writable : desc$1.set !== void 0;
+}
+/**
+* Hide internal stack frames from the error stack trace.
+*/
+function hideInternalStackFrames(stack) {
+	const lines = stack.split("\n    at ");
+	if (lines.length <= 1) return stack;
+	lines.splice(1, 1);
+	return lines.join("\n    at ");
+}
+/**
+* Creates a custom error class that hides stack frames.
+*/
+function makeErrorForHideStackFrame(Base, clazz) {
+	class HideStackFramesError extends Base {
+		#hiddenStack;
+		constructor(...args) {
+			if (isErrorStackTraceLimitWritable()) {
+				const limit = Error.stackTraceLimit;
+				Error.stackTraceLimit = 0;
+				super(...args);
+				Error.stackTraceLimit = limit;
+			} else super(...args);
+			const stack = (/* @__PURE__ */ new Error()).stack;
+			if (stack) this.#hiddenStack = hideInternalStackFrames(stack.replace(/^Error/, this.name));
+		}
+		get errorStack() {
+			return this.#hiddenStack;
+		}
+	}
+	Object.defineProperty(HideStackFramesError.prototype, "constructor", {
+		get() {
+			return clazz;
+		},
+		enumerable: false,
+		configurable: true
+	});
+	return HideStackFramesError;
+}
+const statusCodes = {
+	OK: 200,
+	CREATED: 201,
+	ACCEPTED: 202,
+	NO_CONTENT: 204,
+	MULTIPLE_CHOICES: 300,
+	MOVED_PERMANENTLY: 301,
+	FOUND: 302,
+	SEE_OTHER: 303,
+	NOT_MODIFIED: 304,
+	TEMPORARY_REDIRECT: 307,
+	BAD_REQUEST: 400,
+	UNAUTHORIZED: 401,
+	PAYMENT_REQUIRED: 402,
+	FORBIDDEN: 403,
+	NOT_FOUND: 404,
+	METHOD_NOT_ALLOWED: 405,
+	NOT_ACCEPTABLE: 406,
+	PROXY_AUTHENTICATION_REQUIRED: 407,
+	REQUEST_TIMEOUT: 408,
+	CONFLICT: 409,
+	GONE: 410,
+	LENGTH_REQUIRED: 411,
+	PRECONDITION_FAILED: 412,
+	PAYLOAD_TOO_LARGE: 413,
+	URI_TOO_LONG: 414,
+	UNSUPPORTED_MEDIA_TYPE: 415,
+	RANGE_NOT_SATISFIABLE: 416,
+	EXPECTATION_FAILED: 417,
+	"I'M_A_TEAPOT": 418,
+	MISDIRECTED_REQUEST: 421,
+	UNPROCESSABLE_ENTITY: 422,
+	LOCKED: 423,
+	FAILED_DEPENDENCY: 424,
+	TOO_EARLY: 425,
+	UPGRADE_REQUIRED: 426,
+	PRECONDITION_REQUIRED: 428,
+	TOO_MANY_REQUESTS: 429,
+	REQUEST_HEADER_FIELDS_TOO_LARGE: 431,
+	UNAVAILABLE_FOR_LEGAL_REASONS: 451,
+	INTERNAL_SERVER_ERROR: 500,
+	NOT_IMPLEMENTED: 501,
+	BAD_GATEWAY: 502,
+	SERVICE_UNAVAILABLE: 503,
+	GATEWAY_TIMEOUT: 504,
+	HTTP_VERSION_NOT_SUPPORTED: 505,
+	VARIANT_ALSO_NEGOTIATES: 506,
+	INSUFFICIENT_STORAGE: 507,
+	LOOP_DETECTED: 508,
+	NOT_EXTENDED: 510,
+	NETWORK_AUTHENTICATION_REQUIRED: 511
+};
+var InternalAPIError = class extends Error {
+	constructor(status = "INTERNAL_SERVER_ERROR", body = void 0, headers = {}, statusCode = typeof status === "number" ? status : statusCodes[status]) {
+		super(body?.message, body?.cause ? { cause: body.cause } : void 0);
+		this.status = status;
+		this.body = body;
+		this.headers = headers;
+		this.statusCode = statusCode;
+		this.name = "APIError";
+		this.status = status;
+		this.headers = headers;
+		this.statusCode = statusCode;
+		this.body = body ? {
+			code: body?.message?.toUpperCase().replace(/ /g, "_").replace(/[^A-Z0-9_]/g, ""),
+			...body
+		} : void 0;
+	}
+};
+var ValidationError = class extends InternalAPIError {
+	constructor(message, issues) {
+		super(400, {
+			message,
+			code: "VALIDATION_ERROR"
+		});
+		this.message = message;
+		this.issues = issues;
+		this.issues = issues;
+	}
+};
+var BetterCallError = class extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "BetterCallError";
+	}
+};
+const APIError$1 = makeErrorForHideStackFrame(InternalAPIError, Error);
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/utils.mjs
+function isAPIError(error) {
+	return error instanceof APIError$1 || error?.name === "APIError";
+}
+function tryDecode(str) {
+	try {
+		return str.includes("%") ? decodeURIComponent(str) : str;
+	} catch {
+		return str;
+	}
+}
+async function tryCatch(promise) {
+	try {
+		return {
+			data: await promise,
+			error: null
+		};
+	} catch (error) {
+		return {
+			data: null,
+			error
+		};
+	}
+}
+/**
+* Check if an object is a `Request`
+* - `instanceof`: works for native Request instances
+* - `toString`: handles where instanceof check fails but the object is still a valid Request
+*/
+function isRequest(obj) {
+	return obj instanceof Request || Object.prototype.toString.call(obj) === "[object Request]";
+}
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/to-response.mjs
+function isJSONSerializable(value) {
+	if (value === void 0) return false;
+	const t = typeof value;
+	if (t === "string" || t === "number" || t === "boolean" || t === null) return true;
+	if (t !== "object") return false;
+	if (Array.isArray(value)) return true;
+	if (value.buffer) return false;
+	return value.constructor && value.constructor.name === "Object" || typeof value.toJSON === "function";
+}
+function safeStringify(obj, replacer, space) {
+	let id = 0;
+	const seen = /* @__PURE__ */ new WeakMap();
+	const safeReplacer = (key, value) => {
+		if (typeof value === "bigint") return value.toString();
+		if (typeof value === "object" && value !== null) {
+			if (seen.has(value)) return `[Circular ref-${seen.get(value)}]`;
+			seen.set(value, id++);
+		}
+		if (replacer) return replacer(key, value);
+		return value;
+	};
+	return JSON.stringify(obj, safeReplacer, space);
+}
+function isJSONResponse(value) {
+	if (!value || typeof value !== "object") return false;
+	return "_flag" in value && value._flag === "json";
+}
+function toResponse(data, init) {
+	if (data instanceof Response) {
+		if (init?.headers instanceof Headers) init.headers.forEach((value, key) => {
+			data.headers.set(key, value);
+		});
+		return data;
+	}
+	if (isJSONResponse(data)) {
+		const body$1 = data.body;
+		const routerResponse = data.routerResponse;
+		if (routerResponse instanceof Response) return routerResponse;
+		const headers$1 = new Headers();
+		if (routerResponse?.headers) {
+			const headers$2 = new Headers(routerResponse.headers);
+			for (const [key, value] of headers$2.entries()) headers$2.set(key, value);
+		}
+		if (data.headers) for (const [key, value] of new Headers(data.headers).entries()) headers$1.set(key, value);
+		if (init?.headers) for (const [key, value] of new Headers(init.headers).entries()) headers$1.set(key, value);
+		headers$1.set("Content-Type", "application/json");
+		return new Response(JSON.stringify(body$1), {
+			...routerResponse,
+			headers: headers$1,
+			status: data.status ?? init?.status ?? routerResponse?.status,
+			statusText: init?.statusText ?? routerResponse?.statusText
+		});
+	}
+	if (isAPIError(data)) return toResponse(data.body, {
+		status: init?.status ?? data.statusCode,
+		statusText: data.status.toString(),
+		headers: init?.headers || data.headers
+	});
+	let body = data;
+	let headers = new Headers(init?.headers);
+	if (!data) {
+		if (data === null) body = JSON.stringify(null);
+		headers.set("content-type", "application/json");
+	} else if (typeof data === "string") {
+		body = data;
+		headers.set("Content-Type", "text/plain");
+	} else if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) {
+		body = data;
+		headers.set("Content-Type", "application/octet-stream");
+	} else if (data instanceof Blob) {
+		body = data;
+		headers.set("Content-Type", data.type || "application/octet-stream");
+	} else if (data instanceof FormData) body = data;
+	else if (data instanceof URLSearchParams) {
+		body = data;
+		headers.set("Content-Type", "application/x-www-form-urlencoded");
+	} else if (data instanceof ReadableStream) {
+		body = data;
+		headers.set("Content-Type", "application/octet-stream");
+	} else if (isJSONSerializable(data)) {
+		body = safeStringify(data);
+		headers.set("Content-Type", "application/json");
+	}
+	return new Response(body, {
+		...init,
+		headers
+	});
+}
+
+//#endregion
+//#region ../../node_modules/.pnpm/@better-auth+utils@0.3.0/node_modules/@better-auth/utils/dist/index.mjs
+function getWebcryptoSubtle() {
+	const cr = typeof globalThis !== "undefined" && globalThis.crypto;
+	if (cr && typeof cr.subtle === "object" && cr.subtle != null) return cr.subtle;
+	throw new Error("crypto.subtle must be defined");
+}
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/crypto.mjs
+const algorithm = {
+	name: "HMAC",
+	hash: "SHA-256"
+};
+const getCryptoKey = async (secret) => {
+	const secretBuf = typeof secret === "string" ? new TextEncoder().encode(secret) : secret;
+	return await getWebcryptoSubtle().importKey("raw", secretBuf, algorithm, false, ["sign", "verify"]);
+};
+const verifySignature = async (base64Signature, value, secret) => {
+	try {
+		const signatureBinStr = atob(base64Signature);
+		const signature = new Uint8Array(signatureBinStr.length);
+		for (let i = 0, len = signatureBinStr.length; i < len; i++) signature[i] = signatureBinStr.charCodeAt(i);
+		return await getWebcryptoSubtle().verify(algorithm, secret, signature, new TextEncoder().encode(value));
+	} catch (e) {
+		return false;
+	}
+};
+const makeSignature = async (value, secret) => {
+	const key = await getCryptoKey(secret);
+	const signature = await getWebcryptoSubtle().sign(algorithm.name, key, new TextEncoder().encode(value));
+	return btoa(String.fromCharCode(...new Uint8Array(signature)));
+};
+const signCookieValue = async (value, secret) => {
+	const signature = await makeSignature(value, secret);
+	value = `${value}.${signature}`;
+	value = encodeURIComponent(value);
+	return value;
+};
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/cookies.mjs
+const getCookieKey = (key, prefix) => {
+	let finalKey = key;
+	if (prefix) if (prefix === "secure") finalKey = "__Secure-" + key;
+	else if (prefix === "host") finalKey = "__Host-" + key;
+	else return;
+	return finalKey;
+};
+/**
+* Parse an HTTP Cookie header string and returning an object of all cookie
+* name-value pairs.
+*
+* Inspired by https://github.com/unjs/cookie-es/blob/main/src/cookie/parse.ts
+*
+* @param str the string representing a `Cookie` header value
+*/
+function parseCookies(str) {
+	if (typeof str !== "string") throw new TypeError("argument str must be a string");
+	const cookies = /* @__PURE__ */ new Map();
+	let index$1 = 0;
+	while (index$1 < str.length) {
+		const eqIdx = str.indexOf("=", index$1);
+		if (eqIdx === -1) break;
+		let endIdx = str.indexOf(";", index$1);
+		if (endIdx === -1) endIdx = str.length;
+		else if (endIdx < eqIdx) {
+			index$1 = str.lastIndexOf(";", eqIdx - 1) + 1;
+			continue;
+		}
+		const key = str.slice(index$1, eqIdx).trim();
+		if (!cookies.has(key)) {
+			let val = str.slice(eqIdx + 1, endIdx).trim();
+			if (val.codePointAt(0) === 34) val = val.slice(1, -1);
+			cookies.set(key, tryDecode(val));
+		}
+		index$1 = endIdx + 1;
+	}
+	return cookies;
+}
+const _serialize = (key, value, opt = {}) => {
+	let cookie;
+	if (opt?.prefix === "secure") cookie = `${`__Secure-${key}`}=${value}`;
+	else if (opt?.prefix === "host") cookie = `${`__Host-${key}`}=${value}`;
+	else cookie = `${key}=${value}`;
+	if (key.startsWith("__Secure-") && !opt.secure) opt.secure = true;
+	if (key.startsWith("__Host-")) {
+		if (!opt.secure) opt.secure = true;
+		if (opt.path !== "/") opt.path = "/";
+		if (opt.domain) opt.domain = void 0;
+	}
+	if (opt && typeof opt.maxAge === "number" && opt.maxAge >= 0) {
+		if (opt.maxAge > 3456e4) throw new Error("Cookies Max-Age SHOULD NOT be greater than 400 days (34560000 seconds) in duration.");
+		cookie += `; Max-Age=${Math.floor(opt.maxAge)}`;
+	}
+	if (opt.domain && opt.prefix !== "host") cookie += `; Domain=${opt.domain}`;
+	if (opt.path) cookie += `; Path=${opt.path}`;
+	if (opt.expires) {
+		if (opt.expires.getTime() - Date.now() > 3456e7) throw new Error("Cookies Expires SHOULD NOT be greater than 400 days (34560000 seconds) in the future.");
+		cookie += `; Expires=${opt.expires.toUTCString()}`;
+	}
+	if (opt.httpOnly) cookie += "; HttpOnly";
+	if (opt.secure) cookie += "; Secure";
+	if (opt.sameSite) cookie += `; SameSite=${opt.sameSite.charAt(0).toUpperCase() + opt.sameSite.slice(1)}`;
+	if (opt.partitioned) {
+		if (!opt.secure) opt.secure = true;
+		cookie += "; Partitioned";
+	}
+	return cookie;
+};
+const serializeCookie = (key, value, opt) => {
+	value = encodeURIComponent(value);
+	return _serialize(key, value, opt);
+};
+const serializeSignedCookie = async (key, value, secret, opt) => {
+	value = await signCookieValue(value, secret);
+	return _serialize(key, value, opt);
+};
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/validator.mjs
+/**
+* Runs validation on body and query
+* @returns error and data object
+*/
+async function runValidation(options, context = {}) {
+	let request = {
+		body: context.body,
+		query: context.query
+	};
+	if (options.body) {
+		const result = await options.body["~standard"].validate(context.body);
+		if (result.issues) return {
+			data: null,
+			error: fromError(result.issues, "body")
+		};
+		request.body = result.value;
+	}
+	if (options.query) {
+		const result = await options.query["~standard"].validate(context.query);
+		if (result.issues) return {
+			data: null,
+			error: fromError(result.issues, "query")
+		};
+		request.query = result.value;
+	}
+	if (options.requireHeaders && !context.headers) return {
+		data: null,
+		error: {
+			message: "Headers is required",
+			issues: []
+		}
+	};
+	if (options.requireRequest && !context.request) return {
+		data: null,
+		error: {
+			message: "Request is required",
+			issues: []
+		}
+	};
+	return {
+		data: request,
+		error: null
+	};
+}
+function fromError(error, validating) {
+	return {
+		message: error.map((e) => {
+			return `[${e.path?.length ? `${validating}.` + e.path.map((x) => typeof x === "object" ? x.key : x).join(".") : validating}] ${e.message}`;
+		}).join("; "),
+		issues: error
+	};
+}
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/context.mjs
+const createInternalContext = async (context, { options, path }) => {
+	const headers = new Headers();
+	let responseStatus = void 0;
+	const { data, error } = await runValidation(options, context);
+	if (error) throw new ValidationError(error.message, error.issues);
+	const requestHeaders = "headers" in context ? context.headers instanceof Headers ? context.headers : new Headers(context.headers) : "request" in context && isRequest(context.request) ? context.request.headers : null;
+	const requestCookies = requestHeaders?.get("cookie");
+	const parsedCookies = requestCookies ? parseCookies(requestCookies) : void 0;
+	const internalContext = {
+		...context,
+		body: data.body,
+		query: data.query,
+		path: context.path || path || "virtual:",
+		context: "context" in context && context.context ? context.context : {},
+		returned: void 0,
+		headers: context?.headers,
+		request: context?.request,
+		params: "params" in context ? context.params : void 0,
+		method: context.method ?? (Array.isArray(options.method) ? options.method[0] : options.method === "*" ? "GET" : options.method),
+		setHeader: (key, value) => {
+			headers.set(key, value);
+		},
+		getHeader: (key) => {
+			if (!requestHeaders) return null;
+			return requestHeaders.get(key);
+		},
+		getCookie: (key, prefix) => {
+			const finalKey = getCookieKey(key, prefix);
+			if (!finalKey) return null;
+			return parsedCookies?.get(finalKey) || null;
+		},
+		getSignedCookie: async (key, secret, prefix) => {
+			const finalKey = getCookieKey(key, prefix);
+			if (!finalKey) return null;
+			const value = parsedCookies?.get(finalKey);
+			if (!value) return null;
+			const signatureStartPos = value.lastIndexOf(".");
+			if (signatureStartPos < 1) return null;
+			const signedValue = value.substring(0, signatureStartPos);
+			const signature = value.substring(signatureStartPos + 1);
+			if (signature.length !== 44 || !signature.endsWith("=")) return null;
+			return await verifySignature(signature, signedValue, await getCryptoKey(secret)) ? signedValue : false;
+		},
+		setCookie: (key, value, options$1) => {
+			const cookie = serializeCookie(key, value, options$1);
+			headers.append("set-cookie", cookie);
+			return cookie;
+		},
+		setSignedCookie: async (key, value, secret, options$1) => {
+			const cookie = await serializeSignedCookie(key, value, secret, options$1);
+			headers.append("set-cookie", cookie);
+			return cookie;
+		},
+		redirect: (url) => {
+			headers.set("location", url);
+			return new APIError$1("FOUND", void 0, headers);
+		},
+		error: (status, body, headers$1) => {
+			return new APIError$1(status, body, headers$1);
+		},
+		setStatus: (status) => {
+			responseStatus = status;
+		},
+		json: (json$1, routerResponse) => {
+			if (!context.asResponse) return json$1;
+			return {
+				body: routerResponse?.body || json$1,
+				routerResponse,
+				_flag: "json"
+			};
+		},
+		responseHeaders: headers,
+		get responseStatus() {
+			return responseStatus;
+		}
+	};
+	for (const middleware of options.use || []) {
+		const response = await middleware({
+			...internalContext,
+			returnHeaders: true,
+			asResponse: false
+		});
+		if (response.response) Object.assign(internalContext.context, response.response);
+		/**
+		* Apply headers from the middleware to the endpoint headers
+		*/
+		if (response.headers) response.headers.forEach((value, key) => {
+			internalContext.responseHeaders.set(key, value);
+		});
+	}
+	return internalContext;
+};
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/endpoint.mjs
+function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
+	const path = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
+	const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
+	const handler = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+	if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
+	if (path && /\/{2,}/.test(path)) throw new BetterCallError("Path cannot contain consecutive slashes");
+	const internalHandler = async (...inputCtx) => {
+		const context = inputCtx[0] || {};
+		const { data: internalContext, error: validationError } = await tryCatch(createInternalContext(context, {
+			options,
+			path
+		}));
+		if (validationError) {
+			if (!(validationError instanceof ValidationError)) throw validationError;
+			if (options.onValidationError) await options.onValidationError({
+				message: validationError.message,
+				issues: validationError.issues
+			});
+			throw new APIError$1(400, {
+				message: validationError.message,
+				code: "VALIDATION_ERROR"
+			});
+		}
+		const response = await handler(internalContext).catch(async (e) => {
+			if (isAPIError(e)) {
+				const onAPIError = options.onAPIError;
+				if (onAPIError) await onAPIError(e);
+				if (context.asResponse) return e;
+			}
+			throw e;
+		});
+		const headers = internalContext.responseHeaders;
+		const status = internalContext.responseStatus;
+		return context.asResponse ? toResponse(response, {
+			headers,
+			status
+		}) : context.returnHeaders ? context.returnStatus ? {
+			headers,
+			response,
+			status
+		} : {
+			headers,
+			response
+		} : context.returnStatus ? {
+			response,
+			status
+		} : response;
+	};
+	internalHandler.options = options;
+	internalHandler.path = path;
+	return internalHandler;
+}
+createEndpoint.create = (opts) => {
+	return (path, options, handler) => {
+		return createEndpoint(path, {
+			...options,
+			use: [...options?.use || [], ...opts?.use || []]
+		}, handler);
+	};
+};
+
+//#endregion
+//#region ../../node_modules/.pnpm/better-call@1.1.8_zod@4.3.6/node_modules/better-call/dist/middleware.mjs
+function createMiddleware(optionsOrHandler, handler) {
+	const internalHandler = async (inputCtx) => {
+		const context = inputCtx;
+		const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler;
+		const internalContext = await createInternalContext(context, {
+			options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
+			path: "/"
+		});
+		if (!_handler) throw new Error("handler must be defined");
+		const response = await _handler(internalContext);
+		const headers = internalContext.responseHeaders;
+		return context.returnHeaders ? {
+			headers,
+			response
+		} : response;
+	};
+	internalHandler.options = typeof optionsOrHandler === "function" ? {} : optionsOrHandler;
+	return internalHandler;
+}
+createMiddleware.create = (opts) => {
+	function fn(optionsOrHandler, handler) {
+		if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
+		if (!handler) throw new Error("Middleware handler is required");
+		return createMiddleware({
+			...optionsOrHandler,
+			method: "*",
+			use: [...opts?.use || [], ...optionsOrHandler.use || []]
+		}, handler);
+	}
+	return fn;
+};
+
+//#endregion
+//#region ../../node_modules/.pnpm/@better-auth+core@1.4.19_@b_ce27142bc9376bc27e5ac142474d4150/node_modules/@better-auth/core/dist/api/index.mjs
+const optionsMiddleware = createMiddleware(async () => {
+	/**
+	* This will be passed on the instance of
+	* the context. Used to infer the type
+	* here.
+	*/
+	return {};
+});
+const createAuthMiddleware = createMiddleware.create({ use: [optionsMiddleware, createMiddleware(async () => {
+	return {};
+})] });
+
+//#endregion
+//#region ../../node_modules/.pnpm/@better-auth+expo@1.4.19_8f55e716f0db71b0b2967820fa7dc8ed/node_modules/@better-auth/expo/dist/index.mjs
+const expoAuthorizationProxy = createAuthEndpoint("/expo-authorization-proxy", {
+	method: "GET",
+	query: z$2.object({
+		authorizationURL: z$2.string(),
+		oauthState: z$2.string().optional()
+	}),
+	metadata: HIDE_METADATA
+}, async (ctx) => {
+	const { oauthState } = ctx.query;
+	if (oauthState) {
+		const oauthStateCookie = ctx.context.createAuthCookie("oauth_state", { maxAge: 600 });
+		ctx.setCookie(oauthStateCookie.name, oauthState, oauthStateCookie.attributes);
+		return ctx.redirect(ctx.query.authorizationURL);
+	}
+	const { authorizationURL } = ctx.query;
+	const state = new URL(authorizationURL).searchParams.get("state");
+	if (!state) throw new APIError("BAD_REQUEST", { message: "Unexpected error" });
+	const stateCookie = ctx.context.createAuthCookie("state", { maxAge: 300 });
+	await ctx.setSignedCookie(stateCookie.name, state, ctx.context.secret, stateCookie.attributes);
+	return ctx.redirect(ctx.query.authorizationURL);
+});
+const expo = (options) => {
+	return {
+		id: "expo",
+		init: (ctx) => {
+			return { options: { trustedOrigins: process.env.NODE_ENV === "development" ? ["exp://"] : [] } };
+		},
+		async onRequest(request, ctx) {
+			if (options?.disableOriginOverride || request.headers.get("origin")) return;
+			/**
+			* To bypass origin check from expo, we need to set the origin
+			* header to the expo-origin header
+			*/
+			const expoOrigin = request.headers.get("expo-origin");
+			if (!expoOrigin) return;
+			const newHeaders = new Headers(request.headers);
+			newHeaders.set("origin", expoOrigin);
+			return { request: new Request(request, { headers: newHeaders }) };
+		},
+		hooks: { after: [{
+			matcher(context) {
+				return !!(context.path?.startsWith("/callback") || context.path?.startsWith("/oauth2/callback") || context.path?.startsWith("/magic-link/verify") || context.path?.startsWith("/verify-email"));
+			},
+			handler: createAuthMiddleware(async (ctx) => {
+				const headers = ctx.context.responseHeaders;
+				const location = headers?.get("location");
+				if (!location) return;
+				if (location.includes("/oauth-proxy-callback")) return;
+				let redirectURL;
+				try {
+					redirectURL = new URL(location);
+				} catch {
+					return;
+				}
+				if (redirectURL.protocol === "http:" || redirectURL.protocol === "https:") return;
+				if (!ctx.context.isTrustedOrigin(location)) return;
+				const cookie = headers?.get("set-cookie");
+				if (!cookie) return;
+				redirectURL.searchParams.set("cookie", cookie);
+				ctx.setHeader("location", redirectURL.toString());
+			})
+		}] },
+		endpoints: { expoAuthorizationProxy },
+		options
+	};
+};
+
+//#endregion
+//#region ../../packages/auth/src/index.ts
+const auth = betterAuth({
+	database: drizzleAdapter(db, {
+		provider: "pg",
+		schema: schema_exports
+	}),
+	trustedOrigins: [
+		...env.CORS_ORIGIN.map((origin) => origin.trim()),
+		"sao-blog://",
+		...env.NODE_ENV === "development" ? [
+			"exp://",
+			"exp://**",
+			"exp://192.168.*.*:*/**",
+			"http://localhost:8081"
+		] : []
+	],
+	emailAndPassword: { enabled: true },
+	socialProviders: { github: {
+		clientId: process.env.GITHUB_CLIENT_ID,
+		clientSecret: process.env.GITHUB_CLIENT_SECRET
+	} },
+	advanced: {
+		database: { generateId: false },
+		defaultCookieAttributes: {
+			sameSite: "none",
+			secure: true,
+			httpOnly: true
+		}
+	},
+	plugins: [
+		admin(),
+		username(),
+		openAPI(),
+		expo(),
+		apiKey({ enableSessionForAPIKeys: true })
+	]
+});
+
+//#endregion
+//#region src/routers/admin/post.ts
+const getPosts = protectedProcedure.route({
+	method: "GET",
+	path: "/posts"
+}).handler(async () => {
+	return {
+		status: "success",
+		message: "文章列表取得成功",
+		data: await db.select({
+			id: posts.id,
+			title: posts.title,
+			slug: posts.slug,
+			cover: posts.cover,
+			status: posts.status,
+			createdAt: posts.createdAt,
+			updatedAt: posts.updatedAt,
+			author: {
+				id: user.id,
+				name: user.name
+			}
+		}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).leftJoin(categories, eq(posts.categoryId, categories.id))
+	};
+});
+var post_default$1 = { getPosts };
+
+//#endregion
 //#region src/routers/index.ts
 const appRouter = {
 	post: post_default,
 	note: note_default,
-	comment: commentRouter
+	comment: comment_default,
+	admin: o.prefix("/admin").router({ post: post_default$1 })
 };
 
 //#endregion

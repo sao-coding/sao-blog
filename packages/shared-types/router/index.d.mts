@@ -70,7 +70,7 @@ declare const appRouter: {
         success: "success";
       }>;
       message: zod0.ZodString;
-      meta: zod0.ZodOptional<zod0.ZodUndefined>;
+      meta: zod0.ZodUndefined;
       data: zod0.ZodArray<zod0.ZodObject<{
         id: zod0.ZodString;
         title: zod0.ZodString;
@@ -196,7 +196,7 @@ declare const appRouter: {
         success: "success";
       }>;
       message: zod0.ZodString;
-      meta: zod0.ZodOptional<zod0.ZodUndefined>;
+      meta: zod0.ZodUndefined;
       data: zod0.ZodNullable<zod0.ZodObject<{
         id: zod0.ZodString;
         title: zod0.ZodString;
@@ -703,7 +703,7 @@ declare const appRouter: {
         success: "success";
       }>;
       message: zod0.ZodString;
-      meta: zod0.ZodOptional<zod0.ZodUndefined>;
+      meta: zod0.ZodUndefined;
       data: zod0.ZodArray<zod0.ZodObject<{
         id: zod0.ZodUUID;
         refType: zod0.ZodEnum<{
@@ -718,6 +718,7 @@ declare const appRouter: {
         website: zod0.ZodNullable<zod0.ZodString>;
         content: zod0.ZodString;
         thread: zod0.ZodNullable<zod0.ZodString>;
+        liked: zod0.ZodNullable<zod0.ZodBoolean>;
         likes: zod0.ZodNumber;
         dislikes: zod0.ZodNumber;
         deleted: zod0.ZodBoolean;
@@ -735,7 +736,7 @@ declare const appRouter: {
         updatedAt: zod0.ZodDate;
       }, better_auth0.$strip>>;
     }, better_auth0.$strip>, Record<never, never>, Record<never, never>>;
-    createComment: _orpc_server0.DecoratedProcedure<_orpc_server0.MergedInitialContext<{
+    createComment: _orpc_server0.DecoratedProcedure<{
       session: {
         session: {
           id: string;
@@ -793,94 +794,7 @@ declare const appRouter: {
           displayUsername?: string | null | undefined;
         };
       } | null;
-    } & Record<never, never>, {
-      session: {
-        session: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          userId: string;
-          expiresAt: Date;
-          token: string;
-          ipAddress?: string | null | undefined | undefined;
-          userAgent?: string | null | undefined | undefined;
-          impersonatedBy?: string | null | undefined;
-        };
-        user: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          email: string;
-          emailVerified: boolean;
-          name: string;
-          image?: string | null | undefined | undefined;
-          banned: boolean | null | undefined;
-          role?: string | null | undefined;
-          banReason?: string | null | undefined;
-          banExpires?: Date | null | undefined;
-          username?: string | null | undefined;
-          displayUsername?: string | null | undefined;
-        };
-      } | null;
-    }>, _orpc_server0.MergedCurrentContext<{
-      session: {
-        session: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          userId: string;
-          expiresAt: Date;
-          token: string;
-          ipAddress?: string | null | undefined | undefined;
-          userAgent?: string | null | undefined | undefined;
-          impersonatedBy?: string | null | undefined;
-        };
-        user: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          email: string;
-          emailVerified: boolean;
-          name: string;
-          image?: string | null | undefined | undefined;
-          banned: boolean | null | undefined;
-          role?: string | null | undefined;
-          banReason?: string | null | undefined;
-          banExpires?: Date | null | undefined;
-          username?: string | null | undefined;
-          displayUsername?: string | null | undefined;
-        };
-      } | null;
-    }, {
-      session: {
-        session: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          userId: string;
-          expiresAt: Date;
-          token: string;
-          ipAddress?: string | null | undefined | undefined;
-          userAgent?: string | null | undefined | undefined;
-          impersonatedBy?: string | null | undefined;
-        };
-        user: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          email: string;
-          emailVerified: boolean;
-          name: string;
-          image?: string | null | undefined | undefined;
-          banned: boolean | null | undefined;
-          role?: string | null | undefined;
-          banReason?: string | null | undefined;
-          banExpires?: Date | null | undefined;
-          username?: string | null | undefined;
-          displayUsername?: string | null | undefined;
-        };
-      };
-    }>, zod0.ZodObject<{
+    }, zod0.ZodObject<{
       type: zod0.ZodEnum<{
         post: "post";
         note: "note";
@@ -945,7 +859,7 @@ declare const appRouter: {
         agent: string | null;
       } | undefined;
     }>, Record<never, never>, Record<never, never>>;
-    deleteComment: _orpc_server0.DecoratedProcedure<_orpc_server0.MergedInitialContext<{
+    deleteComment: _orpc_server0.DecoratedProcedure<{
       session: {
         session: {
           id: string;
@@ -1003,94 +917,7 @@ declare const appRouter: {
           displayUsername?: string | null | undefined;
         };
       } | null;
-    } & Record<never, never>, {
-      session: {
-        session: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          userId: string;
-          expiresAt: Date;
-          token: string;
-          ipAddress?: string | null | undefined | undefined;
-          userAgent?: string | null | undefined | undefined;
-          impersonatedBy?: string | null | undefined;
-        };
-        user: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          email: string;
-          emailVerified: boolean;
-          name: string;
-          image?: string | null | undefined | undefined;
-          banned: boolean | null | undefined;
-          role?: string | null | undefined;
-          banReason?: string | null | undefined;
-          banExpires?: Date | null | undefined;
-          username?: string | null | undefined;
-          displayUsername?: string | null | undefined;
-        };
-      } | null;
-    }>, _orpc_server0.MergedCurrentContext<{
-      session: {
-        session: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          userId: string;
-          expiresAt: Date;
-          token: string;
-          ipAddress?: string | null | undefined | undefined;
-          userAgent?: string | null | undefined | undefined;
-          impersonatedBy?: string | null | undefined;
-        };
-        user: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          email: string;
-          emailVerified: boolean;
-          name: string;
-          image?: string | null | undefined | undefined;
-          banned: boolean | null | undefined;
-          role?: string | null | undefined;
-          banReason?: string | null | undefined;
-          banExpires?: Date | null | undefined;
-          username?: string | null | undefined;
-          displayUsername?: string | null | undefined;
-        };
-      } | null;
-    }, {
-      session: {
-        session: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          userId: string;
-          expiresAt: Date;
-          token: string;
-          ipAddress?: string | null | undefined | undefined;
-          userAgent?: string | null | undefined | undefined;
-          impersonatedBy?: string | null | undefined;
-        };
-        user: {
-          id: string;
-          createdAt: Date;
-          updatedAt: Date;
-          email: string;
-          emailVerified: boolean;
-          name: string;
-          image?: string | null | undefined | undefined;
-          banned: boolean | null | undefined;
-          role?: string | null | undefined;
-          banReason?: string | null | undefined;
-          banExpires?: Date | null | undefined;
-          username?: string | null | undefined;
-          displayUsername?: string | null | undefined;
-        };
-      };
-    }>, zod0.ZodObject<{
+    }, zod0.ZodObject<{
       id: zod0.ZodUUID;
     }, better_auth0.$strip>, _orpc_server0.Schema<{
       status: string;
@@ -1272,6 +1099,217 @@ declare const appRouter: {
         like: boolean;
       };
     }>, Record<never, never>, Record<never, never>>;
+  };
+  admin: {
+    post: {
+      getPosts: _orpc_server0.Procedure<_orpc_server0.MergedInitialContext<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never>, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never> & Omit<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never>, "session">, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      }>, _orpc_server0.MergedCurrentContext<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      }, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        };
+      }>, _orpc_server0.Schema<unknown, unknown>, _orpc_server0.Schema<{
+        status: string;
+        message: string;
+        data: {
+          id: string;
+          title: string;
+          slug: string;
+          cover: string | null;
+          status: "draft" | "published" | "archived";
+          createdAt: Date;
+          updatedAt: Date;
+          author: {
+            id: string;
+            name: string;
+          };
+        }[];
+      }, {
+        status: string;
+        message: string;
+        data: {
+          id: string;
+          title: string;
+          slug: string;
+          cover: string | null;
+          status: "draft" | "published" | "archived";
+          createdAt: Date;
+          updatedAt: Date;
+          author: {
+            id: string;
+            name: string;
+          };
+        }[];
+      }>, _orpc_server0.MergedErrorMap<Record<never, never>, Record<never, never>>, Record<never, never>>;
+    };
   };
 };
 type AppRouter = typeof appRouter;
