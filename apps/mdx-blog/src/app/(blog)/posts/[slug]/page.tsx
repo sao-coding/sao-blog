@@ -7,6 +7,8 @@ import type { TocItem } from 'remark-flexible-toc'
 import { ApiResponse } from '@/types/api'
 import { PostItem } from '@/types/post'
 import { PostClientPage } from './_components/post-client-page'
+import { client } from '@/lib/orpc'
+import { id } from 'date-fns/locale'
 
 type Scope = {
   readingTime: string
@@ -46,22 +48,21 @@ export async function generateMetadata(
 }
 
 const getPostData = async (slug: string) => {
-  console.log(
-    `post url: ${process.env.NEXT_PUBLIC_API_URL}/posts/${slug}`
-  )
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/posts/${slug}`
-  )
+  try {
+    const data: ApiResponse<PostItem> = await client.post.getPost({ id: slug })
+    console.log('RPC result:', JSON.stringify(data, null, 2))
 
-  const data: ApiResponse<PostItem> = await res.json()
+    // 確保 data.data 存在
+    if (!data.data) {
+      throw new Error('Post data is empty')
+    }
 
-  if (!res.ok) {
-    throw new Error('Network response was not ok')
+    return data.data
+  } catch (err) {
+    console.error('Error fetching post data:', err)
+    throw new Error('Failed to fetch post data')
   }
-
-  return data.data
 }
-
 export default async function Page({
   params,
 }: {
