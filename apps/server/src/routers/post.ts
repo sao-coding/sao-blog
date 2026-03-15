@@ -55,6 +55,7 @@ const getPosts = publicProcedure
     return {
         status: "success",
         message: "文章列表取得成功",
+        meta: undefined,
         data: result,
     }
 });
@@ -80,6 +81,7 @@ const getPost = publicProcedure
             return {
                 status: "error",
                 message: "文章不存在",
+                meta: undefined,
                 data: null,
             };
         }
@@ -98,6 +100,7 @@ const getPost = publicProcedure
         return {
             status: "success",
             message: "文章取得成功",
+            meta: undefined,
             data: {
                 ...post,
                 author,
