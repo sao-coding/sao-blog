@@ -4,11 +4,8 @@ import { ErrorComponent } from '@/components/index'
 import { components } from '@/components/mdx/mdx-renderer'
 import getMdxOptions from '@/components/mdx/parsers'
 import type { TocItem } from 'remark-flexible-toc'
-import { ApiResponse } from '@/types/api'
-import { PostItem } from '@/types/post'
 import { PostClientPage } from './_components/post-client-page'
 import { client } from '@/lib/orpc'
-import { id } from 'date-fns/locale'
 
 type Scope = {
   readingTime: string
@@ -49,7 +46,7 @@ export async function generateMetadata(
 
 const getPostData = async (slug: string) => {
   try {
-    const data: ApiResponse<PostItem> = await client.post.getPost({ id: slug })
+    const data = await client.post.getPost({ id: slug })
     console.log('RPC result:', JSON.stringify(data, null, 2))
 
     // 確保 data.data 存在
@@ -71,10 +68,10 @@ export default async function Page({
   const { slug } = await params
   // console.log('Fetching post data for slug:', slug)
   let source: string | null = null
-  let data: PostItem
+  
   try {
     // await new Promise((resolve) => setTimeout(resolve, 2000))
-    data = await getPostData(slug)
+    const data = await getPostData(slug)
     source = data.content
     // console.log('MDX source:', source)
   } catch (err) {
