@@ -15,7 +15,7 @@ const getPosts = publicProcedure
         .select({ post: posts, author: user, category: categories })
         .from(posts)
         .innerJoin(user, eq(posts.authorId, user.id))
-        .leftJoin(categories, eq(posts.categoryId, categories.id));
+        .innerJoin(categories, eq(posts.categoryId, categories.id));
 
     const postIds = rows.map((r) => String(r.post.id));
 
@@ -73,7 +73,7 @@ const getPost = publicProcedure
             .select({ post: posts, author: user, category: categories })
             .from(posts)
             .innerJoin(user, eq(posts.authorId, user.id))
-            .leftJoin(categories, eq(posts.categoryId, categories.id))
+            .innerJoin(categories, eq(posts.categoryId, categories.id))
             .where(eq(posts.slug, id))
             .limit(1);
 

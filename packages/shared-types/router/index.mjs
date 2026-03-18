@@ -545,7 +545,7 @@ const postSchema = z$1.object({
 		postCount: z$1.number(),
 		createdAt: z$1.date(),
 		updatedAt: z$1.date()
-	}).nullable(),
+	}),
 	tags: z$1.array(z$1.object({
 		id: z$1.string(),
 		name: z$1.string(),
@@ -589,7 +589,7 @@ const getPosts$1 = publicProcedure.route({
 		post: posts,
 		author: user,
 		category: categories
-	}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).leftJoin(categories, eq(posts.categoryId, categories.id));
+	}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).innerJoin(categories, eq(posts.categoryId, categories.id));
 	const postIds = rows.map((r) => String(r.post.id));
 	let tagRows = [];
 	if (postIds.length) tagRows = await db.select({
@@ -630,7 +630,7 @@ const getPost = publicProcedure.route({
 		post: posts,
 		author: user,
 		category: categories
-	}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).leftJoin(categories, eq(posts.categoryId, categories.id)).where(eq(posts.slug, id)).limit(1);
+	}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).innerJoin(categories, eq(posts.categoryId, categories.id)).where(eq(posts.slug, id)).limit(1);
 	if (!row) return {
 		status: "error",
 		message: "文章不存在",

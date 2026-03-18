@@ -91,7 +91,7 @@ declare const appRouter: {
         pinOrder: zod0.ZodNumber;
         createdAt: zod0.ZodDate;
         updatedAt: zod0.ZodDate;
-        category: zod0.ZodNullable<zod0.ZodObject<{
+        category: zod0.ZodObject<{
           id: zod0.ZodString;
           name: zod0.ZodString;
           slug: zod0.ZodString;
@@ -102,7 +102,7 @@ declare const appRouter: {
           postCount: zod0.ZodNumber;
           createdAt: zod0.ZodDate;
           updatedAt: zod0.ZodDate;
-        }, better_auth0.$strip>>;
+        }, better_auth0.$strip>;
         tags: zod0.ZodArray<zod0.ZodObject<{
           id: zod0.ZodString;
           name: zod0.ZodString;
@@ -217,7 +217,7 @@ declare const appRouter: {
         pinOrder: zod0.ZodNumber;
         createdAt: zod0.ZodDate;
         updatedAt: zod0.ZodDate;
-        category: zod0.ZodNullable<zod0.ZodObject<{
+        category: zod0.ZodObject<{
           id: zod0.ZodString;
           name: zod0.ZodString;
           slug: zod0.ZodString;
@@ -228,7 +228,7 @@ declare const appRouter: {
           postCount: zod0.ZodNumber;
           createdAt: zod0.ZodDate;
           updatedAt: zod0.ZodDate;
-        }, better_auth0.$strip>>;
+        }, better_auth0.$strip>;
         tags: zod0.ZodArray<zod0.ZodObject<{
           id: zod0.ZodString;
           name: zod0.ZodString;

@@ -91,7 +91,7 @@ export const postSchema = z.object({
         postCount: z.number(),
         createdAt: z.date(),
         updatedAt: z.date(),
-    }).nullable(),
+    }),
     tags: z.array(z.object({
         id: z.string(),
         name: z.string(),

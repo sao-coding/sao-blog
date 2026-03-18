@@ -68,10 +68,10 @@ export default async function Page({
   const { slug } = await params
   // console.log('Fetching post data for slug:', slug)
   let source: string | null = null
-  
+  const data = await getPostData(slug)
   try {
     // await new Promise((resolve) => setTimeout(resolve, 2000))
-    const data = await getPostData(slug)
+    
     source = data.content
     // console.log('MDX source:', source)
   } catch (err) {
