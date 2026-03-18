@@ -6,7 +6,8 @@
   "main": "router/index.mjs",
   "types": "router/index.d.mts",
   "devDependencies": {
-    "zod": "^4.3.6",
-    "@orpc/server": "^1.13.5"
+    "zod": "catalog:",
+    "@orpc/server": "catalog:",
+    "better-auth": "catalog:"
   }
 }
