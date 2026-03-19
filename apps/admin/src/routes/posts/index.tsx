@@ -11,7 +11,7 @@ export const Route = createFileRoute('/posts/')({
 
 function RouteComponent() {
 
-  const { data: posts, isLoading } = useQuery(orpc.admin.post.getPosts.getKey(), orpc.admin.post.getPosts)
+  const { data: posts, isLoading } = useQuery(orpc.admin.post.getPosts.queryOptions())
 
   return (
     <AdminShell title="文章列表">
