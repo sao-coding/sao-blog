@@ -11,12 +11,18 @@ export const Route = createFileRoute('/posts/')({
 
 function RouteComponent() {
 
-  const { data: posts, isLoading } = useQuery(orpc.admin.post.getPosts.queryOptions())
+  const { data: posts, status } = useQuery(orpc.admin.post.getPosts.queryOptions())
 
   return (
     <AdminShell title="文章列表">
       <div>
-        <PostsTableWithActions data={posts.data} />
+        {status === 'pending' ? (
+          <div className="flex items-center justify-center h-64">
+            <span className="text-muted-foreground">載入中...</span>
+          </div>
+        ) : (
+          <PostsTableWithActions data={posts?.data || []} />
+        )}
       </div>
     </AdminShell>
   )
