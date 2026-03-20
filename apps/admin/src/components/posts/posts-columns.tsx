@@ -7,8 +7,9 @@ import { PostItem } from '@/types/post'
 import type { ColumnDef } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { DataTableColumnHeader } from '@/components/table/table-column-header'
-import Link from 'next/link'
+// import Link from 'next/link'
 import { PostRowActions } from './post-row-actions'
+import { Link } from '@tanstack/react-router'
 // export interface PostListItem {
 //   id: string;
 //   title: string;
@@ -72,7 +73,8 @@ export const columns: ColumnDef<PostItem>[] = [
       const post = row.original
       return (
         <Link
-          href={`/admin/posts/editor/${post.id}`}
+          // href={`/admin/posts/editor/${post.id}`}
+          to={`/posts/editor/${post.id}`}
           className="hover:underline flex items-center"
         >
           <span className="ml-2 w-40 truncate">{post.title}</span>
@@ -134,8 +136,8 @@ export const columns: ColumnDef<PostItem>[] = [
       )
     },
   },
-  {
-    id: 'actions',
-    cell: ({ row }) => <PostRowActions row={row} />,
-  },
+  // {
+  //   id: 'actions',
+  //   cell: ({ row }) => <PostRowActions row={row} />,
+  // },
 ]
