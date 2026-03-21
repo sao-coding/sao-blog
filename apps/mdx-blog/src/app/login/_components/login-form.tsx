@@ -93,6 +93,16 @@ export function LoginForm({
                 )}
               </Button>
             </div>
+            {/* github 登入 */}
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => authClient.signIn.social({ provider: 'github' })}
+              >
+                使用 GitHub 登入
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
