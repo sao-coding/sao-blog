@@ -1,10 +1,10 @@
 "use client";
 
 // import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { Table } from "@tanstack/react-table";
+import type { Table } from "@tanstack/react-table";
 import { Settings2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@sao-blog/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
+} from "@sao-blog/ui/components/dropdown-menu";
 
 export function DataTableViewOptions<TData>({
   table,

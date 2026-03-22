@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@sao-blog/ui/comp
 import AppSidebar from "@/components/app-sidebar"
 import { Separator } from "@sao-blog/ui/components/separator"
 import { AdminBreadcrumb } from "@/components/layout/admin-breadcrumb"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import '@sao-blog/ui/globals.css'
 import { authClient } from '@/lib/auth-client'
@@ -32,41 +33,45 @@ export const Route = createRootRoute({
 })
 
 function RootLayout() {
+  const queryClient = new QueryClient()
+
   return (
     <>
-      <AuthProvider>
-        <TooltipProvider>
-          <div className="admin">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <Separator
-                    orientation="vertical"
-                    className="mr-2 data-[orientation=vertical]:h-4 data-vertical:self-center"
-                  />
-                  <AdminBreadcrumb />
-                </header>
-                <div className="p-4">
-                  <Outlet />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
-          </div>
-        </TooltipProvider>
-      </AuthProvider>
-      <TanStackDevtools
-        config={{
-          position: 'bottom-right',
-        }}
-        plugins={[
-          {
-            name: 'TanStack Router',
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-        ]}
-      />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <div className="admin">
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  <header className="flex h-16 shrink-0 items-center gap-2 px-4">
+                    <SidebarTrigger className="-ml-1" />
+                    <Separator
+                      orientation="vertical"
+                      className="mr-2 data-[orientation=vertical]:h-4 data-vertical:self-center"
+                    />
+                    <AdminBreadcrumb />
+                  </header>
+                  <div className="p-4">
+                    <Outlet />
+                  </div>
+                </SidebarInset>
+              </SidebarProvider>
+            </div>
+          </TooltipProvider>
+        </AuthProvider>
+        <TanStackDevtools
+          config={{
+            position: 'bottom-right',
+          }}
+          plugins={[
+            {
+              name: 'TanStack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
+      </QueryClientProvider>
     </>
   )
 }

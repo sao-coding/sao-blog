@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { PostItem } from '@/types/post'
+import type { Posts } from '@/types/post'
 import { DataTableContainer } from '@/components/table/table'
 import { columns } from './posts-columns'
-import { deletePosts } from '../../_actions/posts-actions'
+// import { deletePosts } from '../../_actions/posts-actions'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -20,15 +20,15 @@ import { Button } from '@sao-blog/ui/components/button'
 import { Loader2 } from 'lucide-react'
 
 interface PostsTableWithActionsProps {
-  data: PostItem[]
+  data: Posts
 }
 
 export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [selectedPosts, setSelectedPosts] = useState<PostItem[]>([])
+  const [selectedPosts, setSelectedPosts] = useState<Posts>([])
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleBatchDelete = (posts: PostItem[]) => {
+  const handleBatchDelete = (posts: Posts) => {
     setSelectedPosts(posts)
     setIsDeleteDialogOpen(true)
   }

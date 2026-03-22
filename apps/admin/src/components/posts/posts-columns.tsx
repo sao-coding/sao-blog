@@ -3,12 +3,12 @@
 import { Badge } from '@sao-blog/ui/components/badge'
 import { Checkbox } from '@sao-blog/ui/components/checkbox'
 import { cn } from '@sao-blog/ui/lib/utils'
-import { PostItem } from '@/types/post'
+import type { Posts } from '@/types/post'
 import type { ColumnDef } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { DataTableColumnHeader } from '@/components/table/table-column-header'
 // import Link from 'next/link'
-import { PostRowActions } from './post-row-actions'
+// import { PostRowActions } from './post-row-actions'
 import { Link } from '@tanstack/react-router'
 // export interface PostListItem {
 //   id: string;
@@ -32,7 +32,7 @@ const postStatusMap: Record<string, { label: string; color: string }> = {
   archived: { label: '已歸檔', color: 'bg-yellow-100 text-yellow-800' },
 }
 
-export const columns: ColumnDef<PostItem>[] = [
+export const columns: ColumnDef<Posts[number]>[] = [
   {
     id: 'select',
     header: ({ table }) => (
