@@ -505,10 +505,10 @@ const db = drizzle(env.DATABASE_URL, { schema: schema_exports });
 
 //#endregion
 //#region src/schema/api.ts
-const createApiResponseSchema = (dataSchema, metaSchema = z$1.undefined()) => z$1.object({
+const createApiResponseSchema = (dataSchema, metaSchema) => z$1.object({
 	status: z$1.enum(["success", "error"]),
 	message: z$1.string(),
-	meta: metaSchema,
+	meta: metaSchema ? metaSchema.optional() : z$1.undefined().optional(),
 	data: dataSchema
 });
 
@@ -620,7 +620,7 @@ const getPosts$1 = publicProcedure.route({
 		})
 	};
 });
-const getPost = publicProcedure.route({
+const getPost$1 = publicProcedure.route({
 	method: "GET",
 	path: "/posts/{id}"
 }).input(z.object({ id: z.string() })).output(PostResponseSchema).handler(async ({ input }) => {
@@ -653,7 +653,7 @@ const getPost = publicProcedure.route({
 });
 var post_default = {
 	getPosts: getPosts$1,
-	getPost
+	getPost: getPost$1
 };
 
 //#endregion
@@ -1700,7 +1700,75 @@ const getPosts = protectedProcedure.route({
 		}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).leftJoin(categories, eq(posts.categoryId, categories.id))
 	};
 });
-var post_default$1 = { getPosts };
+const getPost = protectedProcedure.route({
+	method: "GET",
+	path: "/posts/{id}"
+}).input(z.object({ id: z.string() })).handler(async ({ input }) => {
+	const { id } = input;
+	const [row] = await db.select({
+		post: posts,
+		author: user,
+		category: categories
+	}).from(posts).innerJoin(user, eq(posts.authorId, user.id)).innerJoin(categories, eq(posts.categoryId, categories.id)).where(eq(posts.id, id)).limit(1);
+	console.log(`Fetching post with id: ${id}`, row);
+	if (!row) return {
+		status: "error",
+		message: "文章不存在",
+		meta: void 0,
+		data: null
+	};
+	const tagsByPost = (await db.select({ tag: tags }).from(postTags).leftJoin(tags, eq(postTags.tagId, tags.id)).where(eq(postTags.postId, row.post.id))).map((tr) => tr.tag).filter((t) => t !== null);
+	const { post, author, category } = row;
+	return {
+		status: "success",
+		message: "文章取得成功",
+		meta: void 0,
+		data: {
+			...post,
+			author,
+			category,
+			tags: tagsByPost
+		}
+	};
+});
+var post_default$1 = {
+	getPosts,
+	getPost
+};
+
+//#endregion
+//#region src/routers/admin/categories.ts
+const getCategories = protectedProcedure.route({
+	method: "GET",
+	path: "/categories"
+}).handler(async () => {
+	return {
+		status: "success",
+		message: "分類列表取得成功",
+		data: await db.select().from(categories).orderBy(desc(categories.createdAt))
+	};
+});
+const getCategory = protectedProcedure.route({
+	method: "GET",
+	path: "/categories/{id}"
+}).input(z.object({ id: z.string() })).handler(async ({ input }) => {
+	const { id } = input;
+	const [row] = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
+	if (!row) return {
+		status: "error",
+		message: "分類不存在",
+		data: null
+	};
+	return {
+		status: "success",
+		message: "分類取得成功",
+		data: row
+	};
+});
+const adminCategoryRouter = {
+	getCategories,
+	getCategory
+};
 
 //#endregion
 //#region src/routers/index.ts
@@ -1708,7 +1776,10 @@ const appRouter = {
 	post: post_default,
 	note: note_default,
 	comment: comment_default,
-	admin: o.prefix("/admin").router({ post: post_default$1 })
+	admin: o.prefix("/admin").router({
+		post: post_default$1,
+		category: adminCategoryRouter
+	})
 };
 
 //#endregion
