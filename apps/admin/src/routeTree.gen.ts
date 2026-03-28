@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
   path: '/posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
+  id: '/posts/editor/$postId',
+  path: '/posts/editor/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/posts/editor/$postId': typeof PostsEditorPostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts': typeof PostsIndexRoute
+  '/posts/editor/$postId': typeof PostsEditorPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/posts/editor/$postId': typeof PostsEditorPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts/'
+  fullPaths: '/' | '/posts/' | '/posts/editor/$postId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts'
-  id: '__root__' | '/' | '/posts/'
+  to: '/' | '/posts' | '/posts/editor/$postId'
+  id: '__root__' | '/' | '/posts/' | '/posts/editor/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
+  PostsEditorPostIdRoute: typeof PostsEditorPostIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/posts/editor/$postId': {
+      id: '/posts/editor/$postId'
+      path: '/posts/editor/$postId'
+      fullPath: '/posts/editor/$postId'
+      preLoaderRoute: typeof PostsEditorPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PostsIndexRoute: PostsIndexRoute,
+  PostsEditorPostIdRoute: PostsEditorPostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
