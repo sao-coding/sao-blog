@@ -2040,6 +2040,397 @@ declare const appRouter: {
           updatedAt: Date;
         };
       }>, _orpc_server0.MergedErrorMap<Record<never, never>, Record<never, never>>, Record<never, never>>;
+      createCategory: _orpc_server0.Procedure<_orpc_server0.MergedInitialContext<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never>, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never> & Omit<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never>, "session">, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      }>, _orpc_server0.MergedCurrentContext<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      }, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        };
+      }>, zod0.ZodObject<{
+        name: zod0.ZodString;
+        slug: zod0.ZodString;
+        description: zod0.ZodNullable<zod0.ZodString>;
+        color: zod0.ZodNullable<zod0.ZodString>;
+      }, zod_v4_core0.$strip>, _orpc_server0.Schema<{
+        status: string;
+        message: string;
+        data: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          color: string | null;
+          parentId: string | null;
+          sortOrder: number;
+          postCount: number;
+          createdAt: Date;
+          updatedAt: Date;
+        } | undefined;
+      }, {
+        status: string;
+        message: string;
+        data: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          color: string | null;
+          parentId: string | null;
+          sortOrder: number;
+          postCount: number;
+          createdAt: Date;
+          updatedAt: Date;
+        } | undefined;
+      }>, _orpc_server0.MergedErrorMap<Record<never, never>, Record<never, never>>, Record<never, never>>;
+      updateCategory: _orpc_server0.Procedure<_orpc_server0.MergedInitialContext<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never>, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never> & Omit<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      } & Record<never, never>, "session">, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      }>, _orpc_server0.MergedCurrentContext<{
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        } | null;
+      }, {
+        session: {
+          session: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            expiresAt: Date;
+            token: string;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
+            impersonatedBy?: string | null | undefined;
+          };
+          user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            emailVerified: boolean;
+            name: string;
+            image?: string | null | undefined | undefined;
+            banned: boolean | null | undefined;
+            role?: string | null | undefined;
+            banReason?: string | null | undefined;
+            banExpires?: Date | null | undefined;
+            username?: string | null | undefined;
+            displayUsername?: string | null | undefined;
+          };
+        };
+      }>, zod0.ZodObject<{
+        id: zod0.ZodString;
+        name: zod0.ZodString;
+        slug: zod0.ZodString;
+        description: zod0.ZodNullable<zod0.ZodString>;
+        color: zod0.ZodNullable<zod0.ZodString>;
+      }, zod_v4_core0.$strip>, _orpc_server0.Schema<void, void>, _orpc_server0.MergedErrorMap<Record<never, never>, Record<never, never>>, Record<never, never>>;
     };
   };
 };

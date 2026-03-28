@@ -1765,9 +1765,51 @@ const getCategory = protectedProcedure.route({
 		data: row
 	};
 });
+const createCategory = protectedProcedure.route({
+	method: "POST",
+	path: "/categories"
+}).input(z.object({
+	name: z.string(),
+	slug: z.string(),
+	description: z.string().nullable(),
+	color: z.string().nullable()
+})).handler(async ({ input }) => {
+	const { name, slug, description, color } = input;
+	const [row] = await db.insert(categories).values({
+		name,
+		slug,
+		description,
+		color
+	}).returning();
+	return {
+		status: "success",
+		message: "分類創建成功",
+		data: row
+	};
+});
+const updateCategory = protectedProcedure.route({
+	method: "PUT",
+	path: "/categories/{id}"
+}).input(z.object({
+	id: z.string(),
+	name: z.string(),
+	slug: z.string(),
+	description: z.string().nullable(),
+	color: z.string().nullable()
+})).handler(async ({ input }) => {
+	const { id, name, slug, description, color } = input;
+	const [row] = await db.update(categories).set({
+		name,
+		slug,
+		description,
+		color
+	}).where(eq(categories.id, id)).returning();
+});
 const adminCategoryRouter = {
 	getCategories,
-	getCategory
+	getCategory,
+	createCategory,
+	updateCategory
 };
 
 //#endregion
