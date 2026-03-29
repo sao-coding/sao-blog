@@ -116,7 +116,7 @@ const updateCategory = protectedProcedure
     });
 
 
-export const adminCategoryRouter = {
+export default {
     getCategories,
     getCategory,
     createCategory,
