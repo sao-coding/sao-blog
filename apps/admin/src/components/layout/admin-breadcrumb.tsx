@@ -16,6 +16,8 @@ export function AdminBreadcrumb() {
   const location = useLocation()
   const pathname = location.pathname
   const segments = pathname.split('/').filter(Boolean)
+  // 加上 根路徑的處理 /admin 會被分割成 ['admin']，但我們希望它顯示為 '後台'
+  segments.unshift('') // 在開頭添加一個空字符串，代表根路徑
 
   return (
     <Breadcrumb>
