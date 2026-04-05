@@ -4,6 +4,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
+import { createPostSchema } from "@/schema/post";
 
 // 管理員系統員系統
 
@@ -85,8 +86,78 @@ const getPost = protectedProcedure
         };
     });
 
+// 創建貼文
+const createPost = protectedProcedure
+    .route({ method: "POST", path: "/posts" })
+    .input(createPostSchema)
+    .handler(async ({ input, context }) => {
+        const { slug, title, content, summary, category, tags, cover, allowComments, pin, pinOrder, status } = input;
+        const authorId = context.session?.user.id;
+
+        // 檢查 slug 是否已存在
+        const existingPost = await db
+            .select()
+            .from(posts)
+            .where(eq(posts.slug, slug))
+            .limit(1);
+
+        if (existingPost.length > 0) {
+            return {
+                status: "error",
+                message: "文章 slug 已存在",
+                meta: undefined,
+                data: null,
+            };
+        }
+
+        // 創建新文章
+        const [newPost] = await db
+            .insert(posts)
+            .values({
+                authorId,
+                slug,
+                title,
+                content,
+                summary,
+                categoryId: category || null,
+                cover: cover || null,
+                // 不傳 createdAt/updatedAt，讓 DB 使用 $defaultFn()
+                allowComments,
+                pin,
+                pinOrder,
+                status,
+            })
+            .returning();
+
+        // 處理標籤
+        if (!newPost) {
+            return {
+                status: "error",
+                message: "文章建立失敗",
+                meta: undefined,
+                data: null,
+            };
+        }
+
+        if (tags && tags.length > 0) {
+            const tagInserts = tags.map((tagId) => ({
+                postId: newPost.id,
+                tagId,
+            }));
+            await db.insert(postTags).values(tagInserts);
+        }
+
+        return {
+            status: "success",
+            message: "文章創建成功",
+            meta: undefined,
+            data: newPost,
+        };
+    });
+
 
 export default {
     getPosts,
     getPost,
+    createPost,
 };

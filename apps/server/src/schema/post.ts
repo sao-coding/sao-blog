@@ -120,11 +120,19 @@ export const postSchema = z.object({
 });
 
 export const createPostSchema = z.object({
-    title: z.string(),
-    content: z.string(),
+    slug: z.string().max(256),
+    title: z.string().max(200),
+    content: z.string().max(10000),
+    summary: z.string().max(200).optional(),
+    category: z.string().uuid().optional(),
+    tags: z.array(z.string().uuid()).optional(),
+    cover: z.string().url().optional(),
+    allowComments: z.boolean().default(true),
+    pin: z.boolean().default(false),
+    pinOrder: z.number().default(0),
+    status: z.enum(["draft", "published"]).default("draft"),
 });
 
 export const PostsResponseSchema = createApiResponseSchema(z.array(postSchema));
 export const PostResponseSchema = createApiResponseSchema(postSchema.nullable());
 export type Post = z.infer<typeof postSchema>;
-export type CreatePostInput = z.infer<typeof createPostSchema>;
