@@ -1,49 +1,138 @@
 import { z } from "zod";
+import { createApiResponseSchema } from "./api";
 
-    // "id": "0199821f-0526-7143-8ba5-f471c6793914",
-    // "slug": "asd",
-    // "title": "sd",
-    // "summary": "asd",
-    // "content": "asd",
-    // "authorId": "01998180-7793-707f-abde-4a5352d4e4b3",
-    // "categoryId": "01998200-86d1-741e-8866-c97d2d8cd6e0",
-    // "cover": "",
-    // "status": "published",
-    // "viewCount": 0,
-    // "likeCount": 0,
-    // "commentCount": 0,
-    // "copyright": true,
-    // "pin": false,
-    // "pinOrder": 0,
-    // "allowComments": true,
-    // "createdAt": "2025-09-25T18:24:55.079Z",
-    // "updatedAt": "2025-09-25T18:24:55.079Z"
+//   id: string
+//   title: string
+//   summary: string | null
+//   content: string
+//   slug: string
+//   cover: string | null
+//   status: 'draft' | 'published' | 'archived'
+//   publishedAt: string | null
+//   viewCount: number
+//   likeCount: number
+//   commentCount: number
+//   allowComments: boolean
+//   pin: boolean
+//   pinOrder: number
+//   isSticky: boolean
+//   createdAt: string
+//   updatedAt: string
+//   category: CategoryItem
+//   tags: TagItem[]
+//   author: {
+//     id: string
+//     username: string
+//     displayUsername: string
+//     name: string | null
+//     email: string
+//     emailVerified: boolean
+//     image: string | null
+//     role: string | null
+//     banned: boolean
+//     banReason: string | null
+//     banExpires: string | null
+//     createdAt: string
+//     updatedAt: string
+//   }
+
+// export interface CategoryItem {
+//   id: string
+//   name: string
+//   slug: string
+//   description: string | null
+//   color: string | null
+//   parentId: string | null
+//   sortOrder: number
+//   postCount: number
+//   createdAt: string
+//   updatedAt: string
+// }
+
+// export interface TagItem {
+//   id: string
+//   name: string
+//   slug: string
+//   description: string | null
+//   color: string | null
+//   postCount?: number
+//   createdAt: string
+//   updatedAt: string
+// }
+
+
 
 export const postSchema = z.object({
     id: z.string(),
-    slug: z.string(),
     title: z.string(),
-    summary: z.string(),
+    summary: z.string().nullable(),
     content: z.string(),
-    authorId: z.string(),
-    categoryId: z.string(),
-    cover: z.string(),
-    status: z.enum(["published", "draft", "archived"]),
+    slug: z.string(),
+    cover: z.string().nullable(),
+    status: z.enum(['draft', 'published', 'archived']),
+    // publishedAt: z.string().nullable(),
     viewCount: z.number(),
     likeCount: z.number(),
     commentCount: z.number(),
-    copyright: z.boolean(),
-    pin: z.boolean(),
-    pinOrder: z.number().optional(),
     allowComments: z.boolean(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    pin: z.boolean(),
+    pinOrder: z.number(),
+    // isSticky: z.boolean(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    category: z.object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().nullable(),
+        color: z.string().nullable(),
+        parentId: z.string().nullable(),
+        sortOrder: z.number(),
+        postCount: z.number(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+    }),
+    tags: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().nullable(),
+        color: z.string().nullable(),
+        postCount: z.number().optional(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+    })),
+    author: z.object({
+        id: z.string(),
+        username: z.string().nullable(),
+        displayUsername: z.string().nullable(),
+        name: z.string().nullable(),
+        email: z.string(),
+        emailVerified: z.boolean(),
+        image: z.string().nullable(),
+        role: z.string().nullable(),
+        banned: z.boolean().nullable(),
+        banReason: z.string().nullable(),
+        banExpires: z.date().nullable(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+    }),
 });
 
 export const createPostSchema = z.object({
-    title: z.string(),
-    content: z.string(),
+    slug: z.string().max(256),
+    title: z.string().max(200),
+    content: z.string().max(10000),
+    summary: z.string().max(200).optional(),
+    category: z.string().uuid().optional(),
+    tags: z.array(z.string().uuid()).optional(),
+    cover: z.string().url().optional(),
+    allowComments: z.boolean().default(true),
+    pin: z.boolean().default(false),
+    pinOrder: z.number().default(0),
+    status: z.enum(['draft', 'published', 'archived']).default("draft"),
 });
 
+export const PostsResponseSchema = createApiResponseSchema(z.array(postSchema));
+export const PostResponseSchema = createApiResponseSchema(postSchema.nullable());
 export type Post = z.infer<typeof postSchema>;
-export type CreatePostInput = z.infer<typeof createPostSchema>;

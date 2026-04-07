@@ -15,6 +15,7 @@
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
+    "drizzle-orm": "^0.45.1",
     "@sao-blog/auth": "workspace:*",
     "@sao-blog/db": "workspace:*",
     "@sao-blog/env": "workspace:*",
