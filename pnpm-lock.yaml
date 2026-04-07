@@ -181,6 +181,9 @@ importers:
         specifier: ^5.0.10
         version: 5.0.11(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
+      '@sao-blog/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@sao-blog/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -706,6 +709,9 @@ importers:
       dotenv:
         specifier: 'catalog:'
         version: 17.3.1
+      drizzle-orm:
+        specifier: ^0.45.1
+        version: 0.45.1(@types/pg@8.16.0)(bun-types@1.3.9)(kysely@0.28.11)(pg@8.19.0)
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -5463,6 +5469,7 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
