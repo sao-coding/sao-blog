@@ -1,6 +1,6 @@
-// import type { AppRouterClient } from "@my-better-t-app/api/routers/index";
+import type { AppRouterClient } from "@sao-blog/api/routers/index";
 // import { env } from "@my-better-t-app/env/web";
-import type { AppRouterClient } from "@sao-blog/shared-types";
+// import type { AppRouterClient } from "@sao-blog/shared-types";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";

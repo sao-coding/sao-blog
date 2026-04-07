@@ -2,17 +2,21 @@ import AdminShell from '@/components/layout/admin-shell'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpc } from '@/utils/orpc'
-import { ClockIcon, EyeIcon, FileText, FileTextIcon, Loader2Icon, SaveIcon, SendIcon, SettingsIcon } from 'lucide-react'
+import { ClockIcon, EyeIcon, FileText, FileTextIcon, FolderIcon, ImageIcon, Loader2Icon, SaveIcon, SendIcon, SettingsIcon } from 'lucide-react'
 import { Button } from '@sao-blog/ui/components/button'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@sao-blog/ui/components/card'
 import { Field, FieldGroup, FieldError, FieldLabel, FieldContent } from '@sao-blog/ui/components/field'
 import { Input } from '@sao-blog/ui/components/input'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { MonacoEditor } from '@/components/monaco-editor'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sao-blog/ui/components/select'
 import { Checkbox } from '@sao-blog/ui/components/checkbox'
-import { MultipleSelector } from '@sao-blog/ui/components/multiple-selector'
+import MultipleSelector from '@sao-blog/ui/components/multiple-selector'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type z from 'zod'
+import { postSchema } from '@sao-blog/api/schema/post'
+import { useIsMobile } from '@sao-blog/ui/hooks/use-mobile'
 
 export const Route = createFileRoute('/posts/editor/$postId')({
   component: RouteComponent,
@@ -20,10 +24,35 @@ export const Route = createFileRoute('/posts/editor/$postId')({
 
 function RouteComponent() {
   const { postId } = Route.useParams()
+  const isMobile = useIsMobile()
   const { data: postData, status: postStatus } = useQuery(orpc.admin.post.getPost.queryOptions({ input: { id: postId } }))
   const { data: categoriesData, status: categoriesStatus } = useQuery(orpc.admin.category.getCategories.queryOptions())
   const { data: tagsData, status: tagsStatus } = useQuery(orpc.admin.tag.getTags.queryOptions())
 
+  const form = useForm<z.infer<typeof postSchema>>({
+    resolver: zodResolver(postSchema),
+    defaultValues: {
+      slug: '',
+      title: '',
+      content: '',
+      summary: '',
+      category: undefined,
+      tags: [],
+      cover: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      allowComments: true,
+      pin: false,
+      pinOrder: 0,
+      status: 'draft',
+    },
+  })
+
+  const isPinned = useWatch({
+    control: form.control,
+    name: 'pin',
+    defaultValue: false,
+  })
 
   return (
     <>
@@ -79,49 +108,32 @@ function RouteComponent() {
         </div>
       </header>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <form
-          id="post-form"
-          onSubmit={form.handleSubmit(
-            (data) => {
-              if (data.status === 'published') {
-                onPublish(data)
-              } else {
-                onSaveDraft(data)
-              }
-            },
-            (submitErrors) => {
-              console.log('validation errors:', submitErrors)
-              toast.error('表單驗證失敗，請檢查必填欄位並修正。')
-            }
-          )}
-        >
+        <form id="post-form">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8">
             {/* Main Content Area */}
             <div className="lg:col-span-3 space-y-4 sm:space-y-6 order-1">
               <FieldGroup className="space-y-4 sm:space-y-6">
-                <Field data-invalid={!!errors.title}>
+                <Field>
                   <Input
                     {...form.register('title')}
                     placeholder="輸入文章標題..."
-                    aria-invalid={!!errors.title}
                   />
-                  <FieldError errors={[errors.title]} />
+                  <FieldError />
                 </Field>
 
-                <Field data-invalid={!!errors.summary}>
+                <Field>
                   <Input
                     {...form.register('summary')}
                     placeholder="簡短描述文章內容..."
-                    aria-invalid={!!errors.summary}
                   />
-                  <FieldError errors={[errors.summary]} />
+                  <FieldError />
                 </Field>
 
                 <Controller
                   control={form.control}
                   name="content"
                   render={({ field }) => (
-                    <Field data-invalid={!!errors.content}>
+                    <Field>
                       <FieldContent>
                         <div className="rounded-lg overflow-hidden">
                           <MonacoEditor
@@ -133,7 +145,7 @@ function RouteComponent() {
                           />
                         </div>
                       </FieldContent>
-                      <FieldError errors={[errors.content]} />
+                      <FieldError />
                     </Field>
                   )}
                 />
@@ -144,7 +156,7 @@ function RouteComponent() {
               <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                    <Folder className="h-4 w-4 text-primary" />
+                    <FolderIcon className="h-4 w-4 text-primary" />
                     分類與標籤
                   </CardTitle>
                 </CardHeader>
@@ -153,7 +165,7 @@ function RouteComponent() {
                     control={form.control}
                     name="category"
                     render={({ field }) => (
-                      <Field data-invalid={!!errors.category}>
+                      <Field>
                         <FieldLabel className="text-xs text-muted-foreground">
                           分類
                         </FieldLabel>
@@ -176,7 +188,7 @@ function RouteComponent() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FieldError errors={[errors.category]} />
+                        <FieldError />
                       </Field>
                     )}
                   />
@@ -185,7 +197,7 @@ function RouteComponent() {
                     control={form.control}
                     name="tags"
                     render={({ field }) => (
-                      <Field data-invalid={!!errors.tags}>
+                      <Field>
                         <FieldLabel className="text-xs text-muted-foreground">
                           標籤
                         </FieldLabel>
@@ -210,7 +222,7 @@ function RouteComponent() {
                             </p>
                           }
                         />
-                        <FieldError errors={[errors.tags]} />
+                        <FieldError />
                       </Field>
                     )}
                   />
@@ -231,7 +243,7 @@ function RouteComponent() {
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <Field data-invalid={!!errors.status}>
+                        <Field>
                           <FieldLabel className="text-xs text-muted-foreground">
                             狀態
                           </FieldLabel>
@@ -253,12 +265,12 @@ function RouteComponent() {
                               <SelectItem value="archived">已封存</SelectItem>
                             </SelectContent>
                           </Select>
-                          <FieldError errors={[errors.status]} />
+                          <FieldError />
                         </Field>
                       )}
                     />
 
-                    <Field data-invalid={!!errors.slug}>
+                    <Field>
                       <FieldLabel className="text-xs text-muted-foreground">
                         網址
                       </FieldLabel>
@@ -266,9 +278,8 @@ function RouteComponent() {
                         {...form.register('slug')}
                         placeholder="article-url-slug"
                         className="text-sm"
-                        aria-invalid={!!errors.slug}
                       />
-                      <FieldError errors={[errors.slug]} />
+                      <FieldError />
                     </Field>
                   </CardContent>
                 </Card>
@@ -282,14 +293,13 @@ function RouteComponent() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <Field data-invalid={!!errors.cover}>
+                    <Field>
                       <Input
                         {...form.register('cover')}
                         placeholder="圖片 URL"
                         className="text-sm"
-                        aria-invalid={!!errors.cover}
                       />
-                      <FieldError errors={[errors.cover]} />
+                      <FieldError/>
                     </Field>
                   </CardContent>
                 </Card>
@@ -347,7 +357,7 @@ function RouteComponent() {
                       control={form.control}
                       name="pinOrder"
                       render={({ field }) => (
-                        <Field data-invalid={!!errors.pinOrder}>
+                        <Field>
                           <FieldLabel className="text-xs text-muted-foreground">
                             置頂順序
                           </FieldLabel>
@@ -362,9 +372,8 @@ function RouteComponent() {
                             min={0}
                             placeholder="0"
                             className="text-sm"
-                            aria-invalid={!!errors.pinOrder}
                           />
-                          <FieldError errors={[errors.pinOrder]} />
+                          <FieldError />
                         </Field>
                       )}
                     />
