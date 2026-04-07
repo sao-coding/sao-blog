@@ -6,10 +6,8 @@
     "build": "tsdown",
     "check-types": "tsc -b",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "generate-types": "tsdown src/routers/index.ts --format esm --dts --out-dir ../../packages/shared-types/router",
-    "watch-types": "tsdown src/routers/index.ts --format esm --dts --watch --out-dir ../../packages/shared-types/router",
     "prebuild": "bun run generate-types",
-    "dev": "concurrently \"bun run watch-types\" \"bun run --watch src/index.ts\"",
+    "dev": "cd ../../ && bun --env-file=apps/server/.env --watch apps/server/src/index.ts",
     "start": "bun run dist/index.mjs"
   },
   "dependencies": {

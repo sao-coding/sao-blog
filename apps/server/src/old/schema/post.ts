@@ -130,7 +130,7 @@ export const createPostSchema = z.object({
     allowComments: z.boolean().default(true),
     pin: z.boolean().default(false),
     pinOrder: z.number().default(0),
-    status: z.enum(["draft", "published"]).default("draft"),
+    status: z.enum(['draft', 'published', 'archived']).default("draft"),
 });
 
 export const PostsResponseSchema = createApiResponseSchema(z.array(postSchema));
