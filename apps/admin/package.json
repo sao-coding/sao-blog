@@ -46,6 +46,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@sao-blog/api": "workspace:*",
     "@sao-blog/shared-types": "workspace:*",
     "@tanstack/devtools-vite": "^0.3.11",
     "@tanstack/eslint-config": "^0.3.0",
