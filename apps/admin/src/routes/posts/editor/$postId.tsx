@@ -17,6 +17,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type z from 'zod'
 import { postSchema } from '@sao-blog/api/schema/post'
 import { useIsMobile } from '@sao-blog/ui/hooks/use-mobile'
+import type { InferClientOutputs } from '@orpc/client'
+import type { AppRouterClient } from '@sao-blog/api/routers/index'
 
 export const Route = createFileRoute('/posts/editor/$postId')({
   component: RouteComponent,
@@ -25,27 +27,14 @@ export const Route = createFileRoute('/posts/editor/$postId')({
 function RouteComponent() {
   const { postId } = Route.useParams()
   const isMobile = useIsMobile()
+  type Post = InferClientOutputs<AppRouterClient>['admin']['post']['getPost']['data']
   const { data: postData, status: postStatus } = useQuery(orpc.admin.post.getPost.queryOptions({ input: { id: postId } }))
   const { data: categoriesData, status: categoriesStatus } = useQuery(orpc.admin.category.getCategories.queryOptions())
   const { data: tagsData, status: tagsStatus } = useQuery(orpc.admin.tag.getTags.queryOptions())
 
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
-    defaultValues: {
-      slug: '',
-      title: '',
-      content: '',
-      summary: '',
-      category: undefined,
-      tags: [],
-      cover: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      allowComments: true,
-      pin: false,
-      pinOrder: 0,
-      status: 'draft',
-    },
+    values: postData
   })
 
   const isPinned = useWatch({
