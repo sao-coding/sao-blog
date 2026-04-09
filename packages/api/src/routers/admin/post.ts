@@ -4,7 +4,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
-import { createPostSchema } from "@sao-blog/api/schema/post";
+import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
 
 // 管理員系統員系統
 
@@ -12,7 +12,7 @@ const getPosts = protectedProcedure
     .route({ method: "GET", path: "/posts" })
     .handler(async () => {
         const result = await db
-            .select({ 
+            .select({
                 id: posts.id,
                 title: posts.title,
                 slug: posts.slug,
@@ -41,6 +41,7 @@ const getPost = protectedProcedure
     .input(z.object({
         id: z.string(),
     }))
+    .output(PostResponseSchema)
     .handler(async ({ input }) => {
         const { id } = input;
         // 1) 先用 left join 取得 post、author、category（若有）
@@ -71,8 +72,8 @@ const getPost = protectedProcedure
 
         const tagsByPost = tagRows.map((tr) => tr.tag).filter((t): t is TagModel => t !== null);
 
-        const { post, author, category} = row;
-    
+        const { post, author, category } = row;
+
         return {
             status: "success",
             message: "文章取得成功",
@@ -89,19 +90,33 @@ const getPost = protectedProcedure
 // 創建貼文
 const createPost = protectedProcedure
     .route({ method: "POST", path: "/posts" })
-    .input(createPostSchema)
+    .input(postInputSchema)
     .handler(async ({ input, context }) => {
-        const { slug, title, content, summary, category, tags, cover, allowComments, pin, pinOrder, status } = input;
-        const authorId = context.session?.user.id;
+        const {
+            slug,
+            title,
+            content,
+            summary,
+            category,
+            tags,
+            cover,
+            allowComments,
+            pin,
+            pinOrder,
+            status,
+        } = input;
+
+        // 取得當前登入使用者 ID
+        const authorId = context.session.user.id;
 
         // 檢查 slug 是否已存在
-        const existingPost = await db
+        const existing = await db
             .select()
             .from(posts)
             .where(eq(posts.slug, slug))
             .limit(1);
 
-        if (existingPost.length > 0) {
+        if (existing.length > 0) {
             return {
                 status: "error",
                 message: "文章 slug 已存在",
@@ -110,18 +125,17 @@ const createPost = protectedProcedure
             };
         }
 
-        // 創建新文章
-        const [newPost] = await db
+        // 建立文章
+        const [createdPost] = await db
             .insert(posts)
             .values({
-                authorId,
                 slug,
                 title,
                 content,
-                summary,
-                categoryId: category || null,
-                cover: cover || null,
-                // 不傳 createdAt/updatedAt，讓 DB 使用 $defaultFn()
+                summary: summary ?? null,
+                authorId,
+                categoryId: category?.id || null,
+                cover: cover ?? null,
                 allowComments,
                 pin,
                 pinOrder,
@@ -129,8 +143,7 @@ const createPost = protectedProcedure
             })
             .returning();
 
-        // 處理標籤
-        if (!newPost) {
+        if (!createdPost) {
             return {
                 status: "error",
                 message: "文章建立失敗",
@@ -139,19 +152,112 @@ const createPost = protectedProcedure
             };
         }
 
+        // 建立標籤關聯
         if (tags && tags.length > 0) {
-            const tagInserts = tags.map((tagId) => ({
-                postId: newPost.id,
-                tagId,
+            const tagInserts = tags.map((t) => ({
+                postId: createdPost.id,
+                tagId: typeof t === 'string' ? t : t.id,
             }));
             await db.insert(postTags).values(tagInserts);
         }
 
         return {
             status: "success",
-            message: "文章創建成功",
+            message: "文章建立成功",
             meta: undefined,
-            data: newPost,
+            data: createdPost,
+        };
+    });
+// 更新貼文
+const updatePost = protectedProcedure
+    .route({ method: "PUT", path: "/posts/{id}" })
+    .input(postInputSchema)
+    .handler(async ({ input }) => {
+        const {
+            id,
+            slug,
+            title,
+            content,
+            summary,
+            category,
+            tags,
+            cover,
+            allowComments,
+            pin,
+            pinOrder,
+            status,
+        } = input;
+
+        // 檢查 slug 是否被其他文章使用
+        const existing = await db
+            .select()
+            .from(posts)
+            .where(eq(posts.slug, slug))
+            .limit(1);
+
+        const existingPost = existing[0];
+        if (existingPost && existingPost.id !== id) {
+            return {
+                status: "error",
+                message: "文章 slug 已存在",
+                meta: undefined,
+                data: null,
+            };
+        }
+
+        if (!id) {
+            return {
+                status: "error",
+                message: "文章 ID 不可為空",
+                meta: undefined,
+                data: null,
+            };
+        }
+
+        // 更新文章主資料
+        const [updatedPost] = await db
+            .update(posts)
+            .set({
+                slug,
+                title,
+                content,
+                summary,
+                categoryId: category?.id || null,
+                cover: cover || null,
+                allowComments,
+                pin,
+                pinOrder,
+                status,
+                updatedAt: new Date(),
+            })
+            .where(eq(posts.id, id))
+            .returning();
+
+        if (!updatedPost) {
+            return {
+                status: "error",
+                message: "文章更新失敗",
+                meta: undefined,
+                data: null,
+            };
+        }
+
+        // 更新標籤關聯：先刪除再新增
+        await db.delete(postTags).where(eq(postTags.postId, id));
+
+        if (tags && tags.length > 0) {
+            const tagInserts = tags.map((t: any) => ({
+                postId: id,
+                tagId: typeof t === 'string' ? t : t.id,
+            }));
+            await db.insert(postTags).values(tagInserts);
+        }
+
+        return {
+            status: "success",
+            message: "文章更新成功",
+            meta: undefined,
+            data: updatedPost,
         };
     });
 
@@ -160,4 +266,5 @@ export default {
     getPosts,
     getPost,
     createPost,
+    updatePost,
 };
