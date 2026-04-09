@@ -1,6 +1,6 @@
 import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
@@ -261,10 +261,52 @@ const updatePost = protectedProcedure
         };
     });
 
+// 刪除貼文(要可以支援批量刪除)
+const deletePosts = protectedProcedure
+  .route({ method: "DELETE", path: "/posts" })
+  .input(z.object({ ids: z.array(z.string()).min(1) }))
+  .handler(async ({ input }) => {
+    const { ids } = input;
+
+    try {
+      const deletedPosts = await db
+        .delete(posts)
+        .where(inArray(posts.id, ids))
+        .returning();
+
+      if (deletedPosts.length === 0) {
+        return {
+          status: "error",
+          message: "找不到可刪除的文章",
+          meta: undefined,
+          data: null,
+        };
+      }
+
+      return {
+        status: "success",
+        message: "文章刪除成功",
+        meta: {
+          requested: ids.length,
+          deleted: deletedPosts.length,
+        },
+        data: deletedPosts,
+      };
+    } catch (error) {
+      console.error("刪除文章發生錯誤:", error);
+      return {
+        status: "error",
+        message: "文章刪除發生錯誤",
+        meta: undefined,
+        data: null,
+      };
+    }
+  });
 
 export default {
     getPosts,
     getPost,
     createPost,
     updatePost,
+    deletePosts
 };
