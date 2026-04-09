@@ -37,24 +37,15 @@ import { Checkbox } from '@sao-blog/ui/components/checkbox'
 import MultipleSelector from '@sao-blog/ui/components/multiple-selector'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type z from 'zod'
-import { postSchema } from '@sao-blog/api/schema/post'
+import { postInputSchema } from '@sao-blog/api/schema/post'
 import { useIsMobile } from '@sao-blog/ui/hooks/use-mobile'
 import { useNavigate } from '@tanstack/react-router'
 
-// ────────────────────────────────────────────────────────────
-// Types
-// ────────────────────────────────────────────────────────────
-
-type PostFormValues = z.infer<typeof postSchema>
+type PostFormValues = z.infer<typeof postInputSchema>
 
 interface PostEditorProps {
-  /** 編輯模式時傳入 postId；新增模式時不傳（undefined） */
   postId?: string
 }
-
-// ────────────────────────────────────────────────────────────
-// Default empty form values
-// ────────────────────────────────────────────────────────────
 
 const emptyPost: PostFormValues = {
   id: '',
@@ -64,9 +55,6 @@ const emptyPost: PostFormValues = {
   slug: '',
   cover: '',
   status: 'draft',
-  viewCount: 0,
-  likeCount: 0,
-  commentCount: 0,
   allowComments: true,
   pin: false,
   pinOrder: 0,
@@ -74,32 +62,23 @@ const emptyPost: PostFormValues = {
   updatedAt: new Date(),
   category: {
     id: '',
-    name: '',
-    slug: '',
-    description: null,
-    color: null,
-    parentId: null,
-    sortOrder: 0,
-    postCount: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
   tags: [],
-  author: {
-    id: '',
-    username: null,
-    displayUsername: null,
-    name: null,
-    email: '',
-    emailVerified: false,
-    image: null,
-    role: null,
-    banned: null,
-    banReason: null,
-    banExpires: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
+  // author: {
+  //   id: '',
+  //   username: null,
+  //   displayUsername: null,
+  //   name: null,
+  //   email: '',
+  //   emailVerified: false,
+  //   image: null,
+  //   role: null,
+  //   banned: null,
+  //   banReason: null,
+  //   banExpires: null,
+  //   createdAt: new Date(),
+  //   updatedAt: new Date(),
+  // },
 }
 
 const POST_STATUS_LIST = [
@@ -108,17 +87,12 @@ const POST_STATUS_LIST = [
   { label: '已封存', value: 'archived' },
 ] as const
 
-// ────────────────────────────────────────────────────────────
-// Component
-// ────────────────────────────────────────────────────────────
-
 export function PostEditor({ postId }: PostEditorProps) {
   const isEditMode = Boolean(postId)
   console.log('PostEditor rendered with postId:', postId, 'isEditMode:', isEditMode)
   const isMobile = useIsMobile()
   const navigate = useNavigate()
 
-  // ── Queries ──────────────────────────────────────────────
   const { data: postData } = useQuery({
     ...orpc.admin.post.getPost.queryOptions({ input: { id: postId! } }),
     enabled: isEditMode,
@@ -132,14 +106,16 @@ export function PostEditor({ postId }: PostEditorProps) {
     orpc.admin.tag.getTags.queryOptions()
   )
 
-  // ── Form ─────────────────────────────────────────────────
   const form = useForm<PostFormValues>({
-    resolver: zodResolver(postSchema),
+    resolver: zodResolver(postInputSchema),
     values:
       isEditMode && postData?.status === 'success'
         ? postData.data
         : emptyPost,
   })
+
+  // ★ 取出 errors 物件
+  const { formState: { errors } } = form
 
   const isPinned = useWatch({
     control: form.control,
@@ -147,20 +123,18 @@ export function PostEditor({ postId }: PostEditorProps) {
     defaultValue: false,
   })
 
-  // ── Mutations ────────────────────────────────────────────
   const createPostMutation = useMutation(orpc.admin.post.createPost.mutationOptions())
   const updatePostMutation = useMutation(orpc.admin.post.updatePost.mutationOptions())
 
   const isSaving =
     createPostMutation.isPending || updatePostMutation.isPending
 
-  // ── Handlers ─────────────────────────────────────────────
   const handleSubmit =
     (type: 'draft' | 'publish' | 'archive') =>
     async (data: PostFormValues) => {
       if (type === 'publish') data.status = 'published'
       if (type === 'archive') data.status = 'archived'
-      console.log('Submitting post data:', data)
+      console.log('Submitting form with data:', data)  // ← 加這行
       try {
         if (isEditMode) {
           await updatePostMutation.mutateAsync(data)
@@ -176,17 +150,16 @@ export function PostEditor({ postId }: PostEditorProps) {
       }
     }
 
-  const handleValidationError = () => {
+  const handleValidationError = (errors: any) => {
+    console.log('Validation errors:', errors)  // ← 加這行
     toast.error('表單驗證失敗，請檢查必填欄位並修正。')
   }
 
   const submitHandler = (type: 'draft' | 'publish' | 'archive') =>
     form.handleSubmit(handleSubmit(type), handleValidationError)
 
-  // ── Render ───────────────────────────────────────────────
   return (
     <>
-      {/* ── Sticky Header ── */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
@@ -198,7 +171,6 @@ export function PostEditor({ postId }: PostEditorProps) {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-3">
-              {/* 預覽 */}
               <Button
                 variant="outline"
                 size="sm"
@@ -209,7 +181,6 @@ export function PostEditor({ postId }: PostEditorProps) {
                 <span className="hidden sm:inline">預覽</span>
               </Button>
 
-              {/* 儲存草稿 */}
               <Button
                 variant="outline"
                 size="sm"
@@ -224,7 +195,6 @@ export function PostEditor({ postId }: PostEditorProps) {
                 </span>
               </Button>
 
-              {/* 發佈 */}
               <Button
                 size="sm"
                 onClick={submitHandler('publish')}
@@ -242,34 +212,36 @@ export function PostEditor({ postId }: PostEditorProps) {
         </div>
       </header>
 
-      {/* ── Body ── */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <form id="post-form">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8">
-            {/* ── Main Content ── */}
             <div className="lg:col-span-3 space-y-4 sm:space-y-6 order-1">
               <FieldGroup className="space-y-4 sm:space-y-6">
-                <Field>
+                {/* ★ title */}
+                <Field data-invalid={!!errors.title}>
                   <Input
                     {...form.register('title')}
                     placeholder="輸入文章標題..."
+                    aria-invalid={!!errors.title}
                   />
-                  <FieldError />
+                  <FieldError errors={errors.title ? [errors.title] : []} />
                 </Field>
 
-                <Field>
+                {/* ★ summary */}
+                <Field data-invalid={!!errors.summary}>
                   <Input
                     {...form.register('summary')}
                     placeholder="簡短描述文章內容..."
+                    aria-invalid={!!errors.summary}
                   />
-                  <FieldError />
+                  <FieldError errors={errors.summary ? [errors.summary] : []} />
                 </Field>
 
                 <Controller
                   control={form.control}
                   name="content"
-                  render={({ field }) => (
-                    <Field>
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={!!fieldState.error}>
                       <FieldContent>
                         <div className="rounded-lg overflow-hidden">
                           <MonacoEditor
@@ -281,16 +253,14 @@ export function PostEditor({ postId }: PostEditorProps) {
                           />
                         </div>
                       </FieldContent>
-                      <FieldError />
+                      <FieldError errors={fieldState.error ? [fieldState.error] : []} />
                     </Field>
                   )}
                 />
               </FieldGroup>
             </div>
 
-            {/* ── Sidebar ── */}
             <div className="lg:col-span-1 space-y-4 sm:space-y-6 order-2">
-              {/* 分類與標籤 */}
               <Card className="border-0 shadow-sm overflow-visible">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-sm font-medium">
@@ -299,11 +269,12 @@ export function PostEditor({ postId }: PostEditorProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 space-y-4">
+                  {/* ★ category */}
                   <Controller
                     control={form.control}
                     name="category"
-                    render={({ field }) => (
-                      <Field>
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={!!fieldState.error}>
                         <FieldLabel className="text-xs text-muted-foreground">
                           分類
                         </FieldLabel>
@@ -322,7 +293,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                             field.onChange(selected || null)
                           }}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" aria-invalid={!!fieldState.error}>
                             {categoriesData ? (
                               <SelectValue placeholder="選擇分類" />
                             ) : (
@@ -337,16 +308,17 @@ export function PostEditor({ postId }: PostEditorProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FieldError />
+                        <FieldError errors={fieldState.error ? [fieldState.error] : []} />
                       </Field>
                     )}
                   />
 
+                  {/* ★ tags */}
                   <Controller
                     control={form.control}
                     name="tags"
-                    render={({ field }) => (
-                      <Field>
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={!!fieldState.error}>
                         <FieldLabel className="text-xs text-muted-foreground">
                           標籤
                         </FieldLabel>
@@ -382,7 +354,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                             </p>
                           }
                         />
-                        <FieldError />
+                        <FieldError errors={fieldState.error ? [fieldState.error] : []} />
                       </Field>
                     )}
                   />
@@ -390,7 +362,6 @@ export function PostEditor({ postId }: PostEditorProps) {
               </Card>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                {/* 發佈設定 */}
                 <Card className="border-0 shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-sm font-medium">
@@ -399,11 +370,12 @@ export function PostEditor({ postId }: PostEditorProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 space-y-3 sm:space-y-4">
+                    {/* ★ status */}
                     <Controller
                       control={form.control}
                       name="status"
-                      render={({ field }) => (
-                        <Field>
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={!!fieldState.error}>
                           <FieldLabel className="text-xs text-muted-foreground">
                             狀態
                           </FieldLabel>
@@ -411,7 +383,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                             value={field.value}
                             onValueChange={field.onChange}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger aria-invalid={!!fieldState.error}>
                               <SelectValue placeholder="選擇狀態">
                                 {POST_STATUS_LIST.find(
                                   (s) => s.value === field.value
@@ -429,12 +401,13 @@ export function PostEditor({ postId }: PostEditorProps) {
                               ))}
                             </SelectContent>
                           </Select>
-                          <FieldError />
+                          <FieldError errors={fieldState.error ? [fieldState.error] : []} />
                         </Field>
                       )}
                     />
 
-                    <Field>
+                    {/* ★ slug */}
+                    <Field data-invalid={!!errors.slug}>
                       <FieldLabel className="text-xs text-muted-foreground">
                         網址
                       </FieldLabel>
@@ -442,13 +415,14 @@ export function PostEditor({ postId }: PostEditorProps) {
                         {...form.register('slug')}
                         placeholder="article-url-slug"
                         className="text-sm"
+                        aria-invalid={!!errors.slug}
                       />
-                      <FieldError />
+                      <FieldError errors={errors.slug ? [errors.slug] : []} />
                     </Field>
                   </CardContent>
                 </Card>
 
-                {/* 封面圖片 */}
+                {/* ★ cover */}
                 <Card className="border-0 shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-sm font-medium">
@@ -457,19 +431,19 @@ export function PostEditor({ postId }: PostEditorProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <Field>
+                    <Field data-invalid={!!errors.cover}>
                       <Input
                         {...form.register('cover')}
                         placeholder="圖片 URL"
                         className="text-sm"
+                        aria-invalid={!!errors.cover}
                       />
-                      <FieldError />
+                      <FieldError errors={errors.cover ? [errors.cover] : []} />
                     </Field>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* 文章設定 */}
               <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-sm font-medium">
@@ -520,8 +494,8 @@ export function PostEditor({ postId }: PostEditorProps) {
                     <Controller
                       control={form.control}
                       name="pinOrder"
-                      render={({ field }) => (
-                        <Field>
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={!!fieldState.error}>
                           <FieldLabel className="text-xs text-muted-foreground">
                             置頂順序
                           </FieldLabel>
@@ -535,8 +509,9 @@ export function PostEditor({ postId }: PostEditorProps) {
                             min={0}
                             placeholder="0"
                             className="text-sm"
+                            aria-invalid={!!fieldState.error}
                           />
-                          <FieldError />
+                          <FieldError errors={fieldState.error ? [fieldState.error] : []} />
                         </Field>
                       )}
                     />
