@@ -23,7 +23,7 @@ export function AdminBreadcrumb() {
     <Breadcrumb>
       <BreadcrumbList>
         {segments.map((segment, index) => {
-          const href = '/' + segments.slice(0, index + 1).join('/')
+          const href = '/admin' + segments.slice(0, index + 1).join('/')
           const isLast = index === segments.length - 1
           const label = BREADCRUMB_LABELS[segment] || segment
 
