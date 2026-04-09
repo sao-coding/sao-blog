@@ -1,4 +1,4 @@
-import { publicProcedure } from "@/index";
+import { publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { notes, topics, user } from "@sao-blog/db/schema/index";
 import { eq, desc, asc, and, lt, gt, inArray } from "drizzle-orm";

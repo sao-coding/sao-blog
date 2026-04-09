@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure } from "@/index";
+import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { posts, categories, postTags, tags, user } from "@sao-blog/db/schema/index";
 import { type TagModel } from "@sao-blog/db/schema/index";

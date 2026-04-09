@@ -8,7 +8,7 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
+      "@sao-blog/api/*": [
         "./src/*"
       ]
     },

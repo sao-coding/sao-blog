@@ -1,10 +1,10 @@
-import { protectedProcedure, publicProcedure } from "@/index";
+import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
-import { createPostSchema } from "@/schema/post";
+import { createPostSchema } from "@sao-blog/api/schema/post";
 
 // 管理員系統員系統
 

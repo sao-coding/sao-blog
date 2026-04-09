@@ -1,6 +1,6 @@
 import type { RouterClient } from "@orpc/server";
 
-import { o, protectedProcedure, publicProcedure } from "@/index"
+import { o, protectedProcedure, publicProcedure } from '@sao-blog/api/index'
 import postRouter from "./post";
 import noteRouter from "./note";
 import commentRouter from "./comment";

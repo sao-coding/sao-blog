@@ -24,7 +24,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@sao-blog/ui/*": ["../../packages/ui/src/*"]
+      "@sao-blog/ui/*": ["../../packages/ui/src/*"],
+      "@sao-blog/api/*": ["../../packages/api/src/*"]
     }
   }
 }

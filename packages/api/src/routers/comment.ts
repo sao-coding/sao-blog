@@ -1,9 +1,9 @@
-import { protectedProcedure, publicProcedure } from "@/index";
+import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import { comments, commentLikes } from "@sao-blog/db/schema/index";
 import z from "zod";
-import { CommentsResponseSchema } from "@/schema/comment";
+import { CommentsResponseSchema } from "@sao-blog/api/schema/comment";
 
 // 獲取每篇文章 or 日記的留言列表（用於文章或日記頁面）
 const getComments = publicProcedure
