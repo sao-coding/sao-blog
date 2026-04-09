@@ -3,13 +3,14 @@
 import { Badge } from '@sao-blog/ui/components/badge'
 import { Checkbox } from '@sao-blog/ui/components/checkbox'
 import { cn } from '@sao-blog/ui/lib/utils'
-import type { Posts } from '@/types/post'
 import type { ColumnDef } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { DataTableColumnHeader } from '@/components/table/table-column-header'
 // import Link from 'next/link'
 // import { PostRowActions } from './post-row-actions'
 import { Link } from '@tanstack/react-router'
+import type { InferClientOutputs } from '@orpc/client'
+import type { client } from '@/utils/orpc'
 // export interface PostListItem {
 //   id: string;
 //   title: string;
@@ -25,6 +26,9 @@ import { Link } from '@tanstack/react-router'
 //   createdAt: string;
 //   updatedAt: string;
 // }
+
+type RouterOutputs = InferClientOutputs<typeof client>;
+type Posts = RouterOutputs['admin']['post']['getPosts']['data']
 
 const postStatusMap: Record<string, { label: string; color: string }> = {
   draft: { label: '草稿', color: 'bg-gray-200 text-gray-800' },
@@ -73,8 +77,8 @@ export const columns: ColumnDef<Posts[number]>[] = [
       const post = row.original
       return (
         <Link
-          // href={`/admin/posts/editor/${post.id}`}
-          to={`/posts/editor/${post.id}`}
+          params={{ postId: post.id }}
+          to={"/posts/editor/$postId"}
           className="hover:underline flex items-center"
         >
           <span className="ml-2 w-40 truncate">{post.title}</span>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import type { Posts } from '@/types/post'
 import { DataTableContainer } from '@/components/table/table'
 import { columns } from './posts-columns'
 // import { deletePosts } from '../../_actions/posts-actions'
@@ -18,7 +17,11 @@ import {
 } from '@sao-blog/ui/components/alert-dialog'
 import { Button } from '@sao-blog/ui/components/button'
 import { Loader2 } from 'lucide-react'
+import type { InferClientOutputs } from '@orpc/client'
+import type { client } from '@/utils/orpc'
 
+type RouterOutputs = InferClientOutputs<typeof client>;
+type Posts = RouterOutputs['admin']['post']['getPosts']['data']
 interface PostsTableWithActionsProps {
   data: Posts
 }
