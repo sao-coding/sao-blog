@@ -94,7 +94,7 @@ const AppSidebar = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton render={
-                <Link to="/admin/categories">
+                <Link to="/categories">
                   <FolderIcon />
                   <span>分類</span>
                 </Link>

@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as PostsEditorIndexRouteImport } from './routes/posts/editor/index'
 import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +25,16 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
   path: '/posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsEditorIndexRoute = PostsEditorIndexRouteImport.update({
+  id: '/posts/editor/',
+  path: '/posts/editor/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
   id: '/posts/editor/$postId',
   path: '/posts/editor/$postId',
@@ -31,32 +43,51 @@ const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories/': typeof CategoriesIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/posts/editor/': typeof PostsEditorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesIndexRoute
   '/posts': typeof PostsIndexRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/posts/editor': typeof PostsEditorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories/': typeof CategoriesIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/posts/editor/': typeof PostsEditorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts/' | '/posts/editor/$postId'
+  fullPaths:
+    | '/'
+    | '/categories/'
+    | '/posts/'
+    | '/posts/editor/$postId'
+    | '/posts/editor/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/posts/editor/$postId'
-  id: '__root__' | '/' | '/posts/' | '/posts/editor/$postId'
+  to: '/' | '/categories' | '/posts' | '/posts/editor/$postId' | '/posts/editor'
+  id:
+    | '__root__'
+    | '/'
+    | '/categories/'
+    | '/posts/'
+    | '/posts/editor/$postId'
+    | '/posts/editor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   PostsEditorPostIdRoute: typeof PostsEditorPostIdRoute
+  PostsEditorIndexRoute: typeof PostsEditorIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,6 +106,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/editor/': {
+      id: '/posts/editor/'
+      path: '/posts/editor'
+      fullPath: '/posts/editor/'
+      preLoaderRoute: typeof PostsEditorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/editor/$postId': {
       id: '/posts/editor/$postId'
       path: '/posts/editor/$postId'
@@ -87,8 +132,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesIndexRoute: CategoriesIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   PostsEditorPostIdRoute: PostsEditorPostIdRoute,
+  PostsEditorIndexRoute: PostsEditorIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
