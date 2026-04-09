@@ -77,7 +77,7 @@ const AppSidebar = () => {
                 </Link>
               } />
               <SidebarMenuAction render={
-                <Link to="/admin/posts/editor">
+                <Link to="/posts/editor">
                   <PlusIcon /> <span className="sr-only">新增文章</span>
                 </Link>
               } />
