@@ -11,6 +11,7 @@ import { DataTableColumnHeader } from '@/components/table/table-column-header'
 import { Link } from '@tanstack/react-router'
 import type { InferClientOutputs } from '@orpc/client'
 import type { client } from '@/utils/orpc'
+import { PostRowActions } from './post-row-actions'
 // export interface PostListItem {
 //   id: string;
 //   title: string;
@@ -140,8 +141,8 @@ export const columns: ColumnDef<Posts[number]>[] = [
       )
     },
   },
-  // {
-  //   id: 'actions',
-  //   cell: ({ row }) => <PostRowActions row={row} />,
-  // },
+  {
+    id: 'actions',
+    cell: ({ row }) => <PostRowActions row={row} />,
+  },
 ]
