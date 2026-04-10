@@ -1,35 +1,17 @@
 'use client'
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@sao-blog/ui/components/alert-dialog'
-import { Button } from '@sao-blog/ui/components/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from '@sao-blog/ui/components/dropdown-menu'
-import { Loader2, MoreHorizontal } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { type Row } from '@tanstack/react-table'
-import { useState } from 'react'
 import { toast } from 'sonner'
 import { Link } from '@tanstack/react-router'
-import type { postSchema } from '@sao-blog/api/schema/post'
-import type z from 'zod'
 import type { InferClientOutputs } from '@orpc/client'
 import type { client } from '@/utils/orpc'
+import { ActionMenu } from '@/components/overlay/action-menu'
+import { useOverlay } from '@/hooks/use-overlay'
 
 type RouterOutputs = InferClientOutputs<typeof client>;
 type Posts = RouterOutputs['admin']['post']['getPosts']['data']
@@ -39,45 +21,73 @@ interface PostRowActionsProps {
 }
 
 export function PostRowActions({ row }: PostRowActionsProps) {
+  const { openAlertDialog } = useOverlay()
   const post = row.original
 
+  const openDeletePostDialog = () => {
+    openAlertDialog({
+      id: `delete-post-${post.id}`,
+      render: ({ isPending }) => ({
+        title: `確定刪除文章「${post.title}」嗎？`,
+        description: '此操作無法復原，刪除後將無法還原文章內容。',
+        body: (
+          <p className="text-xs text-muted-foreground">
+            目前先接全域 Overlay，下一步可直接將 API 刪除請求接在 onConfirm。
+          </p>
+        ),
+        cancelLabel: '取消',
+        confirmLabel: isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <Loader2 className="size-4 animate-spin" />
+            刪除中...
+          </span>
+        ) : (
+          '確定刪除'
+        ),
+        confirmVariant: 'destructive',
+      }),
+      onConfirm: async ({ close }) => {
+        toast.success(`已觸發刪除流程（示範）：${post.title}`)
+        close()
+      },
+    })
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={
-        <Button
-          variant="ghost"
-          className="flex size-8 p-0 data-[state=open]:bg-muted"
-        >
-          <MoreHorizontal className="size-4" />
-          <span className="sr-only">開啟選單</span>
-        </Button>
-      } />
-      <DropdownMenuContent align="end" className="w-[160px]">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>更多操作</DropdownMenuLabel>
+    <ActionMenu
+      triggerSrLabel="開啟文章操作"
+      renderItems={() => (
+        <>
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(post.id)}
+            onClick={() => {
+              navigator.clipboard.writeText(post.id)
+              toast.success('已複製文章 ID')
+            }}
           >
             複製文章 ID
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem render={
-            <Link params={{ postId: post.id }} to="/posts/editor/$postId">
-              編輯文章
-            </Link>
-          } />
+          <DropdownMenuItem
+            render={
+              <Link params={{ postId: post.id }} to="/posts/editor/$postId">
+                編輯文章
+              </Link>
+            }
+          />
           {/* TODO: 使用env 新增 主網域 */}
-          <DropdownMenuItem render={
-            <a href={`/posts/${post.slug}`} target="_blank">
-              查看文章
-            </a>
-          } />
+          <DropdownMenuItem
+            render={
+              <a href={`/posts/${post.slug}`} target="_blank" rel="noreferrer">
+                查看文章
+              </a>
+            }
+          />
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive focus:text-destructive">
-            刪除文章 (尚未實作)
+          <DropdownMenuItem variant="destructive" onClick={openDeletePostDialog}>
+            刪除文章
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </>
+      )}
+    />
   )
 }
