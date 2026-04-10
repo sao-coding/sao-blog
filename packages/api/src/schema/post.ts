@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createApiResponseSchema } from "./api";
+import { categorySchema } from "./category";
 
 //   id: string
 //   title: string
@@ -80,18 +81,7 @@ export const postSchema = z.object({
   // isSticky: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  category: z.object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    description: z.string().nullable(),
-    color: z.string().nullable(),
-    parentId: z.string().nullable(),
-    sortOrder: z.number(),
-    postCount: z.number(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  }),
+  category: categorySchema,
   tags: z.array(z.object({
     id: z.string(),
     name: z.string(),
@@ -120,8 +110,8 @@ export const postSchema = z.object({
 });
 
 export const postInputSchema = z.object({
-  // 更新時需要，新增時不需要 → optional
-  id: z.string().optional(),
+  // 更新時需要，新增時不需要 → optional (但因為空字串可以不需要)
+  id: z.string(),
 
   title: z.string().min(1, '請輸入文章標題'),
   summary: z.string().nullable().optional(),
