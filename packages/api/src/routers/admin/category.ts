@@ -4,6 +4,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
+import { categoryInputSchema } from "@sao-blog/api/schema/category";
 
 const getCategories = protectedProcedure
     .route({ method: "GET", path: "/categories" })
@@ -67,12 +68,7 @@ const getCategory = protectedProcedure
 // 創建
 const createCategory = protectedProcedure
     .route({ method: "POST", path: "/categories" })
-    .input(z.object({
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().nullable(),
-        color: z.string().nullable()
-    }))
+    .input(categoryInputSchema)
     .handler(async ({ input }) => {
         const { name, slug, description, color } = input;
         const [row] = await db
@@ -94,13 +90,7 @@ const createCategory = protectedProcedure
 
 const updateCategory = protectedProcedure
     .route({ method: "PUT", path: "/categories/{id}" })
-    .input(z.object({
-        id: z.string(),
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().nullable(),
-        color: z.string().nullable()
-    }))
+    .input(categoryInputSchema)
     .handler(async ({ input }) => {
         const { id, name, slug, description, color } = input;
         const [row] = await db
@@ -115,10 +105,30 @@ const updateCategory = protectedProcedure
             .returning();
     });
 
+const deleteCategory = protectedProcedure
+    .route({ method: "DELETE", path: "/categories/{id}" })
+    .input(z.object({
+        id: z.string(),
+    }))
+    .handler(async ({ input }) => {
+        const { id } = input;
+        const [row] = await db
+            .delete(categories)
+            .where(eq(categories.id, id))
+            .returning();
+
+        return {
+            status: "success",
+            message: "分類刪除成功",
+            data: row,
+        }
+    });
+
 
 export default {
     getCategories,
     getCategory,
     createCategory,
-    updateCategory
+    updateCategory,
+    deleteCategory
 }
