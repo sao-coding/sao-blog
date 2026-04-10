@@ -9,12 +9,9 @@ import { toast } from 'sonner'
 import type { CategoryItem } from '@/types/category'
 import { ActionMenu } from '@/components/overlay/action-menu'
 import { useOverlay } from '@/hooks/use-overlay'
-import { categoryInputSchema } from '@sao-blog/api/schema/category'
-import { useForm } from 'react-hook-form'
-import type z from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-
-type CategoryFormValues = z.infer<typeof categoryInputSchema>
+import { useMutation } from '@tanstack/react-query'
+import { orpc, queryClient } from '@/utils/orpc'
+import { CategoryForm } from '@/components/categories/category-form'
 
 interface CategoriesRowActionsProps {
   row: Row<CategoryItem>
@@ -24,31 +21,27 @@ export function CategoriesRowActions({ row }: CategoriesRowActionsProps) {
   const { openAlertDialog, openDialog } = useOverlay()
   const category = row.original
 
-  const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categoryInputSchema),
-    values: {
-
-    },
-  });
+  const deleteCategoryMutation = useMutation(
+    orpc.admin.category.deleteCategory.mutationOptions()
+  )
 
   const openEditCategoryDialog = () => {
     openDialog({
       id: `edit-category-${category.id}`,
-      render: ({ isPending }) => ({
+      render: ({ close }) => ({
         title: `編輯分類：${category.name}`,
-        description: '第一波已完成全域 Overlay 接管，此處先保留為可擴充入口。',
+        description: '修改以下欄位並儲存分類。',
         body: (
-          <div className="text-sm text-muted-foreground">
-            你可以在下一步把分類表單掛到這個 Dialog 內。
-          </div>
+          <CategoryForm
+            mode="edit"
+            category={category}
+            onSuccess={close}
+            onCancel={close}
+          />
         ),
-        cancelLabel: '關閉',
-        confirmLabel: isPending ? '處理中...' : '我知道了',
         hideCancel: true,
+        hideConfirm: true,
       }),
-      onConfirm: ({ close }) => {
-        close()
-      },
     })
   }
 
@@ -68,8 +61,16 @@ export function CategoriesRowActions({ row }: CategoriesRowActionsProps) {
         confirmVariant: 'destructive',
       }),
       onConfirm: async ({ close }) => {
-        toast.success(`已觸發刪除流程（示範）：${category.name}`)
-        close()
+        try {
+          await deleteCategoryMutation.mutateAsync({ id: category.id })
+          await queryClient.invalidateQueries({
+            queryKey: orpc.admin.category.getCategories.queryOptions().queryKey,
+          })
+          toast.success(`已刪除分類：${category.name}`)
+          close()
+        } catch {
+          toast.error('刪除分類時發生錯誤，請稍後再試。')
+        }
       },
     })
   }
