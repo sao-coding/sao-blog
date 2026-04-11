@@ -83,7 +83,7 @@ const AppSidebar = () => {
               } />
               <SidebarMenuSub className="ml-0 border-l-0 px-1.5">
                 <SidebarMenuButton render={
-                  <Link to="#">
+                  <Link to=".">
                     <Home />
                     <span>子項目</span>
                   </Link>
@@ -104,7 +104,7 @@ const AppSidebar = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton render={
-                <Link to="/admin/tags">
+                <Link to="/tags">
                   <TagIcon />
                   <span>標籤</span>
                 </Link>
@@ -116,13 +116,13 @@ const AppSidebar = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton render={
-                <Link to="/admin/notes">
+                <Link to="/notes">
                   <NotebookPenIcon />
                   <span>日記</span>
                 </Link>
               } />
               <SidebarMenuAction render={
-                <Link to="/admin/notes/editor">
+                <Link to="/notes/editor">
                   <PlusIcon /> <span className="sr-only">新增日記</span>
                 </Link>
               } />
@@ -132,13 +132,13 @@ const AppSidebar = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton render={
-                <Link to="/admin/topics">
+                <Link to="/topics">
                   <ChartColumnBigIcon />
                   <span>專欄</span>
                 </Link>
               } />
               <SidebarMenuAction render={
-                <Link to="/admin/topics/editor">
+                <Link to="/topics/editor">
                   <PlusIcon /> <span className="sr-only">新增專欄</span>
                 </Link>
               } />
@@ -150,7 +150,7 @@ const AppSidebar = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton render={
-                <Link to="/admin/api-keys">
+                <Link to="/api-keys">
                   <KeyRoundIcon />
                   <span>API 金鑰</span>
                 </Link>
