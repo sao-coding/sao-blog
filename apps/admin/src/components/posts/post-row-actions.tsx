@@ -14,10 +14,10 @@ import { ActionMenu } from '@/components/overlay/action-menu'
 import { useOverlay } from '@/hooks/use-overlay'
 
 type RouterOutputs = InferClientOutputs<typeof client>;
-type Posts = RouterOutputs['admin']['post']['getPosts']['data']
+type Post = RouterOutputs['admin']['post']['getPosts']['data'][number]
 
 interface PostRowActionsProps {
-  row: Row<Posts[number]>
+  row: Row<Post>
 }
 
 export function PostRowActions({ row }: PostRowActionsProps) {
