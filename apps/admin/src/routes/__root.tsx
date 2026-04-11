@@ -13,6 +13,7 @@ import { OverlayProvider } from '@/components/overlay/overlay-provider'
 
 import '@sao-blog/ui/globals.css'
 import { authClient } from '@/lib/auth-client'
+import { queryClient } from '@/utils/orpc'
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -35,7 +36,6 @@ export const Route = createRootRoute({
 })
 
 function RootLayout() {
-  const queryClient = new QueryClient()
 
   return (
     <>
