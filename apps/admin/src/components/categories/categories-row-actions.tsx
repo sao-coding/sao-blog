@@ -6,15 +6,19 @@ import {
 } from '@sao-blog/ui/components/dropdown-menu'
 import { type Row } from '@tanstack/react-table'
 import { toast } from 'sonner'
-import type { CategoryItem } from '@/types/category'
+import type { InferClientOutputs } from '@orpc/client'
+import type { client } from '@/utils/orpc'
 import { ActionMenu } from '@/components/overlay/action-menu'
 import { useOverlay } from '@/hooks/use-overlay'
 import { useMutation } from '@tanstack/react-query'
 import { orpc, queryClient } from '@/utils/orpc'
 import { CategoryForm } from '@/components/categories/category-form'
 
+type RouterOutputs = InferClientOutputs<typeof client>;
+type Category = RouterOutputs['admin']['category']['getCategories']['data'][number]
+
 interface CategoriesRowActionsProps {
-  row: Row<CategoryItem>
+  row: Row<Category>
 }
 
 export function CategoriesRowActions({ row }: CategoriesRowActionsProps) {

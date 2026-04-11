@@ -8,8 +8,8 @@ import { useForm } from 'react-hook-form'
 import type z from 'zod'
 import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
-import { orpc, queryClient } from '@/utils/orpc'
-import type { CategoryItem } from '@/types/category'
+import { client, orpc, queryClient } from '@/utils/orpc'
+
 import {
   Field,
   FieldError,
@@ -18,12 +18,15 @@ import {
 } from '@sao-blog/ui/components/field'
 import { Input } from '@sao-blog/ui/components/input'
 import { Textarea } from '@sao-blog/ui/components/textarea'
+import type { InferClientOutputs } from '@orpc/client'
 
+type RouterOutputs = InferClientOutputs<typeof client>;
+type Category = RouterOutputs['admin']['category']['getCategories']['data'][number]
 type CategoryFormValues = z.infer<typeof categoryInputSchema>
 
 interface CategoryFormProps {
   mode: 'create' | 'edit'
-  category?: CategoryItem
+  category?: Category
   onSuccess?: () => void
   onCancel?: () => void
 }
