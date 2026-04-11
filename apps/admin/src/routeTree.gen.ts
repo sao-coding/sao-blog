@@ -10,8 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TopicsIndexRouteImport } from './routes/topics/index'
+import { Route as TagsIndexRouteImport } from './routes/tags/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as NotesIndexRouteImport } from './routes/notes/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as ApiKeysIndexRouteImport } from './routes/api-keys/index'
 import { Route as PostsEditorIndexRouteImport } from './routes/posts/editor/index'
 import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
 
@@ -20,14 +24,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TopicsIndexRoute = TopicsIndexRouteImport.update({
+  id: '/topics/',
+  path: '/topics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TagsIndexRoute = TagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotesIndexRoute = NotesIndexRouteImport.update({
+  id: '/notes/',
+  path: '/notes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiKeysIndexRoute = ApiKeysIndexRouteImport.update({
+  id: '/api-keys/',
+  path: '/api-keys/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsEditorIndexRoute = PostsEditorIndexRouteImport.update({
@@ -43,23 +67,35 @@ const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api-keys/': typeof ApiKeysIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/tags/': typeof TagsIndexRoute
+  '/topics/': typeof TopicsIndexRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
   '/posts/editor/': typeof PostsEditorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api-keys': typeof ApiKeysIndexRoute
   '/categories': typeof CategoriesIndexRoute
+  '/notes': typeof NotesIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/tags': typeof TagsIndexRoute
+  '/topics': typeof TopicsIndexRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
   '/posts/editor': typeof PostsEditorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api-keys/': typeof ApiKeysIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/tags/': typeof TagsIndexRoute
+  '/topics/': typeof TopicsIndexRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
   '/posts/editor/': typeof PostsEditorIndexRoute
 }
@@ -67,25 +103,46 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/api-keys/'
     | '/categories/'
+    | '/notes/'
     | '/posts/'
+    | '/tags/'
+    | '/topics/'
     | '/posts/editor/$postId'
     | '/posts/editor/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/categories' | '/posts' | '/posts/editor/$postId' | '/posts/editor'
+  to:
+    | '/'
+    | '/api-keys'
+    | '/categories'
+    | '/notes'
+    | '/posts'
+    | '/tags'
+    | '/topics'
+    | '/posts/editor/$postId'
+    | '/posts/editor'
   id:
     | '__root__'
     | '/'
+    | '/api-keys/'
     | '/categories/'
+    | '/notes/'
     | '/posts/'
+    | '/tags/'
+    | '/topics/'
     | '/posts/editor/$postId'
     | '/posts/editor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiKeysIndexRoute: typeof ApiKeysIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
+  NotesIndexRoute: typeof NotesIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
+  TagsIndexRoute: typeof TagsIndexRoute
+  TopicsIndexRoute: typeof TopicsIndexRoute
   PostsEditorPostIdRoute: typeof PostsEditorPostIdRoute
   PostsEditorIndexRoute: typeof PostsEditorIndexRoute
 }
@@ -99,6 +156,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/topics/': {
+      id: '/topics/'
+      path: '/topics'
+      fullPath: '/topics/'
+      preLoaderRoute: typeof TopicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tags/': {
+      id: '/tags/'
+      path: '/tags'
+      fullPath: '/tags/'
+      preLoaderRoute: typeof TagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/': {
       id: '/posts/'
       path: '/posts'
@@ -106,11 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notes/': {
+      id: '/notes/'
+      path: '/notes'
+      fullPath: '/notes/'
+      preLoaderRoute: typeof NotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories/': {
       id: '/categories/'
       path: '/categories'
       fullPath: '/categories/'
       preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api-keys/': {
+      id: '/api-keys/'
+      path: '/api-keys'
+      fullPath: '/api-keys/'
+      preLoaderRoute: typeof ApiKeysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/editor/': {
@@ -132,8 +217,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiKeysIndexRoute: ApiKeysIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
+  NotesIndexRoute: NotesIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
+  TagsIndexRoute: TagsIndexRoute,
+  TopicsIndexRoute: TopicsIndexRoute,
   PostsEditorPostIdRoute: PostsEditorPostIdRoute,
   PostsEditorIndexRoute: PostsEditorIndexRoute,
 }
