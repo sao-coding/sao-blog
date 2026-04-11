@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createApiResponseSchema } from "./api";
 import { categorySchema } from "./category";
+import { tagSchema } from "./tag";
 
 //   id: string
 //   title: string
@@ -82,16 +83,7 @@ export const postSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   category: categorySchema,
-  tags: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    description: z.string().nullable(),
-    color: z.string().nullable(),
-    postCount: z.number().optional(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  })),
+  tags: z.array(tagSchema),
   author: z.object({
     id: z.string(),
     username: z.string().nullable(),
