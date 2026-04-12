@@ -77,7 +77,6 @@ const getPost = protectedProcedure
         return {
             status: "success",
             message: "文章取得成功",
-            meta: undefined,
             data: {
                 ...post,
                 author,
@@ -164,7 +163,6 @@ const createPost = protectedProcedure
         return {
             status: "success",
             message: "文章建立成功",
-            meta: undefined,
             data: createdPost,
         };
     });
@@ -256,7 +254,6 @@ const updatePost = protectedProcedure
         return {
             status: "success",
             message: "文章更新成功",
-            meta: undefined,
             data: updatedPost,
         };
     });
@@ -278,7 +275,6 @@ const deletePosts = protectedProcedure
         return {
           status: "error",
           message: "找不到可刪除的文章",
-          meta: undefined,
           data: null,
         };
       }
@@ -297,7 +293,6 @@ const deletePosts = protectedProcedure
       return {
         status: "error",
         message: "文章刪除發生錯誤",
-        meta: undefined,
         data: null,
       };
     }
