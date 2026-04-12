@@ -1,4 +1,4 @@
-import type { AppRouterClient } from "@sao-blog/shared-types";
+import type { AppRouterClient } from "@sao-blog/api/routers/index";
 
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
