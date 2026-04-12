@@ -401,6 +401,12 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
                           選擇專欄
                         </FieldLabel>
                         <Select
+                          items={
+                            topicsData?.data.map((topic) => ({
+                              label: topic.name,
+                              value: topic.id,
+                            })) ?? []
+                          }
                           value={field.value ?? 'none'}
                           onValueChange={(value) =>
                             field.onChange(value === 'none' ? null : value)
