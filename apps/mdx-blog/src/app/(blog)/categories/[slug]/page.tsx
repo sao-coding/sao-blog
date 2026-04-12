@@ -6,28 +6,27 @@ import { ApiResponse } from '@/types/api'
 import { PostItem } from '@/types/post'
 import Link from 'next/link'
 import { BackToTopFAB } from '@/components/fab'
+import { orpc } from '@/lib/orpc'
+import { format } from 'date-fns'
 
 const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = use(params)
-  const { data, isLoading, error } = useQuery<ApiResponse<PostItem[]>>({
-    queryKey: ['category', slug],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/public/posts?category=${slug}`
-      )
-      if (!res.ok) {
-        throw new Error('Network response was not ok')
-      }
-      return res.json()
-    },
-  })
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error loading category</div>
+  const { data, isLoading, error } = useQuery(orpc.post.getPosts.queryOptions({ input: { category: slug } }))
+
+  if (isLoading) return <div>Loading...</div>;
+
+  // 👉 這行是關鍵（一定要先判斷 status）
+  if (error || !data || data.status === "error") {
+    return <div>Error loading category</div>;
+  }
+
+  // 👉 這裡開始 TS 會知道 data.data 一定不是 null
+  const posts = data.data;
 
   return (
     <>
-      {data?.data.length === 0 ? (
+      {posts.length === 0 ? (
         <div className="mt-20 text-center text-2xl font-semibold text-foreground">
           該分類下尚無文章
         </div>
@@ -44,7 +43,7 @@ const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
             </header>
             <ul className="timeline-list relative ml-4">
               {/* 時間線 */}
-              {data?.data.map((post) => (
+              {posts.map((post) => (
                 <li
                   key={post.id}
                   className="timeline-item flex min-w-0 items-center justify-between leading-loose space-x-2"
@@ -58,7 +57,8 @@ const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
 
                   {/* Date */}
                   <span className="text-muted-foreground font-mono shrink-0">
-                    {post.updatedAt.slice(0, 10)}
+                    {/* {post.updatedAt.slice(0, 10)} */}
+                    {format(new Date(post.updatedAt), "yyyy-MM-dd")}
                   </span>
                 </li>
               ))}
