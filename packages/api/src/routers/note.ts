@@ -116,6 +116,7 @@ const getNoteLatest = publicProcedure
         const note = await db
             .select()
             .from(notes)
+            .where(eq(notes.status, true))
             .orderBy(desc(notes.createdAt))
             .limit(1)
         
