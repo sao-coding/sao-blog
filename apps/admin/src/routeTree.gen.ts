@@ -17,7 +17,9 @@ import { Route as NotesIndexRouteImport } from './routes/notes/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as ApiKeysIndexRouteImport } from './routes/api-keys/index'
 import { Route as PostsEditorIndexRouteImport } from './routes/posts/editor/index'
+import { Route as NotesEditorIndexRouteImport } from './routes/notes/editor/index'
 import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
+import { Route as NotesEditorNoteIdRouteImport } from './routes/notes/editor/$noteId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,9 +61,19 @@ const PostsEditorIndexRoute = PostsEditorIndexRouteImport.update({
   path: '/posts/editor/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotesEditorIndexRoute = NotesEditorIndexRouteImport.update({
+  id: '/notes/editor/',
+  path: '/notes/editor/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
   id: '/posts/editor/$postId',
   path: '/posts/editor/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesEditorNoteIdRoute = NotesEditorNoteIdRouteImport.update({
+  id: '/notes/editor/$noteId',
+  path: '/notes/editor/$noteId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -73,7 +85,9 @@ export interface FileRoutesByFullPath {
   '/posts/': typeof PostsIndexRoute
   '/tags/': typeof TagsIndexRoute
   '/topics/': typeof TopicsIndexRoute
+  '/notes/editor/$noteId': typeof NotesEditorNoteIdRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/notes/editor/': typeof NotesEditorIndexRoute
   '/posts/editor/': typeof PostsEditorIndexRoute
 }
 export interface FileRoutesByTo {
@@ -84,7 +98,9 @@ export interface FileRoutesByTo {
   '/posts': typeof PostsIndexRoute
   '/tags': typeof TagsIndexRoute
   '/topics': typeof TopicsIndexRoute
+  '/notes/editor/$noteId': typeof NotesEditorNoteIdRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/notes/editor': typeof NotesEditorIndexRoute
   '/posts/editor': typeof PostsEditorIndexRoute
 }
 export interface FileRoutesById {
@@ -96,7 +112,9 @@ export interface FileRoutesById {
   '/posts/': typeof PostsIndexRoute
   '/tags/': typeof TagsIndexRoute
   '/topics/': typeof TopicsIndexRoute
+  '/notes/editor/$noteId': typeof NotesEditorNoteIdRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/notes/editor/': typeof NotesEditorIndexRoute
   '/posts/editor/': typeof PostsEditorIndexRoute
 }
 export interface FileRouteTypes {
@@ -109,7 +127,9 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/tags/'
     | '/topics/'
+    | '/notes/editor/$noteId'
     | '/posts/editor/$postId'
+    | '/notes/editor/'
     | '/posts/editor/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -120,7 +140,9 @@ export interface FileRouteTypes {
     | '/posts'
     | '/tags'
     | '/topics'
+    | '/notes/editor/$noteId'
     | '/posts/editor/$postId'
+    | '/notes/editor'
     | '/posts/editor'
   id:
     | '__root__'
@@ -131,7 +153,9 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/tags/'
     | '/topics/'
+    | '/notes/editor/$noteId'
     | '/posts/editor/$postId'
+    | '/notes/editor/'
     | '/posts/editor/'
   fileRoutesById: FileRoutesById
 }
@@ -143,7 +167,9 @@ export interface RootRouteChildren {
   PostsIndexRoute: typeof PostsIndexRoute
   TagsIndexRoute: typeof TagsIndexRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
+  NotesEditorNoteIdRoute: typeof NotesEditorNoteIdRoute
   PostsEditorPostIdRoute: typeof PostsEditorPostIdRoute
+  NotesEditorIndexRoute: typeof NotesEditorIndexRoute
   PostsEditorIndexRoute: typeof PostsEditorIndexRoute
 }
 
@@ -205,11 +231,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsEditorIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notes/editor/': {
+      id: '/notes/editor/'
+      path: '/notes/editor'
+      fullPath: '/notes/editor/'
+      preLoaderRoute: typeof NotesEditorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/editor/$postId': {
       id: '/posts/editor/$postId'
       path: '/posts/editor/$postId'
       fullPath: '/posts/editor/$postId'
       preLoaderRoute: typeof PostsEditorPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notes/editor/$noteId': {
+      id: '/notes/editor/$noteId'
+      path: '/notes/editor/$noteId'
+      fullPath: '/notes/editor/$noteId'
+      preLoaderRoute: typeof NotesEditorNoteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -223,7 +263,9 @@ const rootRouteChildren: RootRouteChildren = {
   PostsIndexRoute: PostsIndexRoute,
   TagsIndexRoute: TagsIndexRoute,
   TopicsIndexRoute: TopicsIndexRoute,
+  NotesEditorNoteIdRoute: NotesEditorNoteIdRoute,
   PostsEditorPostIdRoute: PostsEditorPostIdRoute,
+  NotesEditorIndexRoute: NotesEditorIndexRoute,
   PostsEditorIndexRoute: PostsEditorIndexRoute,
 }
 export const routeTree = rootRouteImport

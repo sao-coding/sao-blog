@@ -188,7 +188,7 @@ export const topics = pgTable('topics', {
   name: varchar('name', { length: 100 }).notNull().unique(),
   slug: varchar('slug', { length: 100 }).notNull().unique(),
   introduce: varchar('introduce', { length: 100 }).notNull(), // 簡介：必填，最多 100 字符
-  description: varchar('description', { length: 400 }).default('').notNull(), // 描述：可選，最多 400 字符，預設空字串
+  description: varchar('description', { length: 400 }), // 描述：可選，最多 400 字符，預設空字串
   color: varchar('color', { length: 7 }), // 顏色代碼 #RRGGBB
   noteCount: integer('note_count').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })

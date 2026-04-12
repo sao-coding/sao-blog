@@ -7,6 +7,8 @@ import commentRouter from "./comment";
 import adminPostRouter from "./admin/post";
 import adminCategoryRouter from "./admin/category";
 import adminTagRouter from "./admin/tag";
+import adminNoteRouter from "./admin/note";
+import adminTopicRouter from "./admin/topic";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -25,6 +27,8 @@ export const appRouter = {
     post: adminPostRouter,
     category: adminCategoryRouter,
     tag: adminTagRouter,
+    note: adminNoteRouter,
+    topic: adminTopicRouter,
   })
 };
 export type AppRouter = typeof appRouter;
