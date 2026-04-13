@@ -4,7 +4,7 @@ import { use } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BackToTopFAB } from '@/components/fab'
 import { orpc } from '@/lib/orpc'
-import { TimeLineList } from '@/components/timeline-list'
+import { CategoriesTimeline } from './_components/categories-timeline'
 
 const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = use(params)
@@ -39,7 +39,7 @@ const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
                   當前共有 {posts.length} 篇文章，加油！
                 </p>
               </header>
-              <TimeLineList
+              <CategoriesTimeline
                 articles={posts.map((post) => ({
                   id: post.id,
                   title: post.title,
