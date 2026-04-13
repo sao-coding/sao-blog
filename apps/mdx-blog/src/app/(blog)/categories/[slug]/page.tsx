@@ -30,8 +30,7 @@ const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
       ) : (
         <div className="mt-20">
           <div className="mx-auto mt-14 max-w-5xl px-6 lg:mt-[80px] lg:px-0 2xl:max-w-6xl">
-            <div className="relative pl-6">
-              <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-muted-foreground/30" />
+            <div className="relative pl-[19px] border-l-2">
               <header className="mb-8 max-w-none">
                 <h1 className="text-4xl font-bold text-foreground">
                   分類 - {slug}
