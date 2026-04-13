@@ -40,7 +40,7 @@ export function TimeLineList({ articles }: TimelineListProps) {
     <div className="relative -ml-6">
       {/* 滑動高亮指示器 */}
       <div
-        className="absolute left-0 w-px bg-primary transition-all duration-300 ease-out"
+        className="absolute left-0 w-[2px] bg-primary transition-all duration-300 ease-out"
         style={{
           top: indicatorStyle.top,
           height: indicatorStyle.height,
@@ -68,7 +68,7 @@ export function TimeLineList({ articles }: TimelineListProps) {
                 href={`/posts/${article.slug}`}
                 className="flex items-baseline gap-6 py-3 pl-6 transition-colors"
               >
-                <time className="text-sm text-muted-foreground font-mono shrink-0 w-24">
+                <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24">
                   {formattedDate}
                 </time>
                 <span className="text-foreground group-hover:text-primary transition-colors">
