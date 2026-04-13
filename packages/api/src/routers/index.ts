@@ -3,12 +3,14 @@ import type { RouterClient } from "@orpc/server";
 import { o, protectedProcedure, publicProcedure } from '@sao-blog/api/index'
 import postRouter from "./post";
 import noteRouter from "./note";
+import timelineRouter from "./timeline";
 import commentRouter from "./comment";
 import adminPostRouter from "./admin/post";
 import adminCategoryRouter from "./admin/category";
 import adminTagRouter from "./admin/tag";
 import adminNoteRouter from "./admin/note";
 import adminTopicRouter from "./admin/topic";
+import timeline from "./timeline";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -22,6 +24,7 @@ export const appRouter = {
   // }),
   post: postRouter,
   note: noteRouter,
+  timeline: timelineRouter,
   comment: commentRouter,
   admin: o.prefix('/admin').router({
     post: adminPostRouter,
