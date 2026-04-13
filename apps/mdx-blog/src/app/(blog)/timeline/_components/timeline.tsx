@@ -69,6 +69,20 @@ export function Timeline({ articles }: TimelineProps) {
                 <span className="text-foreground group-hover:text-primary transition-colors">
                   {article.title}
                 </span>
+                {
+                    article.category && (
+                        <span className="ml-auto text-sm text-muted-foreground">
+                            {article.category} / 文章
+                        </span>
+                    )
+                }
+                {
+                    article.type === 'note' && (
+                        <span className="ml-auto text-sm text-muted-foreground">
+                            心情: {article.mood} / 天氣: {article.weather} / 筆記
+                        </span>
+                    )
+                }
               </Link>
             </li>
           )
