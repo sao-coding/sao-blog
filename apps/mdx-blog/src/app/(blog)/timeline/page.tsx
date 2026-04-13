@@ -38,14 +38,21 @@ const TimelinePage = async ({
               </header>
 
               {posts.map((group) => (
-                <div key={group.year} className="mb-12">
-                  <h2 className="text-2xl font-semibold mb-6">{group.year} 年
-                    <span className="ml-4 text-sm text-muted-foreground">
+                <section key={group.year} className="mb-12">
+                  <header className="mb-4 flex items-baseline gap-3">
+                    <h2 className="text-5xl leading-none font-extralight tracking-tighter text-transparent [-webkit-text-stroke:1px_rgba(115,115,115,0.8)]">
+                      <time dateTime={`${group.year}`}>
+                        {group.year}
+                      </time>
+                    </h2>
+                    <span className="ml-3 text-sm text-muted-foreground">
+                      <span className="sr-only">共有</span>
                       {group.count} 篇文章
                     </span>
-                  </h2>
+
+                  </header>
                   <Timeline articles={group.items} />
-                </div>
+                </section>
               ))}
             </div>
           </div>
