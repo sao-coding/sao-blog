@@ -1,21 +1,16 @@
 "use client"
-
+import { TimelineSchema } from "@sao-blog/api/schema/timeline"
+// categories-timeline.tsx
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
+import z from "zod"
 
-interface Article {
-  id: string
-  title: string
-  slug: string
-  createdAt: Date
-  updatedAt: Date
+
+interface TimelineProps {
+  articles: z.infer<typeof TimelineSchema>['items']
 }
-
-interface TimelineListProps {
-  articles: Article[]
-}
-
-export function TimeLineList({ articles }: TimelineListProps) {
+    
+export function Timeline({ articles }: TimelineProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 })
   const listRef = useRef<HTMLUListElement>(null)
@@ -55,7 +50,7 @@ export function TimeLineList({ articles }: TimelineListProps) {
       >
         {articles.map((article, index) => {
           const date = new Date(article.createdAt)
-          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+          const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`
           
           return (
             <li
