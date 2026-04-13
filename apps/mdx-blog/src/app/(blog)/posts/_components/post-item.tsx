@@ -3,13 +3,14 @@
 import { cn } from '@/lib/utils'
 import { motion, useMotionValue, useSpring } from 'motion/react'
 import { PointerEvent, useRef } from 'react'
-import type { PostItem as Post } from '@/types/post'
+import { postSchema } from '@sao-blog/api/schema/post'
 import { ClockIcon, HashIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import z from 'zod'
 
 interface PostItemProps {
-  post: Post
+  post: z.infer<typeof postSchema>
   options?: {
     maxOffsetPx?: number
     reduceMotion?: boolean
