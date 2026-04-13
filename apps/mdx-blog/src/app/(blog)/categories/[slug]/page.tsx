@@ -2,12 +2,9 @@
 
 import { use } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ApiResponse } from '@/types/api'
-import { PostItem } from '@/types/post'
-import Link from 'next/link'
 import { BackToTopFAB } from '@/components/fab'
 import { orpc } from '@/lib/orpc'
-import { format } from 'date-fns'
+import { TimeLineList } from '@/components/timeline-list'
 
 const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = use(params)
@@ -33,36 +30,26 @@ const CategoriesPage = ({ params }: { params: Promise<{ slug: string }> }) => {
       ) : (
         <div className="mt-20">
           <div className="mx-auto mt-14 max-w-5xl px-6 lg:mt-[80px] lg:px-0 2xl:max-w-6xl">
-            <header className="prose mb-8 max-w-none">
-              <h1 className="text-3xl font-extrabold text-foreground">
-                分類：{slug}
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                瀏覽分類「{slug}」下的所有文章。
-              </p>
-            </header>
-            <ul className="timeline-list relative ml-4">
-              {/* 時間線 */}
-              {posts.map((post) => (
-                <li
-                  key={post.id}
-                  className="timeline-item flex min-w-0 items-center justify-between leading-loose space-x-2"
-                >
-                  <Link
-                    href={`/posts/${post.slug}`}
-                    className="sao-link text-foreground group-hover:text-primary transition-colors duration-200 no-underline! truncate"
-                  >
-                    {post.title}
-                  </Link>
-
-                  {/* Date */}
-                  <span className="text-muted-foreground font-mono shrink-0">
-                    {/* {post.updatedAt.slice(0, 10)} */}
-                    {format(new Date(post.updatedAt), "yyyy-MM-dd")}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <div className="relative pl-6">
+              <div className="absolute left-0 top-0 bottom-0 w-px bg-muted-foreground/30" />
+              <header className="mb-8 max-w-none">
+                <h1 className="text-3xl font-extrabold text-foreground">
+                  分類 - {slug}
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                  當前共有 {posts.length} 篇文章，加油！
+                </p>
+              </header>
+              <TimeLineList
+                articles={posts.map((post) => ({
+                  id: post.id,
+                  title: post.title,
+                  slug: post.slug,
+                  createdAt: post.createdAt,
+                  updatedAt: post.updatedAt,
+                }))}
+              />
+            </div>
           </div>
         </div>
       )}
