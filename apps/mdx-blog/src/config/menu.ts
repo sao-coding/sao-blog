@@ -60,6 +60,18 @@ export const NAV_LINKS: NavLinks = [
     text: '時光',
     children: [
       {
+        icon: IconCategory,
+        href: '/timeline?type=note',
+        text: '筆記',
+        show: true,
+      },
+      {
+        icon: IconSignature,
+        href: '/timeline?type=post',
+        text: '文章',
+        show: true,
+      },
+      {
         icon: IconFenceFilled,
         href: '/notes/topics',
         text: '專欄',
