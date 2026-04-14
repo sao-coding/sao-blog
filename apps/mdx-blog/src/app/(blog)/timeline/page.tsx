@@ -25,17 +25,23 @@ const TimelinePage = async ({
           尚無資料
         </div>
       ) : (
-        <div className="mt-20">
-          <div className="mx-auto mt-14 max-w-5xl px-6">
-            <div className="relative pl-[19px] border-l-2">
-              <header className="mb-8">
-                <h1 className="text-4xl font-bold">
-                  時光 {type ? `- ${type}` : ''}
+    
+          <div className="mx-auto mt-14 max-w-3xl px-2 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
+            <header className="mb-12">
+                <h1 className="tracking-widest text-neutral-10/50 uppercase mb-3">
+                  時間線
                 </h1>
-                <p className="mt-2 text-muted-foreground">
-                  共 {posts.length} 筆資料
-                </p>
+                <div className="mb-6 flex items-baseline gap-4">
+                  <p className="text-[4.5rem] leading-none font-extralight tracking-tighter text-neutral-10/50">
+                    {data?.meta?.total}
+                  </p>
+                  <span className="text-muted-foreground">
+                    篇，再接再厲
+                  </span>
+                </div>
               </header>
+            <div className="relative pl-[19px] border-l-2">
+              
 
               {posts.map((group) => (
                 <section key={group.year} className="mb-12">
@@ -56,7 +62,7 @@ const TimelinePage = async ({
               ))}
             </div>
           </div>
-        </div>
+    
       )}
       <BackToTopFAB />
     </>
