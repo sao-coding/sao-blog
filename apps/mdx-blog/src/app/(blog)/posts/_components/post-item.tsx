@@ -131,7 +131,7 @@ const PostItem = ({ post, options = {} }: PostItemProps) => {
               >
                 {post.category.name}
               </button>
-              /
+              {" / "}
               {post.tags.map((tag, index) => (
                 <span key={tag.slug} className="inline">
                   <button
