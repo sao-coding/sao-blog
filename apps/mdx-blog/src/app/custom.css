@@ -25,3 +25,22 @@
     transform: translateY(0);
   }
 }
+
+.timeline-indicator::before {
+  content: "";
+  width: 2px;
+  left: -2px;
+  top: var(--indicator-top, 0);
+  height: var(--indicator-height, 0);
+  opacity: var(--indicator-opacity, 0);
+  background-color: var(--color-primary);
+  pointer-events: none;
+  z-index: 1;
+  transition: top .2s, height .2s, opacity .15s;
+  position: absolute;
+}
+
+.sao-timeline > li:hover {
+  background: linear-gradient(90deg, 
+    color-mix(in oklch, var(--color-primary) 4%, transparent), transparent 70%);
+}

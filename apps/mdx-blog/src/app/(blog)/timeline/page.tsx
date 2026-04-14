@@ -40,7 +40,7 @@ const TimelinePage = async ({
                   </span>
                 </div>
               </header>
-            <div className="relative pl-[19px] border-l-2">
+            <div className="relative ml-1 border-l-2">
               
 
               {posts.map((group, index) => (
