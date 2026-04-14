@@ -84,10 +84,15 @@ const getTimeLine = publicProcedure
                 items,
             }));
 
+        // 計算數量
+        const total = timeline.reduce((acc, group) => acc + group.count, 0);
+
         return {
             status: "success",
             message: "時間軸資料取得成功",
-            meta: undefined,
+            meta: {
+                total
+            },
             data: timeline,
         };
 

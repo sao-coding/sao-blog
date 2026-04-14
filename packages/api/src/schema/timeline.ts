@@ -51,5 +51,10 @@ export const TimelineInputSchema = z.object({
     type: z.enum(["post", "note"]).optional(),
 });
 
-export const TimelineResponseSchema = createApiResponseSchema(z.array(TimelineSchema));
-export const TimelineNoteResponseSchema = createApiResponseSchema(z.array(TimelineNoteSchema));
+const TimelineMetaSchema = z.object({
+    total: z.number(),
+});
+
+export const TimelineResponseSchema = createApiResponseSchema(z.array(TimelineSchema), TimelineMetaSchema);
+export const TimelineNoteResponseSchema = createApiResponseSchema(z.array(TimelineNoteSchema), TimelineMetaSchema);
+export const TimelinePostResponseSchema = createApiResponseSchema(z.array(TimelinePostSchema), TimelineMetaSchema);
