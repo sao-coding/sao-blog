@@ -114,19 +114,20 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                 <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24 group-hover:text-primary">
                   {formattedDate}
                 </time>
-                <span className="text-foreground transition-colors">
+                <span className="text-foreground transition-colors truncate">
                   {article.title}
                 </span>
-                {article.category && (
-                  <span className="ml-auto text-sm text-muted-foreground">
-                    {article.category} / 文章
-                  </span>
-                )}
-                {article.type === 'note' && (
-                  <span className="ml-auto text-sm text-muted-foreground">
-                    心情: {article.mood} / 天氣: {article.weather} / 筆記
-                  </span>
-                )}
+                <span className="ml-auto text-sm text-muted-foreground hidden lg:inline">
+                  {article.category && (
+                    <>
+                      {article.category} / 文章
+                    </>
+                  )}
+                  {article.type === 'note' && (
+                    <>
+                      心情: {article.mood} / 天氣: {article.weather} / 筆記
+                    </>
+                  )} </span>
               </Link>
             </motion.li>
           )
