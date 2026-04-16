@@ -64,6 +64,13 @@
       "when": 1772951856623,
       "tag": "0008_material_rafael_vega",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775981111604,
+      "tag": "0009_majestic_moon_knight",
+      "breakpoints": true
     }
   ]
 }
