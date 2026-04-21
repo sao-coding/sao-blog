@@ -1,4 +1,97 @@
+import { auth } from '@sao-blog/auth'
 import { Elysia, t } from 'elysia'
+
+type MusicStatus = 'playing' | 'paused' | 'idle'
+type WindowStatus = 'active' | 'idle'
+
+type MusicState = {
+  time: string
+  type: 'music'
+  status: '' | MusicStatus
+  title: string
+  artist: string
+}
+
+type WindowState = {
+  time: string
+  type: 'window'
+  status: '' | WindowStatus
+  process: string
+  app: string
+  title: string
+}
+
+type MusicPayload = {
+  time: string
+  status: MusicStatus
+  title: string
+  artist: string
+}
+
+type WindowPayload = {
+  time: string
+  status: WindowStatus
+  process: string
+  app: string
+  title: string
+}
+
+type StatusBody =
+  | ({ type: 'music' } & MusicPayload)
+  | ({ type: 'window' } & WindowPayload)
+
+const DEFAULT_MUSIC_STATE: MusicState = {
+  time: '',
+  type: 'music',
+  status: '',
+  title: '',
+  artist: '',
+}
+
+const DEFAULT_WINDOW_STATE: WindowState = {
+  time: '',
+  type: 'window',
+  status: '',
+  process: '',
+  app: '',
+  title: '',
+}
+
+const getApiKeyFromHeaders = (headers: Headers): string | null => {
+  const authHeader = headers.get('authorization') ?? ''
+  const bearer = authHeader.startsWith('Bearer ')
+    ? authHeader.slice('Bearer '.length).trim()
+    : ''
+  const xApiKey = headers.get('x-api-key')?.trim() ?? ''
+
+  return bearer || xApiKey || null
+}
+
+const getAuthorizedSession = async (headers: Headers) => {
+  const apiKey = getApiKeyFromHeaders(headers)
+
+  if (apiKey) {
+    try {
+      const verifyResult = await auth.api.verifyApiKey({
+        body: { key: apiKey },
+      })
+
+      if (verifyResult.valid && verifyResult.key) {
+        const session = await auth.api.getSession({
+          headers: new Headers({ 'x-api-key': apiKey }),
+        })
+
+        if (session) {
+          return session
+        }
+      }
+    } catch {
+      // API key 驗證失敗時，往下嘗試一般 session
+    }
+  }
+
+  return auth.api.getSession({ headers })
+}
 
 // 公開 API - 設備相關
 export const devicesRoutes = new Elysia()
@@ -6,41 +99,26 @@ export const devicesRoutes = new Elysia()
   .state({
     devicesStore: {
       // 儲存最新的 music 事件
-      music: {
-        time: '',
-        type: 'music',
-        status: '',
-        title: '',
-        artist: '',
-      },
+      music: DEFAULT_MUSIC_STATE,
       // 儲存最新的 window 事件
-      window: {
-        time: '',
-        type: 'window',
-        status: '',
-        process: '',
-        app: '',
-        title: '',
+      window: DEFAULT_WINDOW_STATE,
+      setMusic(payload: MusicPayload) {
+        this.music = {
+          time: payload.time,
+          type: 'music',
+          status: payload.status,
+          title: payload.title,
+          artist: payload.artist,
+        }
       },
-      // 設定事件（接受 "music" 或 "window" 與事件物件）
-      set(type: 'music' | 'window', payload: any) {
-        if (type === 'music') {
-          this.music = {
-            time: payload.time || '',
-            type: 'music',
-            status: payload.status || '',
-            title: payload.title || '',
-            artist: payload.artist || '',
-          }
-        } else if (type === 'window') {
-          this.window = {
-            time: payload.time || '',
-            type: 'window',
-            status: payload.status || '',
-            process: payload.process || '',
-            app: payload.app || '',
-            title: payload.title || '',
-          }
+      setWindow(payload: WindowPayload) {
+        this.window = {
+          time: payload.time,
+          type: 'window',
+          status: payload.status,
+          process: payload.process,
+          app: payload.app,
+          title: payload.title,
         }
       },
     },
@@ -58,17 +136,27 @@ export const devicesRoutes = new Elysia()
   })
   .post(
     '/status',
-    async ({ body, store, server }) => {
-      const { type } = body as any
+    async ({ body, request, set, store, server }) => {
+      const session = await getAuthorizedSession(request.headers)
+      if (!session) {
+        set.status = 401
+        return {
+          status: 'error',
+          message: '未授權：需要有效的 API Key 或登入 session',
+        }
+      }
+
+      const payload = body as StatusBody
+      const { type } = payload
 
       if (type === 'music') {
-        const { time, status, title, artist } = body as any
+        const { time, status, title, artist } = payload
         if (!time || !status || !title || !artist) {
           return { status: 'error', message: '缺少 music 事件必要欄位' }
         }
 
         // 更新 state
-        store.devicesStore.set('music', { time, status, title, artist })
+        store.devicesStore.setMusic({ time, status, title, artist })
 
         const deviceStatus = {
           music: store.devicesStore.music,
@@ -90,12 +178,12 @@ export const devicesRoutes = new Elysia()
           data: deviceStatus,
         }
       } else if (type === 'window') {
-        const { time, status, process, app: appName, title } = body as any
+        const { time, status, process, app: appName, title } = payload
         if (!time || !process || !appName || !title) {
           return { status: 'error', message: '缺少 window 事件必要欄位' }
         }
 
-        store.devicesStore.set('window', {
+        store.devicesStore.setWindow({
           time,
           status,
           process,
@@ -155,6 +243,7 @@ export const devicesRoutes = new Elysia()
     }
   )
   .ws('/ws', {
+    // 測試用
     // 驗證傳入訊息
     body: t.Object({
       message: t.String(),
@@ -168,21 +257,8 @@ export const devicesRoutes = new Elysia()
 
       // 發送目前的設備狀態給新連接的客戶端（包含 music 與 window 事件）
       const currentStatus = {
-        music: ws.data.store?.devicesStore?.music || {
-          time: '',
-          type: 'music',
-          status: '',
-          title: '',
-          artist: '',
-        },
-        window: ws.data.store?.devicesStore?.window || {
-          time: '',
-          type: 'window',
-          status: '',
-          process: '',
-          app: '',
-          title: '',
-        },
+        music: ws.data.store?.devicesStore?.music || DEFAULT_MUSIC_STATE,
+        window: ws.data.store?.devicesStore?.window || DEFAULT_WINDOW_STATE,
       }
 
       ws.send(
@@ -205,21 +281,8 @@ export const devicesRoutes = new Elysia()
 
       // 回應使用者訊息，並包含目前設備狀態
       const currentStatus = {
-        music: ws.data.store?.devicesStore?.music || {
-          time: '',
-          type: 'music',
-          status: '',
-          title: '',
-          artist: '',
-        },
-        window: ws.data.store?.devicesStore?.window || {
-          time: '',
-          type: 'window',
-          status: '',
-          process: '',
-          app: '',
-          title: '',
-        },
+        music: ws.data.store?.devicesStore?.music || DEFAULT_MUSIC_STATE,
+        window: ws.data.store?.devicesStore?.window || DEFAULT_WINDOW_STATE,
       }
 
       const response = {
