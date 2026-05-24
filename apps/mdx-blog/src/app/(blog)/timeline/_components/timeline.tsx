@@ -174,7 +174,8 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                   }}
                 >
                   <Link
-                    href={`/posts/${article.slug}`}
+                    // 判斷是文章還是筆記，然後導向不同的路由
+                    href={article.type === 'note' ? `/notes/${article.slug}` : `/posts/${article.slug}`}
                     className="flex items-baseline gap-6 transition-colors"
                   >
                     <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24 group-hover:text-primary">
