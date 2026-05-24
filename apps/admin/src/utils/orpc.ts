@@ -1,5 +1,6 @@
 import type { AppRouterClient } from "@sao-blog/api/routers/index";
 // import { env } from "@my-better-t-app/env/web";
+import { env } from "@sao-blog/env/admin";
 // import type { AppRouterClient } from "@sao-blog/shared-types";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
@@ -21,8 +22,7 @@ export const queryClient = new QueryClient({
 });
 
 export const link = new RPCLink({
-  // url: `${env.VITE_SERVER_URL}/rpc`,
-  url: `http://localhost:3000/rpc`,
+  url: `${env.ADMIN_API_URL}/rpc`,
   fetch(url, options) {
     return fetch(url, {
       ...options,

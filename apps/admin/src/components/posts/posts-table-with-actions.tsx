@@ -47,7 +47,7 @@ export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
       // const result = await deletePosts(postIds)
 
       const res = await fetch(
-        `${env.NEXT_PUBLIC_API_URL}/admin/posts${postIds[0]}`,
+        `${env.ADMIN_API_URL}/api/admin/posts${postIds[0]}`,
         { method: 'DELETE' }
       )
       const result = await res.json()

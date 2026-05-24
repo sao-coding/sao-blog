@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@sao-blog/ui/comp
 import AppSidebar from "@/components/app-sidebar"
 import { Separator } from "@sao-blog/ui/components/separator"
 import { AdminBreadcrumb } from "@/components/layout/admin-breadcrumb"
+import { env } from "@sao-blog/env/admin";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { OverlayProvider } from '@/components/overlay/overlay-provider'
@@ -19,7 +20,7 @@ export const Route = createRootRoute({
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession()
     if (!session) {
-      window.location.href = 'http://localhost:3002/login?redirect=/admin'
+      window.location.href = `${env.ADMIN_BLOG_URL}/login?redirect=/admin`
       throw new Error('Unauthorized') // 阻止繼續渲染
     }
     console.log('Session:', session) // 添加日志以调试会话数据
