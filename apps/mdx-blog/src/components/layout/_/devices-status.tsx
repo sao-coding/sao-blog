@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Wifi, WifiOff, Monitor, Music, Smartphone } from 'lucide-react'
+import { env } from '@sao-blog/env/web'
 
 type DevicePayload = {
   status?: string
@@ -19,7 +20,7 @@ type DevicePayload = {
   }
 }
 
-const WS_URL = `${process.env.NEXT_PUBLIC_WS_URL}/public/devices/ws`
+const WS_URL = `${env.NEXT_PUBLIC_WS_URL}/public/devices/ws`
 
 const DevicesStatus = () => {
   const [payload, setPayload] = useState<DevicePayload | null>(null)

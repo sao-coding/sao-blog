@@ -8,6 +8,7 @@ import { getBasicMdxOptions } from '@/components/mdx/parsers'
 import { components } from '@/components/mdx/mdx-renderer'
 import { NoteClientPage } from './_components/note-client-page'
 import { TocItem } from '@/types/toc'
+import { env } from '@sao-blog/env/web'
 
 type Scope = {
   readingTime: string
@@ -25,7 +26,7 @@ type Frontmatter = {
 // 獲取日記資料的函式
 const getNoteData = async (id: string): Promise<ApiResponse<NoteItem>> => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`
+    `${env.NEXT_PUBLIC_API_URL}/notes/${id}`
   )
   if (!res.ok) {
     // 這裡可以根據 status code 做更細緻的錯誤處理，例如 404

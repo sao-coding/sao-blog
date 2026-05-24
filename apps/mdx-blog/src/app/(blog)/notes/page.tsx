@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { ApiResponse } from '@/types/api'
 import { NoteItem } from '@/types/note'
+import { env } from '@sao-blog/env/web'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic'
 const getLatestNoteId = async (): Promise<string | null> => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/notes/latest`,
+      `${env.NEXT_PUBLIC_API_URL}/notes/latest`,
       {
         cache: 'no-store', // 確保每次都獲取最新的日記
       }

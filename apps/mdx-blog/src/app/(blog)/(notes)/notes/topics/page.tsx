@@ -4,13 +4,14 @@ import { useQuery } from '@tanstack/react-query'
 import { ApiResponse } from '@/types/api'
 import { TopicItem } from '@/types/topic'
 import Link from 'next/link'
+import { env } from '@sao-blog/env/web'
 
 const NoteTopicsPage = () => {
   const { data, isLoading, error } = useQuery<ApiResponse<TopicItem[]>>({
     queryKey: ['topics'],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/public/topics`
+        `${env.NEXT_PUBLIC_API_URL}/public/topics`
       )
       if (!res.ok) {
         throw new Error('Network response was not ok')

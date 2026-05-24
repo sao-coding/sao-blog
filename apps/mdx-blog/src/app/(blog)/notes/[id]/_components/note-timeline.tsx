@@ -8,6 +8,7 @@ import type { TargetAndTransition } from 'motion/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { memo } from 'react'
 import { NoteTimelineItem } from './note-timeline-item'
+import { env } from '@sao-blog/env/web'
 
 const animateUl: TargetAndTransition = {
   transition: {
@@ -34,7 +35,7 @@ const NoteTimelineImpl = () => {
     queryKey: ['current-note', id],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`,
+        `${env.NEXT_PUBLIC_API_URL}/notes/${id}`,
         {
           method: 'GET',
           headers: {
@@ -55,7 +56,7 @@ const NoteTimelineImpl = () => {
     queryKey: ['note-timeline', id],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/notes?id=${id}`,
+        `${env.NEXT_PUBLIC_API_URL}/notes?id=${id}`,
         {
           method: 'GET',
           headers: {

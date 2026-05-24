@@ -19,6 +19,7 @@ import { Button } from '@sao-blog/ui/components/button'
 import { Loader2 } from 'lucide-react'
 import type { InferClientOutputs } from '@orpc/client'
 import type { client } from '@/utils/orpc'
+import { env } from '@sao-blog/env/admin'
 
 type RouterOutputs = InferClientOutputs<typeof client>;
 type Posts = RouterOutputs['admin']['post']['getPosts']['data']
@@ -46,7 +47,7 @@ export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
       // const result = await deletePosts(postIds)
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/posts${postIds[0]}`,
+        `${env.NEXT_PUBLIC_API_URL}/admin/posts${postIds[0]}`,
         { method: 'DELETE' }
       )
       const result = await res.json()
