@@ -40,7 +40,7 @@
   position: absolute;
 }
 
-.sao-timeline > li:hover {
+.sao-timeline li:hover {
   background: linear-gradient(90deg, 
     color-mix(in oklch, var(--color-primary) 4%, transparent), transparent 70%);
 }
