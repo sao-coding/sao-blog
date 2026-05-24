@@ -10,9 +10,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json turbo.json ./
 COPY apps/server apps/server
 COPY packages packages
 
-# 原始碼到位後再裝依賴
-# --shamefully-hoist 讓 pnpm 建立 flat node_modules，bun build --compile 才能追蹤到傳遞依賴
-RUN pnpm install --frozen-lockfile --shamefully-hoist
+# node-linker=hoisted 讓 pnpm 直接複製套件（不用 symlink），bun build --compile 才能正確讀取所有檔案
+RUN echo "node-linker=hoisted" >> .npmrc && pnpm install --frozen-lockfile
 
 # Stage 2: 用 bun 編譯
 FROM oven/bun AS build
