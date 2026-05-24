@@ -61,7 +61,7 @@ const getComments = publicProcedure
 const createComment = publicProcedure
     .route({ method: "POST", path: "/comments" })
     .input(z.object({
-        type: z.enum(["post", "note", "page"]), // 留言對象的類型（文章、日記或頁面）
+        type: z.enum(["post", "note", "page", "recently"]), // 留言對象的類型（文章、日記或頁面）
         refId: z.string(), // 文章、日記或頁面的 ID
         displayUsername: z.string(), // 顯示用的名稱
         email: z.string().email(), // 留言者的 email
