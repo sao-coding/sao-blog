@@ -21,6 +21,11 @@ const apiHandler = new OpenAPIHandler(appRouter, {
   plugins: [
     new OpenAPIReferencePlugin({
       schemaConverters: [new ZodToJsonSchemaConverter()],
+      specGenerateOptions: {
+        servers: [
+          { url: env.SERVER_URL + "/api" },
+        ],
+      },
     }),
   ],
   interceptors: [
