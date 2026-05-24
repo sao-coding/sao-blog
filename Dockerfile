@@ -11,7 +11,8 @@ COPY apps/server apps/server
 COPY packages packages
 
 # 原始碼到位後再裝依賴
-RUN pnpm install --frozen-lockfile
+# --shamefully-hoist 讓 pnpm 建立 flat node_modules，bun build --compile 才能追蹤到傳遞依賴
+RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # Stage 2: 用 bun 編譯
 FROM oven/bun AS build
