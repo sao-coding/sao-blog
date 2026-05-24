@@ -8,6 +8,7 @@ import { createContext } from "@sao-blog/api/context";
 import { appRouter } from "@sao-blog/api/routers/index";
 import { auth } from "@sao-blog/auth";
 import { env } from "@sao-blog/env/server";
+import { devicesRoutes } from "./devices";
 import { Elysia } from "elysia";
 
 const rpcHandler = new RPCHandler(appRouter, {
@@ -77,6 +78,7 @@ const app = new Elysia()
       parse: "none",
     },
   )
+  .group("/api/devices", (app) => app.use(devicesRoutes))
   .get("/", () => "OK")
   .listen(3000, () => {
     console.log("Server is running on http://localhost:3000");
