@@ -20,7 +20,7 @@ export const Route = createRootRoute({
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession()
     if (!session) {
-      window.location.href = `${env.ADMIN_BLOG_URL}/login?redirect=/admin`
+      window.location.href = `${env.VITE_BLOG_URL}/login?redirect=/admin`
       throw new Error('Unauthorized') // 阻止繼續渲染
     }
     console.log('Session:', session) // 添加日志以调试会话数据
