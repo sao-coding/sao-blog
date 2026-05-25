@@ -328,6 +328,9 @@ importers:
       '@sao-blog/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@sao-blog/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@shikijs/rehype':
         specifier: ^3.22.0
         version: 3.23.0
@@ -10888,6 +10891,7 @@ packages:
 
   uuid@7.0.3:
     resolution: {integrity: sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@8.3.2:
