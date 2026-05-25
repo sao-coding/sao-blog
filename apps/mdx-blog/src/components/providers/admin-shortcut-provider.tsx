@@ -37,7 +37,7 @@ export function AdminShortcutProvider({ children }: { children: ReactNode }) {
         return
       }
       if (e.key === '.') {
-        router.push(`/login?redirect=${encodeURIComponent(redirectPath)}`)
+        router.push(`/login?redirect=${encodeURIComponent(redirectPath as string)}`)
       }
     }
 
