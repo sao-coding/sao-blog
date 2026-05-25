@@ -8,6 +8,7 @@ import { useHeaderStore } from '@/store/header-store'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { BackToTopFAB } from '@/components/fab'
 import { CommentSection } from '@/components/comment'
+import { useAdminShortcutStore } from '@/store/admin-shortcut-store'
 
 type PostClientPageProps = {
   children: ReactNode
@@ -31,7 +32,7 @@ export function PostClientPage({
 }: PostClientPageProps) {
   const targetRef = useRef<HTMLDivElement | null>(null)
   const { setPostState } = useHeaderStore()
-  // 1024
+  const { setOverridePath } = useAdminShortcutStore()
   const isMobile = useIsMobile(1024)
 
   useEffect(() => {
@@ -43,6 +44,11 @@ export function PostClientPage({
       url: metaData.url,
     })
   }, [metaData])
+
+  useEffect(() => {
+    setOverridePath(`/admin/posts/editor/${postId}`)
+    return () => setOverridePath(null)
+  }, [postId, setOverridePath])
 
   return (
     <div className="container m-auto mt-[120px] max-w-7xl px-2 md:px-6 lg:px-4 xl:px-0">

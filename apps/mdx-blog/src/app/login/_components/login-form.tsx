@@ -15,19 +15,19 @@ import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  // 登入狀態
   const [loginData, setLoginData] = useState({
     username: '',
     password: '',
   })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -42,7 +42,8 @@ export function LoginForm({
     } else {
       toast.success('登入成功！')
       // 重新導向到管理後台首頁
-      router.push('/admin')
+      const redirect = searchParams.get('redirect')
+      router.push(redirect ?? '/admin')
     }
     setLoading(false)
   }
