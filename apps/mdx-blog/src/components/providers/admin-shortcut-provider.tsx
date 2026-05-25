@@ -5,9 +5,15 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAdminShortcutStore } from '@/store/admin-shortcut-store'
 
 function getDefaultRedirectPath(pathname: string): string | null {
+  if (pathname === '/') return '/admin'
   if (pathname === '/posts') return '/admin/posts'
-  // /notes/[id] — note IDs are UUIDs, redirect stays on same note page
-  if (pathname.startsWith('/notes/')) return pathname
+  if (pathname === '/notes') return '/admin/notes'
+  if (pathname === '/notes/topics') return '/admin/topics'
+  if (pathname === '/timeline') return '/admin'
+  if (pathname.startsWith('/categories/')) return '/admin/categories'
+  // /notes/[id] — note IDs are UUIDs, redirect to admin notes editor
+  const noteMatch = pathname.match(/^\/notes\/([^/]+)$/)
+  if (noteMatch) return `/admin/notes/editor/${noteMatch[1]}`
   // /posts/[slug] — needs postId (UUID), handled by override from PostClientPage
   return null
 }
