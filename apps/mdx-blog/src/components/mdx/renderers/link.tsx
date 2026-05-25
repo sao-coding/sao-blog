@@ -22,8 +22,8 @@ type EnhancedLinkProps = React.ComponentProps<'a'> & {
 const EnhancedLink = ({ href, ...props }: EnhancedLinkProps) => {
   const [enabled, setEnabled] = useState(false)
 
-  const { data } = useQuery({
-    ...orpc.linkPreview.getLinkPreview.queryOptions({ url: href }),
+  const { data, isLoading } = useQuery({
+    ...orpc.linkPreview.getLinkPreview.queryOptions({ input: { url: href } }),
     enabled,
     staleTime: 24 * 60 * 60 * 1000,
   })
