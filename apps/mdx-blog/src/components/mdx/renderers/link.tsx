@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   Glimpse,
   GlimpseContent,
@@ -9,19 +13,23 @@ import {
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { SiGithub } from '@icons-pack/react-simple-icons'
+import { orpc } from '@/lib/orpc'
 
 type EnhancedLinkProps = React.ComponentProps<'a'> & {
   href: string
-  data: {
-    title: string | null
-    description: string | null
-    image: string | null
-  }
 }
 
-const EnhancedLink = ({ href, data, ...props }: EnhancedLinkProps) => {
+const EnhancedLink = ({ href, ...props }: EnhancedLinkProps) => {
+  const [enabled, setEnabled] = useState(false)
+
+  const { data } = useQuery({
+    ...orpc.linkPreview.getLinkPreview.queryOptions({ url: href }),
+    enabled,
+    staleTime: 24 * 60 * 60 * 1000,
+  })
+
   return (
-    <Glimpse>
+    <Glimpse onOpenChange={(open) => { if (open) setEnabled(true) }}>
       <GlimpseTrigger delay={0} closeDelay={100} render={
         <span className="inline-flex items-center align-top [&_svg]:size-4">
           {href.includes('https://github.com') && (
@@ -33,13 +41,13 @@ const EnhancedLink = ({ href, data, ...props }: EnhancedLinkProps) => {
         </span>
       }>
       </GlimpseTrigger>
-      <GlimpseContent className={cn(!data.image && 'w-full p-2')}>
-        {!data.image && (
+      <GlimpseContent className={cn(!data?.image && 'w-full p-2')}>
+        {!data?.image && (
           <Link className="sao-link block" href={href}>
             {href}
           </Link>
         )}
-        {data.image && (
+        {data?.image && (
           <>
             <GlimpseImage src={data.image} alt={data.title ?? ''} />
             <GlimpseTitle>{data.title}</GlimpseTitle>

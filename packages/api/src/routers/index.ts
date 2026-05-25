@@ -11,6 +11,7 @@ import adminTagRouter from "./admin/tag";
 import adminNoteRouter from "./admin/note";
 import adminTopicRouter from "./admin/topic";
 import timeline from "./timeline";
+import linkPreviewRouter from "./link-preview";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -26,6 +27,7 @@ export const appRouter = {
   note: noteRouter,
   timeline: timelineRouter,
   comment: commentRouter,
+  linkPreview: linkPreviewRouter,
   admin: o.prefix('/admin').router({
     post: adminPostRouter,
     category: adminCategoryRouter,
