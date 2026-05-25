@@ -44,7 +44,7 @@ const EnhancedLink = ({ href, ...props }: EnhancedLinkProps) => {
       <GlimpseContent>
         {isLoading ? (
           <div className="animate-pulse space-y-2">
-            <div className="aspect-[120/63] w-full rounded-md bg-muted mb-4" />
+            <div className="aspect-120/63 w-full rounded-md bg-muted mb-4" />
             <div className="h-3 w-3/4 rounded bg-muted" />
             <div className="h-3 w-full rounded bg-muted" />
             <div className="h-3 w-5/6 rounded bg-muted" />
