@@ -41,18 +41,24 @@ const EnhancedLink = ({ href, ...props }: EnhancedLinkProps) => {
         </span>
       }>
       </GlimpseTrigger>
-      <GlimpseContent className={cn(!data?.image && 'w-full p-2')}>
-        {!data?.image && (
-          <Link className="sao-link block" href={href}>
-            {href}
-          </Link>
-        )}
-        {data?.image && (
+      <GlimpseContent>
+        {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            <div className="aspect-[120/63] w-full rounded-md bg-muted mb-4" />
+            <div className="h-3 w-3/4 rounded bg-muted" />
+            <div className="h-3 w-full rounded bg-muted" />
+            <div className="h-3 w-5/6 rounded bg-muted" />
+          </div>
+        ) : data?.image ? (
           <>
             <GlimpseImage src={data.image} alt={data.title ?? ''} />
             <GlimpseTitle>{data.title}</GlimpseTitle>
             <GlimpseDescription>{data.description}</GlimpseDescription>
           </>
+        ) : (
+          <Link className="sao-link block truncate text-sm" href={href}>
+            {href}
+          </Link>
         )}
       </GlimpseContent>
     </Glimpse>
