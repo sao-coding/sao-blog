@@ -11,7 +11,7 @@ const NoteTopicsPage = () => {
     queryKey: ['topics'],
     queryFn: async () => {
       const res = await fetch(
-        `${env.NEXT_PUBLIC_API_URL}/public/topics`
+        `${env.NEXT_PUBLIC_SERVER_URL}/api/public/topics`
       )
       if (!res.ok) {
         throw new Error('Network response was not ok')

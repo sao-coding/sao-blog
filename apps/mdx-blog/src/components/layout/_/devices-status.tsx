@@ -20,7 +20,7 @@ type DevicePayload = {
   }
 }
 
-const WS_URL = `${env.NEXT_PUBLIC_WS_URL}/public/devices/ws`
+const WS_URL = `${env.NEXT_PUBLIC_WS_URL}/api/public/devices/ws`
 
 const DevicesStatus = () => {
   const [payload, setPayload] = useState<DevicePayload | null>(null)

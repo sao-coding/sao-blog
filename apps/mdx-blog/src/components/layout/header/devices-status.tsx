@@ -49,7 +49,7 @@ type SpringTransition = {
 // Constants
 const CDN_DOMAIN =
   'https://fastly.jsdelivr.net/gh/sao-coding/apppulse-assets@master'
-const WS_URL = `${env.NEXT_PUBLIC_WS_URL}/devices/ws`
+const WS_URL = `${env.NEXT_PUBLIC_WS_URL}/api/devices/ws`
 const MAX_RECONNECT_ATTEMPTS = 6
 const BASE_DELAY_MS = 800
 

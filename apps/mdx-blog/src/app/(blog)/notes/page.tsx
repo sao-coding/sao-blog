@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 const getLatestNoteId = async (): Promise<string | null> => {
   try {
     const res = await fetch(
-      `${env.NEXT_PUBLIC_API_URL}/notes/latest`,
+      `${env.NEXT_PUBLIC_SERVER_URL}/api/notes/latest`,
       {
         cache: 'no-store', // 確保每次都獲取最新的日記
       }

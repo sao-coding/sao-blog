@@ -35,7 +35,7 @@ const NoteTimelineImpl = () => {
     queryKey: ['current-note', id],
     queryFn: async () => {
       const res = await fetch(
-        `${env.NEXT_PUBLIC_API_URL}/notes/${id}`,
+        `${env.NEXT_PUBLIC_SERVER_URL}/api/notes/${id}`,
         {
           method: 'GET',
           headers: {
@@ -56,7 +56,7 @@ const NoteTimelineImpl = () => {
     queryKey: ['note-timeline', id],
     queryFn: async () => {
       const res = await fetch(
-        `${env.NEXT_PUBLIC_API_URL}/notes?id=${id}`,
+        `${env.NEXT_PUBLIC_SERVER_URL}/api/notes?id=${id}`,
         {
           method: 'GET',
           headers: {
