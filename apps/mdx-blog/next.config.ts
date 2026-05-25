@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/admin/:path*',
-        destination: 'https://blog-admin.sao-x.com/admin/:path*',
+        destination: 'https://blog-admin.sao-x.com/:path*',
       },
     ]
   },
