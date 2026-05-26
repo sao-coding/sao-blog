@@ -32,6 +32,10 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    crossSubdomainCookies: {
+      enabled: true,
+      domain: ".sao-x.com"  // 根網域，含點
+    },
     defaultCookieAttributes: {
       sameSite: "none",
       secure: true,
