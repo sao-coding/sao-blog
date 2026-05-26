@@ -3,6 +3,7 @@ import { LoginForm } from './_components/login-form'
 import { authClient } from '@/lib/auth-client'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import Loading  from '@/components/ui/loading'
 
 const LoginPage = async (props: { searchParams: Promise<{ redirect: string }> }) => {
   const searchParams = await props.searchParams
@@ -22,7 +23,7 @@ const LoginPage = async (props: { searchParams: Promise<{ redirect: string }> })
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Loading />}>
           <LoginForm />
         </Suspense>
       </div>
