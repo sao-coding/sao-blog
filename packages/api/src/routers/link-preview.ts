@@ -9,7 +9,7 @@ const OG_IMAGE_REGEX = /<meta[^>]*property="og:image"[^>]*content="([^"]+)"/;
 
 const getLinkPreview = publicProcedure
   .route({ method: "GET", path: "/link-preview" })
-  .input(z.object({ url: z.string().url() }))
+  .input(z.object({ url: z.url() }))
   .output(
     z.object({
       title: z.string().nullable(),

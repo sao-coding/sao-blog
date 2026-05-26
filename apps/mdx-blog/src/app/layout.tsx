@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="zh-Hant-TW" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
         <Providers>
           {children}
           <Toaster richColors />
