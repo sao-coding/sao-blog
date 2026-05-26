@@ -2,11 +2,19 @@ import { Suspense } from 'react'
 import { LoginForm } from './_components/login-form'
 import { authClient } from '@/lib/auth-client'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 
 const LoginPage = async (props: { searchParams: Promise<{ redirect: string }> }) => {
   const searchParams = await props.searchParams
-  const { data: session } = await authClient.getSession()
-
+  const { data: session, error } = await authClient.getSession(
+    {
+      fetchOptions: {
+        headers: await headers(),
+      },
+    }
+  )
+  console.log('Session:', session)
+  console.log('Error:', error)
   if (session) {
     redirect(searchParams.redirect || '/')
   }
