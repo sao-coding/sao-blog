@@ -9,7 +9,6 @@ import { openAPI, apiKey, admin, username } from "better-auth/plugins";
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-
     schema: schema,
   }),
   trustedOrigins: [
@@ -23,9 +22,9 @@ export const auth = betterAuth({
     enabled: true,
   },
   socialProviders: {
-    github: { 
-        clientId: env.GITHUB_CLIENT_ID, 
-        clientSecret: env.GITHUB_CLIENT_SECRET, 
+    github: {
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
     },
   },
   advanced: {
@@ -34,7 +33,7 @@ export const auth = betterAuth({
     },
     crossSubdomainCookies: {
       enabled: true,
-      domain: ".sao-x.com"  // 根網域，含點
+      domain: "sao-x.com"  // 根網域，含點
     },
     defaultCookieAttributes: {
       sameSite: "none",
@@ -42,13 +41,16 @@ export const auth = betterAuth({
       httpOnly: true,
     },
   },
-  plugins: [    
+  plugins: [
     admin(),
     username(),
     openAPI(),
-    expo(), 
+    expo(),
     apiKey({
-      enableSessionForAPIKeys: true
+      enableSessionForAPIKeys: true,
+      rateLimit: {
+        enabled: false,
+      },
     })
   ],
 });
