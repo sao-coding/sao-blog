@@ -39,6 +39,7 @@ export const auth = betterAuth({
       sameSite: "none",
       secure: true,
       httpOnly: true,
+      domain: ".sao-x.com",
     },
   },
   plugins: [
