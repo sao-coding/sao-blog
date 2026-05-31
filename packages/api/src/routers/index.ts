@@ -6,6 +6,7 @@ import noteRouter from "./note";
 import timelineRouter from "./timeline";
 import commentRouter from "./comment";
 import thinkingRouter from "./thinking";
+import homeRouter from "./home";
 import adminPostRouter from "./admin/post";
 import adminCategoryRouter from "./admin/category";
 import adminTagRouter from "./admin/tag";
@@ -32,6 +33,7 @@ export const appRouter = {
   timeline: timelineRouter,
   comment: commentRouter,
   thinking: thinkingRouter,
+  home: homeRouter,
   linkPreview: linkPreviewRouter,
   admin: o.prefix('/admin').router({
     post: adminPostRouter,

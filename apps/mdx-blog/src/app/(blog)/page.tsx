@@ -1,23 +1,44 @@
-import LocationCard from "./_components/location-card";
-import SkillsCard from "./_components/skills-card";
-import Welcome from "./_components/welcome";
+import { client } from '@/lib/orpc'
+import Welcome from './_components/welcome'
+import { HomeEditorial } from './_components/home-editorial'
+import LocationCard from './_components/location-card'
+import SkillsCard from './_components/skills-card'
+import { WritingTimelineStrip } from './_components/writing-timeline-strip'
+import { HomeFooter } from './_components/home-footer'
 
-const HomePage = () => {
+export const dynamic = 'force-dynamic'
+
+const HomePage = async () => {
+  const res = await client.home.getHome()
+  const data = res.data
+
   return (
     <div>
-      {/* <div className='relative flex h-screen w-full items-center justify-center'></div> */}
-      {/* <div className="relative flex h-dvh w-full flex-col items-center justify-around px-4 md:flex-row md:justify-center lg:px-0"> */}
-      <div className="relative h-dvh mt-[-4.5rem]">
+      <div className="relative mt-[-4.5rem] h-dvh">
         <Welcome />
       </div>
-      <div className="relative mx-auto h-screen w-full max-w-6xl p-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+      <div className="relative mx-auto w-full max-w-6xl py-12">
+        <HomeEditorial
+          recentWriting={data.recentWriting}
+          musings={data.musings}
+          letters={data.letters}
+        />
+
+        <section className="mx-auto mt-32 grid max-w-6xl grid-cols-1 gap-x-16 gap-y-12 px-5 lg:grid-cols-2">
           <LocationCard />
           <SkillsCard />
-        </div>
+        </section>
+
+        <WritingTimelineStrip
+          thisYear={data.thisYear}
+          latestTitle={data.stats.latestTitle}
+        />
+
+        <HomeFooter totalLetters={data.stats.totalLetters} />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default HomePage;
+export default HomePage
