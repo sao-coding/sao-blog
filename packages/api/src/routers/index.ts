@@ -10,6 +10,8 @@ import adminCategoryRouter from "./admin/category";
 import adminTagRouter from "./admin/tag";
 import adminNoteRouter from "./admin/note";
 import adminTopicRouter from "./admin/topic";
+import adminCommentRouter from "./admin/comment";
+import adminDashboardRouter from "./admin/dashboard";
 import timeline from "./timeline";
 import linkPreviewRouter from "./link-preview";
 
@@ -34,6 +36,8 @@ export const appRouter = {
     tag: adminTagRouter,
     note: adminNoteRouter,
     topic: adminTopicRouter,
+    comment: adminCommentRouter,
+    dashboard: adminDashboardRouter,
   })
 };
 export type AppRouter = typeof appRouter;
