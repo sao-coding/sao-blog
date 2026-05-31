@@ -71,6 +71,13 @@
       "when": 1775981111604,
       "tag": "0009_majestic_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780226384082,
+      "tag": "0010_sweet_cargill",
+      "breakpoints": true
     }
   ]
 }

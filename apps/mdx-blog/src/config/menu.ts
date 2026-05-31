@@ -2,6 +2,7 @@ import {
   IconBrandLine,
   IconBrandThreads,
   IconBrandX,
+  IconBubbleText,
   IconFenceFilled,
   IconHistory,
   IconPencil,
@@ -53,6 +54,11 @@ export const NAV_LINKS: NavLinks = [
     icon: IconCategory,
     href: '/notes',
     text: '日記',
+  },
+  {
+    icon: IconBubbleText,
+    href: '/thinking',
+    text: '想法',
   },
   {
     icon: IconHistory,

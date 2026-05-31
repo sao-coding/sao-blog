@@ -21,6 +21,7 @@ import {
   Home,
   KeyRoundIcon,
   LayoutDashboardIcon,
+  MessageCircleHeartIcon,
   MessageSquareIcon,
   NotebookPenIcon,
   PlusIcon,
@@ -136,6 +137,22 @@ const AppSidebar = () => {
                 <Link to="/topics">
                   <ChartColumnBigIcon />
                   <span>專欄</span>
+                </Link>
+              } />
+            </SidebarMenuItem>
+          </SidebarMenu>
+          {/* 想法 */}
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={
+                <Link to="/thinking">
+                  <MessageCircleHeartIcon />
+                  <span>想法</span>
+                </Link>
+              } />
+              <SidebarMenuAction render={
+                <Link to="/thinking/editor">
+                  <PlusIcon /> <span className="sr-only">新增想法</span>
                 </Link>
               } />
             </SidebarMenuItem>

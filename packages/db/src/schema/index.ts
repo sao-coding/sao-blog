@@ -233,6 +233,38 @@ export const notes = pgTable('notes', {
     .notNull(),
 })
 
+// 想法（隨手記錄當下的心情、碎碎念）
+export const thinkings = pgTable(
+  'thinkings',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    // 想法內容（支援 markdown）
+    content: text('content').notNull(),
+    // 是否發表（false 為私密草稿，不顯示於前台）
+    status: boolean('status').default(true).notNull(),
+    // 可選：將此想法發表於某篇日記（/notes/xxx）
+    noteId: uuid('note_id').references(() => notes.id, {
+      onDelete: 'set null',
+    }),
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('thinkings_created_at_idx').on(table.createdAt),
+    index('thinkings_note_idx').on(table.noteId),
+    index('thinkings_author_idx').on(table.authorId),
+  ]
+)
+
 export const commentRefTypeEnum = pgEnum('comment_ref_type', ['post', 'note', 'page', 'recently'])
 export const commentSourceEnum = pgEnum('comment_source', ['guest', 'google', 'github'])
 

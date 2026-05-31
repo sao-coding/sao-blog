@@ -5,6 +5,7 @@ import postRouter from "./post";
 import noteRouter from "./note";
 import timelineRouter from "./timeline";
 import commentRouter from "./comment";
+import thinkingRouter from "./thinking";
 import adminPostRouter from "./admin/post";
 import adminCategoryRouter from "./admin/category";
 import adminTagRouter from "./admin/tag";
@@ -12,6 +13,7 @@ import adminNoteRouter from "./admin/note";
 import adminTopicRouter from "./admin/topic";
 import adminCommentRouter from "./admin/comment";
 import adminDashboardRouter from "./admin/dashboard";
+import adminThinkingRouter from "./admin/thinking";
 import timeline from "./timeline";
 import linkPreviewRouter from "./link-preview";
 
@@ -29,6 +31,7 @@ export const appRouter = {
   note: noteRouter,
   timeline: timelineRouter,
   comment: commentRouter,
+  thinking: thinkingRouter,
   linkPreview: linkPreviewRouter,
   admin: o.prefix('/admin').router({
     post: adminPostRouter,
@@ -38,6 +41,7 @@ export const appRouter = {
     topic: adminTopicRouter,
     comment: adminCommentRouter,
     dashboard: adminDashboardRouter,
+    thinking: adminThinkingRouter,
   })
 };
 export type AppRouter = typeof appRouter;
