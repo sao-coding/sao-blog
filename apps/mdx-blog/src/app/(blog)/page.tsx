@@ -30,10 +30,7 @@ const HomePage = async () => {
           <SkillsCard />
         </section>
 
-        <WritingTimelineStrip
-          thisYear={data.thisYear}
-          latestTitle={data.stats.latestTitle}
-        />
+        <WritingTimelineStrip timeline={data.timeline} />
 
         <HomeFooter totalLetters={data.stats.totalLetters} />
       </div>

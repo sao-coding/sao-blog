@@ -129,7 +129,7 @@ const LocationCard = () => {
 
         <div>
           <p className="flex items-center gap-1.5 text-lg font-light text-neutral-10/80">
-            <span className="size-1.5 rounded-full bg-rose-400" />
+            <span className="size-1.5 rounded-full bg-primary" />
             臺灣
           </p>
           <p className="mt-1 text-xs tracking-widest text-neutral-10/40 uppercase">

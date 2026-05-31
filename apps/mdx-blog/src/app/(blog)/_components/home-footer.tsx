@@ -43,16 +43,16 @@ export function HomeFooter({ totalLetters }: HomeFooterProps) {
 
       <div className="mt-12 flex items-stretch justify-center divide-x divide-neutral-10/10">
         <Link href="/notes" className="group px-8">
-          <p className="text-sm text-neutral-10/50 transition-colors group-hover:text-rose-300">
+          <p className="text-sm text-neutral-10/50 transition-colors group-hover:text-primary">
             留下印記
           </p>
           <p className="mt-1 flex items-center justify-center gap-1.5 text-lg font-light text-neutral-10/80">
-            <HeartIcon className="size-4 fill-rose-400/70 text-rose-400/70" />
+            <HeartIcon className="size-4 fill-primary/70 text-primary/70" />
             {totalLetters.toLocaleString()}
           </p>
         </Link>
         <Link href="/thinking" className="group px-8 text-left">
-          <p className="text-sm text-neutral-10/50 transition-colors group-hover:text-rose-300">
+          <p className="text-sm text-neutral-10/50 transition-colors group-hover:text-primary">
             訂閱通信
           </p>
           <p className="mt-1 text-sm italic text-neutral-10/40">
@@ -62,19 +62,19 @@ export function HomeFooter({ totalLetters }: HomeFooterProps) {
       </div>
 
       <nav className="mt-16 flex items-center justify-center gap-3 text-sm text-neutral-10/40">
-        <Link href="/posts" className="transition-colors hover:text-rose-300">
+        <Link href="/posts" className="transition-colors hover:text-primary">
           文章
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/notes" className="transition-colors hover:text-rose-300">
+        <Link href="/notes" className="transition-colors hover:text-primary">
           日記
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/thinking" className="transition-colors hover:text-rose-300">
+        <Link href="/thinking" className="transition-colors hover:text-primary">
           想法
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/timeline" className="transition-colors hover:text-rose-300">
+        <Link href="/timeline" className="transition-colors hover:text-primary">
           時光
         </Link>
       </nav>

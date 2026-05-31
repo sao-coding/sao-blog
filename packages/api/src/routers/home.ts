@@ -102,9 +102,19 @@ const getHome = publicProcedure
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
 
-        const currentYear = new Date().getFullYear();
-        const thisYearItems = writing
-            .filter((item) => new Date(item.createdAt).getFullYear() === currentYear)
+        const now = new Date();
+        const currentYear = now.getFullYear();
+
+        // 本年（日曆年）篇數，用於「本年 N 篇」
+        const yearTotal = writing.filter(
+            (item) => new Date(item.createdAt).getFullYear() === currentYear
+        ).length;
+
+        // 時間軸顯示「滾動的近 12 個月」窗口（夏 → 秋 → 冬 → 春）
+        const windowStart = new Date(now);
+        windowStart.setFullYear(windowStart.getFullYear() - 1);
+        const timelineItems = writing
+            .filter((item) => new Date(item.createdAt) >= windowStart)
             .map((item) => ({
                 id: item.id,
                 title: item.title,
@@ -134,15 +144,17 @@ const getHome = publicProcedure
                 recentWriting: writing.slice(0, RECENT_WRITING_LIMIT),
                 musings,
                 letters,
-                thisYear: {
-                    year: currentYear,
-                    total: thisYearItems.length,
-                    items: thisYearItems,
+                timeline: {
+                    windowStart: windowStart.toISOString(),
+                    windowEnd: now.toISOString(),
+                    yearTotal,
+                    items: timelineItems,
+                    latestTitle: writing[0]?.title ?? null,
+                    latestHref: writing[0]?.href ?? null,
                 },
                 stats: {
                     totalWriting: writing.length,
                     totalLetters,
-                    latestTitle: writing[0]?.title ?? null,
                 },
             },
         };

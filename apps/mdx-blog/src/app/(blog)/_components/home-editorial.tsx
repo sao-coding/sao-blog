@@ -64,56 +64,66 @@ export function HomeEditorial({
       <div>
         <SectionLabel en="Recent Writing" zh="近期筆墨" />
 
-        {featured && (
-          <Link
-            href={featured.href}
-            className="group block border-l-2 border-rose-500/70 pl-4"
-          >
-            <p className="mb-2 text-xs text-neutral-10/40">
-              <span className="text-rose-400/80">01</span>
-              <span className="mx-2">{TYPE_LABEL[featured.type]}</span>·
-              <span className="mx-2">{fromNow(featured.createdAt)}</span>
-              {featured.weather && WEATHER_LABEL[featured.weather] && (
-                <>·<span className="ml-2">{WEATHER_LABEL[featured.weather]}</span></>
-              )}
-            </p>
-            <h3 className="text-xl font-medium text-neutral-10/90 transition-colors group-hover:text-rose-300">
-              {featured.title}
-            </h3>
-          </Link>
-        )}
+        <div className="relative pl-5">
+          {/* 主題色漸層左線 */}
+          <span
+            aria-hidden
+            className="absolute top-1 bottom-1 left-0 w-0.5 rounded-full bg-gradient-to-b from-primary via-primary/40 to-transparent"
+          />
 
-        <ul className="mt-6 space-y-5">
-          {rest.map((item, index) => (
-            <li key={item.id}>
-              <Link
-                href={item.href}
-                className="group flex items-baseline justify-between gap-4"
-              >
-                <div className="flex min-w-0 items-baseline gap-3">
-                  <span className="shrink-0 text-xs text-neutral-10/30 tabular-nums">
-                    {String(index + 2).padStart(2, '0')}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-[15px] text-neutral-10/80 transition-colors group-hover:text-rose-300">
-                      {item.title}
-                    </p>
-                    <p className="mt-0.5 text-xs text-neutral-10/40">
-                      {TYPE_LABEL[item.type]}
-                      {item.category && ` · ${item.category}`}
-                    </p>
-                  </div>
-                </div>
-                <span className="shrink-0 text-xs text-neutral-10/40">
-                  {fromNow(item.createdAt)}
-                </span>
-              </Link>
-            </li>
-          ))}
-          {recentWriting.length === 0 && (
-            <li className="text-sm text-neutral-10/40">尚無作品</li>
+          {featured && (
+            <Link href={featured.href} className="group block">
+              <p className="mb-2 text-xs text-neutral-10/40">
+                <span className="text-primary">01</span>
+                <span className="mx-2">{TYPE_LABEL[featured.type]}</span>·
+                <span className="mx-2">{fromNow(featured.createdAt)}</span>
+                {featured.weather && WEATHER_LABEL[featured.weather] && (
+                  <>
+                    ·
+                    <span className="ml-2">
+                      {WEATHER_LABEL[featured.weather]}
+                    </span>
+                  </>
+                )}
+              </p>
+              <h3 className="text-xl font-medium text-neutral-10/90 transition-colors group-hover:text-primary">
+                {featured.title}
+              </h3>
+            </Link>
           )}
-        </ul>
+
+          <ul className="mt-6 space-y-5">
+            {rest.map((item, index) => (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  className="group flex items-baseline justify-between gap-4"
+                >
+                  <div className="flex min-w-0 items-baseline gap-3">
+                    <span className="shrink-0 text-xs text-neutral-10/30 tabular-nums">
+                      {String(index + 2).padStart(2, '0')}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] text-neutral-10/80 transition-colors group-hover:text-primary">
+                        {item.title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-neutral-10/40">
+                        {TYPE_LABEL[item.type]}
+                        {item.category && ` · ${item.category}`}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs text-neutral-10/40">
+                    {fromNow(item.createdAt)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+            {recentWriting.length === 0 && (
+              <li className="text-sm text-neutral-10/40">尚無作品</li>
+            )}
+          </ul>
+        </div>
       </div>
 
       {/* 碎念 + 來信 */}
@@ -143,7 +153,7 @@ export function HomeEditorial({
           </ul>
           <Link
             href="/thinking"
-            className="mt-4 inline-block text-xs text-neutral-10/40 transition-colors hover:text-rose-300"
+            className="mt-4 inline-block text-xs text-neutral-10/40 transition-colors hover:text-primary"
           >
             更多碎念 →
           </Link>
