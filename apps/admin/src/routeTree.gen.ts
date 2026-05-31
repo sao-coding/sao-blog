@@ -11,13 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TopicsIndexRouteImport } from './routes/topics/index'
+import { Route as ThinkingIndexRouteImport } from './routes/thinking/index'
 import { Route as TagsIndexRouteImport } from './routes/tags/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as NotesIndexRouteImport } from './routes/notes/index'
+import { Route as CommentsIndexRouteImport } from './routes/comments/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as ApiKeysIndexRouteImport } from './routes/api-keys/index'
+import { Route as ThinkingEditorIndexRouteImport } from './routes/thinking/editor/index'
 import { Route as PostsEditorIndexRouteImport } from './routes/posts/editor/index'
 import { Route as NotesEditorIndexRouteImport } from './routes/notes/editor/index'
+import { Route as ThinkingEditorThinkingIdRouteImport } from './routes/thinking/editor/$thinkingId'
 import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
 import { Route as NotesEditorNoteIdRouteImport } from './routes/notes/editor/$noteId'
 
@@ -29,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
 const TopicsIndexRoute = TopicsIndexRouteImport.update({
   id: '/topics/',
   path: '/topics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThinkingIndexRoute = ThinkingIndexRouteImport.update({
+  id: '/thinking/',
+  path: '/thinking/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TagsIndexRoute = TagsIndexRouteImport.update({
@@ -46,6 +55,11 @@ const NotesIndexRoute = NotesIndexRouteImport.update({
   path: '/notes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommentsIndexRoute = CommentsIndexRouteImport.update({
+  id: '/comments/',
+  path: '/comments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
@@ -54,6 +68,11 @@ const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
 const ApiKeysIndexRoute = ApiKeysIndexRouteImport.update({
   id: '/api-keys/',
   path: '/api-keys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThinkingEditorIndexRoute = ThinkingEditorIndexRouteImport.update({
+  id: '/thinking/editor/',
+  path: '/thinking/editor/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsEditorIndexRoute = PostsEditorIndexRouteImport.update({
@@ -66,6 +85,12 @@ const NotesEditorIndexRoute = NotesEditorIndexRouteImport.update({
   path: '/notes/editor/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ThinkingEditorThinkingIdRoute =
+  ThinkingEditorThinkingIdRouteImport.update({
+    id: '/thinking/editor/$thinkingId',
+    path: '/thinking/editor/$thinkingId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
   id: '/posts/editor/$postId',
   path: '/posts/editor/$postId',
@@ -81,41 +106,53 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api-keys/': typeof ApiKeysIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/comments/': typeof CommentsIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/tags/': typeof TagsIndexRoute
+  '/thinking/': typeof ThinkingIndexRoute
   '/topics/': typeof TopicsIndexRoute
   '/notes/editor/$noteId': typeof NotesEditorNoteIdRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/thinking/editor/$thinkingId': typeof ThinkingEditorThinkingIdRoute
   '/notes/editor/': typeof NotesEditorIndexRoute
   '/posts/editor/': typeof PostsEditorIndexRoute
+  '/thinking/editor/': typeof ThinkingEditorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api-keys': typeof ApiKeysIndexRoute
   '/categories': typeof CategoriesIndexRoute
+  '/comments': typeof CommentsIndexRoute
   '/notes': typeof NotesIndexRoute
   '/posts': typeof PostsIndexRoute
   '/tags': typeof TagsIndexRoute
+  '/thinking': typeof ThinkingIndexRoute
   '/topics': typeof TopicsIndexRoute
   '/notes/editor/$noteId': typeof NotesEditorNoteIdRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/thinking/editor/$thinkingId': typeof ThinkingEditorThinkingIdRoute
   '/notes/editor': typeof NotesEditorIndexRoute
   '/posts/editor': typeof PostsEditorIndexRoute
+  '/thinking/editor': typeof ThinkingEditorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api-keys/': typeof ApiKeysIndexRoute
   '/categories/': typeof CategoriesIndexRoute
+  '/comments/': typeof CommentsIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/tags/': typeof TagsIndexRoute
+  '/thinking/': typeof ThinkingIndexRoute
   '/topics/': typeof TopicsIndexRoute
   '/notes/editor/$noteId': typeof NotesEditorNoteIdRoute
   '/posts/editor/$postId': typeof PostsEditorPostIdRoute
+  '/thinking/editor/$thinkingId': typeof ThinkingEditorThinkingIdRoute
   '/notes/editor/': typeof NotesEditorIndexRoute
   '/posts/editor/': typeof PostsEditorIndexRoute
+  '/thinking/editor/': typeof ThinkingEditorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,54 +160,70 @@ export interface FileRouteTypes {
     | '/'
     | '/api-keys/'
     | '/categories/'
+    | '/comments/'
     | '/notes/'
     | '/posts/'
     | '/tags/'
+    | '/thinking/'
     | '/topics/'
     | '/notes/editor/$noteId'
     | '/posts/editor/$postId'
+    | '/thinking/editor/$thinkingId'
     | '/notes/editor/'
     | '/posts/editor/'
+    | '/thinking/editor/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/api-keys'
     | '/categories'
+    | '/comments'
     | '/notes'
     | '/posts'
     | '/tags'
+    | '/thinking'
     | '/topics'
     | '/notes/editor/$noteId'
     | '/posts/editor/$postId'
+    | '/thinking/editor/$thinkingId'
     | '/notes/editor'
     | '/posts/editor'
+    | '/thinking/editor'
   id:
     | '__root__'
     | '/'
     | '/api-keys/'
     | '/categories/'
+    | '/comments/'
     | '/notes/'
     | '/posts/'
     | '/tags/'
+    | '/thinking/'
     | '/topics/'
     | '/notes/editor/$noteId'
     | '/posts/editor/$postId'
+    | '/thinking/editor/$thinkingId'
     | '/notes/editor/'
     | '/posts/editor/'
+    | '/thinking/editor/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiKeysIndexRoute: typeof ApiKeysIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
+  CommentsIndexRoute: typeof CommentsIndexRoute
   NotesIndexRoute: typeof NotesIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   TagsIndexRoute: typeof TagsIndexRoute
+  ThinkingIndexRoute: typeof ThinkingIndexRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
   NotesEditorNoteIdRoute: typeof NotesEditorNoteIdRoute
   PostsEditorPostIdRoute: typeof PostsEditorPostIdRoute
+  ThinkingEditorThinkingIdRoute: typeof ThinkingEditorThinkingIdRoute
   NotesEditorIndexRoute: typeof NotesEditorIndexRoute
   PostsEditorIndexRoute: typeof PostsEditorIndexRoute
+  ThinkingEditorIndexRoute: typeof ThinkingEditorIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -187,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/topics'
       fullPath: '/topics/'
       preLoaderRoute: typeof TopicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/thinking/': {
+      id: '/thinking/'
+      path: '/thinking'
+      fullPath: '/thinking/'
+      preLoaderRoute: typeof ThinkingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tags/': {
@@ -210,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/comments/': {
+      id: '/comments/'
+      path: '/comments'
+      fullPath: '/comments/'
+      preLoaderRoute: typeof CommentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories/': {
       id: '/categories/'
       path: '/categories'
@@ -224,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiKeysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/thinking/editor/': {
+      id: '/thinking/editor/'
+      path: '/thinking/editor'
+      fullPath: '/thinking/editor/'
+      preLoaderRoute: typeof ThinkingEditorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/editor/': {
       id: '/posts/editor/'
       path: '/posts/editor'
@@ -236,6 +310,13 @@ declare module '@tanstack/react-router' {
       path: '/notes/editor'
       fullPath: '/notes/editor/'
       preLoaderRoute: typeof NotesEditorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/thinking/editor/$thinkingId': {
+      id: '/thinking/editor/$thinkingId'
+      path: '/thinking/editor/$thinkingId'
+      fullPath: '/thinking/editor/$thinkingId'
+      preLoaderRoute: typeof ThinkingEditorThinkingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/editor/$postId': {
@@ -259,14 +340,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiKeysIndexRoute: ApiKeysIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
+  CommentsIndexRoute: CommentsIndexRoute,
   NotesIndexRoute: NotesIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   TagsIndexRoute: TagsIndexRoute,
+  ThinkingIndexRoute: ThinkingIndexRoute,
   TopicsIndexRoute: TopicsIndexRoute,
   NotesEditorNoteIdRoute: NotesEditorNoteIdRoute,
   PostsEditorPostIdRoute: PostsEditorPostIdRoute,
+  ThinkingEditorThinkingIdRoute: ThinkingEditorThinkingIdRoute,
   NotesEditorIndexRoute: NotesEditorIndexRoute,
   PostsEditorIndexRoute: PostsEditorIndexRoute,
+  ThinkingEditorIndexRoute: ThinkingEditorIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
