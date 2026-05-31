@@ -207,7 +207,7 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
         <div className="relative h-8">
           {/* 主軸線 */}
           <div className="absolute inset-0 flex items-center">
-            <div className="h-px w-full bg-neutral-10/15" />
+            <div className="h-px w-full bg-neutral-100/15" />
           </div>
 
           {/* 最近一季的主題色強調段 */}
@@ -236,7 +236,7 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
                         <span
                           className={`block rounded-full transition-transform duration-200 group-hover/dot:scale-150 ${
                             big ? 'size-2' : 'size-1.5'
-                          } ${isRecent ? 'bg-primary/70' : 'bg-neutral-10/40'}`}
+                          } ${isRecent ? 'bg-primary/70' : 'bg-neutral-100/40'}`}
                         />
                       </button>
                     }
@@ -319,12 +319,12 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
             <div className="flex items-baseline justify-between">
               <span
                 className={`font-serif text-base tracking-[2px] ${
-                  group.accent ? 'text-primary' : 'text-neutral-10/70'
+                  group.accent ? 'text-primary' : 'text-neutral-100/70'
                 }`}
               >
                 {group.label}
               </span>
-              <span className="text-xs text-neutral-10/40">
+              <span className="text-xs text-neutral-100/40">
                 {group.items.length} 篇
               </span>
             </div>
@@ -333,7 +333,7 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
               <div className="absolute inset-0 flex items-center">
                 <div
                   className={`h-px w-full ${
-                    group.accent ? 'bg-primary/40' : 'bg-neutral-10/15'
+                    group.accent ? 'bg-primary/40' : 'bg-neutral-100/15'
                   }`}
                 />
               </div>
@@ -347,7 +347,7 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
                 >
                   <span
                     className={`block size-1.5 rounded-full transition-transform group-hover/mdot:scale-150 ${
-                      group.accent ? 'bg-primary/70' : 'bg-neutral-10/40'
+                      group.accent ? 'bg-primary/70' : 'bg-neutral-100/40'
                     }`}
                   />
                 </Link>
@@ -357,7 +357,7 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
               )}
             </div>
 
-            <div className="mt-2 text-[11px] text-neutral-10/40">
+            <div className="mt-2 text-[11px] text-neutral-100/40">
               {group.yearLabel}
             </div>
 
