@@ -21,6 +21,7 @@ import {
   Home,
   KeyRoundIcon,
   LayoutDashboardIcon,
+  MessageSquareIcon,
   NotebookPenIcon,
   PlusIcon,
   Square,
@@ -137,9 +138,17 @@ const AppSidebar = () => {
                   <span>專欄</span>
                 </Link>
               } />
-              <SidebarMenuAction render={
-                <Link to="/topics/editor">
-                  <PlusIcon /> <span className="sr-only">新增專欄</span>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        {/* 留言管理 */}
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={
+                <Link to="/comments">
+                  <MessageSquareIcon />
+                  <span>留言管理</span>
                 </Link>
               } />
             </SidebarMenuItem>
