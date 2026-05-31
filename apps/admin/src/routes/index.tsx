@@ -1,19 +1,29 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@sao-blog/ui/components/button"
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import AdminShell from '@/components/layout/admin-shell'
+import { StatCards } from '@/components/dashboard/stat-cards'
+import { CommentTrendChart } from '@/components/dashboard/comment-trend-chart'
+import { orpc } from '@/utils/orpc'
 
-export const Route = createFileRoute("/")({ component: App })
+export const Route = createFileRoute('/')({ component: App })
 
 function App() {
+  const { data, status } = useQuery(
+    orpc.admin.dashboard.getOverview.queryOptions()
+  )
+
+  const isLoading = status === 'pending'
+  const overview = data?.data
+
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
+    <AdminShell title="儀表板">
+      <div className="space-y-6">
+        <StatCards counts={overview?.counts} isLoading={isLoading} />
+        <CommentTrendChart
+          data={overview?.commentTrend}
+          isLoading={isLoading}
+        />
       </div>
-    </div>
+    </AdminShell>
   )
 }
