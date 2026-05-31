@@ -110,18 +110,23 @@ const getHome = publicProcedure
             (item) => new Date(item.createdAt).getFullYear() === currentYear
         ).length;
 
-        // 時間軸顯示「滾動的近 12 個月」窗口（夏 → 秋 → 冬 → 春）
-        const windowStart = new Date(now);
-        windowStart.setFullYear(windowStart.getFullYear() - 1);
-        const timelineItems = writing
-            .filter((item) => new Date(item.createdAt) >= windowStart)
-            .map((item) => ({
-                id: item.id,
-                title: item.title,
-                href: item.href,
-                type: item.type,
-                createdAt: item.createdAt,
-            }));
+        // 時間軸涵蓋所有作品：從最早一篇到今天，確保每篇都有對應的點
+        // writing 已由新到舊排序，最後一筆即最早的作品
+        const earliest = writing.at(-1);
+        const windowStart = earliest
+            ? new Date(earliest.createdAt)
+            : (() => {
+                  const d = new Date(now);
+                  d.setFullYear(d.getFullYear() - 1);
+                  return d;
+              })();
+        const timelineItems = writing.map((item) => ({
+            id: item.id,
+            title: item.title,
+            href: item.href,
+            type: item.type,
+            createdAt: item.createdAt,
+        }));
 
         const musings = musingRows.map(({ noteTitle, ...musing }) => ({
             ...musing,
