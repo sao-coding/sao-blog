@@ -9,9 +9,9 @@ import {
 } from "@sao-blog/db/schema/index";
 import { eq, desc } from "drizzle-orm";
 
-const RECENT_WRITING_LIMIT = 5;
+const RECENT_WRITING_LIMIT = 6;
 const MUSINGS_LIMIT = 4;
-const LETTERS_LIMIT = 3;
+const LETTERS_LIMIT = 1;
 
 const toIso = (value: Date | string) =>
     value instanceof Date ? value.toISOString() : new Date(value).toISOString();
