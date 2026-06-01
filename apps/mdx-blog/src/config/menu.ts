@@ -92,9 +92,9 @@ export const NAV_LINKS: NavLinks = [
       // { icon: IconUser, href: "/about", text: "關於我", show: true },
       // { icon: IconTags, href: "/tags", text: "標籤", show: true },
       {
-        icon: IconBrandX,
-        href: '/nav-test',
-        text: '推特',
+        icon: IconBrandGithub,
+        href: 'https://github.com/sao-coding',
+        text: 'GitHub',
         show: true,
       },
     ],
