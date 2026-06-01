@@ -197,7 +197,9 @@ export const topics = pgTable('topics', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
-})
+}, (table) => [
+  index('topics_slug_idx').on(table.slug),
+])
 
 // 日記
 export const notes = pgTable('notes', {
@@ -231,7 +233,14 @@ export const notes = pgTable('notes', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
-})
+}, (table) => [
+  // 日記幾乎都以 status 過濾、createdAt 排序，補上索引避免全表掃描
+  index('notes_status_idx').on(table.status),
+  index('notes_created_idx').on(table.createdAt),
+  index('notes_status_created_idx').on(table.status, table.createdAt),
+  index('notes_author_idx').on(table.authorId),
+  index('notes_topic_idx').on(table.topicId),
+])
 
 // 想法（隨手記錄當下的心情、碎碎念）
 export const thinkings = pgTable(

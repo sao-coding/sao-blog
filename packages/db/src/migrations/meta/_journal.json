@@ -78,6 +78,13 @@
       "when": 1780226384082,
       "tag": "0010_sweet_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780308180387,
+      "tag": "0011_wandering_imperial_guard",
+      "breakpoints": true
     }
   ]
 }
