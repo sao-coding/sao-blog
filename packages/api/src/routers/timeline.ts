@@ -3,6 +3,7 @@ import { db } from "@sao-blog/db";
 import { categories, notes, posts } from "@sao-blog/db/schema/index";
 import { eq } from "drizzle-orm";
 import { TimelineInputSchema, TimelineResponseSchema } from "../schema/timeline";
+import { toIso } from "../lib/datetime";
 
 const getTimeLine = publicProcedure
     .route({ method: "GET", path: "/timeline" })
@@ -39,9 +40,6 @@ const getTimeLine = publicProcedure
                 .from(notes)
             : [];
 
-        const toIsoString = (value: Date | string) =>
-            value instanceof Date ? value.toISOString() : new Date(value).toISOString();
-
         const timelineItems = [
             ...postRows.map((post) => ({
                 id: String(post.id),
@@ -51,8 +49,8 @@ const getTimeLine = publicProcedure
                 category: post.category,
                 weather: null,
                 mood: null,
-                createdAt: toIsoString(post.createdAt),
-                updatedAt: toIsoString(post.updatedAt),
+                createdAt: toIso(post.createdAt),
+                updatedAt: toIso(post.updatedAt),
             })),
             ...noteRows.map((note) => ({
                 id: String(note.id),
@@ -62,8 +60,8 @@ const getTimeLine = publicProcedure
                 category: null,
                 weather: note.weather,
                 mood: note.mood,
-                createdAt: toIsoString(note.createdAt),
-                updatedAt: toIsoString(note.updatedAt),
+                createdAt: toIso(note.createdAt),
+                updatedAt: toIso(note.updatedAt),
             })),
         ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
