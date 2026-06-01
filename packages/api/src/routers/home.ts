@@ -8,6 +8,7 @@ import {
     thinkings,
 } from "@sao-blog/db/schema/index";
 import { eq, desc } from "drizzle-orm";
+import { mdxToExcerpt } from "../lib/mdx-to-text";
 
 const RECENT_WRITING_LIMIT = 6;
 const MUSINGS_LIMIT = 4;
@@ -130,6 +131,7 @@ const getHome = publicProcedure
 
         const musings = musingRows.map(({ noteTitle, ...musing }) => ({
             ...musing,
+            content: mdxToExcerpt(musing.content, 100),
             createdAt: toIso(musing.createdAt),
             note:
                 musing.noteId && noteTitle

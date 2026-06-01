@@ -5,6 +5,7 @@ import { type TagModel } from "@sao-blog/db/schema/index";
 import { PostResponseSchema, PostsResponseSchema } from "../schema/post";
 import { eq, inArray } from "drizzle-orm";
 import z from "zod";
+import { mdxToExcerpt } from "../lib/mdx-to-text";
 
 const getPosts = publicProcedure
     .route({ method: "GET", path: "/posts" })
@@ -46,17 +47,22 @@ const getPosts = publicProcedure
         }
 
         // 3) 直接回傳資料庫原始欄位（不重新命名），並把 author/category/tags 附加上去
-        const result = rows.map((r) => {
-            const { post, author, category } = r;
-            const tags = tagsByPost.get(String(post.id)) ?? [];
+        // summary 為 null 時，從 content 自動產生純文字摘要
+        const result = await Promise.all(
+            rows.map(async (r) => {
+                const { post, author, category } = r;
+                const tags = tagsByPost.get(String(post.id)) ?? [];
+                const summary = post.summary ?? await mdxToExcerpt(post.content);
 
-            return {
-                ...post,
-                author,
-                category,
-                tags,
-            };
-        });
+                return {
+                    ...post,
+                    summary,
+                    author,
+                    category,
+                    tags,
+                };
+            })
+        );
 
         return {
             status: "success",
