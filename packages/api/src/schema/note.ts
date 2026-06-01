@@ -30,3 +30,11 @@ export const noteInputSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
 });
+
+// 單篇日記（可能為 null）
+export const NoteResponseSchema = createApiResponseSchema(noteSchema.nullable());
+
+// 最新日記 ID
+export const NoteLatestResponseSchema = createApiResponseSchema(
+    z.object({ id: z.string().nullable() })
+);
