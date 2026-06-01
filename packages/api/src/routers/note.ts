@@ -3,8 +3,11 @@ import { db } from "@sao-blog/db";
 import { notes, topics, user } from "@sao-blog/db/schema/index";
 import { eq, desc, asc, and, lt, gt, inArray } from "drizzle-orm";
 import z from "zod";
+import { NoteLatestResponseSchema, NoteResponseSchema } from "../schema/note";
 
 // notes?id= 獲取日記列表（用於首頁或日記列表頁面）
+// 註：此 procedure 會依是否帶 id 回傳兩種不同形狀（{current,prev,next} 或陣列），
+// 屬多型回應，故暫未加 .output()。建議後續拆成兩個獨立 procedure 再各自加 schema。
 const getNotes = publicProcedure
     .route({ method: "GET", path: "/notes" })
     .input(z.object({
@@ -112,6 +115,7 @@ const getNotes = publicProcedure
 
 const getNoteLatest = publicProcedure
     .route({ method: "GET", path: "/notes/latest" })
+    .output(NoteLatestResponseSchema)
     .handler(async () => {
         const note = await db
             .select()
@@ -135,6 +139,7 @@ const getNote = publicProcedure
     .input(z.object({
         id: z.string(),
     }))
+    .output(NoteResponseSchema)
     .handler(async ({ input }) => {
         const noteId = input.id;
         const note = await db
