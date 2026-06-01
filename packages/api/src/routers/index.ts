@@ -15,7 +15,6 @@ import adminTopicRouter from "./admin/topic";
 import adminCommentRouter from "./admin/comment";
 import adminDashboardRouter from "./admin/dashboard";
 import adminThinkingRouter from "./admin/thinking";
-import timeline from "./timeline";
 import linkPreviewRouter from "./link-preview";
 
 export const appRouter = {
