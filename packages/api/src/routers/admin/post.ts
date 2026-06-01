@@ -5,6 +5,7 @@ import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blo
 import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
+import { mdxToExcerpt } from "../../lib/mdx-to-text";
 
 // 管理員系統員系統
 
@@ -108,6 +109,11 @@ const createPost = protectedProcedure
         // 取得當前登入使用者 ID
         const authorId = context.session.user.id;
 
+        // summary 未填時，於儲存階段先從 content 產生純文字摘要，
+        // 避免前台列表每次請求都即時解析 MDX
+        const resolvedSummary =
+            summary && summary.trim() ? summary : await mdxToExcerpt(content);
+
         // 檢查 slug 是否已存在
         const existing = await db
             .select()
@@ -131,7 +137,7 @@ const createPost = protectedProcedure
                 slug,
                 title,
                 content,
-                summary: summary ?? null,
+                summary: resolvedSummary,
                 authorId,
                 categoryId: category?.id || null,
                 cover: cover ?? null,
@@ -212,6 +218,10 @@ const updatePost = protectedProcedure
             };
         }
 
+        // summary 未填時，於儲存階段先從 content 產生純文字摘要
+        const resolvedSummary =
+            summary && summary.trim() ? summary : await mdxToExcerpt(content);
+
         // 更新文章主資料
         const [updatedPost] = await db
             .update(posts)
@@ -219,7 +229,7 @@ const updatePost = protectedProcedure
                 slug,
                 title,
                 content,
-                summary,
+                summary: resolvedSummary,
                 categoryId: category?.id || null,
                 cover: cover || null,
                 allowComments,
