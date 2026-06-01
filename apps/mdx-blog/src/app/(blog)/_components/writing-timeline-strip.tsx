@@ -272,7 +272,7 @@ export function WritingTimelineStrip({ timeline }: WritingTimelineStripProps) {
           {/* 今日標記 */}
           <div className="absolute top-1/2 right-0 -translate-y-1/2">
             <div className="h-3 w-px bg-primary" />
-            <span className="absolute -top-0.5 right-0 text-[11px] text-primary">
+            <span className="absolute -top-0.5 left-1 text-[11px] text-primary">
               今
             </span>
           </div>

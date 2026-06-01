@@ -50,8 +50,6 @@ export function HomeEditorial({
   musings,
   letters,
 }: HomeEditorialProps) {
-  const [featured, ...rest] = recentWriting
-
   return (
     <motion.section
       initial={{ opacity: 0, y: 24 }}
@@ -64,65 +62,65 @@ export function HomeEditorial({
       <div>
         <SectionLabel en="Recent Writing" zh="近期筆墨" />
 
-        <div className="relative pl-5">
-          {/* 主題色漸層左線 */}
+        <div className="relative">
+          {/* 基礎線 */}
           <span
             aria-hidden
-            className="absolute top-1 bottom-1 left-0 w-0.5 rounded-full bg-gradient-to-b from-primary via-primary/40 to-transparent"
+            className="pointer-events-none absolute inset-y-2 left-[18px] w-0.5 bg-neutral-10/15"
+          />
+          {/* 主題色漸層（覆蓋上方） */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute top-2 left-[18px] h-[58%] w-0.5 bg-gradient-to-b from-primary to-transparent"
           />
 
-          {featured && (
-            <Link href={featured.href} className="group block">
-              <p className="mb-2 text-xs text-neutral-10/40">
-                <span className="text-primary">01</span>
-                <span className="mx-2">{TYPE_LABEL[featured.type]}</span>·
-                <span className="mx-2">{fromNow(featured.createdAt)}</span>
-                {featured.weather && WEATHER_LABEL[featured.weather] && (
-                  <>
-                    ·
-                    <span className="ml-2">
-                      {WEATHER_LABEL[featured.weather]}
-                    </span>
-                  </>
-                )}
-              </p>
-              <h3 className="text-xl font-medium text-neutral-10/90 transition-colors group-hover:text-primary">
-                {featured.title}
-              </h3>
-            </Link>
-          )}
-
-          <ul className="mt-6 space-y-5">
-            {rest.map((item, index) => (
-              <li key={item.id}>
-                <Link
-                  href={item.href}
-                  className="group flex items-baseline justify-between gap-4"
+          {recentWriting.map((item, index) => {
+            const isFeatured = index === 0
+            return (
+              <div key={item.id} className="relative py-4 pl-10">
+                <span
+                  className={`absolute top-4 left-[19px] -translate-x-1/2 bg-stone-900 px-1 text-xs font-medium tracking-[0.5px] tabular-nums ${
+                    isFeatured ? 'text-primary' : 'text-neutral-10/40'
+                  }`}
                 >
-                  <div className="flex min-w-0 items-baseline gap-3">
-                    <span className="shrink-0 text-xs text-neutral-10/30 tabular-nums">
-                      {String(index + 2).padStart(2, '0')}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px] text-neutral-10/80 transition-colors group-hover:text-primary">
-                        {item.title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-neutral-10/40">
-                        {TYPE_LABEL[item.type]}
-                        {item.category && ` · ${item.category}`}
-                      </p>
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+
+                {isFeatured ? (
+                  <Link href={item.href} className="group block">
+                    <div className="text-xs text-neutral-10/40">
+                      {TYPE_LABEL[item.type]} · {fromNow(item.createdAt)}
+                      {item.weather &&
+                        WEATHER_LABEL[item.weather] &&
+                        ` · ${WEATHER_LABEL[item.weather]}`}
                     </div>
-                  </div>
-                  <span className="shrink-0 text-xs text-neutral-10/40">
-                    {fromNow(item.createdAt)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-            {recentWriting.length === 0 && (
-              <li className="text-sm text-neutral-10/40">尚無作品</li>
-            )}
-          </ul>
+                    <div className="mt-2 text-xl leading-normal font-medium text-neutral-10/90 transition-colors group-hover:text-primary">
+                      {item.title}
+                    </div>
+                  </Link>
+                ) : (
+                  <Link href={item.href} className="group block">
+                    <div className="flex items-baseline justify-between gap-5">
+                      <span className="text-[15px] text-neutral-10/80 transition-colors group-hover:text-primary">
+                        {item.title}
+                      </span>
+                      <span className="shrink-0 text-xs whitespace-nowrap text-neutral-10/40 tabular-nums">
+                        {fromNow(item.createdAt)}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-neutral-10/40">
+                      {TYPE_LABEL[item.type]}
+                      {item.category && ` · ${item.category}`}
+                    </div>
+                  </Link>
+                )}
+              </div>
+            )
+          })}
+
+          {recentWriting.length === 0 && (
+            <p className="py-4 pl-10 text-sm text-neutral-10/40">尚無作品</p>
+          )}
         </div>
       </div>
 
