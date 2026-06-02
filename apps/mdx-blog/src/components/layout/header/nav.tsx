@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -15,6 +15,10 @@ import { NAV_LINKS, type NavCard } from '@/config/menu'
 import { cn } from '@/lib/utils'
 import { Icon } from '@tabler/icons-react'
 import MenuCard from './cards/menu-cards'
+
+// SSR 時退回 useEffect，避免 useLayoutEffect 警告（量測只在客戶端 hover 時才需要）
+const useIsoLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 interface AnimatedHeaderProps {
   iconLayout?: boolean
@@ -36,6 +40,14 @@ const Nav = ({
 
   const navRef = useRef<HTMLElement>(null)
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // morph 用：各導覽項目的 DOM ref（量測觸發點位置）、卡片量測容器、卡片尺寸
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [cardSize, setCardSize] = useState<{
+    width: number
+    height: number
+  } | null>(null)
 
   // 滑鼠位置追蹤
   const mouseX = useMotionValue(0)
@@ -141,6 +153,26 @@ const Nav = ({
     }
   }, [])
 
+  // 切換項目時於繪製前先量測卡片尺寸，避免第一幀位置跳動（morph 用）
+  useIsoLayoutEffect(() => {
+    if (!openDropdown) return
+    const el = measureRef.current
+    if (!el) return
+    setCardSize({ width: el.offsetWidth, height: el.offsetHeight })
+  }, [openDropdown])
+
+  // 卡片內容（含非同步資料）載入後尺寸可能改變，持續同步給容器做 morph
+  useEffect(() => {
+    if (!openDropdown) return
+    const el = measureRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(() => {
+      setCardSize({ width: el.offsetWidth, height: el.offsetHeight })
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [openDropdown])
+
   const shouldAnimate = iconLayout && !prefersReducedMotion
 
   const spotlightBackground = useMotionTemplate`radial-gradient(ellipse 200px 100px at ${mouseX}px ${mouseY}px, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.08) 40%, transparent 70%)`
@@ -208,6 +240,16 @@ const Nav = ({
     setOpenDropdown(null)
   }
 
+  // morph 用：當前展開的卡片、對應觸發點位置與目標尺寸
+  const navItems = getNavItemsToShow()
+  const activeItem = openDropdown
+    ? navItems.find((i) => i.stableKey === openDropdown)
+    : undefined
+  const activeCard = activeItem?.card
+  const activeEl = openDropdown ? itemRefs.current.get(openDropdown) : null
+  const centerX = activeEl ? activeEl.offsetLeft + activeEl.offsetWidth / 2 : 0
+  const targetLeft = cardSize ? centerX - cardSize.width / 2 : centerX
+
   return (
     <nav
       ref={navRef}
@@ -229,11 +271,10 @@ const Nav = ({
 
       <LayoutGroup>
         <div className="flex items-center relative">
-          {getNavItemsToShow().map((item) => {
+          {navItems.map((item) => {
             // 使用在 getNavItemsToShow 中計算的 active 標記，支援子項目精確匹配與父路由前綴匹配
             const isActive = Boolean(item.active)
 
-            const isDropdownOpen = openDropdown === item.stableKey
             const isHovered = hoveredItem === item.stableKey
 
             // 如果沒有 href，渲染為 button 而不是 Link
@@ -334,6 +375,10 @@ const Nav = ({
             return (
               <m.div
                 key={item.stableKey}
+                ref={(el: HTMLDivElement | null) => {
+                  if (el) itemRefs.current.set(item.stableKey, el)
+                  else itemRefs.current.delete(item.stableKey)
+                }}
                 layout={shouldAnimate}
                 transition={{
                   type: 'spring',
@@ -374,45 +419,64 @@ const Nav = ({
                     {content}
                   </button>
                 )}
-
-                {/* 下拉選單（hover 卡片） */}
-                {item.hasCard && item.card && (
-                  <AnimatePresence>
-                    {isDropdownOpen && (
-                      <m.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 500,
-                          damping: 25,
-                          mass: 0.8,
-                        }}
-                        className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 w-max bg-gray-800/95 backdrop-blur-md border border-gray-600/50 rounded-lg shadow-xl overflow-hidden z-50"
-                        onMouseEnter={handleDropdownMouseEnter}
-                        onMouseLeave={handleDropdownMouseLeave}
-                      >
-                        <div className="absolute -top-2 left-0 right-0 h-3 bg-transparent" />
-
-                        <MenuCard
-                          card={item.card}
-                          onNavigate={() => {
-                            if (dropdownTimeoutRef.current) {
-                              clearTimeout(dropdownTimeoutRef.current)
-                              dropdownTimeoutRef.current = null
-                            }
-                            setOpenDropdown(null)
-                            setHoveredItem(null)
-                          }}
-                        />
-                      </m.div>
-                    )}
-                  </AnimatePresence>
-                )}
               </m.div>
             )
           })}
+
+          {/*
+            共用下拉容器（morph）：所有項目共用同一個元件，切換項目時平滑變形
+            （位置 left、尺寸 width/height 一起做 spring），內容交叉淡入淡出。
+          */}
+          <AnimatePresence>
+            {activeCard && (
+              <m.div
+                key="shared-dropdown"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  left: targetLeft,
+                  width: cardSize?.width,
+                  height: cardSize?.height,
+                }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 500,
+                  damping: 32,
+                  mass: 0.8,
+                }}
+                className="absolute top-full mt-3 bg-gray-800/95 backdrop-blur-md border border-gray-600/50 rounded-lg shadow-xl overflow-hidden z-50"
+                onMouseEnter={handleDropdownMouseEnter}
+                onMouseLeave={handleDropdownMouseLeave}
+              >
+                {/* 量測容器：以自然尺寸量測卡片，供外層 morph 對齊 */}
+                <div ref={measureRef} className="w-max">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <m.div
+                      key={activeCard}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <MenuCard
+                        card={activeCard}
+                        onNavigate={() => {
+                          if (dropdownTimeoutRef.current) {
+                            clearTimeout(dropdownTimeoutRef.current)
+                            dropdownTimeoutRef.current = null
+                          }
+                          setOpenDropdown(null)
+                          setHoveredItem(null)
+                        }}
+                      />
+                    </m.div>
+                  </AnimatePresence>
+                </div>
+              </m.div>
+            )}
+          </AnimatePresence>
         </div>
       </LayoutGroup>
     </nav>

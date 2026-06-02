@@ -8,7 +8,6 @@ import 'dayjs/locale/zh-tw'
 import type { InferClientOutputs } from '@orpc/client'
 
 import { orpc, type client } from '@/lib/orpc'
-import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { NavCard } from '@/config/menu'
 import { SOCIAL_LINKS } from '@/config/menu'
