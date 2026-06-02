@@ -9,6 +9,7 @@ function getDefaultRedirectPath(pathname: string): string | null {
   if (pathname === '/posts') return '/admin/posts'
   if (pathname === '/notes') return '/admin/notes'
   if (pathname === '/notes/topics') return '/admin/topics'
+  if (pathname === '/thinking') return '/admin/thinking'
   if (pathname === '/timeline') return '/admin'
   if (pathname.startsWith('/categories/')) return '/admin/categories'
   // /notes/[id] — note IDs are UUIDs, redirect to admin notes editor
@@ -25,6 +26,7 @@ export function AdminShortcutProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const redirectPath = overridePath ?? getDefaultRedirectPath(pathname)
+    console.log('AdminShortcutProvider: pathname=', pathname, 'overridePath=', overridePath, 'redirectPath=', redirectPath)
     if (!redirectPath) return
 
     function handleKeyDown(e: KeyboardEvent) {
