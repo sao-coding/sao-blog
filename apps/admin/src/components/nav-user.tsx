@@ -75,7 +75,7 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem render={
-                <Link to="/">
+                <Link to={window.location.href}>
                   <HomeIcon />
                   Blog 首頁
                 </Link>
