@@ -11,9 +11,10 @@ import {
   useMotionValue,
   AnimatePresence,
 } from 'motion/react'
-import { NAV_LINKS } from '@/config/menu'
+import { NAV_LINKS, type NavCard } from '@/config/menu'
 import { cn } from '@/lib/utils'
 import { Icon } from '@tabler/icons-react'
+import MenuCard from './cards/menu-cards'
 
 interface AnimatedHeaderProps {
   iconLayout?: boolean
@@ -53,6 +54,9 @@ const Nav = ({
       parentIcon?: Icon
       childHref?: string
       hasChildren: boolean
+      // 滑鼠移上時要展開的卡片類型（取代原本的純文字 children 下拉）
+      card?: NavCard
+      hasCard: boolean
       active?: boolean
       // 添加一個穩定的 key 來避免動畫重新觸發
       stableKey: string
@@ -82,6 +86,8 @@ const Nav = ({
           parentIcon: link.icon,
           childHref: activeChild.href,
           hasChildren: Boolean(link.children && link.children.length > 0),
+          card: link.card,
+          hasCard: Boolean(link.card),
           // 使用父項目的 index 作為穩定的 key
           stableKey: `parent-${index}`,
           parentIndex: index,
@@ -95,6 +101,8 @@ const Nav = ({
           text: link.text,
           isChild: false,
           hasChildren: Boolean(link.children && link.children.length > 0),
+          card: link.card,
+          hasCard: Boolean(link.card),
           // 使用自身的 href 或 index 作為穩定的 key
           stableKey: link.href || `parent-${index}`,
           parentIndex: index,
@@ -225,8 +233,6 @@ const Nav = ({
             // 使用在 getNavItemsToShow 中計算的 active 標記，支援子項目精確匹配與父路由前綴匹配
             const isActive = Boolean(item.active)
 
-            // 使用 parentIndex 來正確查找原始項目
-            const originalLink = NAV_LINKS[item.parentIndex]
             const isDropdownOpen = openDropdown === item.stableKey
             const isHovered = hoveredItem === item.stableKey
 
@@ -337,7 +343,7 @@ const Nav = ({
                 }}
                 className="relative"
                 onMouseEnter={() =>
-                  handleNavItemMouseEnter(item.stableKey, item.hasChildren)
+                  handleNavItemMouseEnter(item.stableKey, item.hasCard)
                 }
                 onMouseLeave={handleNavItemMouseLeave}
               >
@@ -369,8 +375,8 @@ const Nav = ({
                   </button>
                 )}
 
-                {/* 下拉選單 */}
-                {item.hasChildren && originalLink && (
+                {/* 下拉選單（hover 卡片） */}
+                {item.hasCard && item.card && (
                   <AnimatePresence>
                     {isDropdownOpen && (
                       <m.div
@@ -389,31 +395,17 @@ const Nav = ({
                       >
                         <div className="absolute -top-2 left-0 right-0 h-3 bg-transparent" />
 
-                        <div className="py-2">
-                          {originalLink.children?.map((child) => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              onClick={() => {
-                                if (dropdownTimeoutRef.current) {
-                                  clearTimeout(dropdownTimeoutRef.current)
-                                  dropdownTimeoutRef.current = null
-                                }
-                                setOpenDropdown(null)
-                                setHoveredItem(null)
-                              }}
-                              className="block px-4 py-2 text-sm text-gray-300 hover:text-teal-400 hover:bg-gray-700/50 transition-all duration-200"
-                            >
-                              {child.icon && (
-                                <child.icon
-                                  size={14}
-                                  className="inline-block mr-2"
-                                />
-                              )}
-                              {child.text}
-                            </Link>
-                          ))}
-                        </div>
+                        <MenuCard
+                          card={item.card}
+                          onNavigate={() => {
+                            if (dropdownTimeoutRef.current) {
+                              clearTimeout(dropdownTimeoutRef.current)
+                              dropdownTimeoutRef.current = null
+                            }
+                            setOpenDropdown(null)
+                            setHoveredItem(null)
+                          }}
+                        />
                       </m.div>
                     )}
                   </AnimatePresence>

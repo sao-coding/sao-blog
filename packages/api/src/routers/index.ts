@@ -17,6 +17,7 @@ import adminDashboardRouter from "./admin/dashboard";
 import adminThinkingRouter from "./admin/thinking";
 import linkPreviewRouter from "./link-preview";
 import topicRouter from "./topic";
+import menuRouter from "./menu";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -36,6 +37,7 @@ export const appRouter = {
   home: homeRouter,
   linkPreview: linkPreviewRouter,
   topic: topicRouter,
+  menu: menuRouter,
   admin: o.prefix('/admin').router({
     post: adminPostRouter,
     category: adminCategoryRouter,

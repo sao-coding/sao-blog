@@ -19,10 +19,21 @@ import {
   IconUser,
 } from '@tabler/icons-react'
 
+// 導覽列 hover 卡片類型（對應 components/layout/header/cards）
+export type NavCard =
+  | 'home'
+  | 'posts'
+  | 'notes'
+  | 'thinking'
+  | 'timeline'
+  | 'more'
+
 type NavLinks = {
   icon?: Icon
   href?: string
   text: string
+  // 滑鼠移上時要展開的卡片（取代原本只靠 children 顯示的純文字下拉）
+  card?: NavCard
   children?: { icon?: Icon; href: string; text: string; show: boolean }[]
 }[]
 
@@ -31,11 +42,13 @@ export const NAV_LINKS: NavLinks = [
     icon: IconHome,
     href: '/',
     text: '首頁',
+    card: 'home',
   },
   {
     icon: IconSignature,
     href: '/posts',
     text: '文章',
+    card: 'posts',
     children: [
       {
         href: '/categories/programming',
@@ -54,16 +67,19 @@ export const NAV_LINKS: NavLinks = [
     icon: IconCategory,
     href: '/notes',
     text: '日記',
+    card: 'notes',
   },
   {
     icon: IconBubbleText,
     href: '/thinking',
     text: '想法',
+    card: 'thinking',
   },
   {
     icon: IconHistory,
     href: '/timeline',
     text: '時光',
+    card: 'timeline',
     children: [
       {
         icon: IconCategory,
@@ -88,6 +104,7 @@ export const NAV_LINKS: NavLinks = [
   // 更多
   {
     text: '更多',
+    card: 'more',
     children: [
       // { icon: IconUser, href: "/about", text: "關於我", show: true },
       // { icon: IconTags, href: "/tags", text: "標籤", show: true },
