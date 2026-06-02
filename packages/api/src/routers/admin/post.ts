@@ -1,6 +1,6 @@
 import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
@@ -166,6 +166,14 @@ const createPost = protectedProcedure
             await db.insert(postTags).values(tagInserts);
         }
 
+        // 更新分類文章數量
+        if (category?.id) {
+            await db
+                .update(categories)
+                .set({ postCount: sql`${categories.postCount} + 1` })
+                .where(eq(categories.id, category.id));
+        }
+
         return {
             status: "success",
             message: "文章建立成功",
@@ -191,6 +199,13 @@ const updatePost = protectedProcedure
             pinOrder,
             status,
         } = input;
+
+        // 取得文章目前的分類（用於後續計數調整）
+        const [currentPost] = await db
+            .select({ categoryId: posts.categoryId })
+            .from(posts)
+            .where(eq(posts.id, id!))
+            .limit(1);
 
         // 檢查 slug 是否被其他文章使用
         const existing = await db
@@ -261,6 +276,24 @@ const updatePost = protectedProcedure
             await db.insert(postTags).values(tagInserts);
         }
 
+        // 更新分類文章數量：舊分類 -1，新分類 +1
+        const oldCategoryId = currentPost?.categoryId ?? null;
+        const newCategoryId = category?.id ?? null;
+        if (oldCategoryId !== newCategoryId) {
+            if (oldCategoryId) {
+                await db
+                    .update(categories)
+                    .set({ postCount: sql`GREATEST(${categories.postCount} - 1, 0)` })
+                    .where(eq(categories.id, oldCategoryId));
+            }
+            if (newCategoryId) {
+                await db
+                    .update(categories)
+                    .set({ postCount: sql`${categories.postCount} + 1` })
+                    .where(eq(categories.id, newCategoryId));
+            }
+        }
+
         return {
             status: "success",
             message: "文章更新成功",
@@ -287,6 +320,20 @@ const deletePosts = protectedProcedure
           message: "找不到可刪除的文章",
           data: null,
         };
+      }
+
+      // 更新受影響分類的文章數量
+      const categoryIds = [
+        ...new Set(
+          deletedPosts.map((p) => p.categoryId).filter((id): id is string => id !== null)
+        ),
+      ];
+      for (const categoryId of categoryIds) {
+        const count = deletedPosts.filter((p) => p.categoryId === categoryId).length;
+        await db
+          .update(categories)
+          .set({ postCount: sql`GREATEST(${categories.postCount} - ${count}, 0)` })
+          .where(eq(categories.id, categoryId));
       }
 
       return {
