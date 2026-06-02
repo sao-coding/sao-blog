@@ -9,14 +9,10 @@ export type MegaMenuLink = {
 // 首頁卡片右側「頁面」清單
 export const PROFILE_PAGE_LINKS: MegaMenuLink[] = [
   { text: '自述', href: '#' },
-  { text: '人設', href: '#' },
-  { text: '靈魂', href: '#' },
   { text: '此站點', href: '#' },
   { text: '歷史', href: '#' },
   { text: '迭代', href: '#' },
   { text: '留言', href: '#' },
-  { text: '關於友鏈', href: '#' },
-  { text: '一對一諮詢', href: '#' },
   { text: '贊助', href: '#' },
 ]
 
@@ -30,7 +26,7 @@ export const MORE_LINKS: MegaMenuLink[] = [
 
 // 站長資訊
 export const SITE_OWNER = {
-  name: 'Innei',
+  name: '唯一',
   status: '在線',
   avatar: '/img/avatar.jpg',
   fallback: '唯',
