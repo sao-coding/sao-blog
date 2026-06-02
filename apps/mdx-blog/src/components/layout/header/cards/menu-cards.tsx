@@ -160,8 +160,8 @@ const PostsCard = ({
   data: MenuData
   onNavigate?: () => void
 }) => (
-  <div className="w-[34rem]">
-    <div className="flex gap-6 p-5">
+  <div className="w-108">
+    <div className="flex gap-6 p-3">
       {/* 分類 */}
       <div className="w-40 shrink-0">
         <SectionLabel>分類</SectionLabel>
@@ -219,8 +219,8 @@ const NotesCard = ({
   data: MenuData
   onNavigate?: () => void
 }) => (
-  <div className="w-[34rem]">
-    <div className="flex gap-6 p-5">
+  <div className="w-108">
+    <div className="flex gap-6 p-3">
       {/* 專欄 */}
       <div className="w-40 shrink-0">
         <SectionLabel>專欄</SectionLabel>
@@ -281,8 +281,8 @@ const ThinkingCard = ({
   data: MenuData
   onNavigate?: () => void
 }) => (
-  <div className="w-[24rem]">
-    <div className="p-5">
+  <div className="w-80">
+    <div className="p-3">
       <SectionLabel>近期想法</SectionLabel>
       <div className="flex flex-col gap-1">
         {data.recentThinkings.map((thinking) => (
@@ -329,7 +329,7 @@ const TimelineCard = ({
   onNavigate?: () => void
 }) => (
   <div className="w-[24rem]">
-    <div className="p-5">
+    <div className="p-3">
       <div className="flex items-center justify-around gap-2 border-b border-gray-700/50 pb-3">
         {TIMELINE_TABS.map((tab) => (
           <CardLink
@@ -373,7 +373,7 @@ const TimelineCard = ({
 )
 
 const MoreCard = ({ onNavigate }: { onNavigate?: () => void }) => (
-  <div className="w-44 p-2">
+  <div className="w-44 p-1">
     {MORE_LINKS.map((link) => (
       <CardLink
         key={link.text}
@@ -397,7 +397,7 @@ const CardFooter = ({
   right?: string | { text: string; href: string }
   onNavigate?: () => void
 }) => (
-  <div className="flex items-center justify-between border-t border-gray-700/50 px-5 py-3 text-sm">
+  <div className="flex items-center justify-between border-t border-gray-700/50 p-3 text-sm">
     <CardLink
       href={left.href}
       onNavigate={onNavigate}
