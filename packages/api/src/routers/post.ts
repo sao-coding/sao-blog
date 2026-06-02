@@ -3,7 +3,7 @@ import { db } from "@sao-blog/db";
 import { posts, categories, postTags, tags, user } from "@sao-blog/db/schema/index";
 import { type TagModel } from "@sao-blog/db/schema/index";
 import { PostResponseSchema, PostsResponseSchema } from "../schema/post";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, desc } from "drizzle-orm";
 import z from "zod";
 import { mdxToExcerpt } from "../lib/mdx-to-text";
 
@@ -22,7 +22,8 @@ const getPosts = publicProcedure
             .from(posts)
             .innerJoin(user, eq(posts.authorId, user.id))
             .innerJoin(categories, eq(posts.categoryId, categories.id))
-            .where(category ? eq(categories.slug, category) : undefined); // 可選條件
+            .where(category ? eq(categories.slug, category) : undefined) // 可選條件
+            .orderBy(desc(posts.createdAt))
 
         const postIds = rows.map((r) => String(r.post.id));
 
