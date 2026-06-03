@@ -103,7 +103,7 @@ const HomeCard = ({
   ]
 
   return (
-    <div className="flex gap-8 p-5">
+    <div className="flex gap-8 p-3">
       {/* 左側：站長資訊 */}
       <div className="flex w-44 shrink-0 flex-col">
         <Avatar className="size-14">
@@ -186,8 +186,8 @@ const PostsCard = ({
     : data.recentPosts
 
   return (
-    <div className="w-[34rem]">
-      <div className="flex gap-6 p-5">
+  <div className="w-108">
+    <div className="flex gap-6 p-3">
         {/* 左欄：分類 */}
         <div className="w-40 shrink-0">
           <SectionLabel>分類</SectionLabel>
