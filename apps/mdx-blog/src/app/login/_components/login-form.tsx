@@ -103,6 +103,13 @@ export function LoginForm({
               >
                 使用 GitHub 登入
               </Button>
+              <Button
+                variant="outline"
+                className="w-full mt-2"
+                onClick={() => authClient.signIn.social({ provider: 'google' })}
+              >
+                使用 Google 登入
+              </Button>
             </div>
           </form>
         </CardContent>

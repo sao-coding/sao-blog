@@ -19,12 +19,21 @@ import { queryClient } from '@/utils/orpc'
 export const Route = createRootRoute({
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession()
-    if (!session) {
-      // 網域pathname
-      window.location.href = `${env.VITE_BLOG_URL}/login?redirect=${encodeURIComponent(window.location.pathname)}`
-      throw new Error('Unauthorized') // 阻止繼續渲染
+
+    const isBlocked =
+      !session ||
+      session.user.role === "user" ||
+      session.user.banned
+
+    if (isBlocked) {
+      const redirect = `${env.VITE_BLOG_URL}/login?redirect=${encodeURIComponent(
+        window.location.pathname
+      )}`
+
+      window.location.href = redirect
+      return // ⬅️ 重點：直接結束
     }
-    console.log('Session:', session) // 添加日志以调试会话数据
+
     return { session }
   },
   notFoundComponent: () => (

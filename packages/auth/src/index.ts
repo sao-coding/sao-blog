@@ -26,6 +26,10 @@ export const auth = betterAuth({
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
     },
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    },
   },
   advanced: {
     database: {
@@ -33,13 +37,13 @@ export const auth = betterAuth({
     },
     crossSubdomainCookies: {
       enabled: true,
-      domain: "sao-x.com"  // 根網域，含點
+      // domain: "sao-x.com"  // 根網域，含點
     },
     defaultCookieAttributes: {
       sameSite: "none",
       secure: true,
       httpOnly: true,
-      domain: ".sao-x.com",
+      // domain: ".sao-x.com",
     },
   },
   plugins: [

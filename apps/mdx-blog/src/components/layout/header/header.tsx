@@ -16,16 +16,7 @@ import {
   usePageScrollLocation,
   usePageScrollDirection,
 } from '@/hooks/use-page-scroll'
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { SITE_OWNER } from '@/config/mega-menu'
-
-import { Button } from '@/components/ui/button'
-import { IconBrandGithub, IconBrandGoogle, IconUserBolt } from '@tabler/icons-react'
+import UserButton from './user-button'
 
 /** 判斷「已滾動」的閾值（px） */
 const SCROLL_THRESHOLD = 50
@@ -112,33 +103,7 @@ const Header = () => {
           )}
 
           <div className="flex items-center justify-center">
-            <Dialog>
-              <DialogTrigger render={
-                <Button variant="outline" size="icon-lg" className="rounded-full">
-                  <IconUserBolt className='size-6 cursor-pointer' />
-                </Button>
-              }>
-              </DialogTrigger>
-              <DialogContent>
-                <div className="relative flex justify-center pt-8">
-                  <Avatar className="size-14 absolute -top-11 left-1/2 -translate-x-1/2">
-                    <AvatarImage src={SITE_OWNER.avatar} />
-                    <AvatarFallback>{SITE_OWNER.fallback}</AvatarFallback>
-                  </Avatar>
-                  <div className="gap-4 flex flex-col items-center">
-                    登入到 唯一のBlog
-                    <div className="flex gap-4">
-                      <Button variant="outline" size="icon-lg" className="rounded-full">
-                        <IconBrandGithub className='size-6' />
-                      </Button>
-                      <Button variant="outline" size="icon-lg" className="rounded-full">
-                        <IconBrandGoogle className='size-6' />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <UserButton />
           </div>
         </div>
 
