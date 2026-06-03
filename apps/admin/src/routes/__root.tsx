@@ -20,18 +20,20 @@ export const Route = createRootRoute({
   beforeLoad: async () => {
     const { data: session } = await authClient.getSession()
 
-    const isBlocked =
-      !session ||
-      session.user.role === "user" ||
-      session.user.banned
-
-    if (isBlocked) {
+    // 未登入 → 去 login
+    if (!session) {
       const redirect = `${env.VITE_BLOG_URL}/login?redirect=${encodeURIComponent(
         window.location.pathname
       )}`
 
       window.location.href = redirect
-      return // ⬅️ 重點：直接結束
+      return
+    }
+
+    // 已登入但權限不足或被封鎖 → 回首頁
+    if (session.user.role === "user" || session.user.banned) {
+      window.location.href = env.VITE_BLOG_URL
+      return
     }
 
     return { session }
