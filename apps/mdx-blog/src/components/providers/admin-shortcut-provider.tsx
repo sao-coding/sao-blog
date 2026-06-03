@@ -26,7 +26,6 @@ export function AdminShortcutProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const redirectPath = overridePath ?? getDefaultRedirectPath(pathname)
-    console.log('AdminShortcutProvider: pathname=', pathname, 'overridePath=', overridePath, 'redirectPath=', redirectPath)
     if (!redirectPath) return
 
     function handleKeyDown(e: KeyboardEvent) {
