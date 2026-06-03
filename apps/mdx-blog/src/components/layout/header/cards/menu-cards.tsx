@@ -7,7 +7,10 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-tw'
 import type { InferClientOutputs } from '@orpc/client'
 
+import { Inbox } from 'lucide-react'
+
 import { orpc, type client } from '@/lib/orpc'
+import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { NavCard } from '@/config/menu'
 import { SOCIAL_LINKS } from '@/config/menu'
@@ -66,15 +69,17 @@ const CardLink = ({
   )
 }
 
-const Skeleton = ({ rows = 4 }: { rows?: number }) => (
-  <div className="space-y-2 p-2">
-    {Array.from({ length: rows }).map((_, i) => (
-      <div
-        key={i}
-        className="h-4 animate-pulse rounded bg-gray-700/50"
-        style={{ width: `${70 + ((i * 37) % 30)}%` }}
-      />
-    ))}
+// 載入中／無資料時的佔位符：固定尺寸避免 morph 容器跑版，並顯示圖示與說明
+const CardPlaceholder = ({
+  label = '載入中…',
+  loading = false,
+}: {
+  label?: string
+  loading?: boolean
+}) => (
+  <div className="flex h-40 w-80 flex-col items-center justify-center gap-2 text-gray-500">
+    <Inbox className={cn('size-8 opacity-60', loading && 'animate-pulse')} />
+    <p className="text-sm">{label}</p>
   </div>
 )
 
@@ -435,8 +440,12 @@ const MenuCard = ({
     return <MoreCard onNavigate={onNavigate} />
   }
 
-  if (isLoading || !res || res.status === 'error') {
-    return <Skeleton rows={card === 'home' ? 5 : 4} />
+  if (isLoading || !res) {
+    return <CardPlaceholder loading label="載入中…" />
+  }
+
+  if (res.status === 'error') {
+    return <CardPlaceholder label="空無一物" />
   }
 
   const data = res.data
