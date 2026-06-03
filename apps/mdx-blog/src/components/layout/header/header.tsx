@@ -16,6 +16,19 @@ import {
   usePageScrollLocation,
   usePageScrollDirection,
 } from '@/hooks/use-page-scroll'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { SITE_OWNER } from '@/config/mega-menu'
+
+import { Button } from '@/components/ui/button'
+import { IconBrandGithub, IconBrandGoogle } from '@tabler/icons-react'
 
 /** 判斷「已滾動」的閾值（px） */
 const SCROLL_THRESHOLD = 50
@@ -101,7 +114,32 @@ const Header = () => {
             </div>
           )}
 
-          <div className=""></div>
+          <div className="">
+            <Dialog>
+              <DialogTrigger>
+                123
+              </DialogTrigger>
+              <DialogContent>
+                <div className="relative flex justify-center pt-8">
+                  <Avatar className="size-14 absolute -top-11 left-1/2 -translate-x-1/2">
+                    <AvatarImage src={SITE_OWNER.avatar} />
+                    <AvatarFallback>{SITE_OWNER.fallback}</AvatarFallback>
+                  </Avatar>
+                  <div className="gap-4 flex flex-col items-center">
+                    登入到 唯一のBlog
+                    <div className="flex gap-4">
+                      <Button variant="outline" size="icon-lg" className="rounded-full">
+                        <IconBrandGithub className='size-6'/>
+                      </Button>
+                      <Button variant="outline" size="icon-lg" className="rounded-full">
+                        <IconBrandGoogle className='size-6' />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* 固定導航 - 使用條件渲染配合 CSS 過渡 */}
@@ -113,7 +151,7 @@ const Header = () => {
           />
         )}
       </header>
-    </Drawer>
+    </Drawer >
   )
 }
 
