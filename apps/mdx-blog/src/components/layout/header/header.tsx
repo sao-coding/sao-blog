@@ -19,16 +19,13 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { SITE_OWNER } from '@/config/mega-menu'
 
 import { Button } from '@/components/ui/button'
-import { IconBrandGithub, IconBrandGoogle } from '@tabler/icons-react'
+import { IconBrandGithub, IconBrandGoogle, IconUserBolt } from '@tabler/icons-react'
 
 /** 判斷「已滾動」的閾值（px） */
 const SCROLL_THRESHOLD = 50
@@ -114,10 +111,13 @@ const Header = () => {
             </div>
           )}
 
-          <div className="">
+          <div className="flex items-center justify-center">
             <Dialog>
-              <DialogTrigger>
-                123
+              <DialogTrigger render={
+                <Button variant="outline" size="icon-lg" className="rounded-full">
+                  <IconUserBolt className='size-6 cursor-pointer' />
+                </Button>
+              }>
               </DialogTrigger>
               <DialogContent>
                 <div className="relative flex justify-center pt-8">
@@ -129,7 +129,7 @@ const Header = () => {
                     登入到 唯一のBlog
                     <div className="flex gap-4">
                       <Button variant="outline" size="icon-lg" className="rounded-full">
-                        <IconBrandGithub className='size-6'/>
+                        <IconBrandGithub className='size-6' />
                       </Button>
                       <Button variant="outline" size="icon-lg" className="rounded-full">
                         <IconBrandGoogle className='size-6' />
