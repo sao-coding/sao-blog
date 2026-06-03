@@ -13,6 +13,10 @@ import { toIso } from "../lib/datetime";
 import { MenuResponseSchema } from "../schema/menu";
 
 const RECENT_POSTS_LIMIT = 5;
+// 用於分類 hover 顯示：每分類最多顯示幾篇
+const POSTS_PER_CATEGORY = 4;
+// 一次撈取的文章數（涵蓋所有分類）
+const CATEGORY_POSTS_POOL = 60;
 const RECENT_NOTES_LIMIT = 4;
 const RECENT_ACTIVITY_LIMIT = 4;
 const RECENT_THINKINGS_LIMIT = 4;
@@ -28,6 +32,7 @@ const getMenu = publicProcedure
             earliestRow,
             categoryRows,
             recentPostRows,
+            categoryPostPoolRows,
             topicRows,
             recentNoteRows,
             recentActivityPostRows,
@@ -62,13 +67,14 @@ const getMenu = publicProcedure
                 })
                 .from(categories)
                 .orderBy(categories.sortOrder),
-            // 近期文章
+            // 近期文章（全部）
             db
                 .select({
                     id: posts.id,
                     slug: posts.slug,
                     title: posts.title,
                     category: categories.name,
+                    categorySlug: categories.slug,
                     createdAt: posts.createdAt,
                 })
                 .from(posts)
@@ -76,6 +82,20 @@ const getMenu = publicProcedure
                 .where(eq(posts.status, "published"))
                 .orderBy(desc(posts.createdAt))
                 .limit(RECENT_POSTS_LIMIT),
+            // 分類 hover 用：撈取足夠多的文章，在 JS 端依分類分組
+            db
+                .select({
+                    id: posts.id,
+                    slug: posts.slug,
+                    title: posts.title,
+                    categorySlug: categories.slug,
+                    createdAt: posts.createdAt,
+                })
+                .from(posts)
+                .leftJoin(categories, eq(posts.categoryId, categories.id))
+                .where(eq(posts.status, "published"))
+                .orderBy(desc(posts.createdAt))
+                .limit(CATEGORY_POSTS_POOL),
             // 專欄
             db
                 .select({
@@ -173,6 +193,23 @@ const getMenu = publicProcedure
             )
             .slice(0, RECENT_ACTIVITY_LIMIT);
 
+        // 依分類分組，每組取前 POSTS_PER_CATEGORY 篇
+        const postsByCategory: Record<string, { id: string; slug: string; title: string; createdAt: string }[]> = {};
+        for (const row of categoryPostPoolRows) {
+            const slug = row.categorySlug;
+            if (!slug) continue;
+            const bucket = postsByCategory[slug] ?? [];
+            if (bucket.length < POSTS_PER_CATEGORY) {
+                bucket.push({
+                    id: String(row.id),
+                    slug: row.slug,
+                    title: row.title,
+                    createdAt: toIso(row.createdAt),
+                });
+                postsByCategory[slug] = bucket;
+            }
+        }
+
         const recentThinkings = await Promise.all(
             thinkingRows.map(async (thinking) => ({
                 id: String(thinking.id),
@@ -199,9 +236,11 @@ const getMenu = publicProcedure
                     id: String(post.id),
                     slug: post.slug,
                     title: post.title,
-                    category: post.category,
+                    category: post.category ?? null,
+                    categorySlug: post.categorySlug ?? null,
                     createdAt: toIso(post.createdAt),
                 })),
+                postsByCategory,
                 topics: topicRows.map((topic) => ({
                     id: String(topic.id),
                     name: topic.name,

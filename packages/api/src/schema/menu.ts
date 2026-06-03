@@ -17,15 +17,28 @@ export const MenuDataSchema = z.object({
             postCount: z.number(),
         })
     ),
-    // 文章卡片：近期文章
+    // 文章卡片：近期文章（「全部」用）
     recentPosts: z.array(
         z.object({
             id: z.string(),
             slug: z.string(),
             title: z.string(),
             category: z.string().nullable(),
+            categorySlug: z.string().nullable(),
             createdAt: z.string(),
         })
+    ),
+    // 文章卡片：各分類近期文章（categorySlug → posts），hover 分類時顯示
+    postsByCategory: z.record(
+        z.string(),
+        z.array(
+            z.object({
+                id: z.string(),
+                slug: z.string(),
+                title: z.string(),
+                createdAt: z.string(),
+            })
+        )
     ),
     // 日記卡片：專欄
     topics: z.array(

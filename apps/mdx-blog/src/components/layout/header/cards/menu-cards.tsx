@@ -7,6 +7,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-tw'
 import type { InferClientOutputs } from '@orpc/client'
 
+import { useState } from 'react'
 import { Inbox } from 'lucide-react'
 
 import { orpc, type client } from '@/lib/orpc'
@@ -41,11 +42,13 @@ const isExternal = (href: string) => /^https?:\/\//.test(href)
 const CardLink = ({
   href,
   onNavigate,
+  onMouseEnter,
   className,
   children,
 }: {
   href: string
   onNavigate?: () => void
+  onMouseEnter?: () => void
   className?: string
   children: React.ReactNode
 }) => {
@@ -56,6 +59,7 @@ const CardLink = ({
         target="_blank"
         rel="noopener noreferrer"
         onClick={onNavigate}
+        onMouseEnter={onMouseEnter}
         className={className}
       >
         {children}
@@ -63,7 +67,7 @@ const CardLink = ({
     )
   }
   return (
-    <Link href={href} onClick={onNavigate} className={className}>
+    <Link href={href} onClick={onNavigate} onMouseEnter={onMouseEnter} className={className}>
       {children}
     </Link>
   )
@@ -158,64 +162,108 @@ const HomeCard = ({
   )
 }
 
+type CategoryItem = MenuData['categories'][number]
+
 const PostsCard = ({
   data,
   onNavigate,
 }: {
   data: MenuData
   onNavigate?: () => void
-}) => (
-  <div className="w-108">
-    <div className="flex gap-6 p-3">
-      {/* 分類 */}
-      <div className="w-40 shrink-0">
-        <SectionLabel>分類</SectionLabel>
-        <div className="flex flex-col">
-          {data.categories.map((category) => (
-            <CardLink
-              key={category.slug}
-              href={`/categories/${category.slug}`}
-              onNavigate={onNavigate}
-              className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-gray-700/50 hover:text-teal-400"
+}) => {
+  // null = 全部；string = 分類 slug
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null)
+
+  const activeCategory: CategoryItem | null =
+    hoveredSlug ? (data.categories.find((c) => c.slug === hoveredSlug) ?? null) : null
+
+  // 右欄標題
+  const rightLabel = activeCategory ? `${activeCategory.name} · 近期` : '全部 · 近期'
+
+  // 右欄文章
+  const rightPosts = activeCategory
+    ? (data.postsByCategory[activeCategory.slug] ?? [])
+    : data.recentPosts
+
+  return (
+    <div className="w-[34rem]">
+      <div className="flex gap-6 p-5">
+        {/* 左欄：分類 */}
+        <div className="w-40 shrink-0">
+          <SectionLabel>分類</SectionLabel>
+          <div className="flex flex-col">
+            {/* 全部 */}
+            <button
+              type="button"
+              onMouseEnter={() => setHoveredSlug(null)}
+              onClick={() => { onNavigate?.(); }}
+              className={cn(
+                'flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors',
+                hoveredSlug === null
+                  ? 'bg-gray-700/60 text-teal-400'
+                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-teal-400'
+              )}
             >
-              <span>{category.name}</span>
-              <span className="text-xs text-gray-500">{category.postCount}</span>
-            </CardLink>
-          ))}
-          {data.categories.length === 0 && (
-            <p className="px-2 py-1.5 text-sm text-gray-500">尚無分類</p>
-          )}
+              <span>全部</span>
+              <span className="text-xs text-gray-500">{data.postTotal}</span>
+            </button>
+
+            {data.categories.map((category) => (
+              <CardLink
+                key={category.slug}
+                href={`/categories/${category.slug}`}
+                onNavigate={onNavigate}
+                className={cn(
+                  'flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors',
+                  hoveredSlug === category.slug
+                    ? 'bg-gray-700/60 text-teal-400'
+                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-teal-400'
+                )}
+                onMouseEnter={() => setHoveredSlug(category.slug)}
+              >
+                <span>{category.name}</span>
+                <span className="text-xs text-gray-500">{category.postCount}</span>
+              </CardLink>
+            ))}
+
+            {data.categories.length === 0 && (
+              <p className="px-2 py-1.5 text-sm text-gray-500">尚無分類</p>
+            )}
+          </div>
+        </div>
+
+        {/* 右欄：近期文章（依 hover 分類篩選） */}
+        <div className="flex-1">
+          <SectionLabel>{rightLabel}</SectionLabel>
+          <div className="flex flex-col gap-1">
+            {rightPosts.map((post) => (
+              <CardLink
+                key={post.id}
+                href={`/posts/${post.slug}`}
+                onNavigate={onNavigate}
+                className="block rounded-md px-2 py-1.5 transition-colors hover:bg-gray-700/50"
+              >
+                <p className="line-clamp-1 text-sm text-gray-200">{post.title}</p>
+                <p className="mt-0.5 text-xs text-gray-500">
+                  {fromNow(post.createdAt)}
+                </p>
+              </CardLink>
+            ))}
+            {rightPosts.length === 0 && (
+              <p className="px-2 py-1.5 text-sm text-gray-500">此分類尚無文章</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 近期文章 */}
-      <div className="flex-1">
-        <SectionLabel>近期</SectionLabel>
-        <div className="flex flex-col gap-1">
-          {data.recentPosts.map((post) => (
-            <CardLink
-              key={post.id}
-              href={`/posts/${post.slug}`}
-              onNavigate={onNavigate}
-              className="block rounded-md px-2 py-1.5 transition-colors hover:bg-gray-700/50"
-            >
-              <p className="line-clamp-1 text-sm text-gray-200">{post.title}</p>
-              <p className="mt-0.5 text-xs text-gray-500">
-                {fromNow(post.createdAt)}
-              </p>
-            </CardLink>
-          ))}
-        </div>
-      </div>
+      <CardFooter
+        left={{ text: '查看全部文稿', href: '/posts' }}
+        right={`${data.postTotal} 篇文稿`}
+        onNavigate={onNavigate}
+      />
     </div>
-
-    <CardFooter
-      left={{ text: '查看全部文稿', href: '/posts' }}
-      right={`${data.postTotal} 篇文稿`}
-      onNavigate={onNavigate}
-    />
-  </div>
-)
+  )
+}
 
 const NotesCard = ({
   data,
