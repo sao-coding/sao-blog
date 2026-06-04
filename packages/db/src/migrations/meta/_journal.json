@@ -5,85 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1772211187529,
-      "tag": "0000_lame_starfox",
+      "when": 1780587191437,
+      "tag": "0000_talented_stature",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1772892849182,
-      "tag": "0001_faulty_mesmero",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1772893642366,
-      "tag": "0002_lucky_squadron_sinister",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1772935867737,
-      "tag": "0003_late_retro_girl",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1772936179220,
-      "tag": "0004_special_runaways",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1772936317044,
-      "tag": "0005_quiet_masked_marvel",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1772950831161,
-      "tag": "0006_gifted_mach_iv",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1772951646519,
-      "tag": "0007_mean_the_hood",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1772951856623,
-      "tag": "0008_material_rafael_vega",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1775981111604,
-      "tag": "0009_majestic_moon_knight",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1780226384082,
-      "tag": "0010_sweet_cargill",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1780308180387,
-      "tag": "0011_wandering_imperial_guard",
+      "when": 1780587971878,
+      "tag": "0001_left_ben_grimm",
       "breakpoints": true
     }
   ]

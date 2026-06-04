@@ -1,3 +1,5 @@
+CREATE TYPE "public"."comment_ref_type" AS ENUM('post', 'note', 'page', 'recently');--> statement-breakpoint
+CREATE TYPE "public"."comment_source" AS ENUM('google', 'github');--> statement-breakpoint
 CREATE TYPE "public"."post_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" uuid PRIMARY KEY NOT NULL,
@@ -94,9 +96,17 @@ CREATE TABLE "categories" (
 	CONSTRAINT "categories_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
+CREATE TABLE "comment_likes" (
+	"user_id" varchar(256) NOT NULL,
+	"comment_id" uuid NOT NULL,
+	"like" boolean NOT NULL,
+	CONSTRAINT "comment_likes_user_id_comment_id_pk" PRIMARY KEY("user_id","comment_id")
+);
+--> statement-breakpoint
 CREATE TABLE "comments" (
 	"id" uuid PRIMARY KEY NOT NULL,
-	"post_id" varchar(256) NOT NULL,
+	"ref_type" "comment_ref_type" NOT NULL,
+	"ref_id" uuid NOT NULL,
 	"display_username" varchar(100) NOT NULL,
 	"email" varchar(256) NOT NULL,
 	"website" varchar(512),
@@ -105,6 +115,12 @@ CREATE TABLE "comments" (
 	"likes" integer DEFAULT 0 NOT NULL,
 	"dislikes" integer DEFAULT 0 NOT NULL,
 	"deleted" boolean DEFAULT false NOT NULL,
+	"pin" boolean DEFAULT false NOT NULL,
+	"source" "comment_source" NOT NULL,
+	"user_id" uuid,
+	"ip" varchar(45),
+	"agent" varchar(512),
+	"location" varchar(256),
 	"created_at" timestamp with time zone NOT NULL,
 	"updated_at" timestamp with time zone NOT NULL
 );
@@ -154,13 +170,6 @@ CREATE TABLE "posts" (
 	CONSTRAINT "posts_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
-CREATE TABLE "rates" (
-	"user_id" varchar(256) NOT NULL,
-	"comment_id" uuid NOT NULL,
-	"like" boolean NOT NULL,
-	CONSTRAINT "rates_user_id_comment_id_pk" PRIMARY KEY("user_id","comment_id")
-);
---> statement-breakpoint
 CREATE TABLE "tags" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar(50) NOT NULL,
@@ -174,12 +183,22 @@ CREATE TABLE "tags" (
 	CONSTRAINT "tags_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
+CREATE TABLE "thinkings" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"content" text NOT NULL,
+	"status" boolean DEFAULT true NOT NULL,
+	"note_id" uuid,
+	"author_id" uuid NOT NULL,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "topics" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"slug" varchar(100) NOT NULL,
 	"introduce" varchar(100) NOT NULL,
-	"description" varchar(400) DEFAULT '' NOT NULL,
+	"description" varchar(400),
 	"color" varchar(7),
 	"note_count" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp with time zone NOT NULL,
@@ -191,20 +210,31 @@ CREATE TABLE "topics" (
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "apikey" ADD CONSTRAINT "apikey_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "comments" ADD CONSTRAINT "comments_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notes" ADD CONSTRAINT "notes_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notes" ADD CONSTRAINT "notes_topic_id_topics_id_fk" FOREIGN KEY ("topic_id") REFERENCES "public"."topics"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "post_tags" ADD CONSTRAINT "post_tags_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "post_tags" ADD CONSTRAINT "post_tags_tag_id_tags_id_fk" FOREIGN KEY ("tag_id") REFERENCES "public"."tags"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "posts" ADD CONSTRAINT "posts_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "posts" ADD CONSTRAINT "posts_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "thinkings" ADD CONSTRAINT "thinkings_note_id_notes_id_fk" FOREIGN KEY ("note_id") REFERENCES "public"."notes"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "thinkings" ADD CONSTRAINT "thinkings_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "categories_name_idx" ON "categories" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "categories_slug_idx" ON "categories" USING btree ("slug");--> statement-breakpoint
 CREATE INDEX "categories_parent_idx" ON "categories" USING btree ("parent_id");--> statement-breakpoint
 CREATE INDEX "categories_sort_idx" ON "categories" USING btree ("sort_order");--> statement-breakpoint
-CREATE INDEX "comments_post_id_idx" ON "comments" USING btree ("post_id");--> statement-breakpoint
+CREATE INDEX "comment_idx" ON "comment_likes" USING btree ("comment_id");--> statement-breakpoint
+CREATE INDEX "comments_ref_id_idx" ON "comments" USING btree ("ref_id");--> statement-breakpoint
 CREATE INDEX "comments_thread_idx" ON "comments" USING btree ("thread");--> statement-breakpoint
 CREATE INDEX "comments_created_at_idx" ON "comments" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "comments_post_created_idx" ON "comments" USING btree ("post_id","created_at");--> statement-breakpoint
+CREATE INDEX "comments_ref_created_idx" ON "comments" USING btree ("ref_id","created_at");--> statement-breakpoint
+CREATE INDEX "comments_user_idx" ON "comments" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "comments_source_idx" ON "comments" USING btree ("source");--> statement-breakpoint
+CREATE INDEX "notes_status_idx" ON "notes" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "notes_created_idx" ON "notes" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "notes_status_created_idx" ON "notes" USING btree ("status","created_at");--> statement-breakpoint
+CREATE INDEX "notes_author_idx" ON "notes" USING btree ("author_id");--> statement-breakpoint
+CREATE INDEX "notes_topic_idx" ON "notes" USING btree ("topic_id");--> statement-breakpoint
 CREATE INDEX "post_tags_post_idx" ON "post_tags" USING btree ("post_id");--> statement-breakpoint
 CREATE INDEX "post_tags_tag_idx" ON "post_tags" USING btree ("tag_id");--> statement-breakpoint
 CREATE INDEX "post_tags_unique_idx" ON "post_tags" USING btree ("post_id","tag_id");--> statement-breakpoint
@@ -215,7 +245,10 @@ CREATE INDEX "posts_status_idx" ON "posts" USING btree ("status");--> statement-
 CREATE INDEX "posts_created_idx" ON "posts" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "posts_pin_order_idx" ON "posts" USING btree ("pin_order");--> statement-breakpoint
 CREATE INDEX "posts_pin_idx" ON "posts" USING btree ("pin");--> statement-breakpoint
-CREATE INDEX "rates_comment_idx" ON "rates" USING btree ("comment_id");--> statement-breakpoint
 CREATE INDEX "tags_name_idx" ON "tags" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "tags_slug_idx" ON "tags" USING btree ("slug");--> statement-breakpoint
-CREATE INDEX "tags_post_count_idx" ON "tags" USING btree ("post_count");
+CREATE INDEX "tags_post_count_idx" ON "tags" USING btree ("post_count");--> statement-breakpoint
+CREATE INDEX "thinkings_created_at_idx" ON "thinkings" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "thinkings_note_idx" ON "thinkings" USING btree ("note_id");--> statement-breakpoint
+CREATE INDEX "thinkings_author_idx" ON "thinkings" USING btree ("author_id");--> statement-breakpoint
+CREATE INDEX "topics_slug_idx" ON "topics" USING btree ("slug");
