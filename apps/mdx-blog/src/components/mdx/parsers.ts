@@ -1,5 +1,6 @@
 import type { EvaluateOptions } from 'next-mdx-remote-client/rsc'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import remarkFlexibleToc, { TocItem } from 'remark-flexible-toc'
@@ -23,7 +24,7 @@ type Frontmatter = {
 // 完整 MDX 配置（用於文章，包含 TOC、數學、KaTeX 等）
 const getMdxOptions = (source: string): EvaluateOptions<Scope> => ({
   mdxOptions: {
-    remarkPlugins: [remarkGfm, remarkMath, remarkFlexibleToc],
+    remarkPlugins: [remarkGfm, remarkBreaks, remarkMath, remarkFlexibleToc],
     rehypePlugins: [rehypeKatex, rehypeSlug],
   },
   parseFrontmatter: true,
@@ -36,7 +37,7 @@ const getMdxOptions = (source: string): EvaluateOptions<Scope> => ({
 // 較輕量的 MDX 配置（用於日記/備註，只需要 GFM 與 slug）
 export const getBasicMdxOptions = (source: string): EvaluateOptions<Scope> => ({
   mdxOptions: {
-    remarkPlugins: [remarkGfm, remarkFlexibleToc],
+    remarkPlugins: [remarkGfm, remarkBreaks, remarkFlexibleToc],
     rehypePlugins: [rehypeSlug],
   },
   parseFrontmatter: true,
