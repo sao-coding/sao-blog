@@ -1,2 +1,0 @@
-CREATE TYPE "public"."comment_ref_type" AS ENUM('post', 'note', 'page', 'recently');--> statement-breakpoint
-ALTER TABLE "comments" ALTER COLUMN "ref_type" SET DATA TYPE "public"."comment_ref_type" USING "ref_type"::"public"."comment_ref_type";

@@ -1,1 +1,0 @@
-ALTER TABLE "comments" ADD COLUMN "pin" boolean DEFAULT false NOT NULL;
