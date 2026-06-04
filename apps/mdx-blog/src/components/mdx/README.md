@@ -218,6 +218,73 @@ type MDXComponentOverrides = {
 4. **型別安全**: 使用 TypeScript 介面確保元件 props 的型別安全
 5. **向後相容**: 保持預設配置的穩定，新功能通過覆寫添加
 
+## 文章區塊元件（撰寫語法）
+
+本專案採用 **MDX**，文章中的區塊元件一律使用 **JSX 標籤**書寫（而非 ` ```fence `、`<!-- -->` 或 Hexo 的 `{% %}`）。
+JSX 是 MDX 原生語法，標籤內可放任意巢狀 markdown，且支援 props 與型別檢查。
+
+> 例外：`mermaid` / `echarts` 因內容本身是程式碼，仍使用 ` ```mermaid ` / ` ```echarts ` 圍欄。
+
+### Alert（提示框）
+
+`type`：`note`(預設) / `info` / `success` / `warning` / `danger`
+
+```mdx
+<Alert type="warning" title="注意">
+這裡支援**任意 markdown**內容。
+</Alert>
+```
+
+### Accordion（折疊面板）
+
+`multiple` 允許同時展開多項；`AccordionItem` 的 `open` 設定預設展開。
+
+```mdx
+<Accordion>
+  <AccordionItem title="問題一" open>
+  答案內容，支援 **markdown**。
+  </AccordionItem>
+  <AccordionItem title="問題二">
+  另一段答案。
+  </AccordionItem>
+</Accordion>
+```
+
+### Tabs（分頁）
+
+`defaultIndex` 設定預設分頁（從 0 起算）。
+
+```mdx
+<Tabs defaultIndex={0}>
+  <Tab label="JavaScript">
+  內容一
+  </Tab>
+  <Tab label="Python">
+  內容二
+  </Tab>
+</Tabs>
+```
+
+### Carousel（輪播）
+
+`loop` 是否循環（預設 true）。每張用 `<Slide>` 包覆，可放圖片或 markdown。
+
+```mdx
+<Carousel>
+  <Slide>![圖一](/img/1.jpg)</Slide>
+  <Slide>![圖二](/img/2.jpg)</Slide>
+</Carousel>
+```
+
+### Progress（進度條）
+
+常用於技能熟練度。`color`：`blue`(預設) / `green` / `amber` / `red` / `purple` / `pink`。
+
+```mdx
+<Progress value={90} label="HTML" color="amber" />
+<Progress value={70} label="TypeScript" color="blue" />
+```
+
 ## 故障排除
 
 ### 元件沒有顯示
