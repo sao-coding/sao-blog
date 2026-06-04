@@ -28,7 +28,8 @@ const getPosts = protectedProcedure
             })
             .from(posts)
             .innerJoin(user, eq(posts.authorId, user.id))
-            .leftJoin(categories, eq(posts.categoryId, categories.id));
+            .leftJoin(categories, eq(posts.categoryId, categories.id))
+            .orderBy(desc(posts.updatedAt));
 
         return {
             status: "success",
