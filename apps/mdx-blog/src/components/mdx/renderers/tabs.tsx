@@ -21,7 +21,6 @@ export interface MdxTabProps {
 export const MdxTab = ({ children }: MdxTabProps) => {
   return <>{children}</>
 }
-MdxTab.displayName = 'MdxTab'
 
 export interface MdxTabsProps {
   /** 預設選中的分頁（從 0 起算），預設 0 */
@@ -32,10 +31,11 @@ export interface MdxTabsProps {
 
 type TabElement = React.ReactElement<MdxTabProps>
 
+// 不能用 child.type === MdxTab（Next.js RSC 序列化後 reference 會失效），
+// 改以 label prop 是否存在來辨識 Tab 元素。
 const isTab = (child: React.ReactNode): child is TabElement =>
   React.isValidElement(child) &&
-  (child.type === MdxTab ||
-    (child.type as { displayName?: string })?.displayName === 'MdxTab')
+  typeof (child.props as MdxTabProps).label !== 'undefined'
 
 /**
  * 文章用的分頁元件（對應 Hexo 的 tabs tag）。
