@@ -1,7 +1,8 @@
+import { ORPCError } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
-import { comments, commentLikes } from "@sao-blog/db/schema/index";
+import { comments, commentLikes, account } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { CommentsResponseSchema } from "@sao-blog/api/schema/comment";
 
@@ -58,20 +59,30 @@ const getComments = publicProcedure
     });
 
 // 創建留言
-const createComment = publicProcedure
+const createComment = protectedProcedure
     .route({ method: "POST", path: "/comments" })
     .input(z.object({
-        type: z.enum(["post", "note", "page", "recently"]), // 留言對象的類型（文章、日記或頁面）
-        refId: z.string(), // 文章、日記或頁面的 ID
-        displayUsername: z.string(), // 顯示用的名稱
-        email: z.string().email(), // 留言者的 email
-        source: z.enum(["guest", "google", "github"]), // 留言來源（對應 account.providerId，例如 'guest', 'local', 'github'）
-        content: z.string().min(1), // 留言內容
-        thread: z.string().optional(), // 可選的留言串 ID，用於支持留言串功能
+        type: z.enum(["post", "note", "page", "recently"]),
+        refId: z.string(),
+        content: z.string().min(1),
+        thread: z.string().optional(),
     }))
     .handler(async ({ input, context }) => {
-        const { type, refId, displayUsername, email, content, source, thread } = input;
-        const userId = context.session?.user.id ?? null;
+        const { type, refId, content, thread } = input;
+        const userId = context.session.user.id;
+        const displayUsername = context.session.user.name;
+        const email = context.session.user.email;
+
+        const [userAccount] = await db
+            .select()
+            .from(account)
+            .where(eq(account.userId, userId))
+            .limit(1);
+
+        const providerId = userAccount?.providerId;
+        if (providerId !== 'github' && providerId !== 'google') {
+            throw new ORPCError('FORBIDDEN', { message: '僅支援 GitHub 或 Google 帳號留言' });
+        }
 
         const [newComment] = await db.insert(comments).values({
             refType: type,
@@ -80,7 +91,7 @@ const createComment = publicProcedure
             email,
             content,
             userId,
-            source,
+            source: providerId,
             thread
         }).returning();
 

@@ -36,17 +36,14 @@ import { CommentForm } from './comment-form'
 dayjs.extend(relativeTime)
 
 interface CommentItemProps {
-  /** 留言資料 */
   comment: Comment
-  // ✅ 移除 userVotes：按讚狀態改由 comment.liked 提供
-  /** 按讚回調 */
   onLike: (commentId: string) => void
-  /** 倒讚回調 */
   onDislike: (commentId: string) => void
-  /** 回覆回調 */
   onReply: (parentId: string, data: CommentFormValues) => void
-  /** 巢狀深度（用於限制層級） */
   depth?: number
+  isAuthenticated?: boolean
+  userName?: string
+  userImage?: string | null
 }
 
 /** 最大回覆巢狀深度 */
@@ -91,6 +88,9 @@ export function CommentItem({
   onDislike,
   onReply,
   depth = 0,
+  isAuthenticated = false,
+  userName,
+  userImage,
 }: CommentItemProps) {
   const [showReplies, setShowReplies] = useState(false)
   const [showReplyForm, setShowReplyForm] = useState(false)
@@ -191,8 +191,8 @@ export function CommentItem({
               )}
             </Button>
 
-            {/* 回覆按鈕（限制巢狀深度） */}
-            {depth < MAX_DEPTH && (
+            {/* 回覆按鈕（需登入且限制巢狀深度） */}
+            {isAuthenticated && depth < MAX_DEPTH && (
               <Button
                 type="button"
                 variant="ghost"
@@ -244,6 +244,8 @@ export function CommentItem({
                     compact
                     onSubmit={handleReply}
                     onCancel={() => setShowReplyForm(false)}
+                    userName={userName}
+                    userImage={userImage}
                   />
                 </div>
               </motion.div>
@@ -266,11 +268,13 @@ export function CommentItem({
                     <CommentItem
                       key={reply.id}
                       comment={reply}
-                      // ✅ 不再傳 userVotes
                       onLike={onLike}
                       onDislike={onDislike}
                       onReply={onReply}
                       depth={depth + 1}
+                      isAuthenticated={isAuthenticated}
+                      userName={userName}
+                      userImage={userImage}
                     />
                   ))}
                 </div>

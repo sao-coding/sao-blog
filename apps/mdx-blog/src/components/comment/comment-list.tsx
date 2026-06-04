@@ -22,10 +22,12 @@ interface CommentListProps {
   comments: Comment[]
   sortOrder: CommentSortOrder
   onSortChange: (order: CommentSortOrder) => void
-  // ✅ 移除 userVotes
   onLike: (commentId: string) => void
   onDislike: (commentId: string) => void
   onReply: (parentId: string, data: CommentFormValues) => void
+  isAuthenticated?: boolean
+  userName?: string
+  userImage?: string | null
 }
 
 export function CommentList({
@@ -35,6 +37,9 @@ export function CommentList({
   onLike,
   onDislike,
   onReply,
+  isAuthenticated = false,
+  userName,
+  userImage,
 }: CommentListProps) {
   const sortedComments = useMemo(() => {
     return [...comments].sort((a, b) => {
@@ -92,10 +97,12 @@ export function CommentList({
           <CommentItem
             key={comment.id}
             comment={comment}
-            // ✅ 不再傳 userVotes
             onLike={onLike}
             onDislike={onDislike}
             onReply={onReply}
+            isAuthenticated={isAuthenticated}
+            userName={userName}
+            userImage={userImage}
           />
         ))}
       </div>

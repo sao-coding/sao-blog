@@ -275,7 +275,7 @@ export const thinkings = pgTable(
 )
 
 export const commentRefTypeEnum = pgEnum('comment_ref_type', ['post', 'note', 'page', 'recently'])
-export const commentSourceEnum = pgEnum('comment_source', ['guest', 'google', 'github'])
+export const commentSourceEnum = pgEnum('comment_source', ['google', 'github'])
 
 export const comments = pgTable(
   'comments',
@@ -294,8 +294,7 @@ export const comments = pgTable(
     dislikes: integer('dislikes').default(0).notNull(),
     deleted: boolean('deleted').default(false).notNull(),
     pin: boolean('pin').default(false).notNull(),
-    // 留言來源：對應 account.providerId（例如 'guest', 'local', 'google', 'facebook'）
-    source: commentSourceEnum('source').notNull().default('guest'),
+    source: commentSourceEnum('source').notNull(),
     // 若為已登入使用者，存放對應 user.id；訪客則為 null
     userId: uuid('user_id').references(() => user.id, { onDelete: 'set null' }),
     ip: varchar('ip', { length: 45 }), // 支援 IPv6
