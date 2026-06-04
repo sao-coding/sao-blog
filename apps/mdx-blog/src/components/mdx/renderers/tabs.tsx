@@ -66,12 +66,12 @@ export const MdxTabs = ({
 
   return (
     <Tabs
-      defaultValue={defaultIndex}
+      defaultValue={String(defaultIndex)}
       className={cn('my-6', className)}
     >
       <TabsList className="flex-wrap">
         {tabs.map((tab, index) => (
-          <TabsTrigger key={index} value={index}>
+          <TabsTrigger key={index} value={String(index)}>
             {tab.props.label}
           </TabsTrigger>
         ))}
@@ -79,7 +79,7 @@ export const MdxTabs = ({
       {tabs.map((tab, index) => (
         <TabsContent
           key={index}
-          value={index}
+          value={String(index)}
           className="rounded-lg border bg-card p-4 [&>:first-child]:mt-0 [&>:last-child]:mb-0"
         >
           {tab.props.children}
