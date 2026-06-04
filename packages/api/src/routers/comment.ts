@@ -1,4 +1,3 @@
-import { ORPCError } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
@@ -80,8 +79,11 @@ const createComment = protectedProcedure
             .limit(1);
 
         const providerId = userAccount?.providerId;
-        if (providerId !== 'github' && providerId !== 'google') {
-            throw new ORPCError('FORBIDDEN', { message: '僅支援 GitHub 或 Google 帳號留言' });
+        let source: "google" | "github" | "credential";
+        if (providerId === 'github' || providerId === 'google') {
+            source = providerId;
+        } else {
+            source = 'credential';
         }
 
         const [newComment] = await db.insert(comments).values({
@@ -91,7 +93,7 @@ const createComment = protectedProcedure
             email,
             content,
             userId,
-            source: providerId,
+            source,
             thread
         }).returning();
 

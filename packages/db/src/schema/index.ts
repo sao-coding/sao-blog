@@ -275,7 +275,7 @@ export const thinkings = pgTable(
 )
 
 export const commentRefTypeEnum = pgEnum('comment_ref_type', ['post', 'note', 'page', 'recently'])
-export const commentSourceEnum = pgEnum('comment_source', ['google', 'github'])
+export const commentSourceEnum = pgEnum('comment_source', ['google', 'github', 'credential'])
 
 export const comments = pgTable(
   'comments',

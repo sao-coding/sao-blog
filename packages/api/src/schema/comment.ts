@@ -15,7 +15,7 @@ export const commentSchema = z.object({
     dislikes: z.number(), // 踩的數量
     deleted: z.boolean(), // 是否已刪除
     pin: z.boolean(), // 是否置頂
-    source: z.enum(["google", "github"]),
+    source: z.enum(["google", "github", "credential"]),
     userId: z.string().nullable(), // 留言者的用戶 ID（如果已登入）
     ip: z.string().nullable(), // 留言者的 IP 地址（可選）
     agent: z.string().nullable(), // 留言者的 User Agent（可選）
