@@ -1,6 +1,6 @@
 import React from 'react'
 import type { MDXComponents } from 'next-mdx-remote-client/rsc'
-import { Echarts, Mermaid, Count, CustomQuote } from './renderers'
+import { Echarts, Mermaid, Count, CustomQuote, MdxImage } from './renderers'
 import EnhancedLink from './renderers/link'
 
 // 匯出個別 renderers
@@ -57,6 +57,7 @@ export const defaultMDXComponents: MDXComponents = {
   },
   Count,
   CustomQuote,
+  img: MdxImage,
 }
 
 // 擴充的 MDX components 型別，允許 null/false 來禁用 components
