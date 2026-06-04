@@ -1,7 +1,7 @@
 import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and, inArray } from "drizzle-orm";
-import { categories, posts, user, tags, postTags, type TagModel, notes } from "@sao-blog/db/schema/index";
+import { eq, desc, and, inArray, sql } from "drizzle-orm";
+import { categories, posts, user, tags, postTags, type TagModel, notes, topics } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { noteInputSchema } from "@sao-blog/api/schema/note";
@@ -81,6 +81,13 @@ const createNote = protectedProcedure
             }
         }
 
+        if (topicId) {
+            await db
+                .update(topics)
+                .set({ noteCount: sql`${topics.noteCount} + 1` })
+                .where(eq(topics.id, topicId));
+        }
+
         return {
             status: "success",
             message: "筆記建立成功",
@@ -94,6 +101,12 @@ const updateNote = protectedProcedure
     .handler(async ({ input, context }) => {
         const { id, title, mood, weather, bookmark, coordinates, location, status, content, topicId } = input;
         const authorId = context.session?.user.id;
+
+        const [currentNote] = await db
+            .select({ topicId: notes.topicId })
+            .from(notes)
+            .where(eq(notes.id, id))
+            .limit(1);
 
         const [updatedNote] = await db
             .update(notes)
@@ -119,6 +132,24 @@ const updateNote = protectedProcedure
             }
         }
 
+        // 若專欄變更，調整舊專欄 -1、新專欄 +1
+        const oldTopicId = currentNote?.topicId ?? null;
+        const newTopicId = topicId ?? null;
+        if (oldTopicId !== newTopicId) {
+            if (oldTopicId) {
+                await db
+                    .update(topics)
+                    .set({ noteCount: sql`GREATEST(${topics.noteCount} - 1, 0)` })
+                    .where(eq(topics.id, oldTopicId));
+            }
+            if (newTopicId) {
+                await db
+                    .update(topics)
+                    .set({ noteCount: sql`${topics.noteCount} + 1` })
+                    .where(eq(topics.id, newTopicId));
+            }
+        }
+
         return {
             status: "success",
             message: "筆記更新成功",
@@ -134,12 +165,12 @@ const deleteNote = protectedProcedure
         const { ids } = input;
 
         try {
-            const deleteNotes = await db
+            const deletedNotes = await db
                 .delete(notes)
                 .where(inArray(notes.id, ids))
                 .returning();
 
-            if (deleteNotes.length === 0) {
+            if (deletedNotes.length === 0) {
                 return {
                     status: "error",
                     message: "沒有筆記被刪除，可能是筆記不存在或沒有權限",
@@ -147,10 +178,24 @@ const deleteNote = protectedProcedure
                 }
             }
 
+            // 更新受影響專欄的日記數量
+            const topicIds = [
+                ...new Set(
+                    deletedNotes.map((n) => n.topicId).filter((id): id is string => id !== null)
+                ),
+            ];
+            for (const tid of topicIds) {
+                const count = deletedNotes.filter((n) => n.topicId === tid).length;
+                await db
+                    .update(topics)
+                    .set({ noteCount: sql`GREATEST(${topics.noteCount} - ${count}, 0)` })
+                    .where(eq(topics.id, tid));
+            }
+
             return {
                 status: "success",
                 message: "筆記刪除成功",
-                data: deleteNotes,
+                data: deletedNotes,
             };
         } catch (error) {
             console.error("刪除筆記失敗:", error);
