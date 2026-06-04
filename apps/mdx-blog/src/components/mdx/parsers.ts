@@ -31,6 +31,7 @@ const getMdxOptions = (source: string): EvaluateOptions<Scope> => ({
     readingTime: calculateSomeHow(source),
   },
   vfileDataIntoScope: 'toc', // 這行會把 toc 注入 scope.toc
+  debug: { compiledSource: true }, // TODO: 診斷完移除
 })
 
 // 較輕量的 MDX 配置（用於日記/備註，只需要 GFM 與 slug）
