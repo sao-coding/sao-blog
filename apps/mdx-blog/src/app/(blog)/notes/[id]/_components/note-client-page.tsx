@@ -54,7 +54,7 @@ export function NoteClientPage({ note, toc, children }: NoteClientPageProps) {
             </span>
           </div>
           <NoteMainContainer>
-            <article className="prose dark:prose-invert max-w-full mt-10">
+            <article className="prose dark:prose-invert max-w-full mt-10 note-content">
               {children}
             </article>
           </NoteMainContainer>
