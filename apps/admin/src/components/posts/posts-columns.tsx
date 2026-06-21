@@ -88,6 +88,30 @@ export const columns: ColumnDef<Posts[number]>[] = [
     },
   },
   {
+    accessorKey: 'category',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="分類" />
+    ),
+    cell: ({ row }) => {
+      const category = row.original.category
+      if (!category?.id) {
+        return <span className="ml-2 text-muted-foreground">未分類</span>
+      }
+      return (
+        <div className="ml-2 flex items-center gap-2">
+          {category.color && (
+            <span
+              className="inline-block size-3 shrink-0 rounded-full"
+              style={{ backgroundColor: category.color }}
+              aria-hidden
+            />
+          )}
+          <span className="max-w-32 truncate">{category.name}</span>
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: 'author',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="作者" />
