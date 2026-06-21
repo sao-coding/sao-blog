@@ -16,8 +16,8 @@ export const categorySchema = z.object({
 
 export const categoryInputSchema = z.object({
     id: z.string(),
-    name: z.string(),
-    slug: z.string(),
+    name: z.string().min(1, '請輸入分類名稱'),
+    slug: z.string().min(1, '請輸入網址別名'),
     description: z.string().nullable(),
     color: z.string().nullable(),
     createdAt: z.date(),

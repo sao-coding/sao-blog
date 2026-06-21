@@ -12,6 +12,8 @@ import type { InferClientOutputs } from '@orpc/client'
 import type { client } from '@/utils/orpc'
 import { ActionMenu } from '@/components/overlay/action-menu'
 import { useOverlay } from '@/hooks/use-overlay'
+import { useMutation } from '@tanstack/react-query'
+import { orpc, queryClient } from '@/utils/orpc'
 
 type RouterOutputs = InferClientOutputs<typeof client>;
 type Post = RouterOutputs['admin']['post']['getPosts']['data'][number]
@@ -24,17 +26,16 @@ export function PostRowActions({ row }: PostRowActionsProps) {
   const { openAlertDialog } = useOverlay()
   const post = row.original
 
+  const deletePostMutation = useMutation(
+    orpc.admin.post.deletePosts.mutationOptions()
+  )
+
   const openDeletePostDialog = () => {
     openAlertDialog({
       id: `delete-post-${post.id}`,
       render: ({ isPending }) => ({
         title: `確定刪除文章「${post.title}」嗎？`,
         description: '此操作無法復原，刪除後將無法還原文章內容。',
-        body: (
-          <p className="text-xs text-muted-foreground">
-            目前先接全域 Overlay，下一步可直接將 API 刪除請求接在 onConfirm。
-          </p>
-        ),
         cancelLabel: '取消',
         confirmLabel: isPending ? (
           <span className="inline-flex items-center gap-2">
@@ -47,8 +48,20 @@ export function PostRowActions({ row }: PostRowActionsProps) {
         confirmVariant: 'destructive',
       }),
       onConfirm: async ({ close }) => {
-        toast.success(`已觸發刪除流程（示範）：${post.title}`)
-        close()
+        try {
+          const res = await deletePostMutation.mutateAsync({ ids: [post.id] })
+          if (res.status === 'error') {
+            toast.error(res.message ?? '刪除文章時發生錯誤，請稍後再試。')
+            return
+          }
+          await queryClient.invalidateQueries({
+            queryKey: orpc.admin.post.getPosts.queryOptions().queryKey,
+          })
+          toast.success(`已刪除文章：${post.title}`)
+          close()
+        } catch {
+          toast.error('刪除文章時發生錯誤，請稍後再試。')
+        }
       },
     })
   }

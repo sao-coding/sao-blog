@@ -115,9 +115,9 @@ export const postInputSchema = z.object({
   pin: z.boolean(),
   pinOrder: z.number(),
 
-  // 只需要 id 就夠了，後端自己去查
+  // 只需要 id 就夠了，後端自己去查。分類為必填，不可為空字串
   category: z.object({
-    id: z.string(),
+    id: z.string().min(1, '請選擇分類'),
   }),
   tags: z.array(z.object({
     id: z.string(),
