@@ -20,6 +20,7 @@ catalog:
 
 onlyBuiltDependencies:
   - esbuild
+  - ip2region-ts
   - msw
   - sharp
   - unrs-resolver
