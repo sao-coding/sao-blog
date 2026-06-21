@@ -4,7 +4,10 @@ import { TimelineSchema } from "@sao-blog/api/schema/timeline"
 import { motion } from "motion/react"
 import Link from "next/link"
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
+import type { MouseEvent } from "react"
 import z from "zod"
+
+import { openTimelinePreview } from "./timeline-preview-modal"
 
 // ─── 常數移到模組頂層 ────────────────────────────────────────────────────────
 
@@ -63,6 +66,25 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
   const yearDelay = groupIndex * 0.04
 
   const grouped = useMemo(() => groupByMonth(articles), [articles])
+
+  // 點擊文章/日記：一般左鍵 -> 開啟預覽（URL 加上 ?go-to=）；
+  // 修飾鍵/中鍵 -> 維持預設行為（在新分頁開啟真實文章）
+  const handlePreviewClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>, goTo: string) => {
+      if (
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return
+      }
+      e.preventDefault()
+      openTimelinePreview(goTo)
+    },
+    []
+  )
 
   // ── Indicator ──────────────────────────────────────────────────────────────
 
@@ -176,6 +198,14 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                   <Link
                     // 判斷是文章還是筆記，然後導向不同的路由
                     href={article.type === 'note' ? `/notes/${article.slug}` : `/posts/${article.slug}`}
+                    onClick={(e) =>
+                      handlePreviewClick(
+                        e,
+                        article.type === 'note'
+                          ? `notes/${article.slug}`
+                          : `posts/${article.slug}`
+                      )
+                    }
                     className="flex items-baseline gap-6 transition-colors"
                   >
                     <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24 group-hover:text-primary">
