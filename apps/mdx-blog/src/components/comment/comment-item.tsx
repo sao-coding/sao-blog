@@ -18,6 +18,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ExternalLinkIcon,
+  MapPinIcon,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import dayjs from 'dayjs'
@@ -73,6 +74,22 @@ function getAvatarColor(displayUsername: string): string {
 }
 
 /**
+ * 僅允許 http(s) 的網址，擋掉 javascript: / data: 等 XSS scheme。
+ * @param website - 留言者填寫的網址
+ * @returns 安全的網址，否則 undefined
+ */
+function safeWebsite(website?: string): string | undefined {
+  if (!website) return undefined
+  try {
+    const url = new URL(website)
+    if (url.protocol === 'http:' || url.protocol === 'https:') return url.href
+  } catch {
+    // 非合法網址
+  }
+  return undefined
+}
+
+/**
  * 單則留言元件
  *
  * 顯示使用者頭像、暱稱、時間、Markdown 內容。
@@ -96,6 +113,7 @@ export function CommentItem({
   const [showReplyForm, setShowReplyForm] = useState(false)
 
   const hasReplies = comment.replies.length > 0
+  const websiteHref = safeWebsite(comment.website)
 
   /** 處理回覆送出 */
   const handleReply = useCallback(
@@ -132,11 +150,11 @@ export function CommentItem({
               {comment.displayUsername}
             </span>
 
-            {comment.website && (
+            {websiteHref && (
               <a
-                href={comment.website}
+                href={websiteHref}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="text-muted-foreground hover:text-primary"
                 aria-label={`${comment.displayUsername} 的網站`}
               >
@@ -151,6 +169,13 @@ export function CommentItem({
             <span className="text-xs text-muted-foreground">
               {dayjs(comment.createdAt).locale('zh-tw').fromNow()}
             </span>
+
+            {comment.location && (
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                <MapPinIcon className="size-3" />
+                {comment.location}
+              </span>
+            )}
           </div>
 
           {/* 留言內容 */}

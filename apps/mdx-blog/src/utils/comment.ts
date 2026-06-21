@@ -21,6 +21,7 @@ export function toCommentTree(flatComments: FlatComment[]): Comment[] {
       liked: item.liked,   // ✅
       likes: item.likes,
       dislikes: item.dislikes,
+      location: item.location,
       replies: [],
       parentId: item.thread,
     })

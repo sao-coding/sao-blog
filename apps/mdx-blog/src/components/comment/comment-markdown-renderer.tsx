@@ -214,6 +214,8 @@ export function CommentMarkdownRenderer({
         <Markdown
           options={{
             forceBlock: true,
+            // 禁止解析原始 HTML，徹底杜絕內嵌 <script>/<img onerror> 等 XSS
+            disableParsingRawHTML: true,
             overrides: markdownOverrides,
           }}
         >

@@ -37,6 +37,7 @@ export interface Comment {
   liked: boolean        // ✅ 新增
   likes: number
   dislikes: number
+  location: string | null  // 留言者歸屬地（由 IP 解析，不對外暴露 IP 本身）
   replies: Comment[]
   parentId: string | null
 }

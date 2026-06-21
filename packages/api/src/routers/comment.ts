@@ -1,9 +1,30 @@
 import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
-import { comments, commentLikes, account } from "@sao-blog/db/schema/index";
+import { comments, commentLikes, account, posts } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { CommentsResponseSchema } from "@sao-blog/api/schema/comment";
+import { resolveIpLocation } from "@sao-blog/api/lib/ip-region";
+
+/** 留言內容長度上限，避免儲存型 DoS */
+const MAX_COMMENT_LENGTH = 2000;
+
+/**
+ * 僅允許 http / https 的網址，擋掉 javascript: / data: 等 XSS scheme。
+ * 注意：zod 的 .url() 會把 "javascript:alert(1)" 視為合法 URL，故需額外白名單。
+ */
+function sanitizeWebsite(website: string | undefined | null): string | null {
+  if (!website) return null;
+  try {
+    const url = new URL(website);
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      return url.toString();
+    }
+  } catch {
+    // 非合法 URL
+  }
+  return null;
+}
 
 // 獲取每篇文章 or 日記的留言列表（用於文章或日記頁面）
 const getComments = publicProcedure
@@ -44,6 +65,9 @@ const getComments = publicProcedure
         const processedComments = commentsList.map(comment => ({
             ...comment,
             content: comment.deleted ? "[此評論已被刪除]" : comment.content,
+            // 隱私：公開介面只顯示歸屬地（location），不外洩真實 IP 與 User-Agent
+            ip: null,
+            agent: null,
             liked: userId
                 ? (likedMap.has(comment.id) ? likedMap.get(comment.id)! : null)
                 : null,
@@ -63,7 +87,8 @@ const createComment = protectedProcedure
     .input(z.object({
         type: z.enum(["post", "note", "page", "recently"]),
         refId: z.string(),
-        content: z.string().min(1),
+        content: z.string().trim().min(1, "留言內容不可為空").max(MAX_COMMENT_LENGTH, `留言內容不可超過 ${MAX_COMMENT_LENGTH} 字`),
+        website: z.string().url().optional(),
         thread: z.string().optional(),
     }))
     .handler(async ({ input, context }) => {
@@ -71,6 +96,20 @@ const createComment = protectedProcedure
         const userId = context.session.user.id;
         const displayUsername = context.session.user.name;
         const email = context.session.user.email;
+
+        // 文章關閉留言時不可新增（僅針對 post）
+        if (type === "post") {
+            const post = await db.query.posts.findFirst({
+                where: eq(posts.id, refId),
+                columns: { id: true, allowComments: true },
+            });
+            if (!post) {
+                return { status: "error", message: "文章不存在" };
+            }
+            if (!post.allowComments) {
+                return { status: "error", message: "此文章已關閉留言" };
+            }
+        }
 
         const [userAccount] = await db
             .select()
@@ -86,15 +125,25 @@ const createComment = protectedProcedure
             source = 'credential';
         }
 
+        // 解析來源資訊：IP / User-Agent / 歸屬地
+        const ip = context.ip ?? null;
+        const agent = context.userAgent?.slice(0, 512) ?? null;
+        const location = await resolveIpLocation(ip);
+        const website = sanitizeWebsite(input.website);
+
         const [newComment] = await db.insert(comments).values({
             refType: type,
             refId,
             displayUsername,
             email,
             content,
+            website,
             userId,
             source,
-            thread
+            thread,
+            ip,
+            agent,
+            location,
         }).returning();
 
         return {
