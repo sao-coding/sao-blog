@@ -4,7 +4,7 @@ import { orpc } from '@/lib/orpc'
 
 import { BackToTopFAB } from '@/components/fab'
 import { Timeline } from './_components/timeline'
-import { TimelinePreviewModal } from './_components/timeline-preview-modal'
+import { ArticlePreviewModal } from '@/components/preview/article-preview-modal'
 import ProgressNumber from '@/components/animation/progress-number'
 
 const TimelinePage = async ({
@@ -111,7 +111,7 @@ const TimelinePage = async ({
       )}
       <BackToTopFAB />
       <Suspense fallback={null}>
-        <TimelinePreviewModal />
+        <ArticlePreviewModal />
       </Suspense>
     </>
   )

@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import type { MouseEvent } from "react"
 import z from "zod"
 
-import { openTimelinePreview } from "./timeline-preview-modal"
+import { openArticlePreview } from "@/components/preview/preview-url"
 
 // ─── 常數移到模組頂層 ────────────────────────────────────────────────────────
 
@@ -81,7 +81,7 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
         return
       }
       e.preventDefault()
-      openTimelinePreview(goTo)
+      openArticlePreview(goTo)
     },
     []
   )
