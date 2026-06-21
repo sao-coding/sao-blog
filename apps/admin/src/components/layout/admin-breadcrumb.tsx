@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '@sao-blog/ui/components/breadcrumb'
 import { BREADCRUMB_LABELS } from '@/config/breadcrumb'
-import { useLocation } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import React from 'react'
 
 export function AdminBreadcrumb() {
@@ -23,7 +23,8 @@ export function AdminBreadcrumb() {
     <Breadcrumb>
       <BreadcrumbList>
         {segments.map((segment, index) => {
-          const href = '/admin' + segments.slice(0, index + 1).join('/')
+          // 去掉 /admin 前綴，因為 Link 組件會自動處理路徑
+          const href = segments.slice(0, index + 1).join('/')
           const isLast = index === segments.length - 1
           const label = BREADCRUMB_LABELS[segment] || segment
 
@@ -33,7 +34,12 @@ export function AdminBreadcrumb() {
                 {isLast ? (
                   <BreadcrumbPage>{label}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                  <BreadcrumbLink render={
+                    <Link to={href}>
+                      {label}
+                    </Link>
+                  }
+                  />
                 )}
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
