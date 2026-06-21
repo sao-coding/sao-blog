@@ -58,7 +58,7 @@ const getPosts = protectedProcedure
             })
             .from(posts)
             .innerJoin(user, eq(posts.authorId, user.id))
-            .leftJoin(categories, eq(posts.categoryId, categories.id))
+            .innerJoin(categories, eq(posts.categoryId, categories.id))
             .orderBy(desc(posts.updatedAt));
 
         return {
@@ -76,7 +76,7 @@ const getPost = protectedProcedure
     .output(PostResponseSchema)
     .handler(async ({ input }) => {
         const { id } = input;
-        // 1) 先用 left join 取得 post、author、category（若有）
+        // 1) 取得 post、author、category（分類為必填，每篇文章都有對應分類）
         const [row] = await db
             .select({ post: posts, author: user, category: categories })
             .from(posts)
@@ -85,7 +85,6 @@ const getPost = protectedProcedure
             .where(eq(posts.id, id))
             .limit(1);
 
-        console.log(`Fetching post with id: ${id}`, row);
         if (!row) {
             return {
                 status: "error",
@@ -118,6 +117,20 @@ const getPost = protectedProcedure
         };
     });
 
+// 解析文章分類 id：分類為必填，使用者未選擇時自動歸到 slug 為 "others" 的預設分類。
+// 回傳 null 代表既沒選分類、也找不到預設「其他」分類（需先手動建立該分類）。
+async function resolveCategoryId(categoryId?: string | null) {
+    if (categoryId) return categoryId;
+
+    const [fallback] = await db
+        .select({ id: categories.id })
+        .from(categories)
+        .where(eq(categories.slug, "others"))
+        .limit(1);
+
+    return fallback?.id ?? null;
+}
+
 // 創建貼文
 const createPost = protectedProcedure
     .route({ method: "POST", path: "/posts" })
@@ -139,6 +152,17 @@ const createPost = protectedProcedure
 
         // 取得當前登入使用者 ID
         const authorId = context.session.user.id;
+
+        // 分類為必填：未選擇時自動歸到「其他」(slug=others) 預設分類
+        const resolvedCategoryId = await resolveCategoryId(category?.id);
+        if (!resolvedCategoryId) {
+            return {
+                status: "error",
+                message: "未選擇分類，且找不到預設「其他」分類，請先建立 slug 為 others 的分類",
+                meta: undefined,
+                data: null,
+            };
+        }
 
         // summary 未填時，於儲存階段先從 content 產生純文字摘要，
         // 避免前台列表每次請求都即時解析 MDX
@@ -175,7 +199,7 @@ const createPost = protectedProcedure
                 content,
                 summary: resolvedSummary,
                 authorId,
-                categoryId: category?.id || null,
+                categoryId: resolvedCategoryId,
                 cover: cover ?? null,
                 allowComments,
                 pin,
@@ -203,12 +227,10 @@ const createPost = protectedProcedure
         }
 
         // 更新分類文章數量
-        if (category?.id) {
-            await db
-                .update(categories)
-                .set({ postCount: sql`${categories.postCount} + 1` })
-                .where(eq(categories.id, category.id));
-        }
+        await db
+            .update(categories)
+            .set({ postCount: sql`${categories.postCount} + 1` })
+            .where(eq(categories.id, resolvedCategoryId));
 
         return {
             status: "success",
@@ -278,6 +300,17 @@ const updatePost = protectedProcedure
         const resolvedSummary =
             summary && summary.trim() ? summary : await mdxToExcerpt(content);
 
+        // 分類為必填：未選擇時自動歸到「其他」(slug=others) 預設分類
+        const resolvedCategoryId = await resolveCategoryId(category?.id);
+        if (!resolvedCategoryId) {
+            return {
+                status: "error",
+                message: "未選擇分類，且找不到預設「其他」分類，請先建立 slug 為 others 的分類",
+                meta: undefined,
+                data: null,
+            };
+        }
+
         // 更新文章主資料
         const [updatedPost] = await db
             .update(posts)
@@ -286,7 +319,7 @@ const updatePost = protectedProcedure
                 title,
                 content,
                 summary: resolvedSummary,
-                categoryId: category?.id || null,
+                categoryId: resolvedCategoryId,
                 cover: cover || null,
                 allowComments,
                 pin,
@@ -319,7 +352,7 @@ const updatePost = protectedProcedure
 
         // 更新分類文章數量：舊分類 -1，新分類 +1
         const oldCategoryId = currentPost?.categoryId ?? null;
-        const newCategoryId = category?.id ?? null;
+        const newCategoryId = resolvedCategoryId;
         if (oldCategoryId !== newCategoryId) {
             if (oldCategoryId) {
                 await db
