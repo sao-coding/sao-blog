@@ -2,10 +2,29 @@
 
 import { serialize } from 'next-mdx-remote-client/serialize'
 import type { SerializeOptions } from 'next-mdx-remote-client/serialize'
+import type { postSchema } from '@sao-blog/api/schema/post'
+import type { z } from 'zod'
+import { env } from '@sao-blog/env/web'
 
-import { client } from '@/lib/orpc'
 import getMdxOptions, { getBasicMdxOptions } from '@/components/mdx/parsers'
+import type { ApiResponse } from '@/types/api'
+import type { NoteItem } from '@/types/note'
 import type { PreviewKind, PreviewResult } from './preview-types'
+
+// 直接打 OpenAPI REST 端點（與日記頁相同作法）。
+// getPost / getNote 都是 publicProcedure，不需要任何 header / auth，
+// 也因此避開了 oRPC client 在 Server Action 內轉發 next/headers 造成的
+// content-length 不符問題。
+type PostItem = z.infer<typeof postSchema>
+
+async function fetchApi<T>(path: string): Promise<T | null> {
+  const res = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/api${path}`, {
+    cache: 'no-store',
+  })
+  if (!res.ok) return null
+  const json = (await res.json()) as ApiResponse<T>
+  return json.data ?? null
+}
 
 /**
  * 在伺服器端把文章／日記的 MDX 內容編譯成可在 client 端 <MDXClient> 渲染的格式。
@@ -20,8 +39,7 @@ export async function getArticlePreview({
 }): Promise<PreviewResult> {
   try {
     if (type === 'note') {
-      const res = await client.note.getNote({ id })
-      const note = res.data
+      const note = await fetchApi<NoteItem>(`/notes/${id}`)
       if (!note) return { ok: false, message: '找不到日記' }
 
       const serialized = await serialize({
@@ -43,13 +61,14 @@ export async function getArticlePreview({
           category: null,
           mood: note.mood ?? null,
           weather: note.weather ?? null,
-          createdAt: note.createdAt ? new Date(note.createdAt).toISOString() : null,
+          createdAt: note.createdAt
+            ? new Date(note.createdAt).toISOString()
+            : null,
         },
       }
     }
 
-    const res = await client.post.getPost({ id })
-    const post = res.data
+    const post = await fetchApi<PostItem>(`/posts/${id}`)
     if (!post) return { ok: false, message: '找不到文章' }
 
     const serialized = await serialize({
@@ -71,7 +90,9 @@ export async function getArticlePreview({
         category: post.category?.name ?? null,
         mood: null,
         weather: null,
-        createdAt: post.createdAt ? new Date(post.createdAt).toISOString() : null,
+        createdAt: post.createdAt
+          ? new Date(post.createdAt).toISOString()
+          : null,
       },
     }
   } catch (err) {
