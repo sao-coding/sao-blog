@@ -8,6 +8,7 @@ import {
 } from '@sao-blog/ui/components/card'
 import {
   FolderIcon,
+  FolderXIcon,
   KeyRoundIcon,
   MessageSquareIcon,
   NotebookPenIcon,
@@ -24,6 +25,7 @@ interface StatCardsProps {
     topics: number
     categories: number
     tags: number
+    uncategorizedPosts: number
   }
   isLoading?: boolean
 }
@@ -39,11 +41,12 @@ const STAT_ITEMS: {
   { key: 'topics', label: '專欄', icon: KeyRoundIcon },
   { key: 'categories', label: '分類', icon: FolderIcon },
   { key: 'tags', label: '標籤', icon: TagIcon },
+  { key: 'uncategorizedPosts', label: '未分類文章', icon: FolderXIcon },
 ]
 
 export function StatCards({ counts, isLoading }: StatCardsProps) {
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
       {STAT_ITEMS.map(({ key, label, icon: Icon }) => (
         <Card key={key}>
           <CardHeader>

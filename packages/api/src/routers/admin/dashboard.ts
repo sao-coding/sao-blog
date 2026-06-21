@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { gte, count, sql, desc, eq, gt } from "drizzle-orm";
+import { gte, count, sql, desc, eq, gt, isNull } from "drizzle-orm";
 import {
     posts,
     notes,
@@ -25,6 +25,7 @@ const getOverview = protectedProcedure
             topicCount,
             categoryCount,
             tagCount,
+            uncategorizedPostCount,
         ] = await Promise.all([
             db.$count(posts),
             db.$count(notes),
@@ -32,6 +33,7 @@ const getOverview = protectedProcedure
             db.$count(topics),
             db.$count(categories),
             db.$count(tags),
+            db.$count(posts, isNull(posts.categoryId)),
         ]);
 
         const since = new Date();
@@ -155,6 +157,7 @@ const getOverview = protectedProcedure
                     topics: topicCount,
                     categories: categoryCount,
                     tags: tagCount,
+                    uncategorizedPosts: uncategorizedPostCount,
                 },
                 commentTrend,
                 categoryPostCounts,
