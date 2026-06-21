@@ -413,7 +413,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                       </FieldLabel>
                       <Input
                         {...form.register('slug')}
-                        placeholder="article-url-slug"
+                        placeholder="未填寫時將自動依標題產生"
                         className="text-sm"
                         aria-invalid={!!errors.slug}
                       />

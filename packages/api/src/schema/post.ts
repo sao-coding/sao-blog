@@ -108,16 +108,17 @@ export const postInputSchema = z.object({
   title: z.string().min(1, '請輸入文章標題'),
   summary: z.string().nullable().optional(),
   content: z.string().min(1, '請輸入文章內容'),
-  slug: z.string().min(1, '請輸入文章網址'),
+  // slug 非必填，未填寫時後端會依標題自動產生
+  slug: z.string().optional(),
   cover: z.string().nullable().optional(),
   status: z.enum(['draft', 'published', 'archived']),
   allowComments: z.boolean(),
   pin: z.boolean(),
   pinOrder: z.number(),
 
-  // 只需要 id 就夠了，後端自己去查。分類為必填，不可為空字串
+  // 只需要 id 就夠了，後端自己去查。分類非必填，可不選分類
   category: z.object({
-    id: z.string().min(1, '請選擇分類'),
+    id: z.string(),
   }),
   tags: z.array(z.object({
     id: z.string(),

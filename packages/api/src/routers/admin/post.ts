@@ -6,8 +6,33 @@ import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
 import { mdxToExcerpt } from "../../lib/mdx-to-text";
+import { slugify } from "../../lib/slugify";
 
 // 管理員系統員系統
+
+// 依標題產生 slug，並確保不與既有文章衝突（碰撞時補上序號）
+async function generateUniqueSlugFromTitle(
+    title: string,
+    excludeId?: string
+): Promise<string> {
+    const base = slugify(title) || crypto.randomUUID().slice(0, 8);
+    let candidate = base;
+    let suffix = 1;
+
+    while (true) {
+        const existing = await db
+            .select({ id: posts.id })
+            .from(posts)
+            .where(eq(posts.slug, candidate))
+            .limit(1);
+
+        const found = existing[0];
+        if (!found || found.id === excludeId) return candidate;
+
+        suffix += 1;
+        candidate = `${base}-${suffix}`;
+    }
+}
 
 const getPosts = protectedProcedure
     .route({ method: "GET", path: "/posts" })
@@ -24,7 +49,12 @@ const getPosts = protectedProcedure
                 author: {
                     id: user.id,
                     name: user.name,
-                }
+                },
+                category: {
+                    id: categories.id,
+                    name: categories.name,
+                    color: categories.color,
+                },
             })
             .from(posts)
             .innerJoin(user, eq(posts.authorId, user.id))
@@ -115,27 +145,32 @@ const createPost = protectedProcedure
         const resolvedSummary =
             summary && summary.trim() ? summary : await mdxToExcerpt(content);
 
-        // 檢查 slug 是否已存在
-        const existing = await db
-            .select()
-            .from(posts)
-            .where(eq(posts.slug, slug))
-            .limit(1);
+        // slug 未填寫時，依標題自動產生；已填寫則檢查是否與既有文章衝突
+        let resolvedSlug = slug?.trim();
+        if (!resolvedSlug) {
+            resolvedSlug = await generateUniqueSlugFromTitle(title);
+        } else {
+            const existing = await db
+                .select()
+                .from(posts)
+                .where(eq(posts.slug, resolvedSlug))
+                .limit(1);
 
-        if (existing.length > 0) {
-            return {
-                status: "error",
-                message: "文章 slug 已存在",
-                meta: undefined,
-                data: null,
-            };
+            if (existing.length > 0) {
+                return {
+                    status: "error",
+                    message: "文章 slug 已存在",
+                    meta: undefined,
+                    data: null,
+                };
+            }
         }
 
         // 建立文章
         const [createdPost] = await db
             .insert(posts)
             .values({
-                slug,
+                slug: resolvedSlug,
                 title,
                 content,
                 summary: resolvedSummary,
@@ -208,23 +243,6 @@ const updatePost = protectedProcedure
             .where(eq(posts.id, id!))
             .limit(1);
 
-        // 檢查 slug 是否被其他文章使用
-        const existing = await db
-            .select()
-            .from(posts)
-            .where(eq(posts.slug, slug))
-            .limit(1);
-
-        const existingPost = existing[0];
-        if (existingPost && existingPost.id !== id) {
-            return {
-                status: "error",
-                message: "文章 slug 已存在",
-                meta: undefined,
-                data: null,
-            };
-        }
-
         if (!id) {
             return {
                 status: "error",
@@ -232,6 +250,28 @@ const updatePost = protectedProcedure
                 meta: undefined,
                 data: null,
             };
+        }
+
+        // slug 未填寫時，依標題自動產生；已填寫則檢查是否被其他文章使用
+        let resolvedSlug = slug?.trim();
+        if (!resolvedSlug) {
+            resolvedSlug = await generateUniqueSlugFromTitle(title, id);
+        } else {
+            const existing = await db
+                .select()
+                .from(posts)
+                .where(eq(posts.slug, resolvedSlug))
+                .limit(1);
+
+            const existingPost = existing[0];
+            if (existingPost && existingPost.id !== id) {
+                return {
+                    status: "error",
+                    message: "文章 slug 已存在",
+                    meta: undefined,
+                    data: null,
+                };
+            }
         }
 
         // summary 未填時，於儲存階段先從 content 產生純文字摘要
@@ -242,7 +282,7 @@ const updatePost = protectedProcedure
         const [updatedPost] = await db
             .update(posts)
             .set({
-                slug,
+                slug: resolvedSlug,
                 title,
                 content,
                 summary: resolvedSummary,
