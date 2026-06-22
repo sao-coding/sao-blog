@@ -57,7 +57,9 @@ const app = new Elysia()
     async (context) => {
       const { response } = await rpcHandler.handle(context.request, {
         prefix: "/rpc",
-        context: await createContext({ context }),
+        // 必須以 context.request / context.server 字面寫法傳入，讓 Elysia 的
+        // sucrose 靜態分析掃描到 `.server` 存取，才會把 server 欄位組裝進 context。
+        context: await createContext({ request: context.request, server: context.server }),
       });
       return response ?? new Response("Not Found", { status: 404 });
     },
@@ -70,7 +72,7 @@ const app = new Elysia()
     async (context) => {
       const { response } = await apiHandler.handle(context.request, {
         prefix: "/api",
-        context: await createContext({ context }),
+        context: await createContext({ request: context.request, server: context.server }),
       });
       return response ?? new Response("Not Found", { status: 404 });
     },
