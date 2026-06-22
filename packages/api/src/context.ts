@@ -3,8 +3,7 @@ import type { Context as ElysiaContext } from "elysia";
 import { auth } from "@sao-blog/auth";
 
 export type CreateContextOptions = {
-  request: Request;
-  server: ElysiaContext["server"];
+  context: ElysiaContext;
 };
 
 /**
@@ -14,15 +13,9 @@ export type CreateContextOptions = {
  * 或 x-real-ip。直連時則用 socket 位址（Elysia server.requestIP）。
  * 注意：x-forwarded-for 可被用戶端偽造，此處僅用於「顯示歸屬地」，
  * 不可作為任何權限判斷依據。
- *
- * 重要：請只在呼叫端（route handler）以 `context.request` / `context.server`
- * 這種字面寫法傳入，不要包成 `{ context }` 物件簡寫再轉傳。Elysia 的 sucrose
- * 靜態分析是用正規表達式掃描 handler 原始碼文字來判斷要不要組裝 `server` 欄位，
- * 若該欄位的存取藏在外部函式或物件簡寫裡，分析不到就會直接把 server 設為
- * undefined，導致 requestIP 永遠拿不到值。
  */
-function getClientIp(request: Request, server: ElysiaContext["server"]): string | null {
-  const headers = request.headers;
+function getClientIp(context: ElysiaContext): string | null {
+  const headers = context.request.headers;
   const normalize = (ip: string): string =>
     // 剝除 IPv4-mapped IPv6 前綴，例如 ::ffff:127.0.0.1 -> 127.0.0.1
     ip.replace(/^::ffff:/i, "").trim();
@@ -38,13 +31,15 @@ function getClientIp(request: Request, server: ElysiaContext["server"]): string 
   if (xReal) return normalize(xReal);
 
   // Elysia / Bun 的 socket 位址
-  const socketIp = server?.requestIP?.(request)?.address;
+  const socketIp = (context as ElysiaContext & {
+    server?: { requestIP?: (req: Request) => { address?: string } | null };
+  }).server?.requestIP?.(context.request)?.address;
   return socketIp ? normalize(socketIp) : null;
 }
 
-export async function createContext({ request, server }: CreateContextOptions) {
-  const headers = request.headers;
-  const ip = getClientIp(request, server);
+export async function createContext({ context }: CreateContextOptions) {
+  const headers = context.request.headers;
+  const ip = getClientIp(context);
   const userAgent = headers.get?.("user-agent") ?? null;
   const authHeader = headers.get?.("authorization") ?? "";
   const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -70,7 +65,7 @@ export async function createContext({ request, server }: CreateContextOptions) {
     }
   }
 
-  const session = await auth.api.getSession({ headers });
+  const session = await auth.api.getSession({ headers: context.request.headers });
   return {
     session,
     ip,
