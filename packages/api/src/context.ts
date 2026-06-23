@@ -50,7 +50,7 @@ export async function createContext({ request, server }: CreateContextOptions) {
   const authHeader = headers.get?.("authorization") ?? "";
   const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
   const xApiKey = headers.get?.("x-api-key") ?? null;
-  console.log("Authorization information:", { bearer, xApiKey });
+  // console.log("Authorization information:", { bearer, xApiKey });
   // 優先使用 Bearer 或 x-api-key 進行 API Key 驗證
   const key = bearer ?? xApiKey;
   if (key) {
