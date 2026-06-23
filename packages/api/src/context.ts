@@ -45,6 +45,7 @@ function getClientIp(request: Request, server: ElysiaContext["server"]): string 
 export async function createContext({ request, server }: CreateContextOptions) {
   const headers = request.headers;
   const ip = getClientIp(request, server);
+  console.log("建立 API 請求上下文，來源 IP：", ip);
   const userAgent = headers.get?.("user-agent") ?? null;
   const authHeader = headers.get?.("authorization") ?? "";
   const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;

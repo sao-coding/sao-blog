@@ -8,13 +8,14 @@
  */
 
 import { isValidIp, newWithBuffer } from 'ip2region-ts'
+import { join } from 'node:path'
 // 以 import attribute 內嵌 xdb：
 // - 開發 / `bun run`：解析為磁碟上的真實路徑
 // - `bun build --compile`（Docker 部署）：xdb 會被內嵌進單一執行檔
 // 若改用套件的 defaultDbFile（指向 node_modules），distroless 映像沒有 node_modules 會讀不到。
 // 必須用 Bun.file() 讀取，fs.readFileSync 無法讀取編譯後的內嵌虛擬路徑。
 // @ts-ignore -- 資產匯入無對應型別宣告；執行期由 Bun 解析為檔案路徑字串
-import xdbFile from 'ip2region-ts/data/ip2region.xdb' with { type: 'file' }
+const xdbPath = join(import.meta.dir, '../../assets/ip2region.xdb')
 
 // 整個 xdb 載入記憶體的 singleton searcher（lazy 初始化，避免啟動時阻塞）
 let searcherPromise: Promise<ReturnType<typeof newWithBuffer>> | null = null
@@ -22,7 +23,7 @@ let searcherPromise: Promise<ReturnType<typeof newWithBuffer>> | null = null
 function getSearcher() {
   if (!searcherPromise) {
     searcherPromise = (async () => {
-      const bytes = await Bun.file(xdbFile).arrayBuffer()
+      const bytes = await Bun.file(xdbPath).arrayBuffer()
       return newWithBuffer(Buffer.from(bytes))
     })()
   }
