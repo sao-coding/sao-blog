@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1780587191437,
-      "tag": "0000_talented_stature",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1780587971878,
-      "tag": "0001_left_ben_grimm",
+      "when": 1783796702800,
+      "tag": "0000_slim_zombie",
       "breakpoints": true
     }
   ]

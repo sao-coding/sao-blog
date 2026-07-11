@@ -1,5 +1,5 @@
 {
-  "id": "45c0c4ed-bafe-49c4-b45d-499e16ccb82c",
+  "id": "eb8718c2-315b-4e5e-97dc-609fd19db03f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1917,7 +1917,8 @@
       "schema": "public",
       "values": [
         "google",
-        "github"
+        "github",
+        "credential"
       ]
     },
     "public.post_status": {

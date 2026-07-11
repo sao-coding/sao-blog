@@ -1,5 +1,5 @@
 CREATE TYPE "public"."comment_ref_type" AS ENUM('post', 'note', 'page', 'recently');--> statement-breakpoint
-CREATE TYPE "public"."comment_source" AS ENUM('google', 'github');--> statement-breakpoint
+CREATE TYPE "public"."comment_source" AS ENUM('google', 'github', 'credential');--> statement-breakpoint
 CREATE TYPE "public"."post_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" uuid PRIMARY KEY NOT NULL,

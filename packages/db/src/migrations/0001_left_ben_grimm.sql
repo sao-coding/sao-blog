@@ -1,1 +1,0 @@
-ALTER TYPE "public"."comment_source" ADD VALUE 'credential';
