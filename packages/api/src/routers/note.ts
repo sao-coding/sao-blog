@@ -145,7 +145,7 @@ const getNote = publicProcedure
         const note = await db
             .select()
             .from(notes)
-            .where(eq(notes.id, noteId))
+            .where(and(eq(notes.id, noteId), eq(notes.status, true)))
             .limit(1);
         return {
             status: "success",

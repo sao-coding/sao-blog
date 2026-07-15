@@ -25,6 +25,7 @@ const getTimeLine = publicProcedure
                 })
                 .from(posts)
                 .leftJoin(categories, eq(posts.categoryId, categories.id))
+                .where(eq(posts.status, "published"))
             : [];
 
         const noteRows = includeNotes
@@ -38,6 +39,7 @@ const getTimeLine = publicProcedure
                     updatedAt: notes.updatedAt,
                 })
                 .from(notes)
+                .where(eq(notes.status, true))
             : [];
 
         const timelineItems = [

@@ -1,7 +1,7 @@
 import { publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { notes, topics } from "@sao-blog/db/schema/index";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import z from "zod";
 import { toIso } from "../lib/datetime";
 import { TopicListResponseSchema, TopicWithNotesResponseSchema } from "../schema/topic";
@@ -57,7 +57,7 @@ const getTopicBySlug = publicProcedure
                 updatedAt: notes.updatedAt,
             })
             .from(notes)
-            .where(eq(notes.topicId, topic.id))
+            .where(and(eq(notes.topicId, topic.id), eq(notes.status, true)))
             .orderBy(desc(notes.createdAt));
 
         return {
