@@ -1,4 +1,4 @@
-import { adminProcedure } from "@sao-blog/api/index";
+import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { and, desc, eq, ilike } from "drizzle-orm";
 import { files } from "@sao-blog/db/schema/index";
@@ -20,7 +20,7 @@ const MAX_SIZE_BY_CATEGORY: Record<FileCategory, number> = {
   other: 50 * 1024 * 1024,
 };
 
-const uploadFile = adminProcedure
+const uploadFile = protectedProcedure
   .route({ method: "POST", path: "/files" })
   .input(z.object({ file: z.instanceof(File) }))
   .output(fileResponseSchema)
@@ -77,7 +77,7 @@ const uploadFile = adminProcedure
     return { status: "success", message: "上傳成功", data: row };
   });
 
-const getFiles = adminProcedure
+const getFiles = protectedProcedure
   .route({ method: "GET", path: "/files" })
   .input(listFilesInputSchema)
   .handler(async ({ input }) => {
@@ -108,7 +108,7 @@ const getFiles = adminProcedure
     };
   });
 
-const deleteFile = adminProcedure
+const deleteFile = protectedProcedure
   .route({ method: "DELETE", path: "/files/{id}" })
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {

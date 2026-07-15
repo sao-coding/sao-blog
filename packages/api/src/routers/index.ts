@@ -1,6 +1,6 @@
 import type { RouterClient } from "@orpc/server";
 
-import { o, protectedProcedure, publicProcedure } from '@sao-blog/api/index'
+import { adminProcedure } from '@sao-blog/api/index'
 import postRouter from "./post";
 import noteRouter from "./note";
 import timelineRouter from "./timeline";
@@ -40,7 +40,7 @@ export const appRouter = {
   linkPreview: linkPreviewRouter,
   topic: topicRouter,
   menu: menuRouter,
-  admin: o.prefix('/admin').router({
+  admin: adminProcedure.prefix('/admin').router({
     post: adminPostRouter,
     category: adminCategoryRouter,
     tag: adminTagRouter,

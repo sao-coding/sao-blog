@@ -1,4 +1,4 @@
-import { adminProcedure } from "@sao-blog/api/index";
+import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, ne, and } from "drizzle-orm";
 import { storageConfigs, type StorageConfigModel } from "@sao-blog/db/schema/index";
@@ -11,7 +11,7 @@ function toOutput(row: StorageConfigModel) {
   return { ...rest, hasSecretKey: Boolean(secretAccessKey) };
 }
 
-const getConfigs = adminProcedure
+const getConfigs = protectedProcedure
   .route({ method: "GET", path: "/storage/configs" })
   .handler(async () => {
     const rows = await db
@@ -26,7 +26,7 @@ const getConfigs = adminProcedure
     };
   });
 
-const getConfig = adminProcedure
+const getConfig = protectedProcedure
   .route({ method: "GET", path: "/storage/configs/{id}" })
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
@@ -43,7 +43,7 @@ const getConfig = adminProcedure
     return { status: "success", message: "儲存設定取得成功", data: toOutput(row) };
   });
 
-const createConfig = adminProcedure
+const createConfig = protectedProcedure
   .route({ method: "POST", path: "/storage/configs" })
   .input(storageConfigInputSchema)
   .handler(async ({ input }) => {
@@ -72,7 +72,7 @@ const createConfig = adminProcedure
     return { status: "success", message: "儲存設定新增成功", data: toOutput(row) };
   });
 
-const updateConfig = adminProcedure
+const updateConfig = protectedProcedure
   .route({ method: "PUT", path: "/storage/configs/{id}" })
   .input(storageConfigInputSchema.extend({ id: z.string() }))
   .handler(async ({ input }) => {
@@ -96,7 +96,7 @@ const updateConfig = adminProcedure
     return { status: "success", message: "儲存設定更新成功", data: toOutput(row) };
   });
 
-const deleteConfig = adminProcedure
+const deleteConfig = protectedProcedure
   .route({ method: "DELETE", path: "/storage/configs/{id}" })
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
@@ -126,7 +126,7 @@ const deleteConfig = adminProcedure
     return { status: "success", message: "儲存設定刪除成功", data: toOutput(row) };
   });
 
-const activateConfig = adminProcedure
+const activateConfig = protectedProcedure
   .route({ method: "POST", path: "/storage/configs/{id}/activate" })
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
@@ -150,7 +150,7 @@ const activateConfig = adminProcedure
     return { status: "success", message: "儲存設定已啟用", data: toOutput(row) };
   });
 
-const testConnection = adminProcedure
+const testConnection = protectedProcedure
   .route({ method: "POST", path: "/storage/configs/{id}/test" })
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
