@@ -15,11 +15,14 @@ export default function MonacoEditor({
   options = {},
   onSave,
   showToolbar = true,
+  onImageUpload,
 }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const textHelperRef = useRef<MonacoTextHelper | null>(null)
   const [isEditorReady, setIsEditorReady] = useState(false)
   const disposablesRef = useRef<IDisposable[]>([])
+  const onImageUploadRef = useRef(onImageUpload)
+  onImageUploadRef.current = onImageUpload
 
   // stats
   const [totalWords, setTotalWords] = useState(0)
@@ -39,6 +42,65 @@ export default function MonacoEditor({
       editorRef.current = editor
       textHelperRef.current = new MonacoTextHelper(editor)
       setIsEditorReady(true)
+
+      // 剪貼簿貼上圖片自動上傳。
+      //
+      // 不能用 Monaco 內建的 onDidPaste：Monaco 自己的 paste handler（不管是舊版的
+      // hidden textarea 或新版 Chrome 用的 EditContext）在讀到 clipboardData 後，
+      // 只要抓不到 text/plain 內容就會直接 return、完全不會觸發 onDidPaste——
+      // 而複製螢幕截圖之類的圖片貼上，剪貼簿通常「只有圖片、沒有文字」，所以
+      // onDidPaste 在這個情境下根本不會發生。見 monaco-editor 原始碼：
+      // esm/vs/editor/browser/controller/editContext/{textArea/textAreaEditContextInput,native/nativeEditContext}.js
+      // 裡的 `if (!text) { return; }`。
+      //
+      // 也不能只在 editor 的 DOM container 上 addEventListener('paste')：部分
+      // Monaco 版本這樣掛不會觸發（https://github.com/microsoft/monaco-editor/issues/4099），
+      // 且 Monaco 內部實際接收 paste 的元素（hidden textarea 或 .native-edit-context）
+      // 會隨版本/瀏覽器改變。改成掛在 document 上、capture 階段自己讀取原始
+      // ClipboardEvent，就不依賴 Monaco 內部怎麼處理、也不受它的 DOM 結構影響；
+      // 偵測到圖片時用 stopPropagation 避免 Monaco 之後又把（若存在的）文字內容
+      // 也貼一次。
+      const handleDocumentPaste = (event: ClipboardEvent) => {
+        const uploadImage = onImageUploadRef.current
+        if (!uploadImage) return
+        if (!editor.hasTextFocus()) return
+
+        const imageFiles = Array.from(event.clipboardData?.items ?? [])
+          .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => file !== null)
+
+        if (imageFiles.length === 0) return
+
+        event.preventDefault()
+        event.stopPropagation()
+
+        for (const file of imageFiles) {
+          const token = `![上傳中...](uploading-${crypto.randomUUID()})`
+          const selection = editor.getSelection()
+          if (selection) {
+            editor.executeEdits('paste-image-upload', [
+              { range: selection, text: token, forceMoveMarkers: true },
+            ])
+          }
+
+          uploadImage(file)
+            .then((url) => {
+              textHelperRef.current?.replaceToken(
+                token,
+                `![${file.name}](${url})`
+              )
+            })
+            .catch(() => {
+              textHelperRef.current?.replaceToken(token, '')
+            })
+        }
+      }
+
+      document.addEventListener('paste', handleDocumentPaste, true)
+      disposablesRef.current.push({
+        dispose: () => document.removeEventListener('paste', handleDocumentPaste, true),
+      })
 
       /**
        * 計算字形數量（使用者感知的字元）。

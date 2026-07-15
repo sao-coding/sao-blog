@@ -40,6 +40,7 @@ import { toast } from 'sonner'
 import type z from 'zod'
 import { moodOptions, weatherOptions } from '@/config/note'
 import { MonacoEditor } from '@/components/monaco-editor'
+import { useFileUpload } from '@/hooks/use-file-upload'
 import { client, orpc, queryClient } from '@/utils/orpc'
 
 type RouterOutputs = InferClientOutputs<typeof client>
@@ -87,6 +88,7 @@ const mapNoteToFormValues = (note: NonNullable<NoteOutput>): NoteFormValues => (
 export function NoteEditor({ noteId }: NoteEditorProps) {
   const isEditMode = Boolean(noteId)
   const isMobile = useIsMobile()
+  const { uploadFile } = useFileUpload()
   const navigate = useNavigate()
 
   const { data: noteData } = useQuery({
@@ -249,6 +251,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
                             language="markdown"
                             height={isMobile ? '400px' : '700px'}
                             onSave={submitHandler('draft')}
+                            onImageUpload={uploadFile}
                           />
                         </div>
                       </FieldContent>

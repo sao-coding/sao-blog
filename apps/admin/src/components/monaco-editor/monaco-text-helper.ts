@@ -138,6 +138,28 @@ export class MonacoTextHelper {
   }
 
   /**
+   * 將編輯器中第一個符合 token 的文字替換成 replacement（用於貼圖上傳的佔位符替換）。
+   * @param token - 要尋找的佔位字串。
+   * @param replacement - 替換後的文字。
+   */
+  replaceToken(token: string, replacement: string): void {
+    const model = this.editor.getModel()
+    if (!model) return
+
+    const matches = model.findMatches(token, false, false, true, null, false)
+    const match = matches[0]
+    if (!match) return
+
+    this.editor.executeEdits('text-helper-replace-token', [
+      {
+        range: match.range,
+        text: replacement,
+        forceMoveMarkers: true,
+      },
+    ])
+  }
+
+  /**
    * 取得目前編輯器的值。
    * @returns - 編輯器的目前內容。
    */

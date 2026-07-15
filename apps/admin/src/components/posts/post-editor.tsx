@@ -26,6 +26,7 @@ import {
 import { Input } from '@sao-blog/ui/components/input'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { MonacoEditor } from '@/components/monaco-editor'
+import { useFileUpload } from '@/hooks/use-file-upload'
 import {
   Select,
   SelectContent,
@@ -92,6 +93,7 @@ export function PostEditor({ postId }: PostEditorProps) {
   console.log('PostEditor rendered with postId:', postId, 'isEditMode:', isEditMode)
   const isMobile = useIsMobile()
   const navigate = useNavigate()
+  const { uploadFile } = useFileUpload()
 
   const { data: postData } = useQuery({
     ...orpc.admin.post.getPost.queryOptions({ input: { id: postId! } }),
@@ -250,6 +252,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                             language="markdown"
                             height={isMobile ? '400px' : '700px'}
                             onSave={submitHandler('draft')}
+                            onImageUpload={uploadFile}
                           />
                         </div>
                       </FieldContent>

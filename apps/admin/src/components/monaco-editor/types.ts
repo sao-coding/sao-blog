@@ -9,6 +9,8 @@ export interface MonacoEditorProps {
   options?: editor.IStandaloneEditorConstructionOptions
   onSave?: () => void
   showToolbar?: boolean
+  /** 剪貼簿貼上圖片時呼叫；回傳的網址會取代插入的佔位文字。未提供則不啟用貼圖上傳。 */
+  onImageUpload?: (file: File) => Promise<string>
 }
 
 export interface MonacoToolbarProps {

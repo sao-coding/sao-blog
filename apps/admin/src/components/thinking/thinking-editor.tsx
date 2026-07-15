@@ -40,6 +40,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import type z from 'zod'
 import { MonacoEditor } from '@/components/monaco-editor'
+import { useFileUpload } from '@/hooks/use-file-upload'
 import { client, orpc, queryClient } from '@/utils/orpc'
 
 type RouterOutputs = InferClientOutputs<typeof client>
@@ -77,6 +78,7 @@ const mapThinkingToFormValues = (
 export function ThinkingEditor({ thinkingId }: ThinkingEditorProps) {
   const isEditMode = Boolean(thinkingId)
   const isMobile = useIsMobile()
+  const { uploadFile } = useFileUpload()
   const navigate = useNavigate()
 
   const { data: thinkingData } = useQuery({
@@ -218,6 +220,7 @@ export function ThinkingEditor({ thinkingId }: ThinkingEditorProps) {
                             language="markdown"
                             height={isMobile ? '360px' : '600px'}
                             onSave={submitHandler('draft')}
+                            onImageUpload={uploadFile}
                           />
                         </div>
                       </FieldContent>
