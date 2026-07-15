@@ -433,6 +433,71 @@ export const apikey = pgTable('apikey', {
   metadata: text('metadata'),
 })
 
+// 儲存空間設定（S3 相容，例如 RustFS / MinIO / R2）
+export const storageConfigs = pgTable(
+  'storage_configs',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    name: varchar('name', { length: 100 }).notNull(),
+    endpoint: varchar('endpoint', { length: 500 }).notNull(),
+    region: varchar('region', { length: 100 }).default('us-east-1').notNull(),
+    bucket: varchar('bucket', { length: 200 }).notNull(),
+    accessKeyId: varchar('access_key_id', { length: 500 }).notNull(),
+    secretAccessKey: varchar('secret_access_key', { length: 500 }).notNull(),
+    // 對外可存取的網址前綴，留空則 fallback 為 endpoint/bucket
+    publicUrl: varchar('public_url', { length: 500 }),
+    forcePathStyle: boolean('force_path_style').default(true).notNull(),
+    isActive: boolean('is_active').default(false).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [index('storage_configs_active_idx').on(table.isActive)]
+)
+
+// 上傳檔案的分類，決定儲存路徑前綴與檔案管理介面的分區
+export const fileCategoryEnum = pgEnum('file_category', [
+  'image',
+  'document',
+  'other',
+])
+
+// 已上傳的檔案（存於 S3 相容儲存空間）
+export const files = pgTable(
+  'files',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    // 儲存空間內的完整路徑，例如 images/2026/07/<uuid>.png
+    key: varchar('key', { length: 1000 }).notNull().unique(),
+    filename: varchar('filename', { length: 500 }).notNull(),
+    mimeType: varchar('mime_type', { length: 200 }).notNull(),
+    size: integer('size').notNull(),
+    category: fileCategoryEnum('category').notNull(),
+    // 上傳當下解析好的公開網址
+    url: varchar('url', { length: 1500 }).notNull(),
+    uploaderId: uuid('uploader_id').references(() => user.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('files_category_idx').on(table.category),
+    index('files_created_at_idx').on(table.createdAt),
+  ]
+)
+
 // Relations
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -493,3 +558,5 @@ export type PostModel = InferSelectModel<typeof posts>
 export type CategoryModel = InferSelectModel<typeof categories>
 export type TagModel = InferSelectModel<typeof tags>
 export type UserModel = InferSelectModel<typeof user>
+export type StorageConfigModel = InferSelectModel<typeof storageConfigs>
+export type FileModel = InferSelectModel<typeof files>

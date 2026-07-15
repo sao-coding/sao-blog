@@ -16,7 +16,9 @@ import {
 import { NavUser } from './nav-user'
 import {
   ChartColumnBigIcon,
+  CloudIcon,
   Command,
+  FilesIcon,
   FolderIcon,
   Home,
   KeyRoundIcon,
@@ -179,6 +181,29 @@ const AppSidebar = () => {
                 <Link to="/api-keys">
                   <KeyRoundIcon />
                   <span>API 金鑰</span>
+                </Link>
+              } />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        {/* 檔案與儲存設定 */}
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={
+                <Link to="/files">
+                  <FilesIcon />
+                  <span>檔案管理</span>
+                </Link>
+              } />
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton render={
+                <Link to="/storage-settings">
+                  <CloudIcon />
+                  <span>儲存設定</span>
                 </Link>
               } />
             </SidebarMenuItem>

@@ -13,8 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TopicsIndexRouteImport } from './routes/topics/index'
 import { Route as ThinkingIndexRouteImport } from './routes/thinking/index'
 import { Route as TagsIndexRouteImport } from './routes/tags/index'
+import { Route as StorageSettingsIndexRouteImport } from './routes/storage-settings/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as NotesIndexRouteImport } from './routes/notes/index'
+import { Route as FilesIndexRouteImport } from './routes/files/index'
 import { Route as CommentsIndexRouteImport } from './routes/comments/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as ApiKeysIndexRouteImport } from './routes/api-keys/index'
@@ -45,6 +47,11 @@ const TagsIndexRoute = TagsIndexRouteImport.update({
   path: '/tags/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StorageSettingsIndexRoute = StorageSettingsIndexRouteImport.update({
+  id: '/storage-settings/',
+  path: '/storage-settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
@@ -53,6 +60,11 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
 const NotesIndexRoute = NotesIndexRouteImport.update({
   id: '/notes/',
   path: '/notes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilesIndexRoute = FilesIndexRouteImport.update({
+  id: '/files/',
+  path: '/files/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommentsIndexRoute = CommentsIndexRouteImport.update({
@@ -107,8 +119,10 @@ export interface FileRoutesByFullPath {
   '/api-keys/': typeof ApiKeysIndexRoute
   '/categories/': typeof CategoriesIndexRoute
   '/comments/': typeof CommentsIndexRoute
+  '/files/': typeof FilesIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/storage-settings/': typeof StorageSettingsIndexRoute
   '/tags/': typeof TagsIndexRoute
   '/thinking/': typeof ThinkingIndexRoute
   '/topics/': typeof TopicsIndexRoute
@@ -124,8 +138,10 @@ export interface FileRoutesByTo {
   '/api-keys': typeof ApiKeysIndexRoute
   '/categories': typeof CategoriesIndexRoute
   '/comments': typeof CommentsIndexRoute
+  '/files': typeof FilesIndexRoute
   '/notes': typeof NotesIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/storage-settings': typeof StorageSettingsIndexRoute
   '/tags': typeof TagsIndexRoute
   '/thinking': typeof ThinkingIndexRoute
   '/topics': typeof TopicsIndexRoute
@@ -142,8 +158,10 @@ export interface FileRoutesById {
   '/api-keys/': typeof ApiKeysIndexRoute
   '/categories/': typeof CategoriesIndexRoute
   '/comments/': typeof CommentsIndexRoute
+  '/files/': typeof FilesIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/storage-settings/': typeof StorageSettingsIndexRoute
   '/tags/': typeof TagsIndexRoute
   '/thinking/': typeof ThinkingIndexRoute
   '/topics/': typeof TopicsIndexRoute
@@ -161,8 +179,10 @@ export interface FileRouteTypes {
     | '/api-keys/'
     | '/categories/'
     | '/comments/'
+    | '/files/'
     | '/notes/'
     | '/posts/'
+    | '/storage-settings/'
     | '/tags/'
     | '/thinking/'
     | '/topics/'
@@ -178,8 +198,10 @@ export interface FileRouteTypes {
     | '/api-keys'
     | '/categories'
     | '/comments'
+    | '/files'
     | '/notes'
     | '/posts'
+    | '/storage-settings'
     | '/tags'
     | '/thinking'
     | '/topics'
@@ -195,8 +217,10 @@ export interface FileRouteTypes {
     | '/api-keys/'
     | '/categories/'
     | '/comments/'
+    | '/files/'
     | '/notes/'
     | '/posts/'
+    | '/storage-settings/'
     | '/tags/'
     | '/thinking/'
     | '/topics/'
@@ -213,8 +237,10 @@ export interface RootRouteChildren {
   ApiKeysIndexRoute: typeof ApiKeysIndexRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   CommentsIndexRoute: typeof CommentsIndexRoute
+  FilesIndexRoute: typeof FilesIndexRoute
   NotesIndexRoute: typeof NotesIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
+  StorageSettingsIndexRoute: typeof StorageSettingsIndexRoute
   TagsIndexRoute: typeof TagsIndexRoute
   ThinkingIndexRoute: typeof ThinkingIndexRoute
   TopicsIndexRoute: typeof TopicsIndexRoute
@@ -256,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TagsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/storage-settings/': {
+      id: '/storage-settings/'
+      path: '/storage-settings'
+      fullPath: '/storage-settings/'
+      preLoaderRoute: typeof StorageSettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/': {
       id: '/posts/'
       path: '/posts'
@@ -268,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/notes'
       fullPath: '/notes/'
       preLoaderRoute: typeof NotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/files/': {
+      id: '/files/'
+      path: '/files'
+      fullPath: '/files/'
+      preLoaderRoute: typeof FilesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comments/': {
@@ -341,8 +381,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiKeysIndexRoute: ApiKeysIndexRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
   CommentsIndexRoute: CommentsIndexRoute,
+  FilesIndexRoute: FilesIndexRoute,
   NotesIndexRoute: NotesIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
+  StorageSettingsIndexRoute: StorageSettingsIndexRoute,
   TagsIndexRoute: TagsIndexRoute,
   ThinkingIndexRoute: ThinkingIndexRoute,
   TopicsIndexRoute: TopicsIndexRoute,

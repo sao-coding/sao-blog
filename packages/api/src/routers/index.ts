@@ -15,6 +15,8 @@ import adminTopicRouter from "./admin/topic";
 import adminCommentRouter from "./admin/comment";
 import adminDashboardRouter from "./admin/dashboard";
 import adminThinkingRouter from "./admin/thinking";
+import adminStorageConfigRouter from "./admin/storage-config";
+import adminFileRouter from "./admin/file";
 import linkPreviewRouter from "./link-preview";
 import topicRouter from "./topic";
 import menuRouter from "./menu";
@@ -47,6 +49,8 @@ export const appRouter = {
     comment: adminCommentRouter,
     dashboard: adminDashboardRouter,
     thinking: adminThinkingRouter,
+    storageConfig: adminStorageConfigRouter,
+    file: adminFileRouter,
   })
 };
 export type AppRouter = typeof appRouter;
