@@ -13,11 +13,6 @@ type Scope = {
 }
 
 type Frontmatter = {
-  title: string
-  description?: string
-  keywords?: string
-  author: string
-  date?: string
   showToc?: boolean
 }
 
@@ -105,7 +100,7 @@ export default async function Page({
       metaData={{
         category: data.category.name,
         tags: data.tags.map((tag) => tag.name),
-        title: frontmatter.title,
+        title: data.title,
         url: `/posts/${slug}`,
       }}
     >
