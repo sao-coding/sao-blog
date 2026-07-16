@@ -11,7 +11,10 @@ COPY apps/server apps/server
 COPY packages packages
 
 # node-linker=hoisted 讓 pnpm 直接複製套件（不用 symlink），bun build --compile 才能正確讀取所有檔案
-RUN echo "node-linker=hoisted" >> .npmrc && pnpm install --frozen-lockfile
+RUN echo "node-linker=hoisted" >> .npmrc
+# cache mount 讓 pnpm store 跨 build 保留，lockfile 沒變時不用重新下載套件
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
 # Stage 2: 用 bun 編譯
 FROM oven/bun AS build
