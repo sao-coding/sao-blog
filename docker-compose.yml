@@ -3,6 +3,7 @@ version: "3.8"
 
 services:
   app:
+    image: sao-blog-server:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,23 +11,3 @@ services:
       - "3090:3000"
     env_file: apps/server/.env
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: blog
-    volumes:
-      - ../db:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d blog"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
