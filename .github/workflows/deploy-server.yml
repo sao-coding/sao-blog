@@ -29,25 +29,42 @@ jobs:
       - name: Save image to tar
         run: docker save sao-blog-server:latest -o sao-blog-server.tar
 
+      - name: Prepare non-interactive SSH password helper
+        env:
+          SSH_PASS: ${{ secrets.NAS_PASSWORD }}
+        run: |
+          ASKPASS=$(mktemp)
+          cat > "$ASKPASS" << 'EOF'
+          #!/bin/sh
+          echo "$SSH_PASS"
+          EOF
+          chmod +x "$ASKPASS"
+          echo "SSH_ASKPASS=$ASKPASS" >> "$GITHUB_ENV"
+          echo "SSH_ASKPASS_REQUIRE=force" >> "$GITHUB_ENV"
+
       - name: Copy image + compose file to NAS
         env:
-          SSHPASS: ${{ secrets.NAS_PASSWORD }}
+          SSH_PASS: ${{ secrets.NAS_PASSWORD }}
         run: |
-          sshpass -e scp -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+          scp -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
             sao-blog-server.tar docker-compose.yml \
             ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }}:/volume1/docker/blog-server/
 
       - name: Load image & restart container on NAS
         env:
-          SSHPASS: ${{ secrets.NAS_PASSWORD }}
+          SSH_PASS: ${{ secrets.NAS_PASSWORD }}
         run: |
-          sshpass -e ssh -p ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+          ssh -p ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
             ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }} '
               cd /volume1/docker/blog-server &&
               docker load -i sao-blog-server.tar &&
               docker compose up -d --no-build &&
               rm -f sao-blog-server.tar
             '
+
+      - name: Remove SSH password helper
+        if: always()
+        run: rm -f "$SSH_ASKPASS"
 
       - name: Cleanup runner workspace
         if: always()
