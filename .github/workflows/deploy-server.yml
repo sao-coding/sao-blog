@@ -29,9 +29,6 @@ jobs:
       - name: Save image to tar
         run: docker save sao-blog-server:latest -o sao-blog-server.tar
 
-      - name: Ensure sshpass is installed on runner
-        run: command -v sshpass >/dev/null || (sudo apt-get update && sudo apt-get install -y sshpass)
-
       - name: Copy image + compose file to NAS
         env:
           SSHPASS: ${{ secrets.NAS_PASSWORD }}
@@ -55,3 +52,7 @@ jobs:
       - name: Cleanup runner workspace
         if: always()
         run: rm -f sao-blog-server.tar
+
+      - name: Prune docker build cache & unused images
+        if: always()
+        run: docker system prune -af --volumes
