@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "@sao-blog/server",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
