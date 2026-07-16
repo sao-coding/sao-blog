@@ -1,6 +1,3 @@
-# docker-compose.yml (repo root)
-version: "3.8"
-
 services:
   app:
     image: sao-blog-server:latest
@@ -11,3 +8,9 @@ services:
       - "3090:3000"
     env_file: apps/server/.env
     restart: unless-stopped
+    networks:
+      - pg-network
+      
+networks:
+  pg-network:
+    external: true
