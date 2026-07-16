@@ -56,6 +56,7 @@ jobs:
         run: |
           ssh -p ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
             ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }} '
+              export PATH=$PATH:/usr/local/bin &&
               cd /volume1/docker/blog-server &&
               docker load -i sao-blog-server.tar &&
               docker compose up -d --no-build &&
