@@ -1,0 +1,58 @@
+name: Deploy server to NAS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/server/**"
+      - "packages/**"
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "package.json"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    # 跑在你已綁定的 PVE CT self-hosted runner（效能好，build 快）
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build docker image
+        run: docker build -t sao-blog-server:latest -f Dockerfile .
+
+      - name: Save image to tar
+        run: docker save sao-blog-server:latest -o sao-blog-server.tar
+
+      - name: Copy image + compose file to NAS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.NAS_HOST }}
+          username: ${{ secrets.NAS_USERNAME }}
+          password: ${{ secrets.NAS_PASSWORD }}
+          port: ${{ secrets.NAS_PORT }}
+          source: "sao-blog-server.tar,docker-compose.yml"
+          target: "/volume1/docker/blog-server/"
+          strip_components: 0
+
+      - name: Load image & restart container on NAS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.NAS_HOST }}
+          username: ${{ secrets.NAS_USERNAME }}
+          password: ${{ secrets.NAS_PASSWORD }}
+          port: ${{ secrets.NAS_PORT }}
+          script: |
+            cd /volume1/docker/blog-server
+            docker load -i sao-blog-server.tar
+            docker compose up -d --no-build
+            rm -f sao-blog-server.tar
+
+      - name: Cleanup runner workspace
+        if: always()
+        run: rm -f sao-blog-server.tar
