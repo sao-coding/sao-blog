@@ -46,7 +46,7 @@ jobs:
         env:
           SSH_PASS: ${{ secrets.NAS_PASSWORD }}
         run: |
-          scp -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+          scp -O -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
             sao-blog-server.tar docker-compose.yml \
             ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }}:/volume1/docker/blog-server/
 
