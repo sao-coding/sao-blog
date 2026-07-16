@@ -29,29 +29,28 @@ jobs:
       - name: Save image to tar
         run: docker save sao-blog-server:latest -o sao-blog-server.tar
 
+      - name: Ensure sshpass is installed on runner
+        run: command -v sshpass >/dev/null || (sudo apt-get update && sudo apt-get install -y sshpass)
+
       - name: Copy image + compose file to NAS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.NAS_HOST }}
-          username: ${{ secrets.NAS_USERNAME }}
-          password: ${{ secrets.NAS_PASSWORD }}
-          port: ${{ secrets.NAS_PORT }}
-          source: "sao-blog-server.tar,docker-compose.yml"
-          target: "/volume1/docker/blog-server/"
-          strip_components: 0
+        env:
+          SSHPASS: ${{ secrets.NAS_PASSWORD }}
+        run: |
+          sshpass -e scp -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+            sao-blog-server.tar docker-compose.yml \
+            ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }}:/volume1/docker/blog-server/
 
       - name: Load image & restart container on NAS
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.NAS_HOST }}
-          username: ${{ secrets.NAS_USERNAME }}
-          password: ${{ secrets.NAS_PASSWORD }}
-          port: ${{ secrets.NAS_PORT }}
-          script: |
-            cd /volume1/docker/blog-server
-            docker load -i sao-blog-server.tar
-            docker compose up -d --no-build
-            rm -f sao-blog-server.tar
+        env:
+          SSHPASS: ${{ secrets.NAS_PASSWORD }}
+        run: |
+          sshpass -e ssh -p ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }} '
+              cd /volume1/docker/blog-server &&
+              docker load -i sao-blog-server.tar &&
+              docker compose up -d --no-build &&
+              rm -f sao-blog-server.tar
+            '
 
       - name: Cleanup runner workspace
         if: always()
