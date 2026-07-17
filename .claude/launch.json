@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mdx-blog",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "mdx-blog", "run", "dev"],
+      "port": 3002
+    },
+    {
+      "name": "server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "server", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}
