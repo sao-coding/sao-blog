@@ -3,7 +3,7 @@ services:
     image: sao-blog-server:latest
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/server/Dockerfile
     ports:
       - "3090:3000"
     env_file: apps/server/.env
