@@ -1,5 +1,5 @@
 # Stage 1: 用 turbo prune 算出 server 真正需要的 package 子集
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 COPY . .
