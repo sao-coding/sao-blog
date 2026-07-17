@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="zh-Hant-TW" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-        <NextTopLoader color="var(--primary)" showSpinner={false} />
+        <NextTopLoader color="var(--primary)" showForHashAnchor={false} showSpinner={false} />
         <Providers>
           {children}
           <Toaster richColors />
