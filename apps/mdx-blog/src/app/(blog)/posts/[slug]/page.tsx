@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { evaluate } from 'next-mdx-remote-client/rsc'
 import type { Metadata, ResolvingMetadata } from 'next'
 import { ErrorComponent } from '@/components/index'
@@ -39,7 +40,7 @@ export async function generateMetadata(
   }
 }
 
-const getPostData = async (slug: string) => {
+const getPostData = cache(async (slug: string) => {
   try {
     const data = await client.post.getPost({ id: slug })
     console.log('RPC result:', JSON.stringify(data, null, 2))
@@ -54,7 +55,7 @@ const getPostData = async (slug: string) => {
     console.error('Error fetching post data:', err)
     throw new Error('Failed to fetch post data')
   }
-}
+})
 export default async function Page({
   params,
 }: {
