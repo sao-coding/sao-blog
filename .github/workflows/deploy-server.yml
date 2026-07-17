@@ -59,7 +59,8 @@ jobs:
               cd /volume1/docker/blog-server &&
               docker load -i sao-blog-server.tar &&
               docker compose up -d --no-build &&
-              rm -f sao-blog-server.tar
+              rm -f sao-blog-server.tar &&
+              docker image prune -f
             '
 
       - name: Remove SSH password helper
@@ -70,8 +71,9 @@ jobs:
         if: always()
         run: rm -f sao-blog-server.tar
 
-      - name: Prune unused images/containers (keep pnpm build cache)
+      - name: Prune unused images/containers & cap build cache size
         if: always()
         run: |
           docker container prune -f
-          docker image prune -af
+          docker image prune -f
+          docker builder prune -f --max-used-space 3GB
