@@ -31,32 +31,49 @@ const LocationCard = () => {
     }
     onResize()
 
-    if (!canvasRef.current) return
+    if (!canvasRef.current || !width) return
 
-    const globe = createGlobe(canvasRef.current, {
-      devicePixelRatio: 2,
-      width: width * 2,
-      height: width * 2,
-      phi: 1.08,
-      theta: -0.1,
-      dark: 1,
-      diffuse: 1.6,
-      mapSamples: 36_000,
-      mapBrightness: 2,
-      baseColor: [0.55, 0.55, 0.55],
-      markerColor: [244 / 255, 63 / 255, 94 / 255],
-      glowColor: [0.18, 0.18, 0.2],
-      markers: [{ location: [25.136379, 121.4590044], size: 0.1 }],
-      scale: 1.05,
-      onRender: (state) => {
-        state.phi = r.get() + 2.75
-        state.width = width * 2
-        state.height = width * 2
-      },
-    })
+    let globe: ReturnType<typeof createGlobe> | undefined
+    let animationFrameId: number | undefined
+
+    try {
+      globe = createGlobe(canvasRef.current, {
+        devicePixelRatio: 2,
+        width: width * 2,
+        height: width * 2,
+        phi: 1.08,
+        theta: -0.1,
+        dark: 1,
+        diffuse: 1.6,
+        mapSamples: 36_000,
+        mapBrightness: 2,
+        baseColor: [0.55, 0.55, 0.55],
+        markerColor: [244 / 255, 63 / 255, 94 / 255],
+        glowColor: [0.18, 0.18, 0.2],
+        markers: [{ location: [25.136379, 121.4590044], size: 0.1 }],
+        scale: 1.05,
+      })
+
+      const animate = () => {
+        globe?.update({
+          phi: r.get() + 2.75,
+          width: width * 2,
+          height: width * 2,
+        })
+        animationFrameId = requestAnimationFrame(animate)
+      }
+      animate()
+    } catch (error) {
+      // WebGL context creation can fail (GPU crash, hardware acceleration
+      // disabled, too many active contexts) — degrade gracefully instead of
+      // crashing the page.
+      console.error('Failed to initialize globe:', error)
+    }
 
     return () => {
-      globe.destroy()
+      window.removeEventListener('resize', onResize)
+      if (animationFrameId !== undefined) cancelAnimationFrame(animationFrameId)
+      globe?.destroy()
     }
   }, [r])
 
