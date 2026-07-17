@@ -14,6 +14,8 @@ import {
   MdxCarousel,
   MdxSlide,
   MdxProgress,
+  MdxBenchmark,
+  MdxBenchmarkItem,
   CodeBlockHeader,
 } from './renderers'
 import EnhancedLink from './renderers/link'
@@ -155,6 +157,8 @@ export const defaultMDXComponents: MDXComponents = {
   Carousel: MdxCarousel,
   Slide: MdxSlide,
   Progress: MdxProgress,
+  Benchmark: MdxBenchmark,
+  BenchmarkItem: MdxBenchmarkItem,
 }
 
 // 擴充的 MDX components 型別，允許 null/false 來禁用 components

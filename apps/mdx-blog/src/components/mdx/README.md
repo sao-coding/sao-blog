@@ -285,6 +285,17 @@ JSX 是 MDX 原生語法，標籤內可放任意巢狀 markdown，且支援 prop
 <Progress value={70} label="TypeScript" color="blue" />
 ```
 
+### Benchmark（效能比較長條圖）
+
+常用於優化前後 / 多方案速度對比。長條寬度依所有項目中的最大值等比例縮放；`lowerIsBetter`（預設 `true`）決定數值越小或越大代表最佳，最佳項目會自動標示。
+
+```mdx
+<Benchmark unit="ms">
+  <BenchmarkItem label="優化前" value={4200} />
+  <BenchmarkItem label="優化後" value={180} />
+</Benchmark>
+```
+
 ## 故障排除
 
 ### 元件沒有顯示
