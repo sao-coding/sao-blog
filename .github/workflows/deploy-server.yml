@@ -18,7 +18,7 @@ jobs:
     # 跑在你已綁定的 PVE CT self-hosted runner（效能好，build 快）
     runs-on: self-hosted
     environment:
-      name: Production – sao-blog-api
+      name: Production – sao-blog-server
       url: https://blog-api.sao-x.com
 
     steps:
