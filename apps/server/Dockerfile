@@ -3,7 +3,8 @@ FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 COPY . .
-RUN pnpm dlx turbo prune @sao-blog/server --docker
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm dlx turbo prune @sao-blog/server --docker
 
 # Stage 2: 只裝 prune 出來的依賴（不含 apps/web、packages/ui 等 server 用不到的東西）
 FROM node:22-alpine AS installer
