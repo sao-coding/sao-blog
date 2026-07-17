@@ -6,7 +6,6 @@ on:
     paths:
       - "apps/server/**"
       - "packages/**"
-      - "Dockerfile"
       - "docker-compose.yml"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -24,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build docker image
-        run: docker build -t sao-blog-server:latest -f Dockerfile .
+        run: docker build -t sao-blog-server:latest -f apps/server/Dockerfile .
 
       - name: Save image to tar
         run: docker save sao-blog-server:latest -o sao-blog-server.tar
