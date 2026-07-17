@@ -1,5 +1,5 @@
 # Stage 1: 用 turbo prune 算出 server 真正需要的 package 子集
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 COPY . .
@@ -7,7 +7,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm dlx turbo prune @sao-blog/server --docker
 
 # Stage 2: 只裝 prune 出來的依賴（不含 apps/web、packages/ui 等 server 用不到的東西）
-FROM node:22-alpine AS installer
+FROM node:26-alpine AS installer
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 COPY --from=base /app/out/json/ .
