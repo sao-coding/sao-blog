@@ -50,3 +50,58 @@
     @apply leading-[1.7];
   }
 }
+
+/* Shiki 雙主題（light/dark）以 CSS variables 切換，對應 rehype 設定的
+   themes: { light: 'github-light', dark: 'github-dark' } + defaultColor: false。
+   background-color 只放在 .shiki 本身——如果連 span 也套用背景色，每個文字
+   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。 */
+.shiki {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+.shiki span {
+  color: var(--shiki-light);
+}
+
+.dark .shiki {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+.dark .shiki span {
+  color: var(--shiki-dark);
+}
+
+/* 行號：純 CSS counter，不需要額外 JS，也不會被複製到剪貼簿 */
+.shiki code {
+  counter-reset: line;
+}
+
+/* 水平內距放在每一行的 .line 本身，而不是外層 <pre>（見 index.tsx 的
+   pre 只留 py-4），這樣 .line.highlighted 的背景才能直接吃滿整行寬度，
+   不需要再用負 margin 把背景「拉」到 pre 的邊緣。 */
+.shiki .line {
+  display: inline-block;
+  width: 100%;
+  padding-inline: 1rem;
+}
+
+.shiki .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: var(--muted-foreground);
+  user-select: none;
+}
+
+/* 部分行數高亮，對應 fenced code block 的 {1,3-5} meta 語法
+   （由 parsers.ts 的 transformerMetaHighlight 加上 .highlighted class） */
+.shiki .line.highlighted {
+  background-color: color-mix(in oklch, var(--color-primary) 12%, transparent);
+}
+
+.dark .shiki .line.highlighted {
+  background-color: color-mix(in oklch, var(--color-primary) 18%, transparent);
+}

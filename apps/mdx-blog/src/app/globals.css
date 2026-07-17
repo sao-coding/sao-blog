@@ -259,7 +259,8 @@
   background-color: transparent;
 }
 
-.prose pre > div.echarts {
+/* .prose pre > div.echarts { */
+.prose div.echarts {
   overflow: hidden;
   border-radius: 0.5rem;
 }
