@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,16 @@ const UserButton = () => {
     refetch //refetch the session
   } = authClient.useSession()
 
+  // Avoid hydration mismatch: better-auth's session store can resolve
+  // synchronously on the client (from its cookie cache) before hydration
+  // even though the server always renders the signed-out branch. Delay
+  // switching branches until after mount so the first client render
+  // matches the server output.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const signIn = async (provider: string) => {
     const data = await authClient.signIn.social({
       provider,
@@ -38,7 +49,7 @@ const UserButton = () => {
 
   return (
     <Dialog>
-      {session?.user ? (
+      {mounted && session?.user ? (
         <>
           <DropdownMenu>
             <DropdownMenuTrigger>
