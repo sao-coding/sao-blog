@@ -6,6 +6,7 @@ import { ThemeProvider } from 'next-themes'
 import Providers from './providers'
 import Script from 'next/script'
 import Header from '@/components/layout/header/nav'
+import NextTopLoader from 'nextjs-toploader'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="zh-Hant-TW" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <NextTopLoader color="var(--primary)" showSpinner={false} />
         <Providers>
           {children}
           <Toaster richColors />
