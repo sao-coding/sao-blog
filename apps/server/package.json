@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
+    "@modelcontextprotocol/sdk": "catalog:",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",

@@ -124,9 +124,6 @@ export const postInputSchema = z.object({
     id: z.string(),
     name: z.string(),
   })).optional(),
-
-  createdAt: z.date(),
-  updatedAt: z.date(),
 })
 
 export const PostsResponseSchema = createApiResponseSchema(z.array(postSchema));

@@ -20,6 +20,4 @@ export const categoryInputSchema = z.object({
     slug: z.string().min(1, '請輸入網址別名'),
     description: z.string().nullable(),
     color: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
 });

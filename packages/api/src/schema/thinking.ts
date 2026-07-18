@@ -25,8 +25,6 @@ export const thinkingInputSchema = z.object({
     content: z.string().min(1, "請輸入想法內容"),
     status: z.boolean(),
     noteId: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
 });
 
 export const ThinkingResponseSchema = createApiResponseSchema(thinkingSchema);

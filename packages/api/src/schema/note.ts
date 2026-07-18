@@ -27,8 +27,6 @@ export const noteInputSchema = z.object({
     status: z.boolean(),
     content: z.string().min(1, '請輸入日記內容'),
     topicId: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
 });
 
 // 單篇日記（可能為 null）

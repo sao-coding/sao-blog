@@ -20,8 +20,6 @@ export const topicInputSchema = z.object({
     introduce: z.string().max(100),
     description: z.string().max(400).nullable(),
     color: z.string().regex(/^#([0-9A-Fa-f]{6})$/).nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date()
 })
 
 export const topicPublicSchema = z.object({

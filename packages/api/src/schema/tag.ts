@@ -18,6 +18,4 @@ export const tagInputSchema = z.object({
     slug: z.string(),
     description: z.string().nullable(),
     color: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
 });

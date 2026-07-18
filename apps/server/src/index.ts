@@ -9,6 +9,7 @@ import { appRouter } from "@sao-blog/api/routers/index";
 import { auth } from "@sao-blog/auth";
 import { env } from "@sao-blog/env/server";
 import { devicesRoutes } from "./devices";
+import { mcpRoutes } from "./mcp";
 import { Elysia } from "elysia";
 
 const rpcHandler = new RPCHandler(appRouter, {
@@ -40,8 +41,9 @@ const app = new Elysia()
   .use(
     cors({
       origin: env.CORS_ORIGIN,
-      methods: ["GET", "POST", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+      methods: ["GET", "POST", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Mcp-Protocol-Version", "Mcp-Session-Id"],
+      exposeHeaders: ["Mcp-Session-Id"],
       credentials: true,
     }),
   )
@@ -79,6 +81,7 @@ const app = new Elysia()
     },
   )
   .group("/api/devices", (app) => app.use(devicesRoutes))
+  .use(mcpRoutes)
   .get("/", () => "OK")
   .listen(3000, () => {
     console.log(`Server is running at ${env.SERVER_URL}`);
