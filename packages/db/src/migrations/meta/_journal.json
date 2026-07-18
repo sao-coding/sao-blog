@@ -8,6 +8,13 @@
       "when": 1783796702800,
       "tag": "0000_slim_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784393986208,
+      "tag": "0001_cold_hellfire_club",
+      "breakpoints": true
     }
   ]
 }
