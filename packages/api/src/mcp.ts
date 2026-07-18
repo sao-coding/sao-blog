@@ -1,10 +1,62 @@
+import type { Context as ElysiaContext } from "elysia";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { call, resolveContractProcedures, type AnyProcedure } from "@orpc/server";
 import { ORPCError, safe } from "@orpc/client";
+import { auth } from "@sao-blog/auth";
+import { db } from "@sao-blog/db";
+import { user as userTable } from "@sao-blog/db/schema/index";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import type { Context } from "./context";
+import { createContext, type Context } from "./context";
 import { appRouter } from "./routers/index";
+
+// Claude Desktop/網頁版透過 Better Auth 的 mcp plugin 走 OAuth 登入，取得的是
+// OAuth access token，而非一般的 cookie session 或 apiKey plugin 發的 key。
+// auth.api.getMcpSession 驗證 token 後只會回傳 { userId, clientId, scopes, ... }，
+// 沒有完整的 user 物件，所以這裡另外查一次 user 表，組成跟 createContext 相容的
+// Context 形狀，讓 protectedProcedure/adminProcedure 可以直接沿用同一套
+// session.user.role/banned 判斷，不需要另外設計一套權限邏輯。
+async function resolveOAuthContext(request: Request): Promise<Context | null> {
+  const token = await auth.api.getMcpSession({ headers: request.headers });
+  if (!token) return null;
+
+  const [row] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.id, token.userId))
+    .limit(1);
+  if (!row) return null;
+
+  const session = {
+    session: {
+      id: token.userId,
+      token: token.accessToken,
+      userId: token.userId,
+      expiresAt: token.accessTokenExpiresAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      ipAddress: null,
+      userAgent: null,
+    },
+    user: row,
+  };
+
+  return {
+    session: session as unknown as Context["session"],
+    ip: null,
+    userAgent: null,
+  };
+}
+
+// MCP 路由的 context 解析入口：先試 OAuth access token，沒有的話 fall back 回
+// 既有的 createContext（apiKey / cookie session），不動 context.ts 本身，
+// 確保 /rpc、/api 兩條既有路徑完全不受影響。
+export async function resolveMcpContext(context: ElysiaContext): Promise<Context> {
+  const oauthContext = await resolveOAuthContext(context.request);
+  if (oauthContext) return oauthContext;
+  return createContext({ context });
+}
 
 type LeafProcedure = { path: readonly string[]; procedure: AnyProcedure; inputSchema: z.ZodTypeAny };
 

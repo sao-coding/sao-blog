@@ -4,7 +4,7 @@ import * as schema from "@sao-blog/db/schema/index";
 import { env } from "@sao-blog/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI, apiKey, admin, username } from "better-auth/plugins";
+import { openAPI, apiKey, admin, username, mcp } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -56,6 +56,10 @@ export const auth = betterAuth({
       rateLimit: {
         enabled: false,
       },
-    })
+    }),
+    mcp({
+      loginPage: `${env.BLOG_URL}/login`,
+      resource: `${env.SERVER_URL}/mcp`,
+    }),
   ],
 });

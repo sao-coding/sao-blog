@@ -1,12 +1,11 @@
-import { createContext } from "@sao-blog/api/context";
-import { createMcpServer } from "@sao-blog/api/mcp";
+import { createMcpServer, resolveMcpContext } from "@sao-blog/api/mcp";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { Elysia } from "elysia";
 
 export const mcpRoutes = new Elysia().all(
   "/mcp*",
   async (context) => {
-    const ctx = await createContext({ context });
+    const ctx = await resolveMcpContext(context);
     const server = await createMcpServer(ctx);
     const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined });
 

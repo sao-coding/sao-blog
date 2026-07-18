@@ -433,6 +433,75 @@ export const apikey = pgTable('apikey', {
   metadata: text('metadata'),
 })
 
+// Better Auth mcp plugin：OAuth 2.0 client（供 Claude 等 MCP client 透過 DCR 自行註冊）
+export const oauthApplication = pgTable(
+  'oauth_application',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    name: text('name'),
+    icon: text('icon'),
+    metadata: text('metadata'),
+    clientId: text('client_id').unique(),
+    clientSecret: text('client_secret'),
+    redirectUrls: text('redirect_urls'),
+    type: text('type'),
+    disabled: boolean('disabled').default(false),
+    userId: uuid('user_id').references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at'),
+    updatedAt: timestamp('updated_at'),
+  },
+  (table) => [index('oauth_application_user_id_idx').on(table.userId)]
+)
+
+// Better Auth mcp plugin：OAuth access/refresh token
+export const oauthAccessToken = pgTable(
+  'oauth_access_token',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    accessToken: text('access_token').unique(),
+    refreshToken: text('refresh_token').unique(),
+    accessTokenExpiresAt: timestamp('access_token_expires_at'),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+    clientId: text('client_id').references(() => oauthApplication.clientId, {
+      onDelete: 'cascade',
+    }),
+    userId: uuid('user_id').references(() => user.id, { onDelete: 'cascade' }),
+    scopes: text('scopes'),
+    createdAt: timestamp('created_at'),
+    updatedAt: timestamp('updated_at'),
+  },
+  (table) => [
+    index('oauth_access_token_client_id_idx').on(table.clientId),
+    index('oauth_access_token_user_id_idx').on(table.userId),
+  ]
+)
+
+// Better Auth mcp plugin：使用者對某個 OAuth client 的授權同意紀錄
+export const oauthConsent = pgTable(
+  'oauth_consent',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    clientId: text('client_id').references(() => oauthApplication.clientId, {
+      onDelete: 'cascade',
+    }),
+    userId: uuid('user_id').references(() => user.id, { onDelete: 'cascade' }),
+    scopes: text('scopes'),
+    createdAt: timestamp('created_at'),
+    updatedAt: timestamp('updated_at'),
+    consentGiven: boolean('consent_given'),
+  },
+  (table) => [
+    index('oauth_consent_client_id_idx').on(table.clientId),
+    index('oauth_consent_user_id_idx').on(table.userId),
+  ]
+)
+
 // 儲存空間設定（S3 相容，例如 RustFS / MinIO / R2）
 export const storageConfigs = pgTable(
   'storage_configs',

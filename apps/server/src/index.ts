@@ -7,6 +7,7 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createContext } from "@sao-blog/api/context";
 import { appRouter } from "@sao-blog/api/routers/index";
 import { auth } from "@sao-blog/auth";
+import { oAuthDiscoveryMetadata, oAuthProtectedResourceMetadata } from "better-auth/plugins";
 import { env } from "@sao-blog/env/server";
 import { devicesRoutes } from "./devices";
 import { mcpRoutes } from "./mcp";
@@ -43,7 +44,7 @@ const app = new Elysia()
       origin: env.CORS_ORIGIN,
       methods: ["GET", "POST", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Mcp-Protocol-Version", "Mcp-Session-Id"],
-      exposeHeaders: ["Mcp-Session-Id"],
+      exposeHeaders: ["Mcp-Session-Id", "WWW-Authenticate"],
       credentials: true,
     }),
   )
@@ -82,6 +83,8 @@ const app = new Elysia()
   )
   .group("/api/devices", (app) => app.use(devicesRoutes))
   .use(mcpRoutes)
+  .get("/.well-known/oauth-authorization-server", ({ request }) => oAuthDiscoveryMetadata(auth)(request))
+  .get("/.well-known/oauth-protected-resource", ({ request }) => oAuthProtectedResourceMetadata(auth)(request))
   .get("/", () => "OK")
   .listen(3000, () => {
     console.log(`Server is running at ${env.SERVER_URL}`);

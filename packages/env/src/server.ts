@@ -16,6 +16,7 @@ export const env = createEnv({
       .transform((val) => JSON.parse(val))
       .pipe(z.array(z.url())),
     SERVER_URL: z.url(),
+    BLOG_URL: z.url(),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   },
   runtimeEnv: process.env,
