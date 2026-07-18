@@ -91,7 +91,9 @@ async function getLeafProcedures(): Promise<LeafProcedure[]> {
 }
 
 function toolName(path: readonly string[]): string {
-  return path.join(".");
+  // 部分 MCP client（例如 Claude 的 FrontendRemoteMcpToolDefinition）要求
+  // tool name 只能是 ^[a-zA-Z0-9_-]{1,64}$，不允許句點，所以用底線分隔路徑。
+  return path.join("_");
 }
 
 function describeProcedure(procedure: AnyProcedure, path: readonly string[]): string {
