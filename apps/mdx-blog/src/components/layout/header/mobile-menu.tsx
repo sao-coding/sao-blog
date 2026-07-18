@@ -1,6 +1,7 @@
 "use client"
 
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
+import { useQuery } from '@tanstack/react-query'
 import {
     DrawerClose,
     DrawerContent,
@@ -10,13 +11,29 @@ import {
     DrawerTrigger,
 } from '@/components/ui/drawer'
 import { NAV_LINKS } from '@/config/menu'
+import { orpc } from '@/lib/orpc'
 import { ChevronDownIcon, ChevronUpIcon, MenuIcon, X } from 'lucide-react'
 import Link from 'next/link'
 import { VisuallyHidden } from 'radix-ui'
 
-const MobileMenu = () => {
+const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
     const moreLinks = NAV_LINKS.find(link => !link.href && !link.icon)
     const mainLinks = NAV_LINKS.filter(link => link !== moreLinks)
+
+    // 「文章」分類改為與電腦版一致，動態抓取真實分類清單，而非用設定檔寫死的清單
+    // 僅在手機版時才啟用查詢，避免桌機版（此元件雖有渲染但被 CSS 隱藏）也發出多餘請求
+    const { data: menuRes } = useQuery({
+        ...orpc.menu.getMenu.queryOptions(),
+        enabled: isMobile,
+    })
+    const dynamicCategories =
+        menuRes?.status === 'success'
+            ? menuRes.data.categories.map(category => ({
+                  href: `/categories/${category.slug}`,
+                  text: category.name,
+                  show: true,
+              }))
+            : null
 
     return (
         <div className="relative flex size-full items-center justify-center lg:hidden">
@@ -65,7 +82,10 @@ const MobileMenu = () => {
                     <nav className="py-2">
                         <AccordionPrimitive.Root className="flex w-full flex-col">
                             {mainLinks.map((link, index) => {
-                                const visibleChildren = link.children?.filter(c => c.show) ?? []
+                                const visibleChildren =
+                                    link.card === 'posts' && dynamicCategories
+                                        ? dynamicCategories
+                                        : (link.children?.filter(c => c.show) ?? [])
                                 const hasChildren = visibleChildren.length > 0
 
                                 // 無子項：純連結列

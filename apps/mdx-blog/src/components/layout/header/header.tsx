@@ -77,7 +77,7 @@ const Header = () => {
         )}
       >
         <div className="grid grid-cols-[4.5rem_auto_4.5rem] max-w-7xl mx-auto h-full lg:px-8">
-          <MobileMenu />
+          <MobileMenu isMobile={isMobile} />
           <div>
             <div className="relative flex justify-center items-center space-x-4 h-full">
               {/* 如果是手機模式 並且 showBackground 就顯示標題 不然就顯示 SiteOwnerAvatar DevicesStatus */}
