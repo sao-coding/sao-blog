@@ -105,6 +105,8 @@
   --timeline-line: oklch(0.75 0.02 85);
   --timeline-dot: oklch(0.45 0.08 45);
   --timeline-date: oklch(0.55 0.02 85);
+  --selection-background-color-lightness: 40%;
+  --selection-color-lightness: 30%;
 }
 
 .dark {
@@ -142,6 +144,8 @@
   --timeline-line: oklch(0.3 0.01 270);
   --timeline-dot: oklch(0.7 0.08 200);
   --timeline-date: oklch(0.6 0.02 270);
+  --selection-background-color-lightness: 60%;
+  --selection-color-lightness: 85%;
 }
 
 @layer base {
@@ -162,6 +166,11 @@
   } */
   body {
     background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 35%, transparent);
     color: var(--foreground);
   }
 }

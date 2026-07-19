@@ -107,7 +107,7 @@
 }
 
 /* 滑鼠反白效果 */
-.markdown {
+.mdx-wrapper {
   > :nth-child(6n)::selection,
   > :nth-child(6n) ::selection,
   > :nth-child(6n)::target-text,
