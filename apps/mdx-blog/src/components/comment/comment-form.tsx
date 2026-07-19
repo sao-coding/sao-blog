@@ -57,11 +57,16 @@ export function CommentForm({
 
   const pendingQuote = useCommentQuoteStore((s) => s.pendingQuote)
   const clearPendingQuote = useCommentQuoteStore((s) => s.clearPendingQuote)
+  const consumedQuoteIdRef = useRef<number | null>(null)
 
   // 只有頂層留言表單（非回覆表單）接受右鍵選單的「引用評論」
+  // 用 ref 記錄已套用過的 quote id，避免 React Strict Mode 的 effect 重複執行造成內容重複插入兩次
   useEffect(() => {
     if (parentId || !pendingQuote) return
-    const quoted = `> ${pendingQuote.replace(/\n/g, '\n> ')}\n\n`
+    if (consumedQuoteIdRef.current === pendingQuote.id) return
+    consumedQuoteIdRef.current = pendingQuote.id
+
+    const quoted = `> ${pendingQuote.text.replace(/\n/g, '\n> ')}\n\n`
     const current = getValues('content')
     setValue('content', current ? `${current}\n\n${quoted}` : quoted, {
       shouldValidate: true,

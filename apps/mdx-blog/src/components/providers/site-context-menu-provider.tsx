@@ -14,15 +14,11 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
-  Copy,
   ExternalLink,
   Image as ImageIcon,
   Link as LinkIcon,
-  MessageSquareQuote,
   RotateCw,
-  Search,
   Shuffle,
-  Sparkles,
 } from 'lucide-react'
 import {
   ContextMenu,
@@ -35,22 +31,15 @@ import {
 } from '@/components/ui/context-menu'
 import { orpc } from '@/lib/orpc'
 import { springScrollToTop } from '@/hooks/use-page-scroll'
-import { useCommentQuoteStore } from '@/store/comment-quote-store'
 
 type TargetInfo = {
-  selectionText: string
   linkHref: string | null
   imgSrc: string | null
 }
 
 const EMPTY_TARGET: TargetInfo = {
-  selectionText: '',
   linkHref: null,
   imgSrc: null,
-}
-
-function truncate(text: string, max: number) {
-  return text.length > max ? `${text.slice(0, max)}…` : text
 }
 
 export function SiteContextMenuProvider({
@@ -81,18 +70,10 @@ export function SiteContextMenuProvider({
   const handleContextMenu = useCallback((event: ReactMouseEvent) => {
     const el = event.target as HTMLElement
     setTarget({
-      selectionText: document.getSelection()?.toString() ?? '',
       linkHref: el.closest('a[href]')?.getAttribute('href') ?? null,
       imgSrc: el.closest('img[src]')?.getAttribute('src') ?? null,
     })
   }, [])
-
-  const handleQuoteToComment = useCallback(() => {
-    useCommentQuoteStore.getState().setPendingQuote(target.selectionText)
-    document
-      .getElementById('comment-section')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [target.selectionText])
 
   const handleRandomPost = useCallback(() => {
     const posts = postsData?.status === 'success' ? postsData.data : null
@@ -104,7 +85,6 @@ export function SiteContextMenuProvider({
     router.push(`/posts/${post.slug}`)
   }, [postsData, router])
 
-  const hasSelection = target.selectionText.length > 0
   const hasLink = target.linkHref !== null
   const hasImage = target.imgSrc !== null
 
@@ -139,40 +119,6 @@ export function SiteContextMenuProvider({
         </div>
         <ContextMenuSeparator />
 
-        {hasSelection && (
-          <>
-            <ContextMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(target.selectionText)
-              }
-            >
-              <Copy /> 複製
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() =>
-                window.open(
-                  `https://www.google.com/search?q=${encodeURIComponent(target.selectionText)}`,
-                  '_blank',
-                )
-              }
-            >
-              <Search /> 搜尋「{truncate(target.selectionText, 16)}」
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() =>
-                window.open(
-                  `https://chatgpt.com/?q=${encodeURIComponent(target.selectionText)}`,
-                  '_blank',
-                )
-              }
-            >
-              <Sparkles /> 詢問 ChatGPT
-            </ContextMenuItem>
-            <ContextMenuItem onClick={handleQuoteToComment}>
-              <MessageSquareQuote /> 引用評論
-            </ContextMenuItem>
-          </>
-        )}
         {hasLink && (
           <>
             <ContextMenuItem
@@ -205,7 +151,7 @@ export function SiteContextMenuProvider({
             </ContextMenuItem>
           </>
         )}
-        {(hasSelection || hasLink || hasImage) && <ContextMenuSeparator />}
+        {(hasLink || hasImage) && <ContextMenuSeparator />}
 
         <ContextMenuItem onClick={handleRandomPost}>
           <Shuffle /> 隨機文章

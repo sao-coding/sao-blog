@@ -3,6 +3,7 @@ import Footer from '@/components/layout/footer'
 import { PageScrollInfoProvider } from '@/components/providers/page-scroll-info-provider'
 import { AdminShortcutProvider } from '@/components/providers/admin-shortcut-provider'
 import { SiteContextMenuProvider } from '@/components/providers/site-context-menu-provider'
+import { SelectionBubbleMenu } from '@/components/providers/selection-bubble-menu'
 import { FABContainer } from '@/components/fab'
 
 export default function BlogLayout({
@@ -25,6 +26,7 @@ export default function BlogLayout({
 
         <FABContainer />
       </SiteContextMenuProvider>
+      <SelectionBubbleMenu />
     </div>
   )
 }
