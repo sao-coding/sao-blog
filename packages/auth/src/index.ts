@@ -3,8 +3,9 @@ import { db } from "@sao-blog/db";
 import * as schema from "@sao-blog/db/schema/index";
 import { env } from "@sao-blog/env/server";
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI, apiKey, admin, username, mcp } from "better-auth/plugins";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { apiKey } from "@better-auth/api-key"
+import { openAPI, admin, username, mcp } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -35,9 +36,10 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    
     crossSubDomainCookies: {
       enabled: true,
-      domain: "sao-x.com", // 根網域，讓 cookie 在 blog / blog-admin / blog-api 子網域間共享
+      domain: ".sao-x.com", // 根網域，讓 cookie 在 blog / blog-admin / blog-api 子網域間共享
     },
     defaultCookieAttributes: {
       sameSite: "none",
