@@ -44,7 +44,7 @@ const HeaderTitle: React.FC<Props> = ({ showBackground }) => {
           transition={{ duration: 0.2 }}
           className={cn('absolute w-full lg:px-16')}
         >
-          <small className="flex gap-0.5 text-gray-500">
+          <small className="flex gap-0.5 text-gray-500 truncate line-clamp-1">
             {postState.title && (
               <>
                 {postState.category}
