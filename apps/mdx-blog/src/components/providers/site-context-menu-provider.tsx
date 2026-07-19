@@ -19,7 +19,9 @@ import {
   Image as ImageIcon,
   Link as LinkIcon,
   RotateCw,
+  Search,
   Shuffle,
+  Sparkles,
 } from 'lucide-react'
 import {
   ContextMenu,
@@ -43,6 +45,10 @@ const EMPTY_TARGET: TargetInfo = {
   selectionText: '',
   linkHref: null,
   imgSrc: null,
+}
+
+function truncate(text: string, max: number) {
+  return text.length > max ? `${text.slice(0, max)}…` : text
 }
 
 export function SiteContextMenuProvider({
@@ -95,16 +101,65 @@ export function SiteContextMenuProvider({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="contents" onContextMenu={handleContextMenu}>
+      <ContextMenuTrigger
+        className="contents select-auto"
+        onContextMenu={handleContextMenu}
+      >
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="w-56">
-        {hasSelection && (
+        <div className="flex items-center gap-1 p-1">
           <ContextMenuItem
-            onClick={() => navigator.clipboard.writeText(target.selectionText)}
+            className="flex-1 justify-center gap-0"
+            onClick={() => router.back()}
           >
-            <Copy /> 複製
+            <ArrowLeft />
           </ContextMenuItem>
+          <ContextMenuItem
+            className="flex-1 justify-center gap-0"
+            onClick={() => router.forward()}
+          >
+            <ArrowRight />
+          </ContextMenuItem>
+          <ContextMenuItem
+            className="flex-1 justify-center gap-0"
+            onClick={() => window.location.reload()}
+          >
+            <RotateCw />
+          </ContextMenuItem>
+        </div>
+        <ContextMenuSeparator />
+
+        {hasSelection && (
+          <>
+            <ContextMenuItem
+              onClick={() =>
+                navigator.clipboard.writeText(target.selectionText)
+              }
+            >
+              <Copy /> 複製
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/search?q=${encodeURIComponent(target.selectionText)}`,
+                  '_blank',
+                )
+              }
+            >
+              <Search /> 搜尋「{truncate(target.selectionText, 16)}」
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() =>
+                window.open(
+                  `https://chatgpt.com/?q=${encodeURIComponent(target.selectionText)}`,
+                  '_blank',
+                )
+              }
+            >
+              <Sparkles /> 詢問 ChatGPT
+            </ContextMenuItem>
+          </>
         )}
         {hasLink && (
           <>
@@ -139,18 +194,6 @@ export function SiteContextMenuProvider({
           </>
         )}
         {(hasSelection || hasLink || hasImage) && <ContextMenuSeparator />}
-
-        <ContextMenuItem onClick={() => router.back()}>
-          <ArrowLeft /> 上一頁
-        </ContextMenuItem>
-        <ContextMenuItem onClick={() => router.forward()}>
-          <ArrowRight /> 下一頁
-        </ContextMenuItem>
-        <ContextMenuItem onClick={() => window.location.reload()}>
-          <RotateCw /> 重新整理
-        </ContextMenuItem>
-
-        <ContextMenuSeparator />
 
         <ContextMenuItem onClick={handleRandomPost}>
           <Shuffle /> 隨機文章
