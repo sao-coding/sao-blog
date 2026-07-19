@@ -64,7 +64,7 @@ function RouteComponent() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {configs.map((config) => (
             <Card key={config.id}>
-              <CardHeader className="flex-row items-start justify-between">
+              <CardHeader className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   {config.name}
                   {config.isActive && <Badge>啟用中</Badge>}
