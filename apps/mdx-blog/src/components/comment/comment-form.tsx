@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SendIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { useCommentQuoteStore } from '@/store/comment-quote-store'
 import { commentSchema, type CommentFormValues } from '@/schemas/comment'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -53,6 +54,21 @@ export function CommentForm({
 
   const { ref: formContentRef, ...contentRegisterRest } = register('content')
   const contentValue = watch('content')
+
+  const pendingQuote = useCommentQuoteStore((s) => s.pendingQuote)
+  const clearPendingQuote = useCommentQuoteStore((s) => s.clearPendingQuote)
+
+  // 只有頂層留言表單（非回覆表單）接受右鍵選單的「引用評論」
+  useEffect(() => {
+    if (parentId || !pendingQuote) return
+    const quoted = `> ${pendingQuote.replace(/\n/g, '\n> ')}\n\n`
+    const current = getValues('content')
+    setValue('content', current ? `${current}\n\n${quoted}` : quoted, {
+      shouldValidate: true,
+    })
+    clearPendingQuote()
+    requestAnimationFrame(() => textareaRef.current?.focus())
+  }, [parentId, pendingQuote, clearPendingQuote, getValues, setValue])
 
   const handleEmojiSelect = useCallback(
     (emoji: string) => {

@@ -32,7 +32,7 @@ export function CommentSection({ postId, lazyLoad = false, className }: CommentS
   const shouldRender = !lazyLoad || isInView
 
   return (
-    <div ref={sentinelRef} className={cn('w-full', className)}>
+    <div id="comment-section" ref={sentinelRef} className={cn('w-full', className)}>
       {shouldRender ? (
         <CommentSectionContent postId={postId} />
       ) : (
