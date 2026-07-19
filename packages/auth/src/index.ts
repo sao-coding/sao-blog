@@ -35,15 +35,14 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
-    crossSubdomainCookies: {
+    crossSubDomainCookies: {
       enabled: true,
-      // domain: "sao-x.com"  // 根網域，含點
+      domain: "sao-x.com", // 根網域，讓 cookie 在 blog / blog-admin / blog-api 子網域間共享
     },
     defaultCookieAttributes: {
       sameSite: "none",
       secure: true,
       httpOnly: true,
-      // domain: ".sao-x.com",
     },
   },
   plugins: [
