@@ -26,6 +26,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/router-plugin": "^1.132.0",
     "better-auth": "catalog:",
+    "@better-auth/api-key": "catalog:",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",

@@ -1,5 +1,6 @@
 import { createAuthClient } from "better-auth/react";
-import { apiKeyClient, usernameClient } from "better-auth/client/plugins";
+import { usernameClient } from "better-auth/client/plugins";
+import { apiKeyClient } from "@better-auth/api-key/client"
 import { env } from "@sao-blog/env/web";
 
 export const authClient = createAuthClient({
