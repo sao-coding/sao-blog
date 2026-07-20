@@ -7,6 +7,7 @@ import { auth } from "@sao-blog/auth";
 import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
 import { mdxToExcerpt } from "../../lib/mdx-to-text";
 import { slugify } from "../../lib/slugify";
+import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 
 // 管理員系統員系統
 
@@ -232,6 +233,8 @@ const createPost = protectedProcedure
             .set({ postCount: sql`${categories.postCount} + 1` })
             .where(eq(categories.id, resolvedCategoryId));
 
+        await notifyBlogRevalidate(["/", "/posts", `/posts/${createdPost.slug}`]);
+
         return {
             status: "success",
             message: "文章建立成功",
@@ -368,6 +371,8 @@ const updatePost = protectedProcedure
             }
         }
 
+        await notifyBlogRevalidate(["/", "/posts", `/posts/${updatedPost.slug}`]);
+
         return {
             status: "success",
             message: "文章更新成功",
@@ -409,6 +414,12 @@ const deletePosts = protectedProcedure
           .set({ postCount: sql`GREATEST(${categories.postCount} - ${count}, 0)` })
           .where(eq(categories.id, categoryId));
       }
+
+      await notifyBlogRevalidate([
+        "/",
+        "/posts",
+        ...deletedPosts.map((p) => `/posts/${p.slug}`),
+      ]);
 
       return {
         status: "success",

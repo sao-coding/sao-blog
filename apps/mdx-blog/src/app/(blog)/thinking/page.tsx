@@ -5,7 +5,10 @@ import { ThinkingList } from './_components/thinking-list'
 export const revalidate = 60
 
 const ThinkingPage = async () => {
-  const data = await client.thinking.getThinkings()
+  const data = await client.thinking.getThinkings().catch((err) => {
+    console.error('Failed to fetch thinkings:', err)
+    return null
+  })
 
   const thinkings = data?.data ?? []
   const total = data?.meta?.total ?? thinkings.length

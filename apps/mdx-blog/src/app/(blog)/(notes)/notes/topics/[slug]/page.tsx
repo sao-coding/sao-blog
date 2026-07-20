@@ -6,6 +6,19 @@ import Link from 'next/link'
 
 export const revalidate = 300
 
+// 同 posts/[slug]：build time 把現有專欄 slug 烤成靜態頁，
+// 新專欄一樣靠 dynamicParams 預設 true 做 ISR fallback。
+export async function generateStaticParams() {
+  try {
+    const res = await orpc.topic.getTopics.call({})
+    if (res.status !== 'success' || !res.data) return []
+    return res.data.map((topic) => ({ slug: topic.slug }))
+  } catch (err) {
+    console.error('Failed to generate static params for topics:', err)
+    return []
+  }
+}
+
 interface Props {
   params: Promise<{ slug: string }>
 }

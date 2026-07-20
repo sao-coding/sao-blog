@@ -17,6 +17,7 @@ export const env = createEnv({
       .pipe(z.array(z.url())),
     SERVER_URL: z.url(),
     BLOG_URL: z.url(),
+    REVALIDATE_SECRET: z.string().min(16),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   },
   runtimeEnv: process.env,

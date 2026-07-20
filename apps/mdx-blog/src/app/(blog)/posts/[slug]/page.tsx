@@ -10,6 +10,20 @@ import { client } from '@/lib/orpc'
 
 export const revalidate = 3600
 
+// build time 先把已發布文章的 slug 烤成靜態頁（SSG）；
+// 新文章沒被預生成也沒關係，dynamicParams 預設 true，
+// 第一次請求即時渲染，渲染結果依 revalidate 快取（ISR fallback）。
+export async function generateStaticParams() {
+  try {
+    const res = await client.post.getPosts({})
+    if (res.status !== 'success' || !res.data) return []
+    return res.data.map((post) => ({ slug: post.slug }))
+  } catch (err) {
+    console.error('Failed to generate static params for posts:', err)
+    return []
+  }
+}
+
 type Scope = {
   readingTime: string
   toc?: TocItem[]
