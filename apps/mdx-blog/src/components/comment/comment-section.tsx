@@ -195,7 +195,10 @@ function CommentSectionContent({ postId }: { postId: string }) {
 
 function CommentLoginOverlay({ pathname }: { pathname: string }) {
   const handleLogin = (provider: 'github' | 'google') => {
-    authClient.signIn.social({ provider, callbackURL: pathname })
+    authClient.signIn.social({
+      provider,
+      callbackURL: `${window.location.origin}${pathname}`,
+    })
   }
 
   return (
