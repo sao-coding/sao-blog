@@ -99,14 +99,24 @@ export function LoginForm({
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => authClient.signIn.social({ provider: 'github' })}
+                onClick={() =>
+                  authClient.signIn.social({
+                    provider: 'github',
+                    callbackURL: searchParams.get('redirect') ?? '/',
+                  })
+                }
               >
                 使用 GitHub 登入
               </Button>
               <Button
                 variant="outline"
                 className="w-full mt-2"
-                onClick={() => authClient.signIn.social({ provider: 'google' })}
+                onClick={() =>
+                  authClient.signIn.social({
+                    provider: 'google',
+                    callbackURL: searchParams.get('redirect') ?? '/',
+                  })
+                }
               >
                 使用 Google 登入
               </Button>
