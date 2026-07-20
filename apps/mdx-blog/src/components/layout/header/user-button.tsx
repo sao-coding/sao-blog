@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { SITE_OWNER } from '@/config/mega-menu'
 import { IconBrandGithub, IconBrandGoogle, IconUserBolt } from '@tabler/icons-react'
 import { authClient } from "@/lib/auth-client"
+import { usePathname } from "next/navigation"
 
 
 const UserButton = () => {
@@ -29,6 +30,8 @@ const UserButton = () => {
     error, //error object
     refetch //refetch the session
   } = authClient.useSession()
+
+  const pathname = usePathname()
 
   // Avoid hydration mismatch: better-auth's session store can resolve
   // synchronously on the client (from its cookie cache) before hydration
@@ -43,7 +46,7 @@ const UserButton = () => {
   const signIn = async (provider: string) => {
     const data = await authClient.signIn.social({
       provider,
-      callbackURL: `${window.location.origin}`
+      callbackURL: `${window.location.origin}/${pathname}`,
     })
   }
 
