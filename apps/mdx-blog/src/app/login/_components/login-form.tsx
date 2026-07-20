@@ -102,7 +102,7 @@ export function LoginForm({
                 onClick={() =>
                   authClient.signIn.social({
                     provider: 'github',
-                    callbackURL: searchParams.get('redirect') ?? '/',
+                    callbackURL: `${window.location.origin}${searchParams.get('redirect') ?? '/'}`,
                   })
                 }
               >
@@ -114,7 +114,7 @@ export function LoginForm({
                 onClick={() =>
                   authClient.signIn.social({
                     provider: 'google',
-                    callbackURL: searchParams.get('redirect') ?? '/',
+                    callbackURL: `${window.location.origin}${searchParams.get('redirect') ?? '/'}`,
                   })
                 }
               >
