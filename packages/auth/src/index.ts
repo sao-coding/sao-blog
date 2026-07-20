@@ -45,6 +45,7 @@ export const auth = betterAuth({
       sameSite: env.NODE_ENV === "production" ? "none" : "lax",
       secure: env.NODE_ENV === "production",
       httpOnly: true,
+      domain: ".sao-x.com",
     },
   },
   plugins: [
