@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { MDXClient } from 'next-mdx-remote-client'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -39,6 +39,9 @@ export function ArticlePreviewModalContent() {
     queryFn: () => getArticlePreview({ type: target!.type, id: target!.id }),
     enabled: open,
     staleTime: 5 * 60 * 1000,
+    // 關閉時 target 變 null、queryKey 會跟著換掉，
+    // 沒有這個會讓 data 瞬間變 undefined，在關閉動畫播完前先閃一下錯誤畫面。
+    placeholderData: keepPreviousData,
   })
 
   const close = useCallback(() => {
