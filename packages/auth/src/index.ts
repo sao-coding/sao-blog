@@ -38,12 +38,12 @@ export const auth = betterAuth({
     },
     
     crossSubDomainCookies: {
-      enabled: true,
+      enabled: env.NODE_ENV === "production",
       domain: ".sao-x.com", // 根網域，讓 cookie 在 blog / blog-admin / blog-api 子網域間共享
     },
     defaultCookieAttributes: {
-      sameSite: "none",
-      secure: true,
+      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+      secure: env.NODE_ENV === "production",
       httpOnly: true,
     },
   },
