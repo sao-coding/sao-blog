@@ -2,6 +2,8 @@ import { orpc } from '@/lib/orpc'
 import { BackToTopFAB } from '@/components/fab'
 import { TopicGrid } from './_components/topic-grid'
 
+export const revalidate = 300
+
 const NoteTopicsPage = async () => {
   const data = await orpc.topic.getTopics.call({})
 

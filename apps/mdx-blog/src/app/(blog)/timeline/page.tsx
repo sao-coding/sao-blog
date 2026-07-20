@@ -7,6 +7,8 @@ import { Timeline } from './_components/timeline'
 import { ArticlePreviewModal } from '@/components/preview/article-preview-modal'
 import ProgressNumber from '@/components/animation/progress-number'
 
+export const revalidate = 60
+
 const TimelinePage = async ({
   searchParams,
 }: {

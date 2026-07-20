@@ -1,6 +1,4 @@
-import type { InferClientOutputs } from '@orpc/client'
-import type { client } from '@/lib/orpc'
-import { env } from '@sao-blog/env/web'
+import { client } from '@/lib/orpc'
 import Welcome from './_components/welcome'
 import { HomeEditorial } from './_components/home-editorial'
 import LocationCard from './_components/location-card'
@@ -13,14 +11,10 @@ import { HomeFooter } from './_components/home-footer'
 // 這裡改用無 header 的公開 REST 端點 /api/home，讓 Next 的 Data Cache 生效。
 export const revalidate = 60
 
-type HomeResponse = InferClientOutputs<typeof client>['home']['getHome']
+// type HomeResponse = InferClientOutputs<typeof client>['home']['getHome']
 
 const HomePage = async () => {
-  const res = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/api/home`, {
-    next: { revalidate: 60 },
-  })
-  const json = (await res.json()) as HomeResponse
-  const data = json.data
+  const { data } = await client.home.getHome()
 
   return (
     <div>

@@ -28,13 +28,10 @@ export const link = new RPCLink({
       credentials: "include",
     });
   },
+  // 伺服器端目前所有直接呼叫 client/orpc 的頁面都是公開唯讀內容，
+  // 不需要轉發 next/headers()（那會讓路由被標記為 dynamic，無法走 ISR/Data Cache）。
   headers: async () => {
-    if (typeof window !== "undefined") {
-      return {};
-    }
-
-    const { headers } = await import("next/headers");
-    return Object.fromEntries(await headers());
+    return {};
   },
 });
 

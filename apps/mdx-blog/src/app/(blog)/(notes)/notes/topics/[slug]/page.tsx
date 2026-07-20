@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import { TopicNotesList } from './_components/topic-notes-list'
 import Link from 'next/link'
 
+export const revalidate = 300
+
 interface Props {
   params: Promise<{ slug: string }>
 }

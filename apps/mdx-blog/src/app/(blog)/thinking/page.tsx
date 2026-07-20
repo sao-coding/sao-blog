@@ -2,7 +2,7 @@ import { client } from '@/lib/orpc'
 import { BackToTopFAB } from '@/components/fab'
 import { ThinkingList } from './_components/thinking-list'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 const ThinkingPage = async () => {
   const data = await client.thinking.getThinkings()

@@ -8,6 +8,8 @@ import type { TocItem } from 'remark-flexible-toc'
 import { PostClientPage } from './_components/post-client-page'
 import { client } from '@/lib/orpc'
 
+export const revalidate = 3600
+
 type Scope = {
   readingTime: string
   toc?: TocItem[]
