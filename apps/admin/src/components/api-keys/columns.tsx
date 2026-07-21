@@ -29,8 +29,8 @@ export const columns: ColumnDef<ApiKey, unknown>[] = [
     meta: { className: 'text-sm' },
   },
   {
-    accessorKey: 'userId',
-    header: 'User ID',
+    accessorKey: 'referenceId',
+    header: 'Reference ID',
     cell: ({ getValue }) => (
       <div className="text-xs text-muted-foreground">
         {getValue() as string}

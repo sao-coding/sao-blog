@@ -4,7 +4,7 @@ export interface ApiKey {
   start?: string | null
   prefix?: string | null
   key: string
-  userId: string
+  referenceId: string
   refillInterval?: number | null
   refillAmount?: number | null
   lastRefillAt?: string | null
