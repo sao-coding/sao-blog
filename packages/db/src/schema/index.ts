@@ -405,33 +405,39 @@ export const verification = pgTable('verification', {
   ),
 })
 
-export const apikey = pgTable('apikey', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => uuidv7()),
-  name: text('name'),
-  start: text('start'),
-  prefix: text('prefix'),
-  key: text('key').notNull(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  refillInterval: integer('refill_interval'),
-  refillAmount: integer('refill_amount'),
-  lastRefillAt: timestamp('last_refill_at'),
-  enabled: boolean('enabled').default(true),
-  rateLimitEnabled: boolean('rate_limit_enabled').default(true),
-  rateLimitTimeWindow: integer('rate_limit_time_window').default(86400000),
-  rateLimitMax: integer('rate_limit_max').default(10),
-  requestCount: integer('request_count'),
-  remaining: integer('remaining'),
-  lastRequest: timestamp('last_request'),
-  expiresAt: timestamp('expires_at'),
-  createdAt: timestamp('created_at').notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
-  permissions: text('permissions'),
-  metadata: text('metadata'),
-})
+export const apikey = pgTable(
+  'apikey',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    name: text('name'),
+    start: text('start'),
+    prefix: text('prefix'),
+    key: text('key').notNull(),
+    // Better Auth api-key plugin：舊版 userId 已改為通用的 referenceId（可指向 user 或 organization）
+    configId: text('config_id').default('default'),
+    referenceId: uuid('reference_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    refillInterval: integer('refill_interval'),
+    refillAmount: integer('refill_amount'),
+    lastRefillAt: timestamp('last_refill_at'),
+    enabled: boolean('enabled').default(true),
+    rateLimitEnabled: boolean('rate_limit_enabled').default(true),
+    rateLimitTimeWindow: integer('rate_limit_time_window').default(86400000),
+    rateLimitMax: integer('rate_limit_max').default(10),
+    requestCount: integer('request_count'),
+    remaining: integer('remaining'),
+    lastRequest: timestamp('last_request'),
+    expiresAt: timestamp('expires_at'),
+    createdAt: timestamp('created_at').notNull(),
+    updatedAt: timestamp('updated_at').notNull(),
+    permissions: text('permissions'),
+    metadata: text('metadata'),
+  },
+  (table) => [index('apikey_reference_id_idx').on(table.referenceId)]
+)
 
 // Better Auth mcp plugin：OAuth 2.0 client（供 Claude 等 MCP client 透過 DCR 自行註冊）
 export const oauthApplication = pgTable(

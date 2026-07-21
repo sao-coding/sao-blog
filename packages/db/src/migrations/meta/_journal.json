@@ -15,6 +15,13 @@
       "when": 1784393986208,
       "tag": "0001_cold_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784644169970,
+      "tag": "0002_lame_microchip",
+      "breakpoints": true
     }
   ]
 }
