@@ -12,6 +12,8 @@ export const apiKeysQueryOptions = () =>
       if (error) {
         throw new Error(error.message ?? '取得 API 金鑰列表失敗')
       }
-      return (data ?? []) as unknown as ApiKey[]
+      const result = data as unknown as { apiKeys?: ApiKey[] } | ApiKey[] | null
+      if (Array.isArray(result)) return result
+      return result?.apiKeys ?? []
     },
   })
