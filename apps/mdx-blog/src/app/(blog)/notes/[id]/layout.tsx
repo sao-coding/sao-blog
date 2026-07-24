@@ -1,4 +1,4 @@
-import { NoteLeftSidebar } from './[id]/_components/note-left-sidebar'
+import { NoteLeftSidebar } from './_components/note-left-sidebar'
 
 export default function NoteLayout({
   children,

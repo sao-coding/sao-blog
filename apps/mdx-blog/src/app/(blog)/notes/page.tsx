@@ -1,54 +1,27 @@
 // src/app/(blog)/notes/page.tsx
-import { redirect } from 'next/navigation'
-import { ApiResponse } from '@/types/api'
-import { NoteItem } from '@/types/note'
-import { env } from '@sao-blog/env/web'
+import { client } from '@/lib/orpc'
+import { ErrorComponent } from '@/components/index'
+import { NotePreviewCard } from './_components/note-preview-card'
+import { NoteListEntry } from './_components/note-list-entry'
+import { evaluateNoteContent } from './_lib/evaluate-note'
+import type { NotesHomeData } from './_types'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
-// 此函式將在伺服器端執行
-const getLatestNoteId = async (): Promise<string | null> => {
-  try {
-    const res = await fetch(
-      `${env.NEXT_PUBLIC_SERVER_URL}/api/notes/latest`,
-      {
-        cache: 'no-store', // 確保每次都獲取最新的日記
-      }
-    )
-
-    if (!res.ok) {
-      console.error('Failed to fetch latest note:', res.status)
-      return null
-    }
-
-    const response: ApiResponse<NoteItem> = await res.json()
-
-    if (response.status === 'success' && response.data?.id) {
-      return response.data.id
-    } else {
-      console.error('API did not return a successful status or note ID.')
-      return null
-    }
-  } catch (error) {
-    console.error('An error occurred while fetching the latest note:', error)
+export default async function NotesPage() {
+  const res = await client.note.getNotes({}).catch((err) => {
+    console.error('Failed to fetch notes:', err)
     return null
-  }
-}
+  })
 
-// 這是一個非同步的伺服器元件
-export default async function NotesRedirectPage() {
-  const latestNoteId = await getLatestNoteId()
+  const data = (res?.data ?? null) as NotesHomeData | null
+  const current = data?.current ?? null
 
-  if (latestNoteId) {
-    // 執行伺服器端重定向
-    console.log('Redirecting to latest note with ID:', latestNoteId)
-    redirect(`/notes/${latestNoteId}`)
-  } else {
-    // 如果無法獲取 ID，則顯示一個錯誤或備用頁面
+  if (!current) {
     return (
       <div className="container mx-auto flex min-h-[calc(100vh-80px)] items-center justify-center text-center">
         <div>
-          <h1 className="text-2xl font-bold">無法載入日記</h1>
+          <h1 className="text-2xl font-bold">還沒有任何日記</h1>
           <p className="mt-2 text-muted-foreground">
             目前沒有任何日記，或無法連線至伺服器。請稍後再試。
           </p>
@@ -56,4 +29,37 @@ export default async function NotesRedirectPage() {
       </div>
     )
   }
+
+  const source = current.content
+  if (!source || typeof source !== 'string') {
+    return <ErrorComponent error="找不到日記內容或格式錯誤！" />
+  }
+
+  const { content, error } = await evaluateNoteContent(source)
+
+  if (error) {
+    return <ErrorComponent error={error.message} />
+  }
+
+  const earlier = (data?.list ?? []).filter((note) => note.id !== current.id)
+
+  return (
+    <div className='mx-auto mt-24 min-w-0 max-w-5xl px-4'>
+      <NotePreviewCard note={{ ...current, topic: current.topic ?? null }}>
+        {content}
+      </NotePreviewCard>
+      {earlier.length > 0 && (
+        <div className="mt-16">
+          <p className="mb-8 text-center text-sm tracking-widest text-muted-foreground uppercase">
+            更早的手記
+          </p>
+          <ul className="space-y-6">
+            {earlier.map((note) => (
+              <NoteListEntry key={note.id} note={note} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
 }
