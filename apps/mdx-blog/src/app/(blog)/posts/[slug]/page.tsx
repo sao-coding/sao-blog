@@ -59,7 +59,7 @@ export async function generateMetadata(
 const getPostData = cache(async (slug: string) => {
   try {
     const data = await client.post.getPost({ id: slug })
-    console.log('RPC result:', JSON.stringify(data, null, 2))
+    // console.log('RPC result:', JSON.stringify(data, null, 2))
 
     // 確保 data.data 存在
     if (!data.data) {
