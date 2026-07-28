@@ -231,7 +231,7 @@ export function CommentMarkdownRenderer({
   return (
     <div
       className={cn(
-        'prose prose-sm dark:prose-invert max-w-none break-words',
+        'prose prose-sm dark:prose-invert max-w-none break-words whitespace-pre-line',
         '[&_ul]:list-disc [&_ol]:list-decimal [&_li]:ml-4',
         '[&_del]:line-through [&_blockquote]:border-l-2 [&_blockquote]:border-muted-foreground/30 [&_blockquote]:pl-4 [&_blockquote]:italic',
         className
