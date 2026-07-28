@@ -19,17 +19,8 @@ export async function generateStaticParams() {
     if (res.status !== 'success' || !res.data) return []
     return res.data.map((post) => ({ slug: post.slug }))
   } catch (err) {
-    console.error("getPost failed:");
-    console.error(err);
-
-    if (err instanceof Error) {
-      console.error("name:", err.name);
-      console.error("message:", err.message);
-      console.error("stack:", err.stack);
-      console.error("cause:", err.cause);
-    }
-
-    throw err;
+    console.error('Failed to generate static params for posts:', err)
+    return null
   }
 }
 
