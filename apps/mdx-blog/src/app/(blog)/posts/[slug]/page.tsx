@@ -7,6 +7,7 @@ import getMdxOptions from '@/components/mdx/parsers'
 import type { TocItem } from 'remark-flexible-toc'
 import { PostClientPage } from './_components/post-client-page'
 import { client } from '@/lib/orpc'
+import { notFound } from 'next/navigation'
 
 export const revalidate = 3600
 
@@ -20,7 +21,7 @@ export async function generateStaticParams() {
     return res.data.map((post) => ({ slug: post.slug }))
   } catch (err) {
     console.error('Failed to generate static params for posts:', err)
-    return null
+    return []
   }
 }
 
@@ -45,7 +46,12 @@ export async function generateMetadata(
   const slug = (await params).slug
   const post = await getPostData(slug)
 
-  // console.log('Generating metadata for post:', parent, 'post', post)
+  if (!post) {
+    return {
+      title: '找不到文章',
+      description: 'Post not found',
+    }
+  }
 
   return {
     title: post.title,
@@ -69,7 +75,8 @@ const getPostData = cache(async (slug: string) => {
     return data.data
   } catch (err) {
     console.error('Error fetching post data:', err)
-    throw new Error('Failed to fetch post data')
+    // throw new Error('Failed to fetch post data')
+    return null
   }
 })
 export default async function Page({
@@ -81,9 +88,13 @@ export default async function Page({
   // console.log('Fetching post data for slug:', slug)
   let source: string | null = null
   const data = await getPostData(slug)
+
+  if (!data) {
+    notFound()   // 交給 Next.js 404 處理，不會讓 build/render 崩潰
+  }
+
   try {
     // await new Promise((resolve) => setTimeout(resolve, 2000))
-    
     source = data.content
     // console.log('MDX source:', source)
   } catch (err) {
