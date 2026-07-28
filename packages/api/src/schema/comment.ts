@@ -6,7 +6,7 @@ export const commentSchema = z.object({
     refType: z.enum(["post", "note", "page", "recently"]), // 留言對象的類型（文章、日記、頁面或最近動態）
     refId: z.string(), // 文章、日記或頁面的 ID
     displayUsername: z.string(), // 顯示用的名稱
-    email: z.string().email(), // 留言者的 email
+    image: z.string().url().nullable(), // 留言者頭貼
     website: z.string().url().nullable(), // 留言者的網站（可選）
     content: z.string(), // 留言內容
     thread: z.string().nullable(), // 留言串 ID（可選）
