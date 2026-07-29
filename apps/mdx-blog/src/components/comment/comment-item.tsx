@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils'
 import type { Comment } from '@/types/comment'  // ✅ 移除 VoteType（不再需要）
 import type { CommentFormValues } from '@/schemas/comment'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { CommentMarkdownRenderer } from './comment-markdown-renderer'
 import { CommentForm } from './comment-form'
@@ -134,6 +134,7 @@ export function CommentItem({
       <div className="flex gap-3 py-3">
         {/* 使用者頭像 */}
         <Avatar size="default" className="shrink-0">
+            <AvatarImage src={comment.image || ''} alt={`${comment.displayUsername} 的頭像`} />
           <AvatarFallback
             style={{ backgroundColor: getAvatarColor(comment.displayUsername) }}
             className="text-white font-semibold"

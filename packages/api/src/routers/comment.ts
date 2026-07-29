@@ -1,7 +1,7 @@
 import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
-import { comments, commentLikes, account, posts } from "@sao-blog/db/schema/index";
+import { comments, commentLikes, account, posts, user } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { CommentsResponseSchema } from "@sao-blog/api/schema/comment";
 import { resolveIpLocation } from "@sao-blog/api/lib/ip-region";
@@ -39,8 +39,29 @@ const getComments = publicProcedure
         const userId = context.session?.user.id ?? null;
 
         const commentsList = await db
-            .select()
+            .select({
+                id: comments.id,
+                refType: comments.refType,
+                refId: comments.refId,
+                displayUsername: comments.displayUsername,
+                image: user.image,
+                website: comments.website,
+                content: comments.content,
+                thread: comments.thread,
+                likes: comments.likes,
+                dislikes: comments.dislikes,
+                deleted: comments.deleted,
+                pin: comments.pin,
+                source: comments.source,
+                userId: comments.userId,
+                ip: comments.ip,
+                agent: comments.agent,
+                location: comments.location,
+                createdAt: comments.createdAt,
+                updatedAt: comments.updatedAt,
+            })
             .from(comments)
+            .leftJoin(user, eq(user.id, comments.userId))
             .where(and(
                 eq(comments.refId, refId),
                 eq(comments.refType, type)

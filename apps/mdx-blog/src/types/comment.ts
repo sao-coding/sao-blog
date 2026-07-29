@@ -9,6 +9,7 @@ export interface FlatComment {
   refType: CommentRefType
   refId: string
   displayUsername: string
+  image: string | null
   email: string
   website: string | null
   content: string
@@ -30,6 +31,7 @@ export interface FlatComment {
 export interface Comment {
   id: string
   displayUsername: string
+  image: string | null
   email: string
   website?: string
   content: string

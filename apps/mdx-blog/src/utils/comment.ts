@@ -14,6 +14,7 @@ export function toCommentTree(flatComments: FlatComment[]): Comment[] {
     map.set(item.id, {
       id: item.id,
       displayUsername: item.displayUsername,
+      image: item.image,
       email: item.email,
       website: item.website ?? undefined,
       content: item.content,

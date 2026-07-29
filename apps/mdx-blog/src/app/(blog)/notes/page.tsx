@@ -44,7 +44,7 @@ export default async function NotesPage() {
   const earlier = (data?.list ?? []).filter((note) => note.id !== current.id)
 
   return (
-    <>
+    <div className='mx-auto mt-24 min-w-0 max-w-5xl px-4'>
       <NotePreviewCard note={{ ...current, topic: current.topic ?? null }}>
         {content}
       </NotePreviewCard>
@@ -60,6 +60,6 @@ export default async function NotesPage() {
           </ul>
         </div>
       )}
-    </>
+    </div>
   )
 }
