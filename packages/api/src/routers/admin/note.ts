@@ -5,6 +5,17 @@ import { categories, posts, user, tags, postTags, type TagModel, notes, topics }
 import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { noteInputSchema } from "@sao-blog/api/schema/note";
+import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+
+async function getTopicSlug(topicId: string | null | undefined) {
+    if (!topicId) return null;
+    const [row] = await db
+        .select({ slug: topics.slug })
+        .from(topics)
+        .where(eq(topics.id, topicId))
+        .limit(1);
+    return row?.slug ?? null;
+}
 
 const getNotes = protectedProcedure
     .route({ method: "GET", path: "/notes" })
@@ -88,6 +99,13 @@ const createNote = protectedProcedure
                 .where(eq(topics.id, topicId));
         }
 
+        const topicSlug = await getTopicSlug(topicId);
+        await notifyBlogRevalidate([
+            "/notes",
+            `/notes/${newNote.id}`,
+            ...(topicSlug ? [`/notes/topics/${topicSlug}`] : []),
+        ]);
+
         return {
             status: "success",
             message: "筆記建立成功",
@@ -150,6 +168,17 @@ const updateNote = protectedProcedure
             }
         }
 
+        const [oldSlug, newSlug] = await Promise.all([
+            getTopicSlug(oldTopicId),
+            getTopicSlug(newTopicId),
+        ]);
+        const topicSlugs = [...new Set([oldSlug, newSlug].filter((s): s is string => s !== null))];
+        await notifyBlogRevalidate([
+            "/notes",
+            `/notes/${updatedNote.id}`,
+            ...topicSlugs.map((slug) => `/notes/topics/${slug}`),
+        ]);
+
         return {
             status: "success",
             message: "筆記更新成功",
@@ -191,6 +220,15 @@ const deleteNote = protectedProcedure
                     .set({ noteCount: sql`GREATEST(${topics.noteCount} - ${count}, 0)` })
                     .where(eq(topics.id, tid));
             }
+
+            const topicSlugs = (await Promise.all(topicIds.map(getTopicSlug))).filter(
+                (s): s is string => s !== null
+            );
+            await notifyBlogRevalidate([
+                "/notes",
+                ...deletedNotes.map((n) => `/notes/${n.id}`),
+                ...topicSlugs.map((slug) => `/notes/topics/${slug}`),
+            ]);
 
             return {
                 status: "success",

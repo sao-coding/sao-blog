@@ -5,6 +5,7 @@ import { categories, posts, user, tags, postTags, type TagModel, topics } from "
 import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { topicSchema, topicInputSchema } from "@sao-blog/api/schema/topic";
+import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 
 const getTopics = protectedProcedure
     .route({ method: "GET", path: "/topics" })
@@ -66,6 +67,16 @@ const createTopic = protectedProcedure
             })
             .returning();
 
+        if (!newTopic) {
+            return {
+                status: "error",
+                message: "主題建立失敗",
+                data: null,
+            }
+        }
+
+        await notifyBlogRevalidate(["/notes/topics", `/notes/topics/${newTopic.slug}`]);
+
         return {
             status: "success",
             message: "主題建立成功",
@@ -78,6 +89,12 @@ const updateTopic = protectedProcedure
     .input(topicInputSchema)
     .handler(async ({ input }) => {
         const { id, name, slug, introduce, description, color } = input;
+
+        const [currentTopic] = await db
+            .select({ slug: topics.slug })
+            .from(topics)
+            .where(eq(topics.id, id))
+            .limit(1);
 
         const [updatedTopic] = await db
             .update(topics)
@@ -99,6 +116,15 @@ const updateTopic = protectedProcedure
                 data: null,
             }
         }
+
+        // slug 若被改掉，舊 slug 的快取頁面也要一併清掉，不然舊網址會停在最後
+        // 一次快取內容（雖然理論上會 404，但快取還沒過期前仍會命中舊資料）。
+        const slugsToRevalidate = new Set([updatedTopic.slug]);
+        if (currentTopic?.slug) slugsToRevalidate.add(currentTopic.slug);
+        await notifyBlogRevalidate([
+            "/notes/topics",
+            ...[...slugsToRevalidate].map((s) => `/notes/topics/${s}`),
+        ]);
 
         return {
             status: "success",
@@ -127,6 +153,8 @@ const deleteTopic = protectedProcedure
                 data: null,
             }
         }
+
+        await notifyBlogRevalidate(["/notes/topics", `/notes/topics/${deletedTopic.slug}`]);
 
         return {
             status: "success",

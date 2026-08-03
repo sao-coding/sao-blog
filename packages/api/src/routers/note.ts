@@ -149,6 +149,17 @@ const getNote = publicProcedure
     .output(NoteResponseSchema)
     .handler(async ({ input }) => {
         const noteId = input.id;
+        // notes.id 是 Postgres uuid 欄位，非 uuid 格式的字串直接查詢會讓
+        // DB 丟出型別轉換錯誤（500），這裡提前擋掉、回傳與「查無資料」相同的形狀，
+        // 讓呼叫端既有的 notFound() 邏輯可以正常接住。
+        if (!z.uuid().safeParse(noteId).success) {
+            return {
+                status: "error",
+                message: "日記不存在",
+                data: null,
+            };
+        }
+
         const note = await db
             .select()
             .from(notes)

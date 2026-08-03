@@ -1,0 +1,484 @@
+import type React from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useLocation, Link } from '@tanstack/react-router'
+import {
+  motion as m,
+  LayoutGroup,
+  useMotionTemplate,
+  useMotionValue,
+  AnimatePresence,
+} from 'motion/react'
+import { getNavLinks, type NavCard } from '@/config/menu'
+import { cn } from '@/lib/utils'
+import type { Icon } from '@tabler/icons-react'
+import MenuCard from './cards/menu-cards'
+
+// SSR 時退回 useEffect，避免 useLayoutEffect 警告（量測只在客戶端 hover 時才需要）
+const useIsoLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
+interface AnimatedHeaderProps {
+  iconLayout?: boolean
+  className?: string
+  variant?: 'default' | 'integrated'
+  id: string // 必須傳入的唯一 id，用於生成唯一的 layoutId
+}
+
+const Nav = ({
+  iconLayout = true,
+  className,
+  variant = 'default',
+  id,
+}: AnimatedHeaderProps) => {
+  const pathname = useLocation({ select: (l) => l.pathname })
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+
+  const navRef = useRef<HTMLElement>(null)
+  const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const navLinks = getNavLinks()
+
+  // morph 用：各導覽項目的 DOM ref（量測觸發點位置）、卡片量測容器、卡片尺寸
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [cardSize, setCardSize] = useState<{
+    width: number
+    height: number
+  } | null>(null)
+
+  // 滑鼠位置追蹤
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const entryX = useMotionValue(0)
+  const entryY = useMotionValue(0)
+  const radius = useMotionValue(0)
+
+  // 處理導航項目顯示邏輯
+  const getNavItemsToShow = () => {
+    const itemsToShow: Array<{
+      icon?: Icon
+      href?: string
+      text: string
+      isChild: boolean
+      parentIcon?: Icon
+      childHref?: string
+      hasChildren: boolean
+      // 滑鼠移上時要展開的卡片類型（取代原本的純文字 children 下拉）
+      card?: NavCard
+      hasCard: boolean
+      active?: boolean
+      // 添加一個穩定的 key 來避免動畫重新觸發
+      stableKey: string
+      // 添加 parentIndex 來幫助查找原始項目
+      parentIndex: number
+    }> = []
+
+    navLinks.forEach((link, index) => {
+      // 檢查是否有子項目被激活且需要顯示（僅精確比對子項目）
+      const activeChild = link.children?.find(
+        (child) => child.show && pathname === child.href
+      )
+
+      // 檢查父路由是否為當前路徑的前綴（例如 /posts/slug 或 /notes/:id）
+      const isParentActive =
+        Boolean(link.href) &&
+        (pathname === link.href ||
+          (link.href !== '/' && pathname.startsWith(`${link.href}/`)))
+
+      if (activeChild) {
+        // 如果有精確匹配的子項目，顯示子項目（並標記為 active）
+        itemsToShow.push({
+          icon: activeChild.icon || link.icon,
+          href: link.href,
+          text: activeChild.text,
+          isChild: true,
+          parentIcon: link.icon,
+          childHref: activeChild.href,
+          hasChildren: Boolean(link.children && link.children.length > 0),
+          card: link.card,
+          hasCard: Boolean(link.card),
+          // 使用父項目的 index 作為穩定的 key
+          stableKey: `parent-${index}`,
+          parentIndex: index,
+          active: true,
+        })
+      } else {
+        // 否則顯示父項目；如果 pathname 為父路由的前綴則標記為 active
+        itemsToShow.push({
+          icon: link.icon,
+          href: link.href,
+          text: link.text,
+          isChild: false,
+          hasChildren: Boolean(link.children && link.children.length > 0),
+          card: link.card,
+          hasCard: Boolean(link.card),
+          // 使用自身的 href 或 index 作為穩定的 key
+          stableKey: link.href || `parent-${index}`,
+          parentIndex: index,
+          active: isParentActive,
+        })
+      }
+    })
+
+    return itemsToShow
+  }
+
+  useEffect(() => {
+    // 路徑改變時，關閉所有下拉選單
+    setOpenDropdown(null)
+    setHoveredItem(null)
+  }, [pathname])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mediaQuery.matches)
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches)
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  // 清理 timeout
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // 切換項目時於繪製前先量測卡片尺寸，避免第一幀位置跳動（morph 用）
+  useIsoLayoutEffect(() => {
+    if (!openDropdown) return
+    const el = measureRef.current
+    if (!el) return
+    setCardSize({ width: el.offsetWidth, height: el.offsetHeight })
+  }, [openDropdown])
+
+  // 卡片內容（含非同步資料）載入後尺寸可能改變，持續同步給容器做 morph
+  useEffect(() => {
+    if (!openDropdown) return
+    const el = measureRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(() => {
+      setCardSize({ width: el.offsetWidth, height: el.offsetHeight })
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [openDropdown])
+
+  const shouldAnimate = iconLayout && !prefersReducedMotion
+
+  const spotlightBackground = useMotionTemplate`radial-gradient(ellipse 200px 100px at ${mouseX}px ${mouseY}px, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.08) 40%, transparent 70%)`
+
+  // 處理滑鼠移動事件
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!shouldAnimate) return
+
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    mouseX.set(x)
+    mouseY.set(y)
+    radius.set(Math.hypot(rect.width, rect.height) / 2.5)
+  }
+
+  // 處理滑鼠進入事件
+  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    if (!shouldAnimate) return
+
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    entryX.set(x)
+    entryY.set(y)
+    mouseX.set(x)
+    mouseY.set(y)
+    radius.set(Math.hypot(rect.width, rect.height) / 2)
+  }
+
+  // 下拉選單處理邏輯
+  const handleNavItemMouseEnter = (linkKey: string, hasChildren: boolean) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current)
+      dropdownTimeoutRef.current = null
+    }
+
+    setHoveredItem(linkKey)
+
+    if (hasChildren) {
+      setOpenDropdown(linkKey)
+    } else {
+      setOpenDropdown(null)
+    }
+  }
+
+  const handleNavItemMouseLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setHoveredItem(null)
+      setOpenDropdown(null)
+    }, 100)
+  }
+
+  const handleDropdownMouseEnter = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current)
+      dropdownTimeoutRef.current = null
+    }
+  }
+
+  const handleDropdownMouseLeave = () => {
+    setHoveredItem(null)
+    setOpenDropdown(null)
+  }
+
+  // morph 用：當前展開的卡片、對應觸發點位置與目標尺寸
+  const navItems = getNavItemsToShow()
+  const activeItem = openDropdown
+    ? navItems.find((i) => i.stableKey === openDropdown)
+    : undefined
+  const activeCard = activeItem?.card
+  const activeEl = openDropdown ? itemRefs.current.get(openDropdown) : null
+  const centerX = activeEl ? activeEl.offsetLeft + activeEl.offsetWidth / 2 : 0
+  const targetLeft = cardSize ? centerX - cardSize.width / 2 : centerX
+
+  return (
+    <nav
+      ref={navRef}
+      className={cn(
+        'relative mx-auto h-9 max-w-fit items-center justify-between rounded-full border px-4 md:flex overflow-visible group transition-all duration-100',
+        variant === 'integrated'
+          ? 'bg-transparent border-transparent shadow-none'
+          : 'bg-gray-900/95 backdrop-blur-md border-gray-700/50 shadow-lg',
+        className
+      )}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+    >
+      <m.div
+        className="pointer-events-none absolute -inset-px rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{ background: spotlightBackground }}
+        aria-hidden="true"
+      />
+
+      <LayoutGroup>
+        <div className="flex items-center relative">
+          {navItems.map((item) => {
+            // 使用在 getNavItemsToShow 中計算的 active 標記，支援子項目精確匹配與父路由前綴匹配
+            const isActive = Boolean(item.active)
+
+            const isHovered = hoveredItem === item.stableKey
+
+            // 如果沒有 href，渲染為 button 而不是 Link
+            const content = (
+              <>
+                {/* 動態內容容器 */}
+                <div className="flex items-center">
+                  {/* 圖標 */}
+                  {isActive && shouldAnimate && item.icon && (
+                    <m.div
+                      layoutId={`header-menu-icon-${id}`}
+                      className="flex items-center justify-center w-5 relative"
+                      transition={{
+                        type: 'spring',
+                        stiffness: 350,
+                        damping: 28,
+                        mass: 0.6,
+                      }}
+                      style={{ willChange: 'transform' }}
+                      aria-hidden="true"
+                    >
+                      <AnimatePresence mode="wait">
+                        <m.div
+                          key={`icon-${
+                            item.isChild ? item.childHref : item.stableKey
+                          }`}
+                          initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          transition={{
+                            duration: 0.3,
+                            ease: 'easeInOut',
+                          }}
+                          className="absolute inset-0 flex items-center justify-center"
+                        >
+                          <item.icon size={16} className="text-teal-400" />
+                        </m.div>
+                      </AnimatePresence>
+                    </m.div>
+                  )}
+
+                  {isActive && !shouldAnimate && item.icon && (
+                    <div className="flex items-center justify-center w-5">
+                      <item.icon size={16} className="text-teal-400" />
+                    </div>
+                  )}
+
+                  {/* 文字 - 添加 key 確保內容更新 */}
+                  <m.span
+                    key={`text-${item.stableKey}-${item.isChild}`}
+                    layout={shouldAnimate}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 350,
+                      damping: 28,
+                      mass: 0.6,
+                    }}
+                    className={cn(
+                      'text-sm font-medium whitespace-nowrap hover:text-teal-400',
+                      isActive ? 'text-teal-400' : 'text-gray-300'
+                    )}
+                  >
+                    {item.text}
+                  </m.span>
+                </div>
+
+                {/* 活躍項目的底部橫線 */}
+                {isActive && shouldAnimate && (
+                  <m.span
+                    layoutId={`active-nav-underline-${id}`}
+                    className="absolute inset-x-0 bottom-px h-px bg-gradient-to-r from-transparent via-teal-400 to-transparent pointer-events-none rounded-full"
+                    transition={{
+                      type: 'spring',
+                      stiffness: 350,
+                      damping: 28,
+                      mass: 0.6,
+                    }}
+                    style={{ willChange: 'transform' }}
+                    aria-hidden="true"
+                  />
+                )}
+
+                {!shouldAnimate && (
+                  <span
+                    className={cn(
+                      'absolute inset-x-0 bottom-px h-0.5 pointer-events-none rounded-full transition-all duration-300 ease-out',
+                      'bg-gradient-to-r from-transparent via-teal-400 to-transparent',
+                      isActive
+                        ? 'opacity-100 scale-x-100'
+                        : 'opacity-0 scale-x-0'
+                    )}
+                    aria-hidden="true"
+                  />
+                )}
+              </>
+            )
+
+            return (
+              <m.div
+                key={item.stableKey}
+                ref={(el: HTMLDivElement | null) => {
+                  if (el) itemRefs.current.set(item.stableKey, el)
+                  else itemRefs.current.delete(item.stableKey)
+                }}
+                layout={shouldAnimate}
+                transition={{
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 30,
+                  mass: 0.8,
+                }}
+                className="relative"
+                onMouseEnter={() =>
+                  handleNavItemMouseEnter(item.stableKey, item.hasCard)
+                }
+                onMouseLeave={handleNavItemMouseLeave}
+              >
+                {item.href ? (
+                  <Link
+                    to={item.href}
+                    title={item.text}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'relative flex items-center justify-center rounded-full px-4 py-2 transition-all duration-200 group/item',
+                      'focus-visible:outline-0',
+                      isHovered && 'text-teal-300'
+                    )}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    title={item.text}
+                    className={cn(
+                      'relative flex items-center justify-center rounded-full px-4 py-2 transition-all duration-200 group/item cursor-pointer',
+                      'text-gray-300',
+                      'focus-visible:outline-0',
+                      isHovered && 'text-teal-300'
+                    )}
+                  >
+                    {content}
+                  </button>
+                )}
+              </m.div>
+            )
+          })}
+
+          {/*
+            共用下拉容器（morph）：所有項目共用同一個元件，切換項目時平滑變形
+            （位置 left、尺寸 width/height 一起做 spring），內容交叉淡入淡出。
+          */}
+          <AnimatePresence>
+            {activeCard && (
+              <m.div
+                key="shared-dropdown"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  left: targetLeft,
+                  width: cardSize?.width,
+                  height: cardSize?.height,
+                }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 500,
+                  damping: 32,
+                  mass: 0.8,
+                }}
+                className="absolute top-full mt-3 bg-gray-800/95 backdrop-blur-md border border-gray-600/50 rounded-lg shadow-xl overflow-hidden z-50"
+                onMouseEnter={handleDropdownMouseEnter}
+                onMouseLeave={handleDropdownMouseLeave}
+              >
+                {/* 量測容器：以自然尺寸量測卡片，供外層 morph 對齊 */}
+                <div ref={measureRef} className="w-max">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <m.div
+                      key={activeCard}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <MenuCard
+                        card={activeCard}
+                        onNavigate={() => {
+                          if (dropdownTimeoutRef.current) {
+                            clearTimeout(dropdownTimeoutRef.current)
+                            dropdownTimeoutRef.current = null
+                          }
+                          setOpenDropdown(null)
+                          setHoveredItem(null)
+                        }}
+                      />
+                    </m.div>
+                  </AnimatePresence>
+                </div>
+              </m.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </LayoutGroup>
+    </nav>
+  )
+}
+
+export default Nav
