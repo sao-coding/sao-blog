@@ -7,6 +7,7 @@ import Providers from './providers'
 import Script from 'next/script'
 import Header from '@/components/layout/header/nav'
 import NextTopLoader from 'nextjs-toploader'
+import UmamiAnalytics from './umami-analytics'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,13 +31,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant-TW" suppressHydrationWarning>
+      <head>
+        <UmamiAnalytics />
+      </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-        <NextTopLoader color="var(--primary)" showForHashAnchor={false} showSpinner={false} />
-        <Providers>
-          {children}
-          <Toaster richColors />
-        </Providers>
+          <NextTopLoader color="var(--primary)" showForHashAnchor={false} showSpinner={false} />
+          <Providers>
+            {children}
+            <Toaster richColors />
+          </Providers>
         </ThemeProvider>
         <canvas
           id="universe"
