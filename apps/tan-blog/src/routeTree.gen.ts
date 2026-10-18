@@ -16,6 +16,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as LayoutNotesRouteRouteImport } from './routes/_layout/notes/route'
 import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as OgIndexRouteImport } from './routes/og/index'
 import { Route as LayouthomeIndexRouteImport } from './routes/_layout/(home)/index'
 import { Route as LayoutCategoriesSlugRouteImport } from './routes/_layout/categories/$slug'
 import { Route as LayoutNotesIndexRouteImport } from './routes/_layout/notes/index'
@@ -24,6 +25,8 @@ import { Route as LayoutPostsIndexRouteImport } from './routes/_layout/posts/ind
 import { Route as LayoutPostsSlugRouteImport } from './routes/_layout/posts/$slug'
 import { Route as LayoutThinkingIndexRouteImport } from './routes/_layout/thinking/index'
 import { Route as LayoutTimelineIndexRouteImport } from './routes/_layout/timeline/index'
+import { Route as OgNotesIdRouteImport } from './routes/og/notes/$id'
+import { Route as OgPostsSlugRouteImport } from './routes/og/posts/$slug'
 import { Route as LayoutNotesTopicsIndexRouteImport } from './routes/_layout/notes/topics/index'
 import { Route as LayoutNotesTopicsSlugRouteImport } from './routes/_layout/notes/topics/$slug'
 
@@ -59,6 +62,11 @@ const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OgIndexRoute = OgIndexRouteImport.update({
+  id: '/og/',
+  path: '/og/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayouthomeIndexRoute = LayouthomeIndexRouteImport.update({
@@ -101,6 +109,16 @@ const LayoutTimelineIndexRoute = LayoutTimelineIndexRouteImport.update({
   path: '/timeline/',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
+const OgNotesIdRoute = OgNotesIdRouteImport.update({
+  id: '/og/notes/$id',
+  path: '/og/notes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OgPostsSlugRoute = OgPostsSlugRouteImport.update({
+  id: '/og/posts/$slug',
+  path: '/og/posts/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutNotesTopicsIndexRoute = LayoutNotesTopicsIndexRouteImport.update({
   id: '/topics/',
   path: '/topics/',
@@ -120,9 +138,12 @@ export interface FileRoutesByFullPath {
   '/notes': typeof LayoutNotesRouteRouteWithChildren
   '/api/revalidate': typeof ApiRevalidateRoute
   '/login/': typeof LoginIndexRoute
+  '/og/': typeof OgIndexRoute
   '/categories/$slug': typeof LayoutCategoriesSlugRoute
   '/notes/$id': typeof LayoutNotesIdRoute
   '/posts/$slug': typeof LayoutPostsSlugRoute
+  '/og/notes/$id': typeof OgNotesIdRoute
+  '/og/posts/$slug': typeof OgPostsSlugRoute
   '/notes/': typeof LayoutNotesIndexRoute
   '/posts/': typeof LayoutPostsIndexRoute
   '/thinking/': typeof LayoutThinkingIndexRoute
@@ -136,9 +157,12 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/revalidate': typeof ApiRevalidateRoute
   '/login': typeof LoginIndexRoute
+  '/og': typeof OgIndexRoute
   '/categories/$slug': typeof LayoutCategoriesSlugRoute
   '/notes/$id': typeof LayoutNotesIdRoute
   '/posts/$slug': typeof LayoutPostsSlugRoute
+  '/og/notes/$id': typeof OgNotesIdRoute
+  '/og/posts/$slug': typeof OgPostsSlugRoute
   '/': typeof LayouthomeIndexRoute
   '/notes': typeof LayoutNotesIndexRoute
   '/posts': typeof LayoutPostsIndexRoute
@@ -156,9 +180,12 @@ export interface FileRoutesById {
   '/_layout/notes': typeof LayoutNotesRouteRouteWithChildren
   '/api/revalidate': typeof ApiRevalidateRoute
   '/login/': typeof LoginIndexRoute
+  '/og/': typeof OgIndexRoute
   '/_layout/categories/$slug': typeof LayoutCategoriesSlugRoute
   '/_layout/notes/$id': typeof LayoutNotesIdRoute
   '/_layout/posts/$slug': typeof LayoutPostsSlugRoute
+  '/og/notes/$id': typeof OgNotesIdRoute
+  '/og/posts/$slug': typeof OgPostsSlugRoute
   '/_layout/(home)/': typeof LayouthomeIndexRoute
   '/_layout/notes/': typeof LayoutNotesIndexRoute
   '/_layout/posts/': typeof LayoutPostsIndexRoute
@@ -177,9 +204,12 @@ export interface FileRouteTypes {
     | '/notes'
     | '/api/revalidate'
     | '/login/'
+    | '/og/'
     | '/categories/$slug'
     | '/notes/$id'
     | '/posts/$slug'
+    | '/og/notes/$id'
+    | '/og/posts/$slug'
     | '/notes/'
     | '/posts/'
     | '/thinking/'
@@ -193,9 +223,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/revalidate'
     | '/login'
+    | '/og'
     | '/categories/$slug'
     | '/notes/$id'
     | '/posts/$slug'
+    | '/og/notes/$id'
+    | '/og/posts/$slug'
     | '/'
     | '/notes'
     | '/posts'
@@ -212,9 +245,12 @@ export interface FileRouteTypes {
     | '/_layout/notes'
     | '/api/revalidate'
     | '/login/'
+    | '/og/'
     | '/_layout/categories/$slug'
     | '/_layout/notes/$id'
     | '/_layout/posts/$slug'
+    | '/og/notes/$id'
+    | '/og/posts/$slug'
     | '/_layout/(home)/'
     | '/_layout/notes/'
     | '/_layout/posts/'
@@ -231,6 +267,9 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiRevalidateRoute: typeof ApiRevalidateRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  OgIndexRoute: typeof OgIndexRoute
+  OgNotesIdRoute: typeof OgNotesIdRoute
+  OgPostsSlugRoute: typeof OgPostsSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -282,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login/'
       preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/': {
+      id: '/og/'
+      path: '/og'
+      fullPath: '/og/'
+      preLoaderRoute: typeof OgIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/(home)/': {
@@ -339,6 +385,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/timeline/'
       preLoaderRoute: typeof LayoutTimelineIndexRouteImport
       parentRoute: typeof LayoutRouteRoute
+    }
+    '/og/notes/$id': {
+      id: '/og/notes/$id'
+      path: '/og/notes/$id'
+      fullPath: '/og/notes/$id'
+      preLoaderRoute: typeof OgNotesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/posts/$slug': {
+      id: '/og/posts/$slug'
+      path: '/og/posts/$slug'
+      fullPath: '/og/posts/$slug'
+      preLoaderRoute: typeof OgPostsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/notes/topics/': {
       id: '/_layout/notes/topics/'
@@ -405,6 +465,9 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiRevalidateRoute: ApiRevalidateRoute,
   LoginIndexRoute: LoginIndexRoute,
+  OgIndexRoute: OgIndexRoute,
+  OgNotesIdRoute: OgNotesIdRoute,
+  OgPostsSlugRoute: OgPostsSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
