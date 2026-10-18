@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowUpToLineIcon, SearchIcon } from 'lucide-react'
+import { ArrowUpIcon, SearchIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { m } from '#/paraglide/messages'
 
@@ -41,64 +41,62 @@ export function PostsSidebar({
   const visibleTags = expanded ? tags : tags.slice(0, COLLAPSED_TAG_COUNT)
 
   return (
-    <aside className="sticky top-24 flex flex-col gap-4">
-      <div className="rounded-xl border bg-card/60 p-4 backdrop-blur-sm">
-        <label className="flex items-center gap-2 border-b pb-3 text-sm">
-          <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
+    <aside className="sticky top-28 flex flex-col gap-8 pt-2 text-sm">
+      <label className="block">
+        <span className="font-wenkai text-xs text-muted-foreground">{m.posts_search_label()}</span>
+        <span className="mt-1 flex items-center gap-2 border-b border-dashed border-rule pb-1.5 focus-within:border-solid focus-within:border-ink/60">
+          <SearchIcon className="size-3.5 shrink-0 text-muted-foreground" />
           <input
             type="search"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={m.posts_search_placeholder()}
-            aria-label={m.posts_search_placeholder()}
-            className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+            className="w-full bg-transparent font-wenkai outline-none placeholder:text-muted-foreground/60"
           />
-        </label>
+        </span>
+      </label>
 
-        {tags.length > 0 && (
-          <>
-            <p className="mt-3 mb-2 text-xs text-muted-foreground">{m.posts_tags_title()}</p>
-            <div className="flex flex-wrap gap-2">
-              {visibleTags.map((tag) => {
-                const active = tag.slug === activeTag
-                return (
-                  <Link
-                    key={tag.slug}
-                    to="/posts"
-                    search={(prev) => ({ ...prev, tag: active ? undefined : tag.slug })}
-                    resetScroll={false}
-                    className={cn(
-                      'rounded-md border px-2 py-1 text-xs transition-colors',
-                      active
-                        ? 'border-primary/60 bg-primary/15 text-primary'
-                        : 'bg-background/40 hover:border-primary/40 hover:text-primary',
-                    )}
-                  >
-                    {tag.name}
-                    <span className="ml-1 text-muted-foreground">({tag.count})</span>
-                  </Link>
-                )
-              })}
-            </div>
-            {tags.length > COLLAPSED_TAG_COUNT && (
-              <button
-                type="button"
-                onClick={() => setExpanded((v) => !v)}
-                className="mt-3 text-xs text-muted-foreground hover:text-primary"
-              >
-                {expanded ? '−' : `+${tags.length - COLLAPSED_TAG_COUNT}`}
-              </button>
-            )}
-          </>
-        )}
-      </div>
+      {tags.length > 0 && (
+        <section>
+          <h2 className="mb-2 font-wenkai text-xs text-muted-foreground">{m.posts_tags_title()}</h2>
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 leading-relaxed">
+            {visibleTags.map((tag) => {
+              const active = tag.slug === activeTag
+              return (
+                <Link
+                  key={tag.slug}
+                  to="/posts"
+                  search={(prev) => ({ ...prev, tag: active ? undefined : tag.slug })}
+                  resetScroll={false}
+                  className={cn(
+                    "transition-colors hover:text-ink",
+                    active ? "text-ink underline decoration-ink/50 underline-offset-4" : "text-foreground/75",
+                  )}
+                >
+                  {tag.name}
+                  <sup className="ml-0.5 font-mono text-[0.65rem] text-muted-foreground">{tag.count}</sup>
+                </Link>
+              )
+            })}
+          </div>
+          {tags.length > COLLAPSED_TAG_COUNT && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-2 font-mono text-xs text-muted-foreground hover:text-ink"
+            >
+              {expanded ? "−" : `+${tags.length - COLLAPSED_TAG_COUNT}`}
+            </button>
+          )}
+        </section>
+      )}
 
       <button
         type="button"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="flex items-center gap-2 px-1 text-xs text-muted-foreground hover:text-primary"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="flex items-center gap-1.5 self-start font-wenkai text-xs text-muted-foreground hover:text-ink"
       >
-        <ArrowUpToLineIcon className="size-3.5" />
+        <ArrowUpIcon className="size-3.5" />
         {m.fab_back_to_top()}
       </button>
     </aside>

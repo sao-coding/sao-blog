@@ -83,5 +83,10 @@
   "posts_load_failed_hint": "ネットワークを確認するか、後でもう一度お試しください。",
   "posts_retry": "再試行",
   "posts_views": "{count} 回閲覧",
-  "posts_comments": "{count} 件のコメント"
+  "posts_comments": "{count} 件のコメント",
+  "posts_views_short": "{count} 閲覧",
+  "posts_comments_short": "{count} 件",
+  "posts_year_count": "{count} 件",
+  "posts_subtitle": "書き留めたものだけが、本当に考えたことになる。",
+  "posts_search_label": "探す"
 }

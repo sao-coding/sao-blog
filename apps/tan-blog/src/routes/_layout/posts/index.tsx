@@ -1,8 +1,6 @@
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { motion } from 'motion/react'
-import { XIcon } from 'lucide-react'
 import { z } from 'zod'
 import { orpc } from '@/lib/orpc'
 import { pageHead } from '@/lib/seo'
@@ -44,13 +42,26 @@ const SORT_LABEL: Record<Sort, () => string> = {
   updated: m.posts_sort_updated,
 }
 
+const time = (d: Date) => new Date(d).getTime()
+
 function sortPosts(posts: PostListItem[], sort: Sort) {
-  const time = (d: Date) => new Date(d).getTime()
   return [...posts].sort((a, b) => {
     if (sort === 'oldest') return time(a.createdAt) - time(b.createdAt)
     if (sort === 'updated') return time(b.updatedAt) - time(a.updatedAt)
     return time(b.createdAt) - time(a.createdAt)
   })
+}
+
+// 已排序的清單依年份切段；年份取排序所依據的日期（最近更新 → updatedAt）
+function groupByYear(posts: PostListItem[], dateKey: 'createdAt' | 'updatedAt') {
+  const groups: { year: number; posts: PostListItem[] }[] = []
+  for (const post of posts) {
+    const year = new Date(post[dateKey]).getFullYear()
+    const last = groups.at(-1)
+    if (last?.year === year) last.posts.push(post)
+    else groups.push({ year, posts: [post] })
+  }
+  return groups
 }
 
 function collectTags(posts: PostListItem[]): TagStat[] {
@@ -71,6 +82,7 @@ function PostsIndexPage() {
     orpc.post.getPosts.queryOptions({ input: {} }),
   )
   const posts = data?.status === 'success' ? data.data : undefined
+  const dateKey = sort === 'updated' ? 'updatedAt' : 'createdAt'
 
   const view = useMemo(() => {
     if (!posts) return null
@@ -89,25 +101,29 @@ function PostsIndexPage() {
     })
 
     // 篩選中不另外拉出置頂，避免置頂文章不符條件卻還出現在最上面
-    const pinned = isFiltering
-      ? []
-      : posts.filter((p) => p.pin).sort((a, b) => a.pinOrder - b.pinOrder)
-    const list = sortPosts(isFiltering ? filtered : filtered.filter((p) => !p.pin), sort)
+    const pinned = isFiltering ? [] : posts.filter((p) => p.pin).sort((a, b) => a.pinOrder - b.pinOrder)
+    const rest = sortPosts(isFiltering ? filtered : filtered.filter((p) => !p.pin), sort)
 
-    return { pinned, list, total: filtered.length, tags: collectTags(posts), isFiltering }
-  }, [posts, sort, tag, q])
+    return {
+      pinned,
+      groups: groupByYear(rest, dateKey),
+      total: filtered.length,
+      tags: collectTags(posts),
+      isFiltering,
+    }
+  }, [posts, sort, tag, q, dateKey])
 
-  const activeTagName = tag ? view?.tags.find((t) => t.slug === tag)?.name ?? tag : undefined
+  const activeTagName = tag ? (view?.tags.find((t) => t.slug === tag)?.name ?? tag) : undefined
 
   return (
     <div className="mx-auto mt-28 w-full max-w-5xl px-4 pb-24 lg:mt-32">
-      <header className="mb-8">
-        <p className="text-xs tracking-[0.3em] text-muted-foreground">{m.posts_eyebrow()}</p>
-        <h1 className="mt-2 text-3xl font-bold">{m.page_posts_title()}</h1>
-      </header>
-
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_240px]">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_13rem]">
         <main className="min-w-0">
+          <header className="mb-10">
+            <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
+            <p className="mt-3 font-wenkai text-sm text-muted-foreground">{m.posts_subtitle()}</p>
+          </header>
+
           {isLoading && <ListSkeleton />}
 
           {!isLoading && (error || !view) && (
@@ -119,67 +135,73 @@ function PostsIndexPage() {
 
           {view && (
             <>
-              {view.pinned.length > 0 && (
-                <div className="mb-6 flex flex-col gap-3">
-                  {view.pinned.map((post) => (
-                    <PostItem key={post.id} post={post} variant="pinned" />
-                  ))}
-                </div>
-              )}
-
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-3 border-b pb-3 text-xs text-muted-foreground">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span>{m.posts_total({ count: String(view.total + view.pinned.length) })}</span>
+              <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-rule pb-3 text-xs text-muted-foreground">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <span className="font-mono tabular-nums">{m.posts_total({ count: String(view.total) })}</span>
                   {activeTagName && (
                     <FilterChip label={m.posts_filter_tag({ tag: activeTagName })} clear={{ tag: undefined }} />
                   )}
                   {q && <FilterChip label={m.posts_filter_query({ q })} clear={{ q: undefined }} />}
                 </div>
-                <nav className="flex items-center gap-3">
-                  {SORTS.map((key) => (
-                    <Link
-                      key={key}
-                      to="/posts"
-                      search={(prev) => ({ ...prev, sort: key === 'newest' ? undefined : key })}
-                      resetScroll={false}
-                      className={cn(
-                        'relative pb-0.5 transition-colors hover:text-foreground',
-                        sort === key && 'text-primary',
-                      )}
-                    >
-                      {SORT_LABEL[key]()}
-                      {sort === key && (
-                        <motion.span
-                          layoutId="posts-sort-indicator"
-                          className="absolute inset-x-0 -bottom-0.5 h-px bg-primary"
-                        />
-                      )}
-                    </Link>
+                <nav className="flex items-baseline">
+                  {SORTS.map((key, i) => (
+                    <Fragment key={key}>
+                      {i > 0 && <span className="mx-2 text-rule">/</span>}
+                      <Link
+                        to="/posts"
+                        search={(prev) => ({ ...prev, sort: key === 'newest' ? undefined : key })}
+                        resetScroll={false}
+                        className={cn(
+                          'transition-colors hover:text-foreground',
+                          sort === key && 'text-ink underline decoration-ink/50 underline-offset-4',
+                        )}
+                      >
+                        {SORT_LABEL[key]()}
+                      </Link>
+                    </Fragment>
                   ))}
                 </nav>
               </div>
 
-              {view.list.length === 0 ? (
-                <div className="py-16 text-center text-sm text-muted-foreground">
+              {view.pinned.length > 0 && (
+                <section className="mt-2">
+                  {view.pinned.map((post) => (
+                    <PostItem key={post.id} post={post} pinned />
+                  ))}
+                </section>
+              )}
+
+              {view.groups.length === 0 ? (
+                <div className="py-20 text-center font-wenkai text-muted-foreground">
                   <p>{m.posts_empty()}</p>
                   {view.isFiltering && (
-                    <Link to="/posts" search={{ sort: sort === 'newest' ? undefined : sort }} className="mt-3 inline-block text-primary">
+                    <Link
+                      to="/posts"
+                      search={{ sort: sort === 'newest' ? undefined : sort }}
+                      className="mt-3 inline-block text-sm text-ink underline underline-offset-4"
+                    >
                       {m.posts_clear_filter()}
                     </Link>
                   )}
                 </div>
               ) : (
-                <ul className="flex flex-col">
-                  {view.list.map((post, i) => (
-                    <li
-                      key={post.id}
-                      className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-300"
-                      style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }}
-                    >
-                      <PostItem post={post} />
-                    </li>
-                  ))}
-                </ul>
+                view.groups.map((group) => (
+                  <section key={group.year} className="relative mt-12 first-of-type:mt-8">
+                    <h2 className="mb-1 flex items-baseline gap-3 font-wenkai">
+                      <span className="text-5xl leading-none text-ink/25 tabular-nums select-none">{group.year}</span>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {m.posts_year_count({ count: String(group.posts.length) })}
+                      </span>
+                    </h2>
+                    <ul>
+                      {group.posts.map((post) => (
+                        <li key={post.id}>
+                          <PostItem post={post} dateKey={dateKey} />
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))
               )}
             </>
           )}
@@ -199,22 +221,20 @@ function FilterChip({ label, clear }: { label: string; clear: Partial<z.infer<ty
       to="/posts"
       search={(prev) => ({ ...prev, ...clear })}
       resetScroll={false}
-      className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-primary hover:bg-primary/20"
+      className="text-ink underline decoration-dashed underline-offset-4 hover:decoration-solid"
     >
-      {label}
-      <XIcon className="size-3" />
+      {label} ×
     </Link>
   )
 }
 
 function ListSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} className="animate-pulse space-y-2">
+        <div key={i} className="animate-pulse space-y-2 border-b border-dashed border-rule py-5 pl-20">
           <div className="h-5 w-2/3 rounded bg-muted" />
           <div className="h-3 w-full rounded bg-muted" />
-          <div className="h-3 w-1/3 rounded bg-muted" />
         </div>
       ))}
     </div>
@@ -223,15 +243,10 @@ function ListSkeleton() {
 
 function ErrorBlock({ message, onRetry }: { message?: string; onRetry: () => void }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-destructive/40 bg-destructive/10 p-4">
-      <div>
-        <p className="font-medium text-destructive">{m.posts_load_failed()}</p>
-        <p className="text-sm text-muted-foreground">{message ?? m.posts_load_failed_hint()}</p>
-      </div>
-      <button
-        className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-95"
-        onClick={onRetry}
-      >
+    <div className="border-l-2 border-destructive/60 py-2 pl-4">
+      <p className="font-wenkai text-destructive">{m.posts_load_failed()}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{message ?? m.posts_load_failed_hint()}</p>
+      <button className="mt-3 text-sm text-ink underline underline-offset-4" onClick={onRetry}>
         {m.posts_retry()}
       </button>
     </div>
