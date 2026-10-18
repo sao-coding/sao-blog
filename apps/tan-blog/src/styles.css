@@ -559,3 +559,68 @@
     background: oklch(var(--selection-background-color-lightness) 0.111 300 / 35%);
   }
 }
+
+/* ── /thinking 便條紙 ───────────────────────────────────────────────────────
+ * 擬真 Post-it：上緣有背膠所以貼平，下緣離開牆面微微翹起、右下角翹得最多。
+ * - 紙面：背膠區略亮、往下漸暗（翹起處受光少）、疊一層極淡的紙纖維雜訊
+ * - 右下角用橢圓圓角做出捲曲的弧線
+ * - ::before / ::after 是兩塊旋轉過的陰影，從翹起的兩角下方透出來
+ * 注意：便條本身不能有 transform/rotate，否則會自成 stacking context，
+ * z-index:-1 的陰影會蓋到紙上；旋轉放在外層 <li>。
+ */
+.sticky-note {
+  --paper: oklch(0.82 0.05 88);
+  --note-ink: oklch(0.31 0.035 55);
+  position: relative;
+  color: var(--note-ink);
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgb(255 255 255 / 0.14) 0 1.75rem, rgb(0 0 0 / 0.025) 1.75rem calc(1.75rem + 1px), transparent calc(1.75rem + 1px)),
+    radial-gradient(90% 55% at 100% 100%, rgb(0 0 0 / 0.16), transparent 70%),
+    linear-gradient(180deg, transparent 45%, rgb(0 0 0 / 0.09) 100%),
+    linear-gradient(100deg, transparent 65%, rgb(0 0 0 / 0.05) 100%);
+  background-blend-mode: multiply, normal, normal, normal, normal;
+  border-radius: 1px 1px 0.75rem 3rem / 1px 1px 0.2rem 0.7rem;
+  /* 深色背景上黑色投影幾乎看不見，所以翹起感主要靠紙面本身：
+     右下角的暗部漸層 + 沿著翹起邊緣的一道細亮線（紙張邊緣反光） */
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.35),
+    inset 0 -2px 2px -1px rgb(255 255 255 / 0.28),
+    inset -1px 0 1px -0.5px rgb(255 255 255 / 0.12);
+}
+.sticky-note::before,
+.sticky-note::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  bottom: 0.7rem;
+  width: 45%;
+  height: 35%;
+  transition:
+    rotate 0.35s ease-out,
+    box-shadow 0.35s ease-out;
+}
+.sticky-note::before {
+  left: 0.5rem;
+  rotate: -2.5deg;
+  box-shadow: 0 10px 14px rgb(0 0 0 / 0.75);
+}
+.sticky-note::after {
+  right: 0.6rem;
+  rotate: 4.5deg;
+  box-shadow: 0 16px 18px rgb(0 0 0 / 0.85);
+}
+.sticky-note-wrap:hover .sticky-note::after {
+  rotate: 6.5deg;
+  box-shadow: 0 24px 22px rgb(0 0 0 / 0.55);
+}
+.sticky-note-wrap:hover .sticky-note::before {
+  box-shadow: 0 14px 16px rgb(0 0 0 / 0.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticky-note::before,
+  .sticky-note::after {
+    transition: none;
+  }
+}
