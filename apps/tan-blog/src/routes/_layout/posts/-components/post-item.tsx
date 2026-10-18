@@ -1,155 +1,114 @@
-import { cn } from '@/lib/utils'
-import { motion, useMotionValue, useSpring } from 'motion/react'
-import { useRef } from 'react'
-import type { PointerEvent } from 'react'
-import { postSchema } from '@sao-blog/api/schema/post'
-import { ClockIcon, HashIcon } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+import { EyeIcon, MessageCircleIcon } from 'lucide-react'
 import type z from 'zod'
+import type { postSchema } from '@sao-blog/api/schema/post'
+import { dayjsLocale } from '@/lib/date-locale'
+import { cn } from '@/lib/utils'
+import { m } from '#/paraglide/messages'
 
-interface PostItemProps {
-  post: z.infer<typeof postSchema>
-  options?: {
-    maxOffsetPx?: number
-    reduceMotion?: boolean
-  }
+dayjs.extend(relativeTime)
+dayjs.extend(localizedFormat)
+
+export type PostListItem = z.infer<typeof postSchema>
+
+const MAX_VISIBLE_TAGS = 2
+
+// 30 天內顯示相對時間（「9 天前」），更早的顯示完整日期＋星期
+function formatPostDate(date: Date) {
+  const d = dayjs(date).locale(dayjsLocale())
+  return dayjs().diff(d, 'day') < 30 ? d.fromNow() : d.format('LL dddd')
 }
 
-const IS_TOUCH_DEVICE =
-  typeof window !== 'undefined' &&
-  window.matchMedia('(pointer: coarse)').matches
-
-const PostItem = ({ post, options = {} }: PostItemProps) => {
-  const { maxOffsetPx = 8, reduceMotion = false } = options
-  const ref = useRef<HTMLDivElement>(null)
-
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const springConfig = { damping: 20, stiffness: 150 }
-  const sx = useSpring(x, springConfig)
-  const sy = useSpring(y, springConfig)
-  const isTracking = useRef(false)
-
-  const handlePointerEnter = (e: PointerEvent<HTMLDivElement>) => {
-    if (IS_TOUCH_DEVICE || reduceMotion) return
-
-    if (!ref.current) return
-    const rect = ref.current.getBoundingClientRect()
-    const px = (e.clientX - rect.left) / rect.width
-    const py = (e.clientY - rect.top) / rect.height
-
-    ref.current.style.setProperty('--origin-x', `${px * 100}%`)
-    ref.current.style.setProperty('--origin-y', `${py * 100}%`)
-
-    isTracking.current = true
-  }
-
-  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isTracking.current || !ref.current) return
-
-    const rect = ref.current.getBoundingClientRect()
-    const px = (e.clientX - rect.left) / rect.width
-    const py = (e.clientY - rect.top) / rect.height
-
-    const offsetX = (px - 0.5) * 2 * maxOffsetPx
-    const offsetY = (py - 0.5) * 2 * maxOffsetPx
-
-    x.set(offsetX)
-    y.set(offsetY)
-  }
-
-  const handlePointerLeave = () => {
-    if (!isTracking.current) return
-
-    isTracking.current = false
-    x.set(0)
-    y.set(0)
-  }
+// 標題用 Link 的 ::after 撐滿整列當點擊區；分類/標籤連結用 relative z-10
+// 疊在上層，避免 <a> 巢狀 <a> 的非法 HTML。
+export function PostItem({
+  post,
+  variant = 'row',
+}: {
+  post: PostListItem
+  variant?: 'row' | 'pinned'
+}) {
+  const extraTags = post.tags.length - MAX_VISIBLE_TAGS
 
   return (
-    <Link to="/posts/$slug" params={{ slug: post.slug }}>
-      <motion.div
-        ref={ref}
-        style={{
-          x: sx,
-          y: sy,
-          transition: 'transform 0.4s cubic-bezier(0.33, 1, 0.68, 1)',
-        }}
-        onPointerEnter={handlePointerEnter}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        onPointerCancel={handlePointerLeave}
-        className={cn(
-          'relative block w-full rounded-lg py-8 text-card-foreground',
-          'transition-shadow duration-300',
-          'before:content-[""] dark:before:bg-white/10',
-          'before:pointer-events-none before:absolute before:inset-y-0 before:-inset-x-6 before:rounded-lg',
-          'before:bg-gradient-radial from-transparent to-transparent',
-          'before:opacity-0 before:scale-0 before:transition-all before:duration-[200ms] before:ease-[cubic-bezier(0.33,1,0.68,1)]',
-          'hover:before:from-primary/5 hover:before:to-transparent hover:before:opacity-100 hover:before:scale-100',
-          'focus:before:from-primary/5 focus:before:to-transparent focus:before:opacity-100 focus:before:scale-100',
-          '[--origin-x:50%] [--origin-y:50%]',
-          'before:bg-gradient-to-br before:origin-[var(--origin-x)_var(--origin-y)]',
-          'before:transform-origin-[var(--origin-x)_var(--origin-y)]'
-        )}
-      >
-        <h2 className="relative break-words text-2xl">{post.title}</h2>
-        <div className="relative mt-4 space-y-2">
-          <div className="relative overflow-hidden text-justify"></div>
-        </div>
-        <div className="flex min-w-0 shrink grow flex-wrap gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center space-x-1">
-            <ClockIcon className="size-4" />
-            <span>
-              {(() => {
-                const d = new Date(post.createdAt)
-                const year = d.getFullYear()
-                const month = d.getMonth() + 1
-                const day = d.getDate()
-                const weekday = new Intl.DateTimeFormat(
-                  navigator.language ?? 'zh-TW',
-                  { weekday: 'long' }
-                ).format(d)
-                return `${year} 年 ${month} 月 ${day} 日 ${weekday}`
-              })()}
-            </span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <HashIcon className="size-4" />
-            <div className="truncate">
-              <button
-                className="sao-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  window.location.href = `/categories/${post.category.slug}`
-                }}
+    <article
+      className={cn(
+        'group relative',
+        variant === 'pinned'
+          ? 'rounded-xl border bg-card/60 p-5 backdrop-blur-sm transition-colors hover:border-primary/40'
+          : 'rounded-lg px-3 py-4 -mx-3 transition-colors hover:bg-accent/40',
+      )}
+    >
+      {variant === 'pinned' && (
+        <span className="mb-2 inline-block text-xs font-medium text-primary">{m.posts_pinned()}</span>
+      )}
+      <h2 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
+        <Link
+          to="/posts/$slug"
+          params={{ slug: post.slug }}
+          className="transition-colors after:absolute after:inset-0 after:content-[''] group-hover:text-primary"
+        >
+          {post.title}
+        </Link>
+      </h2>
+
+      {post.summary && (
+        <p
+          className={cn(
+            'mt-1.5 text-sm text-muted-foreground',
+            variant === 'pinned' ? 'line-clamp-2' : 'line-clamp-1',
+          )}
+        >
+          {post.summary}
+        </p>
+      )}
+
+      <div className="mt-2 flex items-center justify-between gap-4 text-xs text-muted-foreground">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+          <time dateTime={new Date(post.createdAt).toISOString()} suppressHydrationWarning>
+            {formatPostDate(post.createdAt)}
+          </time>
+          <span aria-hidden>·</span>
+          <Link
+            to="/categories/$slug"
+            params={{ slug: post.category.slug }}
+            className="relative z-10 font-medium text-foreground/80 hover:text-primary"
+          >
+            {post.category.name}
+          </Link>
+          {post.tags.length > 0 && <span aria-hidden>/</span>}
+          {post.tags.slice(0, MAX_VISIBLE_TAGS).map((tag, i) => (
+            <span key={tag.id} className="inline-flex items-center">
+              <Link
+                to="/posts"
+                search={(prev) => ({ ...prev, tag: tag.slug })}
+                className="relative z-10 hover:text-primary"
               >
-                {post.category.name}
-              </button>
-              {' / '}
-              {post.tags.map((tag, index) => (
-                <span key={tag.slug} className="inline">
-                  <button
-                    className="sao-link"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      // 註：原 mdx-blog 亦無 /tags/[slug] 路由，此連結目前為 dead link，維持原行為
-                      window.location.href = `/tags/${tag.slug}`
-                    }}
-                  >
-                    {tag.name}
-                  </button>
-                  {index < post.tags.length - 1 && <span>, </span>}
-                </span>
-              ))}
-            </div>
-          </div>
+                {tag.name}
+              </Link>
+              {i < Math.min(post.tags.length, MAX_VISIBLE_TAGS) - 1 && <span>,</span>}
+            </span>
+          ))}
+          {extraTags > 0 && <span>+{extraTags}</span>}
         </div>
-      </motion.div>
-    </Link>
+
+        <div className="flex shrink-0 items-center gap-3 tabular-nums">
+          <span className="inline-flex items-center gap-1" title={m.posts_views({ count: String(post.viewCount) })}>
+            <EyeIcon className="size-3.5" />
+            {post.viewCount}
+          </span>
+          <span
+            className="inline-flex items-center gap-1"
+            title={m.posts_comments({ count: String(post.commentCount) })}
+          >
+            <MessageCircleIcon className="size-3.5" />
+            {post.commentCount}
+          </span>
+        </div>
+      </div>
+    </article>
   )
 }
-
-export { PostItem }

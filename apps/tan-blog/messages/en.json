@@ -11,19 +11,15 @@
   "nav_timeline_topics": "Topics",
   "nav_more": "More",
   "nav_github": "GitHub",
-
   "mobile_menu_open": "Open menu",
   "mobile_menu_close": "Close menu",
   "mobile_menu_title": "Mobile menu",
   "mobile_menu_description": "Mobile navigation menu. Tap an item to navigate, or tap outside to close.",
   "mobile_menu_more": "More",
   "reader_login": "Reader sign in",
-
   "footer_copyright": "© {year} {siteName}. All rights reserved.",
   "footer_language_label": "Language",
-
   "fab_back_to_top": "Back to top",
-
   "login_title": "Sign in to your account",
   "login_description": "Enter your username and password to sign in",
   "login_username_label": "Username",
@@ -35,10 +31,8 @@
   "login_google": "Sign in with Google",
   "login_failed": "Sign in failed",
   "login_success": "Signed in successfully!",
-
   "not_found_title": "Page not found",
   "not_found_back_home": "Back to home",
-
   "page_home_title": "Home",
   "page_posts_title": "Posts",
   "page_posts_description": "All posts",
@@ -53,7 +47,6 @@
   "page_category_title": "Category - {slug}",
   "page_category_description": "All posts in the \"{slug}\" category",
   "page_login_title": "Sign in",
-
   "comment_section_title": "Comments",
   "comment_section_loading": "Loading comment section...",
   "comment_count": "{count} comments",
@@ -73,5 +66,22 @@
   "comment_sort_newest": "Newest first",
   "comment_sort_oldest": "Oldest first",
   "comment_sort_by": "Sort by",
-  "comment_empty": "No comments yet. Be the first to comment!"
+  "comment_empty": "No comments yet. Be the first to comment!",
+  "posts_eyebrow": "BLOG",
+  "posts_pinned": "Pinned",
+  "posts_total": "{count} posts",
+  "posts_sort_newest": "Newest",
+  "posts_sort_oldest": "Oldest",
+  "posts_sort_updated": "Recently updated",
+  "posts_search_placeholder": "Search posts",
+  "posts_tags_title": "Tags",
+  "posts_clear_filter": "Clear filters",
+  "posts_filter_tag": "Tag: {tag}",
+  "posts_filter_query": "Search: {q}",
+  "posts_empty": "No posts match your filters",
+  "posts_load_failed": "Failed to load posts",
+  "posts_load_failed_hint": "Check your connection or try again later.",
+  "posts_retry": "Retry",
+  "posts_views": "{count} views",
+  "posts_comments": "{count} comments"
 }
