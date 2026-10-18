@@ -31,27 +31,19 @@ function ThinkingPage() {
 
   return (
     <>
-      <div className="mx-auto mt-14 max-w-3xl px-2 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
-        <header className="mb-12">
-          <h1 className="mb-3 tracking-widest text-neutral-10/50 uppercase">
-            想法
-          </h1>
-          <div className="mb-6 flex items-baseline gap-4">
-            <p className="text-[4.5rem] leading-none font-extralight tracking-tighter text-neutral-10/50">
-              {total}
-            </p>
-            <span className="text-muted-foreground">則隨手記下的心情</span>
-          </div>
-          <p className="max-w-xl text-sm leading-relaxed text-neutral-10/40">
-            這裡是一些零碎的念頭與當下的心情，不一定完整，也不一定深刻，
-            只是想說說而已。
+      <div className="mx-auto mt-28 w-full max-w-5xl px-4 pb-24 lg:mt-32">
+        <header className="mb-14 max-w-xl">
+          <h1 className="font-wenkai text-4xl text-foreground">{m.page_thinking_title()}</h1>
+          <p className="mt-3 font-wenkai text-sm leading-relaxed text-muted-foreground">
+            <span className="mr-1.5 font-mono text-ink tabular-nums">{total}</span>
+            {m.thinking_count()}
+            <br />
+            {m.thinking_intro()}
           </p>
         </header>
 
         {thinkings.length === 0 ? (
-          <div className="mt-20 text-center text-2xl font-semibold text-neutral-10/50">
-            還沒有任何想法
-          </div>
+          <p className="mt-20 text-center font-wenkai text-xl text-muted-foreground">{m.thinking_empty()}</p>
         ) : (
           <ThinkingList items={thinkings} />
         )}
