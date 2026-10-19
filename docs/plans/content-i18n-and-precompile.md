@@ -22,7 +22,8 @@
 | i18n 框架 | **Paraglide JS**（與 tan-blog 一致） |
 | 編譯產物 | **hast JSON**（§3 方案 A），作為 Web / 未來 Android App 共用的跨平台渲染契約 |
 | 搜尋引擎 | **Typesense**（§6.5） |
-| 互動元件擴充方向 | **未決定**（暫不實作，見 §3.1） |
+| 互動元件擴充方向 | registry 資料驅動元件 + **Sandbox 元件**執行一次性示範（§3.2） |
+| 優先順序 | AI 自動發文 > i18n > 元件互動多樣性；App 非近期重點但保留契約（§3.1） |
 
 ## 1. 現況（相關檔案）
 
@@ -165,7 +166,23 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 - 渲染端遇到**未知元件**必須降級顯示（fallback 區塊 + 「於網頁查看」連結），不得崩潰；Web renderer 同樣實作此行為
 - 公開 API 回傳 `compiled` + `toc`，App 端不做任何 MDX 處理
 
-> ⚠️ **互動元件擴充方向尚未決定**（例如股票、地圖、圖表、一次性互動區塊的作法：資料驅動通用元件 vs 沙盒 iframe 等）。本計畫**只建立 registry 機制與上述契約**，沿用現有元件（Alert / Accordion / Tabs / Carousel / Progress / Benchmark / CustomQuote / mermaid / echarts），**不新增任何元件**。待方向確定後另開計畫。
+> **優先順序（2026-10-19 定案）**：AI 自動發文 > i18n > 元件互動多樣性；Android App 不是近期重點，但**上述契約全部保留**，不得為了 Web 方便而破壞（App 後路）。
+> JSON Schema 除了當 App 規格，同時也是給 AI（MCP 工具描述）的元件說明。
+
+### 3.2 互動元件擴充方向（2026-10-19 定案）
+
+- **資料驅動元件**：互動行為寫在各端元件實作裡，MDX 只傳純資料 props。新增元件 = registry 登記 zod schema + Web 實作（`satisfies` 檢查），AI 透過 JSON Schema 自動得知可用元件
+- **一次性示範 / 可執行程式碼 → Sandbox 元件**：不允許在文章裡 `export` 元件或寫 JS 表達式；需要執行的程式碼一律以**資料**形式（子元素 code fence 或字串 prop）交給 sandbox 元件，在 `sandbox` iframe（或 Sandpack）中執行，與部落格本體的 DOM / cookie 隔離
+  ````mdx
+  <Playground template="react">
+  ```jsx App.jsx
+  export default function App() { … }
+  ```
+  </Playground>
+  ````
+  - 編譯管線需讓 sandbox 元件內的 code fence 保留原始碼（不經 Shiki 高亮，或另存原文）
+  - App 端可先降級為「顯示程式碼 + 於網頁執行」連結，維持契約
+- 文章本體永遠不執行程式；「會執行的程式」被明確限縮在 sandbox 內 —— 這同時是 AI 發文的安全邊界
 
 ## 4. API 變更（packages/api）
 
@@ -297,6 +314,7 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - ✅ 已完成：新 package `packages/mdx`（`compileMdx`、zod registry、`registry.schema.json`、`scripts/audit.ts`）；tan-blog 的 `lib/mdx/compile-source.ts` 改用它產出 hast JSON，文章 / 日記 / 預覽改由 `<CompiledMdx>`（`lib/mdx/compiled-mdx.tsx`）渲染，取代原本的 function-body + `runSync`；快取沿用既有 Nitro ISR（`lib/isr/*`）；移除 `components/mdx/parsers.ts`、`lib/mdx/mdx-content.tsx`
    - 盤點結果（2026-10-19，正式站已發布內容）：14 篇文章、19 篇日記**全數通過**，無需改寫。草稿未盤點
    - 未清：tan-blog 的 `@mdx-js/mdx`、`gray-matter`、remark/rehype/shiki 依賴已不再使用，留到 PR7 一併移除
+1.5 **PR1.5 – AI 發文驗證**（因優先順序調整，自 PR3 提前）：API 新增 `previewMdx`；`createPost` / `updatePost` / `createNote` / `updateNote` 存檔前以 `compileMdx` 驗證，失敗回傳帶行號的錯誤、不存檔；未填摘要改用 compile 產出的 plainText；MCP 新增 `admin_content_previewMdx`，工具描述附上 registry 元件規格
 2. **PR2 – Schema + 資料遷移**：translation 表、relations、data migration（舊欄位保留）
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
@@ -304,7 +322,7 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 6. **PR6 – 搜尋**：Typesense docker / env、`packages/search`、collection + alias、寫入時同步、`reindexAll`、搜尋 API proxy、前台 ⌘K、MCP `content_search`（依賴 PR3 的 translation 寫入路徑與 PR1 的 plainText）
 7. **PR7 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
 8. （後續）AI 翻譯流程：MCP 一鍵翻譯、mdast 區塊級增量翻譯、後台即時預覽 Worker 化
-9. （後續，方向未定）互動元件擴充；Android App 渲染端
+9. （後續）互動元件擴充：依 §3.2，先做 Sandbox 元件；Android App 渲染端（非近期，契約已保留）
 
 ## 9. 驗收
 
@@ -326,4 +344,4 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 - 預設語系 URL 是否省略前綴（本計畫假設省略）
 - Typesense 版本的 CJK 分詞設定方式（決定每語系 collection vs 每語系欄位；預設每語系 collection）
 - Typesense 部署位置（自架 docker 與 Postgres 同機，或 Typesense Cloud）
-- 互動元件擴充方向（另開計畫）
+- ~~互動元件擴充方向~~ → 已定案（§3.2）；Sandbox 用自製 `sandbox` iframe 或 Sandpack 待實作時決定
