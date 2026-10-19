@@ -120,67 +120,92 @@
   --selection-color-lightness: 30%;
 }
 
+/* ── 玄方・四季主題 ───────────────────────────────────────────────────────
+ * 「一地看盡四季」：每個季節是一整套主題——夜空底色、主色、雲的顏色、天際線微光
+ * 都會換，並搭配 SeasonParticles 的飄落物（桃瓣／螢火／楓葉／雪）。
+ * 季節由 <html data-season> 決定（伺服器依二十四節氣寫入，訪客可在頁尾預覽其他季節）。
+ *
+ * 每季只定義少數「原料」變數，.dark 內所有 shadcn token 由它們推導：
+ *   --h / --c     夜空底色的色相與彩度
+ *   --pri         主色（連結、目前導覽、強調、--ink）
+ *   --season      季節點綴色（紙膠帶、粒子、天際線微光）
+ *   --cloud       雲海顏色
+ */
+:root,
+[data-season='autumn'] {
+  /* 秋・雲梭燈影：靛藍夜空、燈影暖金、楓紅 */
+  --h: 264;
+  --c: 0.03;
+  --pri: oklch(0.8 0.1 78);
+  --season: oklch(0.68 0.14 38);
+  --cloud: oklch(0.8 0.04 70);
+}
+[data-season='spring'] {
+  /* 春・桃苑：暮紫夜空、桃粉、櫻白 */
+  --h: 330;
+  --c: 0.035;
+  --pri: oklch(0.83 0.08 10);
+  --season: oklch(0.86 0.07 0);
+  --cloud: oklch(0.85 0.05 340);
+}
+[data-season='summer'] {
+  /* 夏・竹影螢火：深青夜空、竹青、螢黃綠 */
+  --h: 195;
+  --c: 0.035;
+  --pri: oklch(0.82 0.1 160);
+  --season: oklch(0.9 0.15 120);
+  --cloud: oklch(0.8 0.05 180);
+}
+[data-season='winter'] {
+  /* 冬・雪原：冷灰藍夜空、霜銀藍、雪白 */
+  --h: 240;
+  --c: 0.02;
+  --pri: oklch(0.87 0.045 225);
+  --season: oklch(0.96 0.01 240);
+  --cloud: oklch(0.92 0.015 240);
+}
+
 .dark {
-  /* ── 玄方・雲梭夜航 ────────────────────────────────────────────────
-   * 底色：夢州夜空的深靛（不是純黑），文字：偏暖的宣紙白
-   * 主色：燈影暖金（--primary / --ink），輔助：玉青（--jade，機關金屬光）
-   * 季節點綴：--season，依二十四節氣切換（見 [data-season] 與 src/lib/season.ts）
-   */
-  --ink: oklch(0.8 0.1 78);
-  --ink-soft: oklch(0.8 0.1 78 / 0.1);
-  --rule: oklch(0.85 0.03 255 / 0.14);
+  --ink: var(--pri);
+  --ink-soft: color-mix(in oklch, var(--pri) 10%, transparent);
+  --rule: oklch(0.85 0.03 var(--h) / 0.14);
   --jade: oklch(0.76 0.06 190);
-  --background: oklch(0.165 0.03 264);
+  --background: oklch(0.165 var(--c) var(--h));
   --foreground: oklch(0.94 0.012 85);
-  --card: oklch(0.21 0.03 262);
+  --card: oklch(0.21 var(--c) var(--h));
   --card-foreground: oklch(0.94 0.012 85);
-  --popover: oklch(0.21 0.03 262);
+  --popover: oklch(0.21 var(--c) var(--h));
   --popover-foreground: oklch(0.94 0.012 85);
-  --primary: oklch(0.8 0.1 78);
-  --primary-foreground: oklch(0.2 0.03 262);
-  --secondary: oklch(0.25 0.03 262);
+  --primary: var(--pri);
+  --primary-foreground: oklch(0.2 var(--c) var(--h));
+  --secondary: oklch(0.25 var(--c) var(--h));
   --secondary-foreground: oklch(0.94 0.012 85);
-  --muted: oklch(0.24 0.028 262);
-  --muted-foreground: oklch(0.72 0.02 255);
-  --accent: oklch(0.26 0.035 262);
+  --muted: oklch(0.24 var(--c) var(--h));
+  --muted-foreground: oklch(0.72 0.02 var(--h));
+  --accent: oklch(0.26 calc(var(--c) + 0.005) var(--h));
   --accent-foreground: oklch(0.94 0.012 85);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.85 0.03 255 / 12%);
-  --input: oklch(0.85 0.03 255 / 16%);
-  --ring: oklch(0.8 0.1 78 / 60%);
+  --border: oklch(0.85 0.03 var(--h) / 12%);
+  --input: oklch(0.85 0.03 var(--h) / 16%);
+  --ring: color-mix(in oklch, var(--pri) 60%, transparent);
   --chart-1: oklch(0.8 0.1 78);
   --chart-2: oklch(0.76 0.06 190);
   --chart-3: oklch(0.7 0.13 40);
   --chart-4: oklch(0.78 0.09 150);
   --chart-5: oklch(0.8 0.08 10);
-  --sidebar: oklch(0.21 0.03 262);
+  --sidebar: oklch(0.21 var(--c) var(--h));
   --sidebar-foreground: oklch(0.94 0.012 85);
-  --sidebar-primary: oklch(0.8 0.1 78);
-  --sidebar-primary-foreground: oklch(0.2 0.03 262);
-  --sidebar-accent: oklch(0.26 0.035 262);
+  --sidebar-primary: var(--pri);
+  --sidebar-primary-foreground: oklch(0.2 var(--c) var(--h));
+  --sidebar-accent: oklch(0.26 var(--c) var(--h));
   --sidebar-accent-foreground: oklch(0.94 0.012 85);
-  --sidebar-border: oklch(0.85 0.03 255 / 12%);
-  --sidebar-ring: oklch(0.8 0.1 78 / 60%);
-  --timeline-line: oklch(0.85 0.03 255 / 0.18);
-  --timeline-dot: oklch(0.8 0.1 78);
-  --timeline-date: oklch(0.72 0.02 255);
+  --sidebar-border: oklch(0.85 0.03 var(--h) / 12%);
+  --sidebar-ring: color-mix(in oklch, var(--pri) 60%, transparent);
+  --timeline-line: oklch(0.85 0.03 var(--h) / 0.18);
+  --timeline-dot: var(--pri);
+  --timeline-date: oklch(0.72 0.02 var(--h));
   --selection-background-color-lightness: 60%;
   --selection-color-lightness: 85%;
-}
-
-/* 四季點綴色：只用在少數地方（紙膠帶、季節切換、天際線的微光），主色不跟著換 */
-:root,
-[data-season='autumn'] {
-  --season: oklch(0.7 0.13 40); /* 楓 */
-}
-[data-season='spring'] {
-  --season: oklch(0.8 0.08 10); /* 桃 */
-}
-[data-season='summer'] {
-  --season: oklch(0.78 0.09 150); /* 竹 */
-}
-[data-season='winter'] {
-  --season: oklch(0.9 0.025 240); /* 雪 */
 }
 
 @layer base {
@@ -197,10 +222,11 @@
   /* 雲海夜空：上深下淺的夜色，天際線處透出一點當季的微光（.dark 才套用） */
   .dark body {
     background-image:
-      radial-gradient(120% 55% at 50% 112%, color-mix(in oklch, var(--season) 14%, transparent), transparent 70%),
-      radial-gradient(70% 40% at 85% 0%, oklch(0.8 0.1 78 / 0.06), transparent 70%),
-      linear-gradient(180deg, oklch(0.14 0.03 266) 0%, var(--background) 45%, oklch(0.19 0.035 256) 100%);
+      radial-gradient(120% 60% at 50% 112%, color-mix(in oklch, var(--season) 22%, transparent), transparent 70%),
+      radial-gradient(70% 45% at 85% 0%, color-mix(in oklch, var(--pri) 12%, transparent), transparent 70%),
+      linear-gradient(180deg, oklch(0.13 var(--c) var(--h)) 0%, var(--background) 45%, oklch(0.2 calc(var(--c) + 0.01) var(--h)) 100%);
     background-attachment: fixed;
+    transition: background-color 0.8s ease;
   }
 
   ::selection {
@@ -714,16 +740,17 @@
   content: '';
   position: absolute;
   inset: 0 -1300px 0 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .012' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .78 0 0 0 0 .82 0 0 0 0 .92 0 0 0 1.6 -.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
-  background-size: 900px 100%;
-  background-repeat: repeat-x;
-  opacity: 0.09;
+  background-color: var(--cloud);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .012' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .78 0 0 0 0 .82 0 0 0 0 .92 0 0 0 1.6 -.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+  mask-size: 900px 100%;
+  mask-repeat: repeat-x;
+  opacity: 0.16;
   animation: cloud-drift 140s linear infinite;
 }
 .cloud-sea::after {
   top: 30%;
-  background-size: 1300px 100%;
-  opacity: 0.07;
+  mask-size: 1300px 100%;
+  opacity: 0.11;
   animation-name: cloud-drift-far;
   animation-duration: 220s;
 }

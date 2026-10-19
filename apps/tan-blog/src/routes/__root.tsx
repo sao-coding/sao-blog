@@ -11,6 +11,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '../components/theme-provider'
 import { getSolarTerm, SEASON_INIT_SCRIPT } from '../lib/season'
+import { SeasonParticles } from '../components/season-particles'
 
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
@@ -111,6 +112,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <ThemeProvider>
           {children}
           <div aria-hidden className="cloud-sea" />
+          <SeasonParticles />
           <canvas
             id="universe"
             className="pointer-events-none fixed left-0 top-0 z-[1] m-0 block h-full w-full border-0 p-0 outline-0"
