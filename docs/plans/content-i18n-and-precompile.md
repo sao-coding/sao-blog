@@ -327,6 +327,10 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - 與原計畫不同：舊欄位**仍雙寫、未改 nullable**（主表保留原文副本，作為沒有 translation 時的 fallback），改到 PR7 一併處理
    - `CompiledContent.tree` 改為自訂 `HastJsonRoot`（hast 的純 JSON 子集），避免 @types/hast 的 `data` 擴充讓跨端序列化型別失效
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
+   - ✅ 已完成（`apps/admin/src/components/translations/`）：文章 / 日記編輯器頂部語言分頁（原文 + 其他語系，圓點顯示已發布 / 草稿 / 過期 / 未建立）；譯文編輯區可並排顯示唯讀原文、AI 翻譯勾選、過期警示、儲存草稿 / 發佈 / 刪除譯文
+   - 列表新增「語言」欄 badge；分類表單加入 English / 日本語 名稱與描述
+   - 修正：編輯器原本不檢查 `status: "error"`，發布時 MDX 錯誤也顯示成功 → 改為顯示後端錯誤（含行號），草稿警告以 warning toast 顯示
+   - 未驗證畫面：本機 DB 尚未套用 migration 0003，後台無法載入列表
 5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、Paraglide 設定與 middleware、hreflang、語言切換、fallback 提示
    - ✅ 已完成（tan-blog，先於 PR4 進行：AI 以 MCP 管理譯文，後台 UI 較不急）：`lib/content-locale.ts` 對照 `zh-Hant ↔ zh-TW`；所有 API 呼叫與 query key 帶 `locale`（loader 算好再傳入 server fn，因 server fn 的 RPC 網址沒有語系前綴）
    - Nitro ISR 快取 key 改為「語系:slug」，`/api/revalidate` 一次清掉所有語系

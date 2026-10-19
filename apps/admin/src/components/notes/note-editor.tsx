@@ -24,6 +24,10 @@ import {
 import { useIsMobile } from '@sao-blog/ui/hooks/use-mobile'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { LanguageTabs, useTranslationStates, type LanguageTab } from '@/components/translations/language-tabs'
+import { TranslationEditor } from '@/components/translations/translation-editor'
+import { apiErrorMessage } from '@/components/translations/locales'
 import {
   BookIcon,
   CloudIcon,
@@ -90,6 +94,9 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   const isMobile = useIsMobile()
   const { uploadFile } = useFileUpload()
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<LanguageTab>('source')
+  const { states: translationStates, sourceLocale } = useTranslationStates('note', noteId)
+  const editingTranslation = isEditMode && activeTab !== 'source'
 
   const { data: noteData } = useQuery({
     ...orpc.admin.note.getNote.queryOptions({ input: { id: noteId! } }),
@@ -136,14 +143,21 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       }
 
       try {
-        if (isEditMode && noteId) {
-          await updateNoteMutation.mutateAsync({ id: noteId, ...payload })
-          toast.success(type === 'publish' ? '日記發佈成功！' : '草稿更新成功！')
-        } else {
-          await createNoteMutation.mutateAsync(payload)
-          toast.success(type === 'publish' ? '日記發佈成功！' : '草稿建立成功！')
-          navigate({ to: '/notes' })
+        // API 以 status: "error" 回報錯誤（例如發布時 MDX 編譯失敗，訊息含行號），不會 throw
+        const res =
+          isEditMode && noteId
+            ? await updateNoteMutation.mutateAsync({ id: noteId, ...payload })
+            : await createNoteMutation.mutateAsync(payload)
+        const error = apiErrorMessage(res)
+        if (error) {
+          toast.error(error, { duration: 10000 })
+          return
         }
+        // 草稿有 MDX 錯誤時仍會儲存，message 會附上警告
+        if (res.message.includes('MDX 有錯誤')) toast.warning(res.message, { duration: 10000 })
+        else if (isEditMode) toast.success(type === 'publish' ? '日記發佈成功！' : '草稿更新成功！')
+        else toast.success(type === 'publish' ? '日記發佈成功！' : '草稿建立成功！')
+        if (!(isEditMode && noteId)) navigate({ to: '/notes' })
 
         await queryClient.invalidateQueries({
           queryKey: orpc.admin.note.getNotes.queryOptions().queryKey,
@@ -182,7 +196,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
               </h1>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-3">
+            <div className={editingTranslation ? 'hidden' : 'flex items-center gap-1 sm:gap-3'}>
               <Button
                 variant="outline"
                 size="sm"
@@ -225,7 +239,20 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       </header>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <form id="note-form">
+        {isEditMode && (
+          <div className="mb-4 sm:mb-6">
+            <LanguageTabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              sourceLocale={sourceLocale}
+              states={translationStates}
+            />
+          </div>
+        )}
+        {isEditMode && activeTab !== 'source' && (
+          <TranslationEditor kind="note" ownerId={noteId!} locale={activeTab} />
+        )}
+        <form id="note-form" className={editingTranslation ? 'hidden' : undefined}>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8">
             <div className="lg:col-span-3 space-y-4 sm:space-y-6 order-1">
               <FieldGroup className="space-y-4 sm:space-y-6">
