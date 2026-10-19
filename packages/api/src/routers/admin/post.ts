@@ -7,6 +7,7 @@ import { auth } from "@sao-blog/auth";
 import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
 import { checkMdxForSave } from "../../lib/mdx-validate";
 import { upsertSourcePostTranslation } from "../../lib/source-translation";
+import { listTranslationStatus, postTranslationProcedures } from "./translation";
 import { slugify } from "../../lib/slugify";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 
@@ -63,10 +64,13 @@ const getPosts = protectedProcedure
             .innerJoin(categories, eq(posts.categoryId, categories.id))
             .orderBy(desc(posts.updatedAt));
 
+        // 各語言版本狀態（後台列表 badge；outdated = 原文改過、譯文待更新）
+        const translations = await listTranslationStatus("post", result.map((r) => r.id));
+
         return {
             status: "success",
             message: "文章列表取得成功",
-            data: result,
+            data: result.map((r) => ({ ...r, translations: translations.get(r.id) ?? [] })),
         }
     });
 
@@ -480,5 +484,6 @@ export default {
     getPost,
     createPost,
     updatePost,
-    deletePosts
+    deletePosts,
+    ...postTranslationProcedures,
 };

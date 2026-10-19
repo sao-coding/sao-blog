@@ -1,11 +1,4 @@
-import type { Root as HastRoot } from 'hast'
 import type { TocItem as FlexibleTocItem } from 'remark-flexible-toc'
-
-export type {
-  Element as HastElement,
-  Root as HastRoot,
-  RootContent as HastRootContent,
-} from 'hast'
 
 /** 目錄項目（去掉 remark-flexible-toc 的 `data` 欄位，確保可 JSON 序列化） */
 export type TocItem = Omit<FlexibleTocItem, 'data'>
@@ -16,10 +9,41 @@ export type TocItem = Omit<FlexibleTocItem, 'data'>
  */
 export const COMPILED_VERSION = 1
 
+// ─── 跨平台渲染契約：hast 的 JSON 子集 ───────────────────────────────────────
+// 不直接用 @types/hast：它的 `data` 欄位會被各 remark / rehype 套件的型別擴充加入
+// 非序列化的欄位，而編譯產物在存檔前已移除 data / position。這裡只描述實際會出現的資料。
+
+export type HastJsonPropertyValue = string | number | boolean | null | (string | number)[]
+
+export interface HastJsonElement {
+  type: 'element'
+  /** HTML 標籤（小寫）或 registry 元件名稱（大寫開頭） */
+  tagName: string
+  properties: Record<string, HastJsonPropertyValue>
+  children: HastJsonNode[]
+}
+
+export interface HastJsonText {
+  type: 'text'
+  value: string
+}
+
+export interface HastJsonComment {
+  type: 'comment'
+  value: string
+}
+
+export type HastJsonNode = HastJsonElement | HastJsonText | HastJsonComment
+
+export interface HastJsonRoot {
+  type: 'root'
+  children: HastJsonNode[]
+}
+
 /** 發布時編譯結果：純資料（hast JSON），任何平台都能走訪渲染。 */
 export interface CompiledContent {
   v: typeof COMPILED_VERSION
-  tree: HastRoot
+  tree: HastJsonRoot
 }
 
 /**

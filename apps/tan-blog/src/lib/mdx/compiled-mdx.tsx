@@ -7,9 +7,9 @@ import { isRegisteredComponent } from '@sao-blog/mdx/registry'
 import {
   COMPILED_VERSION,
   type CompiledContent,
-  type HastElement,
-  type HastRoot,
-  type HastRootContent,
+  type HastJsonElement,
+  type HastJsonNode,
+  type HastJsonRoot,
 } from '@sao-blog/mdx/types'
 
 import { ErrorComponent } from '@/components/index'
@@ -21,11 +21,11 @@ import {
 import { MdxUnknown } from '@/components/mdx/renderers/unknown'
 
 /** 把 renderer 沒有實作的元件換成 MdxUnknown（回傳新 tree，不動到快取裡的原物件） */
-function withFallbacks<T extends HastRoot | HastElement>(
+function withFallbacks<T extends HastJsonRoot | HastJsonElement>(
   node: T,
   known: (name: string) => boolean
 ): T {
-  const children = node.children.map((child): HastRootContent => {
+  const children = node.children.map((child): HastJsonNode => {
     if (child.type !== 'element') return child
     const next = withFallbacks(child, known)
     if (/^[A-Z]/.test(next.tagName) && !known(next.tagName)) {
@@ -54,7 +54,9 @@ export function CompiledMdx({ compiled, components }: CompiledMdxProps) {
     const known = (name: string) =>
       Object.hasOwn(merged, name) && isRegisteredComponent(name)
 
-    return toJsxRuntime(withFallbacks(compiled.tree, known), {
+    // HastJsonRoot 是 hast 的 JSON 子集，可直接交給 hast-util-to-jsx-runtime
+    const tree = withFallbacks(compiled.tree, known) as unknown as Parameters<typeof toJsxRuntime>[0]
+    return toJsxRuntime(tree, {
       Fragment,
       jsx,
       jsxs,

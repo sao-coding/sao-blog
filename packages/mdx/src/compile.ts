@@ -19,6 +19,7 @@ import {
   type CompileError,
   type CompileProfile,
   type CompileResult,
+  type HastJsonRoot,
   type TocItem,
 } from './types'
 
@@ -198,7 +199,8 @@ export async function compileMdx(
 
   return {
     ok: true,
-    compiled: { v: COMPILED_VERSION, tree },
+    // cleanTree 已移除 data / position / doctype，剩下的就是 HastJsonRoot 描述的純資料
+    compiled: { v: COMPILED_VERSION, tree: tree as unknown as HastJsonRoot },
     toc: (data.toc ?? []).map(({ data: _data, ...item }) => item),
     plainText,
     readingTime: estimateReadingTime(plainText),

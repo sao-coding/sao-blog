@@ -3,6 +3,7 @@ import { db } from "@sao-blog/db";
 import { eq, desc } from "drizzle-orm";
 import { categories, DEFAULT_LOCALE } from "@sao-blog/db/schema/index";
 import { upsertCategoryTranslation } from "../../lib/source-translation";
+import { categoryTranslationProcedures } from "./translation";
 import z from "zod";
 import { categoryInputSchema } from "@sao-blog/api/schema/category";
 
@@ -172,5 +173,6 @@ export default {
     getCategory,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    ...categoryTranslationProcedures,
 }

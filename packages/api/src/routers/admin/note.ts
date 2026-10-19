@@ -8,6 +8,7 @@ import { noteInputSchema } from "@sao-blog/api/schema/note";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 import { checkMdxForSave } from "../../lib/mdx-validate";
 import { upsertSourceNoteTranslation } from "../../lib/source-translation";
+import { listTranslationStatus, noteTranslationProcedures } from "./translation";
 
 async function getTopicSlug(topicId: string | null | undefined) {
     if (!topicId) return null;
@@ -27,10 +28,13 @@ const getNotes = protectedProcedure
             .from(notes)
             .orderBy(desc(notes.createdAt));
 
+        // 各語言版本狀態（後台列表 badge；outdated = 原文改過、譯文待更新）
+        const translations = await listTranslationStatus("note", result.map((r) => r.id));
+
         return {
             status: "success",
             message: "筆記列表取得成功",
-            data: result,
+            data: result.map((r) => ({ ...r, translations: translations.get(r.id) ?? [] })),
         }
     });
 
@@ -282,5 +286,6 @@ export default {
     getNote,
     createNote,
     updateNote,
-    deleteNote
+    deleteNote,
+    ...noteTranslationProcedures,
 }

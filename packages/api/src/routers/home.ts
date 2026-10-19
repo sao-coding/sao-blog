@@ -10,6 +10,9 @@ import {
 import { eq, desc, and, gte } from "drizzle-orm";
 import { mdxToExcerpt } from "../lib/mdx-to-text";
 import { toIso } from "../lib/datetime";
+import { localizedCategories, localizedTitles } from "../lib/i18n";
+import { localeInput } from "../schema/i18n";
+import z from "zod";
 
 const RECENT_WRITING_LIMIT = 6;
 const MUSINGS_LIMIT = 4;
@@ -18,7 +21,9 @@ const LETTERS_LIMIT = 1;
 // 前台首頁聚合資料
 const getHome = publicProcedure
     .route({ method: "GET", path: "/home" })
-    .handler(async () => {
+    .input(z.object({ ...localeInput }).optional())
+    .handler(async ({ input }) => {
+        const locale = input?.locale ?? "zh-TW";
         const now = new Date();
         const currentYear = now.getFullYear();
         const startOfYear = new Date(currentYear, 0, 1);
@@ -43,6 +48,7 @@ const getHome = publicProcedure
                     slug: posts.slug,
                     title: posts.title,
                     category: categories.name,
+                    categoryId: posts.categoryId,
                     createdAt: posts.createdAt,
                 })
                 .from(posts)
@@ -123,22 +129,32 @@ const getHome = publicProcedure
             db.$count(comments, eq(comments.deleted, false)),
         ]);
 
+        // 疊上請求語系的標題與分類名稱（時間軸列表已涵蓋所有已發布作品；無譯文時沿用原文）
+        const [postTitles, noteTitles, categoryNames] = await Promise.all([
+            localizedTitles("post", timelinePostRows.map((p) => p.id), locale),
+            localizedTitles("note", [...new Set([
+                ...timelineNoteRows.map((n) => n.id),
+                ...musingRows.map((m) => m.noteId).filter((id): id is string => !!id),
+            ])], locale),
+            localizedCategories(recentPostRows.map((p) => p.categoryId), locale),
+        ]);
+
         // 近期作品：合併文章與日記後取最新的 N 筆
         // （全域最新 N 筆必落在「各表最新 N 筆」的聯集內，故只需各取 N 筆）
         const recentWriting = [
             ...recentPostRows.map((post) => ({
                 id: String(post.id),
-                title: post.title,
+                title: postTitles.get(post.id) ?? post.title,
                 slug: post.slug,
                 href: `/posts/${post.slug}`,
                 type: "post" as const,
-                category: post.category,
+                category: (post.categoryId && categoryNames.get(post.categoryId)?.name) || post.category,
                 weather: null as string | null,
                 createdAt: toIso(post.createdAt),
             })),
             ...recentNoteRows.map((note) => ({
                 id: String(note.id),
-                title: note.title,
+                title: noteTitles.get(note.id) ?? note.title,
                 slug: String(note.id),
                 href: `/notes/${note.id}`,
                 type: "note" as const,
@@ -157,14 +173,14 @@ const getHome = publicProcedure
         const timelineItems = [
             ...timelinePostRows.map((post) => ({
                 id: String(post.id),
-                title: post.title,
+                title: postTitles.get(post.id) ?? post.title,
                 href: `/posts/${post.slug}`,
                 type: "post" as const,
                 createdAt: toIso(post.createdAt),
             })),
             ...timelineNoteRows.map((note) => ({
                 id: String(note.id),
-                title: note.title,
+                title: noteTitles.get(note.id) ?? note.title,
                 href: `/notes/${note.id}`,
                 type: "note" as const,
                 createdAt: toIso(note.createdAt),
@@ -191,7 +207,7 @@ const getHome = publicProcedure
                 createdAt: toIso(musing.createdAt),
                 note:
                     musing.noteId && noteTitle
-                        ? { id: musing.noteId, title: noteTitle }
+                        ? { id: musing.noteId, title: noteTitles.get(musing.noteId) ?? noteTitle }
                         : null,
             }))
         );
