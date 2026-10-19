@@ -116,10 +116,10 @@ function PostsIndexPage() {
   const activeTagName = tag ? (view?.tags.find((t) => t.slug === tag)?.name ?? tag) : undefined
 
   return (
-    <div className="mx-auto mt-28 w-full max-w-7xl px-4 pb-24 lg:mt-32">
-      {/* 三欄：主欄固定寬度置於畫面正中，側欄放右欄、不推擠主欄；xl 以下只留置中的主欄 */}
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,44rem)_minmax(0,1fr)]">
-        <main className="mx-auto w-full min-w-0 max-w-[44rem] xl:col-start-2">
+    <div className="mx-auto mt-28 w-full max-w-[67rem] px-4 pb-24 lg:mt-32">
+      {/* 參考 innei.in：「列表 44rem ＋ 間距 3rem ＋ 側欄 18rem」整組置中；lg 以下只留置中的列表 */}
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,44rem)_18rem]">
+        <main className="mx-auto w-full min-w-0 max-w-[44rem]">
           <header className="mb-10">
             <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
             <p className="mt-3 font-wenkai text-sm text-muted-foreground">{m.posts_subtitle()}</p>
@@ -208,7 +208,7 @@ function PostsIndexPage() {
           )}
         </main>
 
-        <div className="hidden xl:col-start-3 xl:block xl:w-56">
+        <div className="hidden lg:block">
           <PostsSidebar tags={view?.tags ?? []} activeTag={tag} query={q} />
         </div>
       </div>
