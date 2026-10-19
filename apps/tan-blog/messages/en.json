@@ -83,5 +83,10 @@
   "posts_load_failed_hint": "Check your connection or try again later.",
   "posts_retry": "Retry",
   "posts_views": "{count} views",
-  "posts_comments": "{count} comments"
+  "posts_comments": "{count} comments",
+  "posts_views_short": "{count} reads",
+  "posts_comments_short": "{count} notes",
+  "posts_year_count": "{count} posts",
+  "posts_subtitle": "If it is not written down, it was not really thought through.",
+  "posts_search_label": "Search"
 }

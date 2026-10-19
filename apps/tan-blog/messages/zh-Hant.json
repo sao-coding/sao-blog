@@ -83,5 +83,10 @@
   "posts_load_failed_hint": "請檢查網路或稍後再試。",
   "posts_retry": "重試",
   "posts_views": "{count} 次閱讀",
-  "posts_comments": "{count} 則留言"
+  "posts_comments": "{count} 則留言",
+  "posts_views_short": "{count} 閱",
+  "posts_comments_short": "{count} 言",
+  "posts_year_count": "{count} 篇",
+  "posts_subtitle": "寫下來的，才算真的想過。",
+  "posts_search_label": "翻找"
 }
