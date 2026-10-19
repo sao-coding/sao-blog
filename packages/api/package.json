@@ -20,6 +20,7 @@
     "@sao-blog/auth": "workspace:*",
     "@sao-blog/db": "workspace:*",
     "@sao-blog/env": "workspace:*",
+    "@sao-blog/mdx": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",

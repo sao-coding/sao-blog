@@ -315,6 +315,7 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - 盤點結果（2026-10-19，正式站已發布內容）：14 篇文章、19 篇日記**全數通過**，無需改寫。草稿未盤點
    - 未清：tan-blog 的 `@mdx-js/mdx`、`gray-matter`、remark/rehype/shiki 依賴已不再使用，留到 PR7 一併移除
 1.5 **PR1.5 – AI 發文驗證**（因優先順序調整，自 PR3 提前）：API 新增 `previewMdx`；`createPost` / `updatePost` / `createNote` / `updateNote` 存檔前以 `compileMdx` 驗證，失敗回傳帶行號的錯誤、不存檔；未填摘要改用 compile 產出的 plainText；MCP 新增 `admin_content_previewMdx`，工具描述附上 registry 元件規格
+   - ✅ 已完成：`packages/api/src/lib/mdx-validate.ts`（`checkMdxForSave`）；發布時錯誤拒存、**草稿仍可存但回傳警告**（避免後台半成品存不了）；新增 `admin/content` router → MCP `admin_content_previewMdx`、`admin_content_getComponents`（回傳 registry JSON Schema）；post / note 建立與更新的 route summary 寫明驗證規則，AI 從工具描述即可得知
 2. **PR2 – Schema + 資料遷移**：translation 表、relations、data migration（舊欄位保留）
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單

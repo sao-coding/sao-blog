@@ -6,6 +6,7 @@ import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { noteInputSchema } from "@sao-blog/api/schema/note";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+import { checkMdxForSave } from "../../lib/mdx-validate";
 
 async function getTopicSlug(topicId: string | null | undefined) {
     if (!topicId) return null;
@@ -61,12 +62,18 @@ const getNote = protectedProcedure
     });
 
 const createNote = protectedProcedure
-    .route({ method: "POST", path: "/notes" })
+    .route({ method: "POST", path: "/notes", summary: "建立日記（status: true 為發布）。content 為 MDX，存檔前以前台同一條管線驗證：發布狀態下有錯誤會被拒絕（錯誤含行號），草稿則可存但會回傳警告。建議先用 admin_content_previewMdx 驗證、用 admin_content_getComponents 查可用元件。" })
     .input(noteInputSchema)
     .handler(async ({ input, context }) => {
         // protectedProcedure 已經確保 context.session?.user 是存在的
         const { title, mood, weather, bookmark, coordinates, location, status, content, topicId } = input;
         const authorId = context.session?.user.id;
+
+        // 用前台同一條編譯管線驗證 MDX：發布時有錯誤直接拒絕存檔（錯誤帶行號）
+        const mdx = await checkMdxForSave(content, { profile: "note", publish: status });
+        if (!mdx.ok) {
+            return { status: "error", message: mdx.message, data: null };
+        }
 
         const [newNote] = await db
             .insert(notes)
@@ -108,17 +115,23 @@ const createNote = protectedProcedure
 
         return {
             status: "success",
-            message: "筆記建立成功",
+            message: mdx.warning ? `筆記建立成功。${mdx.warning}` : "筆記建立成功",
             data: newNote,
         };
     });
 
 const updateNote = protectedProcedure
-    .route({ method: "PUT", path: "/notes/{id}" })
+    .route({ method: "PUT", path: "/notes/{id}", summary: "更新日記（status: true 為發布）。content 為 MDX，存檔前以前台同一條管線驗證：發布狀態下有錯誤會被拒絕（錯誤含行號），草稿則可存但會回傳警告。建議先用 admin_content_previewMdx 驗證、用 admin_content_getComponents 查可用元件。" })
     .input(noteInputSchema.merge(z.object({ id: z.string() })))
     .handler(async ({ input, context }) => {
         const { id, title, mood, weather, bookmark, coordinates, location, status, content, topicId } = input;
         const authorId = context.session?.user.id;
+
+        // 驗證 MDX（規則同 createNote）
+        const mdx = await checkMdxForSave(content, { profile: "note", publish: status });
+        if (!mdx.ok) {
+            return { status: "error", message: mdx.message, data: null };
+        }
 
         const [currentNote] = await db
             .select({ topicId: notes.topicId })
@@ -181,7 +194,7 @@ const updateNote = protectedProcedure
 
         return {
             status: "success",
-            message: "筆記更新成功",
+            message: mdx.warning ? `筆記更新成功。${mdx.warning}` : "筆記更新成功",
             data: updatedNote,
         };
     });
