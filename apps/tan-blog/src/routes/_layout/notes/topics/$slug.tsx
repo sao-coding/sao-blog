@@ -51,24 +51,23 @@ function NoteTopicDetailPage() {
               />
             )}
             <div>
-              <h1 className="text-[3rem] leading-none font-extralight tracking-tighter text-neutral-10/80 mb-3">
+              <h1 className="mb-3 font-wenkai text-4xl text-foreground">
                 {topic.name}
               </h1>
-              <p className="text-muted-foreground">{topic.introduce}</p>
+              <p className="font-wenkai text-muted-foreground">{topic.introduce}</p>
               {topic.description && (
                 <p className="mt-2 text-sm text-muted-foreground/70">{topic.description}</p>
               )}
-              <p className="mt-3 text-sm text-muted-foreground">
-                <span className="tabular-nums font-light text-foreground">{notes.length}</span>{' '}
-                篇筆記
+              <p className="mt-3 flex items-baseline gap-1.5 font-wenkai text-sm text-muted-foreground">
+                共<span className="text-2xl leading-none text-ink tabular-nums">{notes.length}</span>篇筆記
               </p>
             </div>
           </div>
         </header>
 
-        <div className="relative ml-1 border-l-2">
+        <div className="relative ml-1 border-l border-rule">
           {notes.length === 0 ? (
-            <div className="py-16 text-center text-muted-foreground pl-6">尚無筆記</div>
+            <div className="py-16 pl-6 text-center font-wenkai text-muted-foreground">尚無筆記</div>
           ) : (
             <TopicNotesList notes={notes} />
           )}

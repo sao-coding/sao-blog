@@ -19,7 +19,8 @@ type HastNode = {
   data?: { meta?: string }
 }
 
-const SHIKI_THEMES = { light: 'github-light', dark: 'github-dark' } as const
+// 淺色用 kanagawa-lotus（取自北齋浮世繪的暖紙色系），和宣紙底比較搭
+const SHIKI_THEMES = { light: 'kanagawa-lotus', dark: 'github-dark' } as const
 
 // fine-grained bundle：明確列出部落格實際會用到的語言，而不是像
 // `shiki` 主要入口那樣預設打包全部 200+ 種語言。除了縮小 bundle、加快冷啟動
@@ -76,7 +77,7 @@ let highlighterPromise: Promise<HighlighterCore> | undefined
 function getHighlighter() {
   highlighterPromise ??= createHighlighterCore({
     themes: [
-      import('@shikijs/themes/github-light'),
+      import('@shikijs/themes/kanagawa-lotus'),
       import('@shikijs/themes/github-dark'),
     ],
     langs: SHIKI_LANGS,

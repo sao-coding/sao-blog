@@ -529,12 +529,13 @@
 }
 
 /* Shiki 雙主題（light/dark）以 CSS variables 切換，對應 rehype 設定的
-   themes: { light: 'github-light', dark: 'github-dark' } + defaultColor: false。
+   themes: { light: 'kanagawa-lotus', dark: 'github-dark' } + defaultColor: false。
    background-color 只放在 .shiki 本身——如果連 span 也套用背景色，每個文字
-   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。 */
+   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。
+   淺色底不用主題自帶的米黃，改取信箋紙色再壓一點墨，像紙上另貼的一方箋。 */
 .shiki {
   color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+  background-color: color-mix(in oklch, var(--foreground) 4%, var(--card));
 }
 .shiki span {
   color: var(--shiki-light);

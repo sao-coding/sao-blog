@@ -20,6 +20,12 @@ export function WrittenOn({ date, className }: { date: Date | string; className?
   )
 }
 
+// 時間線月份標題：數字月份＋傳統月名，和信箋的落款一個調子
+export const MONTH_NAMES = [
+  '一月 · 正月', '二月 · 杏月', '三月 · 桃月', '四月 · 槐月', '五月 · 榴月', '六月 · 荷月',
+  '七月 · 蘭月', '八月 · 桂月', '九月 · 菊月', '十月 · 陽月', '十一月 · 葭月', '十二月 · 臘月',
+] as const
+
 // 列表用的節氣小字
 export function TermMark({ date, className }: { date: Date | string; className?: string }) {
   const term = getSolarTerm(new Date(date))
