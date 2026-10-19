@@ -5,6 +5,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { CategoriesTimeline } from './-components/categories-timeline'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 export const Route = createFileRoute('/_layout/categories/$slug')({
   loader: async ({ context, params }) => {
@@ -46,7 +47,7 @@ function CategoryDetailPage() {
         </div>
       ) : (
         <div className="mt-20">
-          <div className="mx-auto mt-14 max-w-5xl px-6 lg:mt-[80px] lg:px-0 2xl:max-w-6xl">
+          <div className={pageShellClass}>
             <div className="relative pl-[19px] border-l-2">
               <header className="mb-8 max-w-none">
                 <h1 className="text-4xl font-bold text-foreground">

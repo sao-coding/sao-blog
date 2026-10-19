@@ -6,6 +6,7 @@ import { MdxContent } from '@/lib/mdx/mdx-content'
 import { defaultMDXComponents } from '@/components/mdx'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
+import { PageWithSidebar } from '@/components/layout/page-shell'
 import { NotePreviewCard } from './-components/note-preview-card'
 import { NotesJournal, type JournalNote } from './-components/notes-journal'
 import { NotesCalendar } from './-components/notes-calendar'
@@ -73,33 +74,24 @@ function NotesIndexPage() {
   const earlier = journal.filter((note) => note.id !== current.id)
 
   return (
-    <div className="mx-auto mt-28 w-full max-w-[67rem] px-4 pb-24 2xl:max-w-[75rem] lg:mt-32">
-      {/* 參考 innei.in：「列表 44rem（2xl 起 52rem）＋ 間距 3rem ＋ 側欄 18rem」整組置中；lg 以下只留置中的列表 */}
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,44rem)_18rem] 2xl:grid-cols-[minmax(0,52rem)_18rem]">
-        <main className="mx-auto w-full min-w-0 max-w-[44rem] 2xl:max-w-[52rem]">
-          <header className="mb-12">
-            <h1 className="font-wenkai text-4xl text-foreground">{m.page_notes_title()}</h1>
-            <p className="mt-3 font-wenkai text-sm text-muted-foreground">
-              <span className="mr-2 font-mono text-ink tabular-nums">{m.notes_total({ count: String(journal.length) })}</span>
-              {m.notes_subtitle()}
-            </p>
-          </header>
+    <PageWithSidebar sidebar={<NotesCalendar notes={journal} />}>
+      <header className="mb-12">
+        <h1 className="font-wenkai text-4xl text-foreground">{m.page_notes_title()}</h1>
+        <p className="mt-3 font-wenkai text-sm text-muted-foreground">
+          <span className="mr-2 font-mono text-ink tabular-nums">{m.notes_total({ count: String(journal.length) })}</span>
+          {m.notes_subtitle()}
+        </p>
+      </header>
 
-          <NotePreviewCard note={{ ...current, topic: current.topic ?? null }}>
-            <MdxContent compiledSource={compiledSource} components={defaultMDXComponents} />
-          </NotePreviewCard>
+      <NotePreviewCard note={{ ...current, topic: current.topic ?? null }}>
+        <MdxContent compiledSource={compiledSource} components={defaultMDXComponents} />
+      </NotePreviewCard>
 
-          {earlier.length > 0 && (
-            <div className="mt-16">
-              <NotesJournal notes={earlier} />
-            </div>
-          )}
-        </main>
-
-        <div className="hidden lg:block">
-          <NotesCalendar notes={journal} />
+      {earlier.length > 0 && (
+        <div className="mt-16">
+          <NotesJournal notes={earlier} />
         </div>
-      </div>
-    </div>
+      )}
+    </PageWithSidebar>
   )
 }

@@ -4,6 +4,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { TopicGrid } from './-components/topic-grid'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 export const Route = createFileRoute('/_layout/notes/topics/')({
   loader: async ({ context }) => {
@@ -34,7 +35,7 @@ function NoteTopicsIndexPage() {
 
   return (
     <>
-      <div className="mx-auto mt-14 max-w-3xl px-4 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
+      <div className={pageShellClass}>
         <header className="mb-12">
           <h1 className="tracking-widest text-neutral-10/50 uppercase mb-3">
             專欄

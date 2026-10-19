@@ -9,6 +9,7 @@ import { m } from '#/paraglide/messages'
 import { Timeline } from './-components/timeline'
 import { ArticlePreviewModal } from '@/components/preview/article-preview-modal'
 import ProgressNumber from '@/components/animation/progress-number'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 const timelineSearchSchema = z.object({
   type: z.enum(['post', 'note']).optional(),
@@ -66,7 +67,7 @@ function TimelinePage() {
       {posts.length === 0 ? (
         <div className="mt-20 text-center text-2xl font-semibold">尚無資料</div>
       ) : (
-        <div className="mx-auto mt-14 max-w-3xl px-2 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
+        <div className={pageShellClass}>
           <header className="mb-12">
             <h1 className="tracking-widest text-neutral-10/50 uppercase mb-3">
               時間線

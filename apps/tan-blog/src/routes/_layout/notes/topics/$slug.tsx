@@ -3,6 +3,7 @@ import { getCachedTopic } from '@/lib/isr/topic'
 import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { TopicNotesList } from './-components/topic-notes-list'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 export const Route = createFileRoute('/_layout/notes/topics/$slug')({
   loader: async ({ params }) => {
@@ -32,7 +33,7 @@ function NoteTopicDetailPage() {
 
   return (
     <>
-      <div className="mx-auto mt-14 max-w-3xl px-4 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
+      <div className={pageShellClass}>
         <header className="mb-12">
           <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/notes/topics" className="hover:text-foreground transition-colors">

@@ -6,6 +6,7 @@ import { orpc } from '@/lib/orpc'
 import { pageHead } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { m } from '#/paraglide/messages'
+import { PageWithSidebar } from '@/components/layout/page-shell'
 import { PostItem, type PostListItem } from './-components/post-item'
 import { PostsSidebar, type TagStat } from './-components/posts-sidebar'
 
@@ -116,103 +117,94 @@ function PostsIndexPage() {
   const activeTagName = tag ? (view?.tags.find((t) => t.slug === tag)?.name ?? tag) : undefined
 
   return (
-    <div className="mx-auto mt-28 w-full max-w-[67rem] px-4 pb-24 2xl:max-w-[75rem] lg:mt-32">
-      {/* 參考 innei.in：「列表 44rem（2xl 起 52rem）＋ 間距 3rem ＋ 側欄 18rem」整組置中；lg 以下只留置中的列表 */}
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,44rem)_18rem] 2xl:grid-cols-[minmax(0,52rem)_18rem]">
-        <main className="mx-auto w-full min-w-0 max-w-[44rem] 2xl:max-w-[52rem]">
-          <header className="mb-10">
-            <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
-            <p className="mt-3 font-wenkai text-sm text-muted-foreground">{m.posts_subtitle()}</p>
-          </header>
+    <PageWithSidebar sidebar={<PostsSidebar tags={view?.tags ?? []} activeTag={tag} query={q} />}>
+      <header className="mb-10">
+        <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
+        <p className="mt-3 font-wenkai text-sm text-muted-foreground">{m.posts_subtitle()}</p>
+      </header>
 
-          {isLoading && <ListSkeleton />}
+      {isLoading && <ListSkeleton />}
 
-          {!isLoading && (error || !view) && (
-            <ErrorBlock
-              message={data?.status === 'error' ? data.message : undefined}
-              onRetry={() => void refetch()}
-            />
+      {!isLoading && (error || !view) && (
+        <ErrorBlock
+          message={data?.status === 'error' ? data.message : undefined}
+          onRetry={() => void refetch()}
+        />
+      )}
+
+      {view && (
+        <>
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-rule pb-3 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-baseline gap-3">
+              <span className="font-mono tabular-nums">{m.posts_total({ count: String(view.total) })}</span>
+              {activeTagName && (
+                <FilterChip label={m.posts_filter_tag({ tag: activeTagName })} clear={{ tag: undefined }} />
+              )}
+              {q && <FilterChip label={m.posts_filter_query({ q })} clear={{ q: undefined }} />}
+            </div>
+            <nav className="flex items-baseline">
+              {SORTS.map((key, i) => (
+                <Fragment key={key}>
+                  {i > 0 && <span className="mx-2 text-rule">/</span>}
+                  <Link
+                    to="/posts"
+                    search={(prev) => ({ ...prev, sort: key === 'newest' ? undefined : key })}
+                    resetScroll={false}
+                    className={cn(
+                      'transition-colors hover:text-foreground',
+                      sort === key && 'text-ink underline decoration-ink/50 underline-offset-4',
+                    )}
+                  >
+                    {SORT_LABEL[key]()}
+                  </Link>
+                </Fragment>
+              ))}
+            </nav>
+          </div>
+
+          {view.pinned.length > 0 && (
+            <section className="mt-2">
+              {view.pinned.map((post) => (
+                <PostItem key={post.id} post={post} pinned />
+              ))}
+            </section>
           )}
 
-          {view && (
-            <>
-              <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-rule pb-3 text-xs text-muted-foreground">
-                <div className="flex flex-wrap items-baseline gap-3">
-                  <span className="font-mono tabular-nums">{m.posts_total({ count: String(view.total) })}</span>
-                  {activeTagName && (
-                    <FilterChip label={m.posts_filter_tag({ tag: activeTagName })} clear={{ tag: undefined }} />
-                  )}
-                  {q && <FilterChip label={m.posts_filter_query({ q })} clear={{ q: undefined }} />}
-                </div>
-                <nav className="flex items-baseline">
-                  {SORTS.map((key, i) => (
-                    <Fragment key={key}>
-                      {i > 0 && <span className="mx-2 text-rule">/</span>}
-                      <Link
-                        to="/posts"
-                        search={(prev) => ({ ...prev, sort: key === 'newest' ? undefined : key })}
-                        resetScroll={false}
-                        className={cn(
-                          'transition-colors hover:text-foreground',
-                          sort === key && 'text-ink underline decoration-ink/50 underline-offset-4',
-                        )}
-                      >
-                        {SORT_LABEL[key]()}
-                      </Link>
-                    </Fragment>
-                  ))}
-                </nav>
-              </div>
-
-              {view.pinned.length > 0 && (
-                <section className="mt-2">
-                  {view.pinned.map((post) => (
-                    <PostItem key={post.id} post={post} pinned />
-                  ))}
-                </section>
+          {view.groups.length === 0 ? (
+            <div className="py-20 text-center font-wenkai text-muted-foreground">
+              <p>{m.posts_empty()}</p>
+              {view.isFiltering && (
+                <Link
+                  to="/posts"
+                  search={{ sort: sort === 'newest' ? undefined : sort }}
+                  className="mt-3 inline-block text-sm text-ink underline underline-offset-4"
+                >
+                  {m.posts_clear_filter()}
+                </Link>
               )}
-
-              {view.groups.length === 0 ? (
-                <div className="py-20 text-center font-wenkai text-muted-foreground">
-                  <p>{m.posts_empty()}</p>
-                  {view.isFiltering && (
-                    <Link
-                      to="/posts"
-                      search={{ sort: sort === 'newest' ? undefined : sort }}
-                      className="mt-3 inline-block text-sm text-ink underline underline-offset-4"
-                    >
-                      {m.posts_clear_filter()}
-                    </Link>
-                  )}
-                </div>
-              ) : (
-                view.groups.map((group) => (
-                  <section key={group.year} className="relative mt-12 first-of-type:mt-8">
-                    <h2 className="mb-1 flex items-baseline gap-3 font-wenkai">
-                      <span className="text-5xl leading-none text-ink/25 tabular-nums select-none">{group.year}</span>
-                      <span className="font-mono text-xs text-muted-foreground">
-                        {m.posts_year_count({ count: String(group.posts.length) })}
-                      </span>
-                    </h2>
-                    <ul>
-                      {group.posts.map((post) => (
-                        <li key={post.id}>
-                          <PostItem post={post} dateKey={dateKey} />
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))
-              )}
-            </>
+            </div>
+          ) : (
+            view.groups.map((group) => (
+              <section key={group.year} className="relative mt-12 first-of-type:mt-8">
+                <h2 className="mb-1 flex items-baseline gap-3 font-wenkai">
+                  <span className="text-5xl leading-none text-ink/25 tabular-nums select-none">{group.year}</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {m.posts_year_count({ count: String(group.posts.length) })}
+                  </span>
+                </h2>
+                <ul>
+                  {group.posts.map((post) => (
+                    <li key={post.id}>
+                      <PostItem post={post} dateKey={dateKey} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))
           )}
-        </main>
-
-        <div className="hidden lg:block">
-          <PostsSidebar tags={view?.tags ?? []} activeTag={tag} query={q} />
-        </div>
-      </div>
-    </div>
+        </>
+      )}
+    </PageWithSidebar>
   )
 }
 

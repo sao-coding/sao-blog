@@ -4,6 +4,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { ThinkingList } from './-components/thinking-list'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 export const Route = createFileRoute('/_layout/thinking/')({
   loader: async () => {
@@ -31,7 +32,7 @@ function ThinkingPage() {
 
   return (
     <>
-      <div className="mx-auto mt-28 w-full max-w-5xl px-4 pb-24 lg:mt-32">
+      <div className={pageShellClass}>
         <header className="mb-10 max-w-xl sm:mb-14">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_thinking_title()}</h1>
           <p className="mt-3 font-wenkai text-sm leading-relaxed text-muted-foreground">
