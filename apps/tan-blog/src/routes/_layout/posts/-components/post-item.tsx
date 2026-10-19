@@ -27,15 +27,15 @@ export function PostItem({
   const extraTags = post.tags.length - MAX_VISIBLE_TAGS
 
   return (
-    <article className="group relative grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 border-b border-dashed border-rule py-5 sm:grid-cols-[4rem_minmax(0,1fr)]">
-      <div className="pt-1 font-mono text-xs leading-none text-muted-foreground tabular-nums">
+    <article className="group relative grid grid-cols-[3.75rem_minmax(0,1fr)] gap-x-4 border-b border-dashed border-rule py-5 sm:grid-cols-[4.5rem_minmax(0,1fr)]">
+      <div className="pt-1 font-mono text-sm leading-none text-muted-foreground tabular-nums sm:text-lg">
         {pinned ? (
           <span className="font-wenkai text-sm text-ink">{m.posts_pinned()}</span>
         ) : (
           <>
             <time dateTime={date.toISOString()}>{date.format('MM.DD')}</time>
             {/* 寫作當時的節氣 */}
-            <TermMark date={post[dateKey]} className="mt-1.5 block text-[0.7rem] leading-none" />
+            <TermMark date={post[dateKey]} className="mt-2 block text-sm leading-none sm:text-base" />
           </>
         )}
       </div>
@@ -62,7 +62,7 @@ export function PostItem({
           </p>
         )}
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
           <Link
             to="/categories/$slug"
             params={{ slug: post.category.slug }}

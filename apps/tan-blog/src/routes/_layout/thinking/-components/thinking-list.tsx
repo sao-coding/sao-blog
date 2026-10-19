@@ -69,14 +69,14 @@ export function ThinkingList({ items }: { items: Thinking[] }) {
         <section key={month.key} className="mt-14 first:mt-0">
           <h2 className="mb-6 flex items-baseline gap-2 border-b border-rule pb-2 font-wenkai">
             <span className="text-4xl leading-none text-ink/30 tabular-nums select-none">{month.date.format('MM')}</span>
-            <span className="font-mono text-xs text-muted-foreground">{month.date.format('YYYY')}</span>
+            <span className="font-mono text-sm text-muted-foreground">{month.date.format('YYYY')}</span>
           </h2>
 
           <ol className="flex flex-col gap-8">
             {month.days.map((day) => (
               <li
                 key={day.key}
-                className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-6"
+                className="grid grid-cols-[3.75rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-x-6"
               >
                 <CalendarLeaf date={day.date} />
                 <div className="min-w-0">
@@ -105,7 +105,7 @@ function ThinkingEntry({ thinking }: { thinking: Thinking }) {
       >
         <CommentMarkdownRenderer content={thinking.content} className={MARKDOWN_CLASS} />
       </div>
-      <footer className="mt-2 flex flex-wrap items-baseline gap-x-3 text-xs text-muted-foreground">
+      <footer className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-muted-foreground">
         <time
           dateTime={created.toISOString()}
           title={created.format('YYYY-MM-DD HH:mm')}

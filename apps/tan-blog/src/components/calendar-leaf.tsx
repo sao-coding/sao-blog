@@ -9,8 +9,8 @@ export function CalendarLeaf({ date }: { date: Dayjs }) {
         dateTime={date.format('YYYY-MM-DD')}
         className="flex flex-col items-center rounded-b-sm border border-t-2 border-rule border-t-ink/40 bg-ink-soft pt-1 pb-1.5 [border-top-style:dashed]"
       >
-        <span className="font-wenkai text-[0.7rem] leading-tight text-muted-foreground">{date.format('ddd')}</span>
-        <span className="font-wenkai text-2xl leading-none text-ink tabular-nums sm:text-3xl">{date.format('D')}</span>
+        <span className="font-wenkai text-xs leading-tight text-muted-foreground sm:text-sm">{date.format('ddd')}</span>
+        <span className="font-wenkai text-3xl leading-none text-ink tabular-nums sm:text-4xl">{date.format('D')}</span>
       </time>
     </div>
   )

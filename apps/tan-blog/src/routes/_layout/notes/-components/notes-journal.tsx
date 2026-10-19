@@ -58,14 +58,14 @@ export function NotesJournal({ notes }: { notes: JournalNote[] }) {
         <section key={month.key} id={`m-${month.key}`} className="mt-14 scroll-mt-28 first:mt-0">
           <h2 className="mb-6 flex items-baseline gap-2 border-b border-rule pb-2 font-wenkai">
             <span className="text-4xl leading-none text-ink/30 tabular-nums select-none">{month.date.format('MM')}</span>
-            <span className="font-mono text-xs text-muted-foreground">{month.date.format('YYYY')}</span>
+            <span className="font-mono text-sm text-muted-foreground">{month.date.format('YYYY')}</span>
           </h2>
 
           <ol className="flex flex-col gap-8">
             {month.days.map((day) => (
               <li
                 key={day.key}
-                className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-6"
+                className="grid grid-cols-[3.75rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-x-6"
               >
                 <CalendarLeaf date={day.date} />
                 <div className="min-w-0">
@@ -104,7 +104,7 @@ function JournalEntry({ note }: { note: JournalNote }) {
       {note.excerpt && (
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{note.excerpt}</p>
       )}
-      <footer className="mt-2 flex flex-wrap items-baseline gap-x-2 text-xs text-muted-foreground">
+      <footer className="mt-2 flex flex-wrap items-baseline gap-x-2 text-sm text-muted-foreground">
         <time dateTime={created.toISOString()} className="font-mono tabular-nums">
           {created.format('HH:mm')}
         </time>
