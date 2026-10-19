@@ -24,7 +24,7 @@ async function fetchApi<T>(path: string): Promise<T | null> {
 }
 
 /**
- * 在伺服器端把文章／日記的 MDX 內容編譯成可在 client 端 <MDXClient> 渲染的格式。
+ * 在伺服器端把文章／日記的 MDX 內容編譯成hast JSON，交給 client 端 <CompiledMdx> 渲染。
  * 與正式頁面共用同一組 remark/rehype 設定，確保預覽 = 渲染後的版本。
  */
 export const getArticlePreview = createServerFn({ method: 'GET' })
@@ -40,7 +40,7 @@ export const getArticlePreview = createServerFn({ method: 'GET' })
 
       return {
         ok: true,
-        serialized: { compiledSource: compiled.compiledSource },
+        compiled: compiled.compiled,
         meta: {
           title: note.title,
           href: `/notes/${id}`,
@@ -63,7 +63,7 @@ export const getArticlePreview = createServerFn({ method: 'GET' })
 
     return {
       ok: true,
-      serialized: { compiledSource: compiled.compiledSource },
+      compiled: compiled.compiled,
       meta: {
         title: post.title,
         href: `/posts/${id}`,

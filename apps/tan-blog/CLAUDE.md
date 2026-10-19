@@ -7,7 +7,7 @@
 ### 关键决策（见 MIGRATION-TDD.md）
 
 - **资料层**：oRPC over HTTP → `apps/server`（Elysia）；tan-blog 仅消费端
-- **MDX**：`@mdx-js/mdx evaluate()` + 既有 unified pipeline；内容来自 API，非文件系统
+- **MDX**：伺服器端用 `@sao-blog/mdx` 的 `compileMdx` 编译成 **hast JSON**（纯资料），client 端 `<CompiledMdx>` 依元件对照表渲染，不执行任何 MDX/JS；内容来自 API，非文件系统
 - **i18n**：Paraglide JS 2，zh-Hant（base）/ en / ja，URL 前缀路由
 - **Rendering**：文章/日记/专栏详情页 SSR + Nitro ISR 快取（`src/lib/isr/*.ts`，非 build-time prerender）；列表页 SSR + 短 TTL
 - **Theme**：shadcn ScriptOnce ThemeProvider（预设浅色宣纸，暗色为「夜读」可切换）
@@ -35,8 +35,8 @@ tan-blog/
 │   ├── components/
 │   │   ├── ui/              ← shadcn/ui × 40+ 元件
 │   │   ├── mdx/
-│   │   │   ├── parsers.ts   ← Shiki + remark/rehype 完整 pipeline
-│   │   │   ├── mdx-content.tsx ← client 端 MDX 运行时
+│   │   │   ├── index.tsx    ← 元件对照表（`blockComponents` 以 satisfies 对齐 registry）
+│   │   │   ├── renderers/unknown.tsx ← 未知元件降级显示
 │   │   │   └── renderers/   ← Alert/Tabs/Carousel/Mermaid/ECharts 等
 │   │   ├── layout/          ← Header/Footer/FAB
 │   │   ├── animation/       ← Motion 动画
@@ -44,8 +44,8 @@ tan-blog/
 │   ├── lib/
 │   │   ├── orpc.ts          ← oRPC client（SSR headers 转发）
 │   │   ├── mdx/
-│   │   │   ├── compile.ts   ← compileMdx Server Fn
-│   │   │   └── parsers.ts   ← Shiki/remark/rehype 配置
+│   │   │   ├── compile-source.ts ← 包装 @sao-blog/mdx 的 compileMdx（失败丢 MdxCompileError）
+│   │   │   ├── compile.ts   ← compileMdx Server Fn；compiled-mdx.tsx ← hast JSON renderer
 │   │   └── with-retry.ts    ← prerender 网络抖动保护
 │   ├── store/               ← Zustand stores（Theme/Search/Comment 等）
 │   ├── hooks/               ← 自製 React hooks
@@ -126,7 +126,7 @@ tan-blog/
    </Alert>
    ```
 
-3. **新元件须加到 MDX runtime（`mdx-content.tsx` 的 `components` 对象）**
+3. **新元件须先在 `packages/mdx/src/registry.ts` 登记 zod props schema（编译时验证），再加到 `components/mdx/index.tsx` 的 `blockComponents`**（未登记的元件编译会失败）
 
 ### 国际化 (i18n)
 
@@ -353,7 +353,7 @@ tan-blog 自己的 Nitro server，不依赖任何外部 CDN/Caddy/Nginx purge：
 - [ ] `pnpm --filter tan-blog typecheck` 无错误
 - [ ] 新路由文件已创建、loader/head/component 完整
 - [ ] 新 i18n 文案已同步三语 `messages/*.json`
-- [ ] 新 MDX 元件已加入 `mdx-content.tsx` 的 `components`
+- [ ] 新 MDX 元件已登记到 `packages/mdx` registry，并加入 `components/mdx/index.tsx` 的 `blockComponents`
 - [ ] 若改动 route/cache headers，已验证 SEO meta 与 canonical 正确
 - [ ] 若改 oRPC 调用，已在 loader 中用 `getRequestHeaders()` 转发 cookie（认证）
 

@@ -1,23 +1,8 @@
-import type { CompileOptions } from '@mdx-js/mdx'
-import remarkGfm from 'remark-gfm'
-import remarkBreaks from 'remark-breaks'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import remarkFlexibleToc from 'remark-flexible-toc'
-import rehypeSlug from 'rehype-slug'
+import type { Element, Root, RootContent } from 'hast'
 import { createHighlighterCore, type HighlighterCore } from 'shiki/core'
 import { createOnigurumaEngine } from 'shiki/engine/oniguruma'
 import { transformerMetaHighlight } from '@shikijs/transformers'
 import { transformerColorizedBrackets } from '@shikijs/colorized-brackets'
-
-type HastNode = {
-  type: string
-  tagName?: string
-  properties?: Record<string, unknown>
-  children?: HastNode[]
-  value?: string
-  data?: { meta?: string }
-}
 
 // 淺色用 kanagawa-lotus（取自北齋浮世繪的暖紙色系），和宣紙底比較搭
 const SHIKI_THEMES = { light: 'kanagawa-lotus', dark: 'github-dark' } as const
@@ -29,8 +14,8 @@ const SHIKI_THEMES = { light: 'kanagawa-lotus', dark: 'github-dark' } as const
 // 連帶載入，讓單純用 `langs` 排除 'mermaid' 失效）。
 // 清單以外的語言會 fallback 顯示成純文字（見下面 targetLang 邏輯）。
 // 每個語言要各自寫一個 import()（不能用變數組字串動態 import），
-// 否則 Turbopack 沒辦法對 package.json 的 exports 做 pattern 解析。
-const SHIKI_LANGS = [
+// 否則 bundler 沒辦法對 package.json 的 exports 做 pattern 解析。
+const loadLangs = () => [
   import('@shikijs/langs/typescript'),
   import('@shikijs/langs/javascript'),
   import('@shikijs/langs/jsx'),
@@ -68,11 +53,10 @@ const SHIKI_LANGS = [
 ]
 
 // `mermaid`/`echarts` fenced blocks 是圖表原始碼，不是要高亮的程式碼，
-// 交給 index.tsx 的 code 元件攔截渲染成圖表。
-const DIAGRAM_LANGS = new Set(['mermaid', 'echarts'])
+// 保留原始 <pre><code> 交給各端 renderer 渲染成圖表。
+export const DIAGRAM_LANGS = new Set(['mermaid', 'echarts'])
 
-// fine-grained bundle 需要自己維護 singleton（不像 getSingletonHighlighter
-// 是套件內建的），避免每次編譯 MDX 都重新載入一次語言/主題。
+// fine-grained bundle 需要自己維護 singleton，避免每次編譯都重新載入語言/主題。
 let highlighterPromise: Promise<HighlighterCore> | undefined
 function getHighlighter() {
   highlighterPromise ??= createHighlighterCore({
@@ -80,25 +64,29 @@ function getHighlighter() {
       import('@shikijs/themes/kanagawa-lotus'),
       import('@shikijs/themes/github-dark'),
     ],
-    langs: SHIKI_LANGS,
+    langs: loadLangs(),
     engine: createOnigurumaEngine(() => import('shiki/wasm')),
   })
   return highlighterPromise
 }
 
-function hastToText(node: HastNode): string {
-  if (node.type === 'text') return node.value ?? ''
-  return node.children?.map(hastToText).join('') ?? ''
+const isElement = (node: unknown): node is Element =>
+  (node as Element | undefined)?.type === 'element'
+
+export function hastToText(node: Root | RootContent): string {
+  if (node.type === 'text') return node.value
+  if ('children' in node) return node.children.map(hastToText).join('')
+  return ''
 }
 
-function getCodeNode(preNode: HastNode): HastNode | undefined {
-  return preNode.children?.find(
-    (child) => child.type === 'element' && child.tagName === 'code'
+function getCodeNode(preNode: Element): Element | undefined {
+  return preNode.children.find(
+    (child): child is Element => isElement(child) && child.tagName === 'code'
   )
 }
 
-function getLanguage(codeNode: HastNode): string | undefined {
-  const classes = codeNode.properties?.className
+export function getLanguage(codeNode: Element): string | undefined {
+  const classes = codeNode.properties.className
   if (!Array.isArray(classes)) return undefined
   const languageClass = classes.find(
     (c): c is string => typeof c === 'string' && c.startsWith('language-')
@@ -109,18 +97,22 @@ function getLanguage(codeNode: HastNode): string | undefined {
 // 自己寫 rehype plugin（而不是用 @shikijs/rehype 這個現成套件）的原因：
 // 我們需要在「拿到語言」的那一刻就決定要不要跳過，讓 mermaid/echarts 完全
 // 不經過 shiki；@shikijs/rehype 沒有這種依語言排除單一節點的 hook。
-function rehypeCodeHighlight() {
-  return async (tree: HastNode) => {
+export function rehypeCodeHighlight() {
+  return async (tree: Root) => {
     const highlighter = await getHighlighter()
     const loadedLangs = new Set(highlighter.getLoadedLanguages())
 
-    const targets: { parent: HastNode; index: number; node: HastNode }[] = []
-    const collect = (node: HastNode, parent?: HastNode, index?: number) => {
-      if (node.type === 'element' && node.tagName === 'pre') {
-        if (parent && index !== undefined) targets.push({ parent, index, node })
-        return // <pre> 不會巢狀 <pre>，不用往下找
-      }
-      node.children?.forEach((child, i) => collect(child, node, i))
+    const targets: { parent: Root | Element; index: number; node: Element }[] =
+      []
+    const collect = (node: Root | Element) => {
+      node.children.forEach((child, index) => {
+        if (!isElement(child)) return
+        if (child.tagName === 'pre') {
+          targets.push({ parent: node, index, node: child })
+          return // <pre> 不會巢狀 <pre>，不用往下找
+        }
+        collect(child)
+      })
     }
     collect(tree)
 
@@ -129,7 +121,6 @@ function rehypeCodeHighlight() {
       if (!codeNode) continue
 
       const lang = getLanguage(codeNode)
-      // 一偵測到是圖表語言就直接跳過，保留原始 <pre><code> 給 Mermaid/Echarts 用
       if (lang && DIAGRAM_LANGS.has(lang)) continue
 
       // 沒標語言、或標了 shiki 不支援的語言（例如 caddyfile），一律當作 text
@@ -140,39 +131,29 @@ function rehypeCodeHighlight() {
 
       // fenced code block 語言後面接的 meta 字串（例如 ```ts {1,3-5}```）
       // 交給 transformerMetaHighlight 解析成要高亮的行號範圍
-      const metaRaw = codeNode.data?.meta ?? ''
+      const metaRaw = (codeNode.data as { meta?: string } | undefined)?.meta ?? ''
 
       const highlighted = highlighter.codeToHast(code, {
         lang: targetLang,
         themes: SHIKI_THEMES,
         defaultColor: false,
         meta: { __raw: metaRaw },
-        transformers: [transformerMetaHighlight(), transformerColorizedBrackets()],
-      }) as unknown as { children: HastNode[] }
+        transformers: [
+          transformerMetaHighlight(),
+          transformerColorizedBrackets(),
+        ],
+      })
 
       const newPre = highlighted.children[0]
-      const newCode = newPre && getCodeNode(newPre)
+      if (!isElement(newPre)) continue
+      const newCode = getCodeNode(newPre)
       if (newCode) {
         newCode.properties = {
           ...newCode.properties,
           className: [`language-${targetLang}`],
         }
       }
-      parent.children![index] = newPre
+      parent.children[index] = newPre
     }
   }
 }
-
-// 完整 MDX 配置（用於文章，包含 TOC、數學、KaTeX 等）
-const getMdxOptions = (): Pick<CompileOptions, 'remarkPlugins' | 'rehypePlugins'> => ({
-  remarkPlugins: [remarkGfm, remarkBreaks, remarkMath, remarkFlexibleToc],
-  rehypePlugins: [rehypeKatex, rehypeSlug, rehypeCodeHighlight],
-})
-
-// 較輕量的 MDX 配置（用於日記/備註，只需要 GFM 與 slug）
-export const getBasicMdxOptions = (): Pick<CompileOptions, 'remarkPlugins' | 'rehypePlugins'> => ({
-  remarkPlugins: [remarkGfm, remarkBreaks, remarkFlexibleToc],
-  rehypePlugins: [rehypeSlug, rehypeCodeHighlight],
-})
-
-export default getMdxOptions

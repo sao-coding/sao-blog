@@ -6,8 +6,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useCallback, useMemo } from 'react'
 
 import { ErrorComponent } from '@/components/index'
-import { defaultMDXComponents } from '@/components/mdx'
-import { MdxContent } from '@/lib/mdx/mdx-content'
+import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -116,10 +115,7 @@ export function ArticlePreviewModalContent() {
                 />
               )}
               <article className="prose dark:prose-invert max-w-full">
-                <MdxContent
-                  compiledSource={result.serialized.compiledSource}
-                  components={defaultMDXComponents}
-                />
+                <CompiledMdx compiled={result.compiled} />
               </article>
             </>
           )}

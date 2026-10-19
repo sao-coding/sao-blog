@@ -1,3 +1,5 @@
+import type { CompiledContent } from '@sao-blog/mdx/types'
+
 export type PreviewKind = 'post' | 'note'
 
 export interface PreviewMeta {
@@ -14,7 +16,7 @@ export interface PreviewMeta {
 export type PreviewResult =
   | {
       ok: true
-      serialized: { compiledSource: string }
+      compiled: CompiledContent
       meta: PreviewMeta
     }
   | { ok: false; message: string }

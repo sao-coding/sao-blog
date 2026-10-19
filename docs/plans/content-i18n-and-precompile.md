@@ -1,6 +1,10 @@
 # 文章 / 日記多語言 + 發布時預編譯 — 改動計畫
 
-> 狀態：計畫（尚未實作）・日期：2026-10-19
+> 狀態：實作中（PR1 編譯管線已完成，見 §8）・日期：2026-10-19
+>
+> ⚠️ **前台目標改為 `apps/tan-blog`（`tanstack` 分支）**，下文提到 `apps/mdx-blog` 的前台部分一律改讀 tan-blog。
+> tan-blog 已有 Paraglide 與 URL 前綴路由（`zh-Hant` / `en` / `ja`），§5 第 1 點大部分已存在；
+> 但本計畫的語系代碼寫 `zh-TW`，與 tan-blog 的 `zh-Hant` 不一致 —— **PR2 開工前需定案**（建議 DB 直接沿用 `zh-Hant`，與 Paraglide 單一來源一致）。
 > 背景討論結論：維持 **MDX 為原始格式**（不換 WYSIWYG/Lexical），渲染改為**發布時預編譯**，並加入**多語言**。
 
 ## 0. 已確認的決策
@@ -290,6 +294,9 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 ## 8. 實作順序（建議切 PR）
 
 1. **PR1 – 編譯管線**：抽出 `compileMdx` + registry + 盤點/改寫不相容文章；前台改渲染 compiled（仍讀舊欄位，先加 `compiled` 暫存欄位或記憶體快取）— 可獨立驗證效能
+   - ✅ 已完成：新 package `packages/mdx`（`compileMdx`、zod registry、`registry.schema.json`、`scripts/audit.ts`）；tan-blog 的 `lib/mdx/compile-source.ts` 改用它產出 hast JSON，文章 / 日記 / 預覽改由 `<CompiledMdx>`（`lib/mdx/compiled-mdx.tsx`）渲染，取代原本的 function-body + `runSync`；快取沿用既有 Nitro ISR（`lib/isr/*`）；移除 `components/mdx/parsers.ts`、`lib/mdx/mdx-content.tsx`
+   - 盤點結果（2026-10-19，正式站已發布內容）：14 篇文章、19 篇日記**全數通過**，無需改寫。草稿未盤點
+   - 未清：tan-blog 的 `@mdx-js/mdx`、`gray-matter`、remark/rehype/shiki 依賴已不再使用，留到 PR7 一併移除
 2. **PR2 – Schema + 資料遷移**：translation 表、relations、data migration（舊欄位保留）
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
@@ -314,7 +321,7 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 
 ## 10. 待實作時確認
 
-- 現有文章是否用到 MDX JS 表達式 / `export`（決定 hast JSON 方案可行性）
+- ~~現有文章是否用到 MDX JS 表達式 / `export`~~ → 已發布內容皆未使用，hast JSON 方案可行（草稿待確認）
 - notes 的 `mood` / `weather` 是自由文字還是固定選項（決定放主表或翻譯表）
 - 預設語系 URL 是否省略前綴（本計畫假設省略）
 - Typesense 版本的 CJK 分詞設定方式（決定每語系 collection vs 每語系欄位；預設每語系 collection）

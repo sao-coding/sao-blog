@@ -1,7 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { getCachedPost } from '@/lib/isr/post'
-import { MdxContent } from '@/lib/mdx/mdx-content'
-import { defaultMDXComponents } from '@/components/mdx'
+import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
 import { blogPostingJsonLd, pageHead } from '@/lib/seo'
 import { postOgImagePath } from '@/lib/og/og-url'
 import { PostClientPage } from './-components/post-client-page'
@@ -79,7 +78,7 @@ function PostDetailPage() {
         url: `/posts/${slug}`,
       }}
     >
-      <MdxContent compiledSource={data.compiledSource} components={defaultMDXComponents} />
+      <CompiledMdx compiled={data.compiled} />
     </PostClientPage>
   )
 }

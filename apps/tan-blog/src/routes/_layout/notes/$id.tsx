@@ -1,7 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { getCachedNote } from '@/lib/isr/note'
-import { MdxContent } from '@/lib/mdx/mdx-content'
-import { defaultMDXComponents } from '@/components/mdx'
+import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
 import { blogPostingJsonLd, pageHead } from '@/lib/seo'
 import { noteOgImagePath } from '@/lib/og/og-url'
 import { mdxToPlainText } from '@/lib/plain-text'
@@ -69,7 +68,7 @@ function NoteDetailPage() {
         }}
         toc={note.toc}
       >
-        <MdxContent compiledSource={note.compiledSource} components={defaultMDXComponents} />
+        <CompiledMdx compiled={note.compiled} />
       </NoteClientPage>
     </div>
   )
