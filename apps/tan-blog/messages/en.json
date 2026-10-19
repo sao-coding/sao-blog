@@ -113,5 +113,6 @@
   "notes_empty": "No diary entries yet",
   "notes_empty_hint": "There are no entries yet, or the server could not be reached. Please try again later.",
   "notes_weather": "Weather",
-  "notes_mood": "Mood"
+  "notes_mood": "Mood",
+  "posts_filter_toggle": "Search · Tags"
 }

@@ -185,12 +185,13 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                         : { slug: article.slug }) as any
                     }
                     onClick={(e) => handlePreviewClick(e, goTo)}
-                    className="flex items-baseline gap-6 transition-colors"
+                    className="flex items-baseline gap-3 transition-colors md:gap-6"
                   >
-                    <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24 group-hover:text-primary">
+                    <time className="w-8 shrink-0 text-sm text-muted-foreground tabular-nums group-hover:text-primary md:w-24">
                       {day}
                     </time>
-                    <span className="text-foreground transition-colors truncate">
+                    {/* 手機版允許換行（最多兩行），寬螢幕才截成一行 */}
+                    <span className="line-clamp-2 min-w-0 text-foreground transition-colors md:line-clamp-1">
                       {article.title}
                     </span>
                     <span className="ml-auto text-sm text-muted-foreground hidden md:inline">

@@ -247,7 +247,7 @@ function AppIcon({ windowInfo, appIcons, appDescriptions }: AppIconProps) {
 
   return (
     <div className="size-10 p-1">
-      <div className="rounded-md flex h-full w-full items-center justify-center text-sm bg-slate-100 text-slate-700">
+      <div className="flex h-full w-full items-center justify-center rounded-md border border-border bg-muted text-sm text-muted-foreground">
         {(windowInfo.process && windowInfo.process.charAt(0)) ?? '#'}
       </div>
     </div>

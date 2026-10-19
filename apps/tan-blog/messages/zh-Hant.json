@@ -113,5 +113,6 @@
   "notes_empty": "還沒有任何日記",
   "notes_empty_hint": "目前沒有任何日記，或無法連線至伺服器。請稍後再試。",
   "notes_weather": "天氣",
-  "notes_mood": "心情"
+  "notes_mood": "心情",
+  "posts_filter_toggle": "搜尋・標籤"
 }

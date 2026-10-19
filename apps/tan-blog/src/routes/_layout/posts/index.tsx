@@ -123,6 +123,18 @@ function PostsIndexPage() {
         <p className="mt-3 font-wenkai text-sm text-muted-foreground">{m.posts_subtitle()}</p>
       </header>
 
+      {/* 手機版：側欄隱藏，搜尋與標籤改放在列表上方的折疊區；有篩選條件時預設展開 */}
+      {view && (
+        <details open={Boolean(tag || q)} className="mb-8 rounded-xl border border-rule bg-card/40 lg:hidden">
+          <summary className="cursor-pointer px-4 py-3 font-wenkai text-sm text-muted-foreground">
+            {m.posts_filter_toggle()}
+          </summary>
+          <div className="px-4 pb-4">
+            <PostsSidebar tags={view.tags} activeTag={tag} query={q} inline />
+          </div>
+        </details>
+      )}
+
       {isLoading && <ListSkeleton />}
 
       {!isLoading && (error || !view) && (

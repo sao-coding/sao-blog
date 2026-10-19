@@ -113,5 +113,6 @@
   "notes_empty": "まだ日記はありません",
   "notes_empty_hint": "日記がまだないか、サーバーに接続できません。しばらくしてからもう一度お試しください。",
   "notes_weather": "天気",
-  "notes_mood": "気分"
+  "notes_mood": "気分",
+  "posts_filter_toggle": "検索・タグ"
 }

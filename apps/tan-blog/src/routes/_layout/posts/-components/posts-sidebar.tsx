@@ -16,10 +16,13 @@ export function PostsSidebar({
   tags,
   activeTag,
   query,
+  inline = false,
 }: {
   tags: TagStat[]
   activeTag?: string
   query?: string
+  // inline：手機版放在列表上方的折疊區裡，不要 sticky、卡片外框與「回到頂部」
+  inline?: boolean
 }) {
   const navigate = useNavigate({ from: '/posts/' })
   const [draft, setDraft] = useState(query ?? '')
@@ -41,7 +44,12 @@ export function PostsSidebar({
   const visibleTags = expanded ? tags : tags.slice(0, COLLAPSED_TAG_COUNT)
 
   return (
-    <aside className="sticky top-28 flex flex-col gap-8 rounded-xl border border-rule bg-card/40 p-5 text-sm backdrop-blur-sm">
+    <aside
+      className={cn(
+        'flex flex-col gap-8 text-sm',
+        !inline && 'sticky top-28 rounded-xl border border-rule bg-card/40 p-5 backdrop-blur-sm',
+      )}
+    >
       <label className="block">
         <span className="font-wenkai text-xs text-muted-foreground">{m.posts_search_label()}</span>
         <span className="mt-1 flex items-center gap-2 border-b border-dashed border-rule pb-1.5 focus-within:border-solid focus-within:border-ink/60">
@@ -91,14 +99,16 @@ export function PostsSidebar({
         </section>
       )}
 
-      <button
-        type="button"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="flex items-center gap-1.5 self-start font-wenkai text-xs text-muted-foreground hover:text-ink"
-      >
-        <ArrowUpIcon className="size-3.5" />
-        {m.fab_back_to_top()}
-      </button>
+      {!inline && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="flex items-center gap-1.5 self-start font-wenkai text-xs text-muted-foreground hover:text-ink"
+        >
+          <ArrowUpIcon className="size-3.5" />
+          {m.fab_back_to_top()}
+        </button>
+      )}
     </aside>
   )
 }
