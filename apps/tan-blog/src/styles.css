@@ -624,3 +624,41 @@
     transition: none;
   }
 }
+
+/* ── 紙膠帶（washi tape）───────────────────────────────────────────────────
+ * - 半透明底色，能透出底下的紙與背景；斜紋＋上亮下暗模擬和紙的纖維與光澤
+ * - 兩端用 clip-path 鋸齒做出手撕的毛邊
+ * - clip-path 會裁掉自身的 box-shadow，所以陰影放在外層 .washi-tape 用 drop-shadow
+ * 用 --tape 換顏色、--tape-rotate 換角度。
+ */
+.washi-tape {
+  --tape: oklch(0.8 0.045 190 / 0.62);
+  --tape-rotate: -6deg;
+  position: absolute;
+  z-index: 1;
+  top: -0.85rem;
+  left: 42%;
+  width: 7.25rem;
+  height: 1.7rem;
+  translate: -50% 0;
+  rotate: var(--tape-rotate);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.22));
+  pointer-events: none;
+}
+.washi-tape::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--tape);
+  background-image:
+    linear-gradient(180deg, rgb(255 255 255 / 0.28), transparent 45%, rgb(0 0 0 / 0.06)),
+    repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.1) 0 3px, transparent 3px 8px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  clip-path: polygon(
+    3px 0, calc(100% - 2px) 0,
+    100% 9%, calc(100% - 3px) 20%, 100% 31%, calc(100% - 2px) 44%, 100% 56%,
+    calc(100% - 3px) 68%, 100% 80%, calc(100% - 2px) 91%, calc(100% - 4px) 100%,
+    2px 100%,
+    0 89%, 3px 77%, 0 66%, 2px 53%, 0 41%, 3px 29%, 0 17%, 2px 7%
+  );
+}
