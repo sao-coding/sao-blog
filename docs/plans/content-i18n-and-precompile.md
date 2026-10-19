@@ -16,6 +16,9 @@
 | Topics、Thinkings | 本次不處理（之後可比照） |
 | 支援語系 | `zh-TW`（預設 / 原文）、`en`、`ja` — 以 Paraglide 設定為單一來源 |
 | i18n 框架 | **Paraglide JS**（與 tan-blog 一致） |
+| 編譯產物 | **hast JSON**（§3 方案 A），作為 Web / 未來 Android App 共用的跨平台渲染契約 |
+| 搜尋引擎 | **Typesense**（§6.5） |
+| 互動元件擴充方向 | **未決定**（暫不實作，見 §3.1） |
 
 ## 1. 現況（相關檔案）
 
@@ -145,6 +148,20 @@ compileMdx(source: string): Promise<
 - 寫入路徑：create/update translation 時呼叫 `compileMdx`；失敗回傳 `{ status: 'error', errors }`，**不存檔**（AI 可依錯誤自行修正）
 - 讀取路徑：`compiledHash !== hash(content)` 或 `compiled` 為空 → lazy 重編並回寫（相容舊資料 / plugin 升版）
 - 加一個 admin 端點 `recompileAll`，plugin 鏈改版時批次重編
+- 編譯成功後觸發搜尋索引同步（§6.5）
+
+### 3.1 跨平台渲染契約（為未來 Android App 預留）
+
+MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資料，任何平台皆可走訪渲染。因此：
+
+- **確定採用方案 A（hast JSON）**，不採方案 B（App 端將需要 JS 引擎）
+- 元件 props **只允許純資料**（string / number / boolean / 陣列 / 物件），禁止函式與 JS 表達式；編譯時驗證
+- 元件 registry 的 props 定義用 **zod**，並可匯出 **JSON Schema**（`registry.schema.json`），作為 Web / React Native / Kotlin 各端實作的共同規格
+- hast JSON 結構加上版本號（`compiled: { v: 1, tree: HastRoot }`），結構變更時遞增，客戶端可判斷相容性
+- 渲染端遇到**未知元件**必須降級顯示（fallback 區塊 + 「於網頁查看」連結），不得崩潰；Web renderer 同樣實作此行為
+- 公開 API 回傳 `compiled` + `toc`，App 端不做任何 MDX 處理
+
+> ⚠️ **互動元件擴充方向尚未決定**（例如股票、地圖、圖表、一次性互動區塊的作法：資料驅動通用元件 vs 沙盒 iframe 等）。本計畫**只建立 registry 機制與上述契約**，沿用現有元件（Alert / Accordion / Tabs / Carousel / Progress / Benchmark / CustomQuote / mermaid / echarts），**不新增任何元件**。待方向確定後另開計畫。
 
 ## 4. API 變更（packages/api）
 
@@ -196,6 +213,68 @@ compileMdx(source: string): Promise<
 - 分類表單：各語言 name / description 欄位
 - 只新增 route 檔，**不要手改 `routeTree.gen.ts`**
 
+## 6.5 搜尋（Typesense）
+
+目前 repo 沒有任何全文搜尋實作。
+
+### 基礎設施
+
+- `packages/db/docker-compose.yml` 新增 `typesense` service（`typesense/typesense:<固定版本>`，port 8108，volume 持久化，healthcheck `/health`）
+- `packages/env`：
+  - server：`TYPESENSE_HOST`、`TYPESENSE_PORT`、`TYPESENSE_PROTOCOL`、`TYPESENSE_ADMIN_API_KEY`
+  - web（前台）：`NEXT_PUBLIC_TYPESENSE_HOST`… + `NEXT_PUBLIC_TYPESENSE_SEARCH_KEY`
+- **Search-only key**：用 admin key 產生 scoped search key（`filter_by: status:=published`，只允許 `documents:search`），前台只能拿到這把；admin key 絕不進 client bundle
+- 新增 `packages/search`（或 `packages/api/src/lib/search/`）：Typesense client、collection schema、索引函式
+
+### Collection 設計
+
+單一 collection `contents`，**一筆文件 = 一篇內容的一個語言版本**：
+
+```ts
+{
+  id: `${type}:${refId}:${locale}`,   // 例 post:<uuid>:en
+  type: 'post' | 'note',               // facet
+  refId: string,
+  locale: 'zh-TW' | 'en' | 'ja',       // facet，查詢時 filter_by locale
+  slug: string,                        // post 用；note 用 id
+  title: string,
+  summary: string,
+  content: string,                     // compileMdx 產出的 plainText
+  headings: string[],                  // 由 toc 取得，加權搜尋
+  categoryId?: string, categoryName?: string,   // facet（當語系分類名）
+  tags?: string[],                     // facet（tags 不翻譯）
+  topicId?: string,                    // note
+  cover?: string,
+  status: 'published',                 // 只索引已發布者
+  isFallback: false,
+  createdAt: int64, updatedAt: int64   // 排序
+}
+```
+
+- **分詞**：中、日文需 Typesense 的 CJK 支援 —— 欄位設 `locale` 對應 `"locale": "zh"` / `"ja"`（Typesense 欄位層級 locale 設定）；因同一欄位要混語系，建議改為**每語系獨立欄位**（`title_zh`、`title_en`、`title_ja`…）或**每語系一個 collection**（`contents_zh-TW`、`contents_en`、`contents_ja`）。實作時以 Typesense 目前版本文件確認 CJK 分詞方式後擇一，**預設採每語系一個 collection**（schema 最單純、可各自設定 locale）
+- `query_by`: `title,headings,summary,content`，權重 `4,3,2,1`
+- 高亮：`highlight_fields: content`，搭配 `snippet_threshold`
+
+### 同步策略
+
+- **寫入時同步（主要）**：`upsertPostTranslation` / `upsertNoteTranslation` / 狀態變更 / 刪除後，呼叫 `indexContent(type, refId, locale)`：
+  - 已發布（主表與 translation 皆 published）→ upsert 文件
+  - 否則 → 刪除該文件
+  - 分類改名 → 重新索引該分類下文件
+  - 同步失敗只記 log、不阻擋存檔；寫入 `search_sync_failures`（或簡單用 log + 下方全量重建修補）
+- **全量重建**：admin 端點 `reindexAll`（建立新 collection → 寫入 → 切換 alias → 刪舊），用 Typesense **collection alias** 達成零停機；schema 變更時使用
+- 未翻譯語系**不建立 fallback 文件**（避免搜尋結果重複）；前台搜尋 `/en` 時只搜 en，可提供「搜尋所有語言」選項
+
+### API / 前台 / 後台
+
+- 前台搜尋可二選一：
+  - **直接從瀏覽器打 Typesense**（scoped search key，延遲最低，可用 `typesense-instantsearch-adapter` 或自寫）
+  - 或經 `packages/api` 新增 `search.query({ q, locale, type?, page })` proxy（方便加 rate limit、統一回傳格式，App 也能共用）
+  - 建議：**提供 API proxy 作為正式介面**（App / MCP 共用），前台 ⌘K 搜尋框可直接打 Typesense 以求即時
+- 前台 UI：header 加搜尋入口 + ⌘K command palette（`packages/ui` 已有 `command.tsx`），結果顯示標題、類型、高亮片段，點擊導向 locale 對應網址
+- MCP：新增 `content_search` 工具（AI 發文前可查相關舊文、做內部連結）
+- 後台：設定頁或 dashboard 加「重建索引」按鈕與索引狀態（文件數、最後同步時間）
+
 ## 7. 資料遷移
 
 單一 drizzle migration（`pnpm --filter db db:generate` 後手動補 data migration SQL）：
@@ -215,8 +294,10 @@ compileMdx(source: string): Promise<
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
 5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、Paraglide 設定與 middleware、hreflang、語言切換、fallback 提示
-6. **PR6 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
-7. （後續）AI 翻譯流程：MCP 一鍵翻譯、mdast 區塊級增量翻譯、後台即時預覽 Worker 化
+6. **PR6 – 搜尋**：Typesense docker / env、`packages/search`、collection + alias、寫入時同步、`reindexAll`、搜尋 API proxy、前台 ⌘K、MCP `content_search`（依賴 PR3 的 translation 寫入路徑與 PR1 的 plainText）
+7. **PR7 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
+8. （後續）AI 翻譯流程：MCP 一鍵翻譯、mdast 區塊級增量翻譯、後台即時預覽 Worker 化
+9. （後續，方向未定）互動元件擴充；Android App 渲染端
 
 ## 9. 驗收
 
@@ -226,6 +307,9 @@ compileMdx(source: string): Promise<
 - MCP 可建立文章、新增英文翻譯、預覽驗證錯誤
 - 修改原文後，後台譯文顯示「過期」
 - hreflang 與 sitemap 正確
+- `compiled` 帶版本號；registry 可匯出 JSON Schema；未知元件降級顯示不崩潰
+- 發布 / 修改 / 下架文章後，Typesense 對應語系文件同步更新或刪除；`reindexAll` 透過 alias 零停機完成
+- 中文、日文、英文關鍵字皆能搜到對應語系文章，且只回傳已發布內容；前台 bundle 不含 admin key
 - 型別檢查與 build 通過：`pnpm turbo build typecheck`
 
 ## 10. 待實作時確認
@@ -233,3 +317,6 @@ compileMdx(source: string): Promise<
 - 現有文章是否用到 MDX JS 表達式 / `export`（決定 hast JSON 方案可行性）
 - notes 的 `mood` / `weather` 是自由文字還是固定選項（決定放主表或翻譯表）
 - 預設語系 URL 是否省略前綴（本計畫假設省略）
+- Typesense 版本的 CJK 分詞設定方式（決定每語系 collection vs 每語系欄位；預設每語系 collection）
+- Typesense 部署位置（自架 docker 與 Postgres 同機，或 Typesense Cloud）
+- 互動元件擴充方向（另開計畫）
