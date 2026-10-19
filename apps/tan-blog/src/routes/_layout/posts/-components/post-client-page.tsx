@@ -52,8 +52,9 @@ export function PostClientPage({
   }, [postId, setOverridePath])
 
   return (
-    <div className="container m-auto mt-[120px] max-w-7xl px-2 md:px-6 lg:px-4 xl:px-0">
-      <div className="relative flex min-h-[120px] grid-cols-[auto_200px] lg:grid">
+    // 比照 innei.in 文章頁：文章 920px ＋ 間距 16px ＋ 目錄 200px，整組 1136px 置中；lg 以下只留文章
+    <div className="mx-auto mt-[120px] w-full max-w-[1136px] px-4 xl:px-0">
+      <div className="relative min-h-[120px] lg:grid lg:grid-cols-[minmax(0,920px)_200px] lg:gap-4">
         <div className="min-w-0">
           <WrittenOn date={writtenAt} className="mb-6" />
           <article className="prose dark:prose-invert max-w-full" ref={targetRef}>
