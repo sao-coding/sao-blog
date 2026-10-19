@@ -44,7 +44,7 @@ export function TopicGrid({ topics }: TopicGridProps) {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <h2 className="truncate text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+                <h2 className="truncate font-wenkai text-lg text-foreground transition-colors group-hover:text-ink">
                   {topic.name}
                 </h2>
                 <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">

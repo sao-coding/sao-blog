@@ -70,7 +70,7 @@ const Header = () => {
         className={cn(
           'fixed inset-x-0 top-0 z-50 h-[4.5rem] border-b transition-colors duration-300',
           showBackground
-            ? 'border-gray-700/50 bg-background/40 backdrop-blur-md'
+            ? 'border-border bg-background/40 backdrop-blur-md'
             : 'border-transparent'
         )}
       >

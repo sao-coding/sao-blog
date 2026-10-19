@@ -101,5 +101,21 @@
   "season_switch": "季節の配色を切り替え",
   "season_now": "いまは{term}・{season}",
   "season_preview": "{season}をプレビュー（今の季節を押すと戻ります）",
-  "written_on": "{date} に記す・"
+  "written_on": "{date} に記す・",
+  "notes_subtitle": "日々を書き留めておけば、そんなに早く忘れずにすむ。",
+  "notes_total": "全 {count} 件",
+  "notes_latest": "最新",
+  "notes_continue": "続きを読む",
+  "notes_footprint": "書いた足あと",
+  "notes_footprint_month": "今月は {count} 件",
+  "notes_prev_month": "前の月",
+  "notes_next_month": "次の月",
+  "notes_empty": "まだ日記はありません",
+  "notes_empty_hint": "日記がまだないか、サーバーに接続できません。しばらくしてからもう一度お試しください。",
+  "notes_weather": "天気",
+  "notes_mood": "気分",
+  "posts_filter_toggle": "検索・タグ",
+  "theme_day": "昼",
+  "theme_night": "夜読み",
+  "theme_toggle": "昼／夜読みを切り替え"
 }

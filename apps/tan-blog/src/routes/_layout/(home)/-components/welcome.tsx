@@ -27,7 +27,7 @@ const Welcome = () => {
                 text={'<Developer />'}
                 delay={1.1}
                 el="code"
-                className="mb-4 mr-2 self-end rounded-md px-1 text-3xl transition-colors duration-200 hover:bg-black/50 text-center md:text-left w-full md:w-fit"
+                className="mb-4 mr-2 self-end rounded-md px-1 text-3xl transition-colors duration-200 hover:bg-foreground/10 text-center md:text-left w-full md:w-fit"
               />
               <span className="relative top-2 inline-block h-8 w-[1px] self-end bg-gray-800/80 opacity-0 transition-opacity duration-200 group-hover:animate-blink group-hover:opacity-100 dark:bg-gray-200/80" />
             </div>

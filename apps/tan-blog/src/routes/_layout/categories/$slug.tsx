@@ -5,6 +5,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { CategoriesTimeline } from './-components/categories-timeline'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 export const Route = createFileRoute('/_layout/categories/$slug')({
   loader: async ({ context, params }) => {
@@ -30,10 +31,12 @@ function CategoryDetailPage() {
     orpc.post.getPosts.queryOptions({ input: { category: slug } })
   )
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) {
+    return <div className="mt-40 text-center font-wenkai text-muted-foreground">載入中…</div>
+  }
 
   if (error || !data || data.status === 'error') {
-    return <div>Error loading category</div>
+    return <div className="mt-40 text-center font-wenkai text-destructive">分類載入失敗</div>
   }
 
   const posts = data.data
@@ -41,31 +44,31 @@ function CategoryDetailPage() {
   return (
     <>
       {posts.length === 0 ? (
-        <div className="mt-20 text-center text-2xl font-semibold text-foreground">
+        <div className="mt-40 text-center font-wenkai text-xl text-muted-foreground">
           該分類下尚無文章
         </div>
       ) : (
-        <div className="mt-20">
-          <div className="mx-auto mt-14 max-w-5xl px-6 lg:mt-[80px] lg:px-0 2xl:max-w-6xl">
-            <div className="relative pl-[19px] border-l-2">
-              <header className="mb-8 max-w-none">
-                <h1 className="text-4xl font-bold text-foreground">
-                  分類 - {slug}
-                </h1>
-                <p className="mt-2 text-muted-foreground">
-                  當前共有 {posts.length} 篇文章，加油！
-                </p>
-              </header>
-              <CategoriesTimeline
-                articles={posts.map((post) => ({
-                  id: post.id,
-                  title: post.title,
-                  slug: post.slug,
-                  createdAt: post.createdAt,
-                  updatedAt: post.updatedAt,
-                }))}
-              />
-            </div>
+        // 版面比照 /timeline：文楷標題＋細墨線串起的列表
+        <div className={pageShellClass}>
+          <header className="mb-10">
+            <p className="font-wenkai text-sm text-muted-foreground">分類</p>
+            <h1 className="mt-1 font-wenkai text-4xl text-foreground">{slug}</h1>
+            <p className="mt-3 flex items-baseline gap-1.5 font-wenkai text-sm text-muted-foreground">
+              共
+              <span className="text-2xl leading-none text-ink tabular-nums">{posts.length}</span>
+              篇，加油！
+            </p>
+          </header>
+          <div className="relative ml-1 border-l border-rule">
+            <CategoriesTimeline
+              articles={posts.map((post) => ({
+                id: post.id,
+                title: post.title,
+                slug: post.slug,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+              }))}
+            />
           </div>
         </div>
       )}

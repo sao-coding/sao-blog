@@ -101,5 +101,21 @@
   "season_switch": "切換季節配色",
   "season_now": "現在是 {term}・{season}",
   "season_preview": "預覽{season}（點目前的季節回到現在）",
-  "written_on": "寫於 {date}・"
+  "written_on": "寫於 {date}・",
+  "notes_subtitle": "把日子寫下來，就不會那麼快忘記。",
+  "notes_total": "共 {count} 篇",
+  "notes_latest": "最新一篇",
+  "notes_continue": "繼續讀",
+  "notes_footprint": "寫作足跡",
+  "notes_footprint_month": "這個月寫了 {count} 篇",
+  "notes_prev_month": "上個月",
+  "notes_next_month": "下個月",
+  "notes_empty": "還沒有任何日記",
+  "notes_empty_hint": "目前沒有任何日記，或無法連線至伺服器。請稍後再試。",
+  "notes_weather": "天氣",
+  "notes_mood": "心情",
+  "posts_filter_toggle": "搜尋・標籤",
+  "theme_day": "晝",
+  "theme_night": "夜讀",
+  "theme_toggle": "切換晝／夜讀"
 }

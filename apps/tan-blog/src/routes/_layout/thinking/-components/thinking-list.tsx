@@ -2,26 +2,21 @@ import type { CSSProperties } from 'react'
 import { Link } from '@tanstack/react-router'
 import dayjs, { type Dayjs } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
 import type { InferClientOutputs } from '@orpc/client'
 import type { client } from '@/lib/orpc'
-import { dayjsLocale } from '@/lib/date-locale'
+import { siteTime } from '@/lib/site-time'
+import { CalendarLeaf } from '@/components/calendar-leaf'
 import { cn } from '@/lib/utils'
 import { CommentMarkdownRenderer } from '@/components/comment/comment-markdown-renderer'
 import { m } from '#/paraglide/messages'
 import { TermMark } from '@/components/written-season'
 
 dayjs.extend(relativeTime)
-dayjs.extend(utc)
-dayjs.extend(timezone)
 
 type Thinking = InferClientOutputs<typeof client>['thinking']['getThinkings']['data'][number]
 
-// 分組與時間一律用站主所在時區計算：伺服器與瀏覽器時區可能不同，
-// 用執行環境時區會讓 SSR 與 hydration 分到不同的「那一天」。
-const SITE_TZ = 'Asia/Taipei'
-const local = (d: Date | string) => dayjs(d).tz(SITE_TZ).locale(dayjsLocale())
+// 分組與時間一律用站主所在時區（見 lib/site-time.ts）
+const local = siteTime
 
 const MARKDOWN_CLASS =
   'text-inherit [font-size:inherit] [line-height:inherit] [&_*]:text-inherit [&_*]:[font-size:inherit] [&_*]:[line-height:inherit] prose-p:my-1.5 prose-a:underline prose-a:decoration-dashed'
@@ -74,14 +69,14 @@ export function ThinkingList({ items }: { items: Thinking[] }) {
         <section key={month.key} className="mt-14 first:mt-0">
           <h2 className="mb-6 flex items-baseline gap-2 border-b border-rule pb-2 font-wenkai">
             <span className="text-4xl leading-none text-ink/30 tabular-nums select-none">{month.date.format('MM')}</span>
-            <span className="font-mono text-xs text-muted-foreground">{month.date.format('YYYY')}</span>
+            <span className="font-mono text-sm text-muted-foreground">{month.date.format('YYYY')}</span>
           </h2>
 
           <ol className="flex flex-col gap-8">
             {month.days.map((day) => (
               <li
                 key={day.key}
-                className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-6"
+                className="grid grid-cols-[3.75rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-x-6"
               >
                 <CalendarLeaf date={day.date} />
                 <div className="min-w-0">
@@ -98,22 +93,6 @@ export function ThinkingList({ items }: { items: Thinking[] }) {
   )
 }
 
-// 撕下來的一頁日曆：上緣虛線是撕痕，上方星期、下方大號日期。
-// 桌機 sticky，同一天有多則時捲動中日期會一直留在左側。
-function CalendarLeaf({ date }: { date: Dayjs }) {
-  return (
-    <div className="sm:sticky sm:top-24 sm:self-start">
-      <time
-        dateTime={date.format('YYYY-MM-DD')}
-        className="flex flex-col items-center rounded-b-sm border border-t-2 border-rule border-t-ink/40 bg-ink-soft pt-1 pb-1.5 [border-top-style:dashed]"
-      >
-        <span className="font-wenkai text-[0.7rem] leading-tight text-muted-foreground">{date.format('ddd')}</span>
-        <span className="font-wenkai text-2xl leading-none text-ink tabular-nums sm:text-3xl">{date.format('D')}</span>
-      </time>
-    </div>
-  )
-}
-
 function ThinkingEntry({ thinking }: { thinking: Thinking }) {
   const created = local(thinking.createdAt)
   return (
@@ -126,7 +105,7 @@ function ThinkingEntry({ thinking }: { thinking: Thinking }) {
       >
         <CommentMarkdownRenderer content={thinking.content} className={MARKDOWN_CLASS} />
       </div>
-      <footer className="mt-2 flex flex-wrap items-baseline gap-x-3 text-xs text-muted-foreground">
+      <footer className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-muted-foreground">
         <time
           dateTime={created.toISOString()}
           title={created.format('YYYY-MM-DD HH:mm')}

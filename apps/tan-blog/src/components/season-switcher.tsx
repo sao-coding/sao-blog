@@ -42,7 +42,7 @@ export function SeasonSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-3 font-wenkai text-xs text-muted-foreground">
+    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-wenkai text-sm text-muted-foreground">
       <span>{m.season_now({ term: now.term, season: SEASON_LABEL[now.season]() })}</span>
       <div role="group" aria-label={m.season_switch()} className="flex items-center gap-1">
         {SEASONS.map((season) => {

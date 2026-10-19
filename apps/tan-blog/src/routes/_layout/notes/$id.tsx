@@ -57,7 +57,8 @@ function NoteDetailPage() {
   const note = Route.useLoaderData()
 
   return (
-    <div className="grid max-w-[60rem] mt-12 mx-auto gap-4 xl:max-w-[calc(60rem+400px)] xl:grid-cols-[1fr_minmax(auto,60rem)_1fr] md:grid-cols-1">
+    // 比照 innei.in 日記頁：日記卡片 778px 置中，左（其他日記）右（目錄）側欄放在兩旁
+    <div className="mx-auto mt-12 grid w-full max-w-[778px] gap-4 xl:max-w-[calc(778px+400px)] xl:grid-cols-[1fr_minmax(0,778px)_1fr]">
       <NoteLeftSidebar className="relative hidden min-w-0 xl:block" />
       <NoteClientPage
         note={{

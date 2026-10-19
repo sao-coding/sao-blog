@@ -9,6 +9,8 @@ import { m } from '#/paraglide/messages'
 import { Timeline } from './-components/timeline'
 import { ArticlePreviewModal } from '@/components/preview/article-preview-modal'
 import ProgressNumber from '@/components/animation/progress-number'
+import { pageShellClass } from '@/components/layout/page-shell'
+import { TermMark } from '@/components/written-season'
 
 const timelineSearchSchema = z.object({
   type: z.enum(['post', 'note']).optional(),
@@ -64,47 +66,39 @@ function TimelinePage() {
   return (
     <>
       {posts.length === 0 ? (
-        <div className="mt-20 text-center text-2xl font-semibold">尚無資料</div>
+        <div className="mt-40 text-center font-wenkai text-xl text-muted-foreground">尚無資料</div>
       ) : (
-        <div className="mx-auto mt-14 max-w-3xl px-2 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
+        <div className={pageShellClass}>
+          {/* 標題比照 /posts：文楷大字＋一行小字；數字改成墨色，節氣標出今天 */}
           <header className="mb-12">
-            <h1 className="tracking-widest text-neutral-10/50 uppercase mb-3">
-              時間線
-            </h1>
-            <div className="mb-6 flex items-baseline gap-4">
-              <p className="text-[4.5rem] leading-none font-extralight tracking-tighter text-neutral-10/50">
-                {data?.meta?.total}
-              </p>
-              <span className="text-muted-foreground">篇，再接再厲</span>
-            </div>
-            <div className="flex gap-8">
+            <h1 className="font-wenkai text-4xl text-foreground">時間線</h1>
+            <p className="mt-3 flex items-baseline gap-1.5 font-wenkai text-sm text-muted-foreground">
+              共
+              <span className="text-2xl leading-none text-ink tabular-nums">{data?.meta?.total}</span>
+              篇，再接再厲
+            </p>
+            <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 font-wenkai">
               <div>
-                <ProgressNumber
-                  className="text-[2rem] leading-none font-light text-primary"
-                  value={dayOfYear}
-                />
-                <div className="mt-1 text-[11px] text-neutral-10/30">今年第幾天</div>
+                <ProgressNumber className="text-3xl leading-none text-ink" value={dayOfYear} />
+                <div className="mt-1.5 text-xs text-muted-foreground">今年第幾天</div>
               </div>
               <div>
-                <ProgressNumber
-                  className="text-[2rem] leading-none font-light text-neutral-10/50"
-                  value={yearProgress}
-                />
-                <span className="ml-0.5 text-base text-neutral-10/30">%</span>
-                <div className="mt-1 text-[11px] text-neutral-10/30">年度進度</div>
+                <ProgressNumber className="text-3xl leading-none text-foreground/70" value={yearProgress} />
+                <span className="ml-0.5 text-base text-muted-foreground">%</span>
+                <div className="mt-1.5 text-xs text-muted-foreground">年度進度</div>
               </div>
               <div>
-                <ProgressNumber
-                  className="text-[2rem] leading-none font-light text-neutral-10/50"
-                  value={dayProgress}
-                />
-                <span className="ml-0.5 text-base text-neutral-10/30">%</span>
-                <div className="mt-1 text-[11px] text-neutral-10/30">今日進度</div>
+                <ProgressNumber className="text-3xl leading-none text-foreground/70" value={dayProgress} />
+                <span className="ml-0.5 text-base text-muted-foreground">%</span>
+                <div className="mt-1.5 text-xs text-muted-foreground">今日進度</div>
               </div>
-              <div></div>
+              <div>
+                <TermMark date={now} className="text-3xl leading-none" />
+                <div className="mt-1.5 text-xs text-muted-foreground">時節</div>
+              </div>
             </div>
           </header>
-          <div className="relative ml-1 border-l-2">
+          <div className="relative ml-1 border-l border-rule">
             {posts.map((group, index) => (
               <section key={`timeline-${group.year}`} className="mb-12">
                 <Timeline

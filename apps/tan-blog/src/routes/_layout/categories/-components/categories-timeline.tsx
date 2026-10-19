@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
+import { TermMark } from '@/components/written-season'
 
 interface Article {
   id: string
@@ -35,9 +36,9 @@ export function CategoriesTimeline({ articles }: CategoriesTimelineProps) {
   }, [hoveredIndex])
 
   return (
-    <div className="relative -ml-6">
+    <div className="relative">
       <div
-        className="absolute left-0 w-[2px] bg-primary transition-all duration-300 ease-out"
+        className="absolute -left-px w-[2px] bg-primary transition-all duration-300 ease-out"
         style={{
           top: indicatorStyle.top,
           height: indicatorStyle.height,
@@ -47,7 +48,7 @@ export function CategoriesTimeline({ articles }: CategoriesTimelineProps) {
 
       <ul
         ref={listRef}
-        className="relative"
+        className="relative sao-timeline"
         onMouseLeave={() => setHoveredIndex(null)}
       >
         {articles.map((article, index) => {
@@ -64,12 +65,13 @@ export function CategoriesTimeline({ articles }: CategoriesTimelineProps) {
               <Link
                 to="/posts/$slug"
                 params={{ slug: article.slug }}
-                className="flex items-baseline gap-6 py-3 pl-6 transition-colors"
+                className="flex items-baseline gap-4 py-3 pl-6 font-wenkai transition-colors md:gap-6"
               >
-                <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24">
-                  {formattedDate}
-                </time>
-                <span className="text-foreground group-hover:text-primary transition-colors">
+                <span className="flex w-24 shrink-0 items-baseline gap-2 text-sm md:w-36">
+                  <time className="text-muted-foreground tabular-nums group-hover:text-ink">{formattedDate}</time>
+                  <TermMark date={date} className="hidden text-xs md:inline" />
+                </span>
+                <span className="line-clamp-2 min-w-0 text-foreground transition-colors group-hover:text-ink md:line-clamp-1">
                   {article.title}
                 </span>
               </Link>

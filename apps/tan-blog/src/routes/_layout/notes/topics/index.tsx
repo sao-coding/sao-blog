@@ -4,6 +4,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { TopicGrid } from './-components/topic-grid'
+import { pageShellClass } from '@/components/layout/page-shell'
 
 export const Route = createFileRoute('/_layout/notes/topics/')({
   loader: async ({ context }) => {
@@ -34,21 +35,18 @@ function NoteTopicsIndexPage() {
 
   return (
     <>
-      <div className="mx-auto mt-14 max-w-3xl px-4 lg:mt-[80px] lg:px-0 2xl:max-w-4xl">
+      <div className={pageShellClass}>
         <header className="mb-12">
-          <h1 className="tracking-widest text-neutral-10/50 uppercase mb-3">
-            專欄
-          </h1>
-          <div className="mb-2 flex items-baseline gap-4">
-            <p className="text-[4.5rem] leading-none font-extralight tracking-tighter text-neutral-10/50">
-              {topicList.length}
-            </p>
-            <span className="text-muted-foreground">個專欄</span>
-          </div>
+          <h1 className="font-wenkai text-4xl text-foreground">專欄</h1>
+          <p className="mt-3 flex items-baseline gap-1.5 font-wenkai text-sm text-muted-foreground">
+            共
+            <span className="text-2xl leading-none text-ink tabular-nums">{topicList.length}</span>
+            個專欄
+          </p>
         </header>
 
         {topicList.length === 0 ? (
-          <div className="text-center text-2xl font-semibold text-muted-foreground py-20">
+          <div className="py-20 text-center font-wenkai text-xl text-muted-foreground">
             尚無專欄
           </div>
         ) : (
