@@ -32,7 +32,7 @@ function ThinkingPage() {
   return (
     <>
       <div className="mx-auto mt-28 w-full max-w-5xl px-4 pb-24 lg:mt-32">
-        <header className="mb-14 max-w-xl">
+        <header className="mb-10 max-w-xl sm:mb-14">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_thinking_title()}</h1>
           <p className="mt-3 font-wenkai text-sm leading-relaxed text-muted-foreground">
             <span className="mr-1.5 font-mono text-ink tabular-nums">{total}</span>

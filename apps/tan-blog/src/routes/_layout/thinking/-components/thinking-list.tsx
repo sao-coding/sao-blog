@@ -33,7 +33,8 @@ export function ThinkingList({ items }: { items: Thinking[] }) {
   return (
     <ul className="columns-1 gap-8 sm:columns-2 lg:columns-3">
       {items.map((thinking, index) => {
-        // 顏色依序輪替，確保相鄰兩張不同色；歪斜角度用 id 雜湊（-2.5° ~ 2.5°）
+        // 顏色依序輪替，確保相鄰兩張不同色；歪斜角度用 id 雜湊（-2.5° ~ 2.5°，手機減半）。
+        // 手機版便條不撐滿寬度、左右交錯，維持「一張張便條」而不是橫幅卡片的比例。
         const paper = PAPERS[index % PAPERS.length]
         const rotate = ((hash(thinking.id) >> 3) % 11) / 2 - 2.5
         const created = dayjs(thinking.createdAt)
@@ -43,14 +44,14 @@ export function ThinkingList({ items }: { items: Thinking[] }) {
         return (
           <li
             key={thinking.id}
-            className="sticky-note-wrap mb-12 break-inside-avoid animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
+            className="sticky-note-wrap mb-8 break-inside-avoid max-sm:w-[86%] max-sm:even:ml-auto sm:mb-12 animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
             style={{ animationDelay: `${Math.min(index, 12) * 50}ms` }}
           >
             <div
-              style={{ rotate: `${rotate}deg` }}
-              className="origin-top transition-[rotate,translate] duration-300 ease-out hover:-translate-y-0.5 hover:!rotate-0 motion-reduce:transition-none"
+              style={{ "--tilt": `${rotate}deg` } as CSSProperties}
+              className="origin-top rotate-[calc(var(--tilt)*0.5)] transition-[rotate,translate] duration-300 ease-out motion-reduce:transition-none sm:rotate-(--tilt) sm:hover:-translate-y-0.5 sm:hover:rotate-0"
             >
-              <article style={{ "--paper": paper } as CSSProperties} className="sticky-note px-5 pt-9 pb-5">
+              <article style={{ "--paper": paper } as CSSProperties} className="sticky-note px-4 pt-8 pb-4 sm:px-5 sm:pt-9 sm:pb-5">
                 <div className={cn("font-wenkai", isShort ? "text-xl leading-snug" : "text-[15px] leading-relaxed")}>
                   <CommentMarkdownRenderer
                     content={thinking.content}
