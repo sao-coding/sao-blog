@@ -321,6 +321,11 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - 決定：notes 的 `mood` / `weather` 是固定選項值 → 留主表（UI 標籤走 Paraglide）；`location` 暫留主表
    - 部署：`pnpm db:migrate` 前先備份；既有內容的 compiled 為空，PR3 讀取時 lazy 重編或跑 recompileAll
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
+   - ✅ 已完成：公開 post / note / timeline / home / menu / topic 加 `locale`（預設 zh-TW），請求語系無已發布譯文 → 原文，回傳 `locale` / `isFallback` / `availableLocales` / `translatedBy`；分類名稱同樣 fallback（`packages/api/src/lib/i18n.ts`）
+   - `getPost` / `getNote` 附 `compiled` / `toc` / `readingTime`，compiled 為空或 `compiledHash` 不符時 lazy 重編並回寫
+   - 後台 / MCP：`admin_post_{get,upsert,delete}PostTranslation(s)`、日記同理、`admin_category_{get,upsert}CategoryTranslation(s)`（`routers/admin/translation.ts`）；不可改 / 刪原文；後台列表附各語言 `outdated` 狀態
+   - 與原計畫不同：舊欄位**仍雙寫、未改 nullable**（主表保留原文副本，作為沒有 translation 時的 fallback），改到 PR7 一併處理
+   - `CompiledContent.tree` 改為自訂 `HastJsonRoot`（hast 的純 JSON 子集），避免 @types/hast 的 `data` 擴充讓跨端序列化型別失效
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
 5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、Paraglide 設定與 middleware、hreflang、語言切換、fallback 提示
 6. **PR6 – 搜尋**：Typesense docker / env、`packages/search`、collection + alias、寫入時同步、`reindexAll`、搜尋 API proxy、前台 ⌘K、MCP `content_search`（依賴 PR3 的 translation 寫入路徑與 PR1 的 plainText）
