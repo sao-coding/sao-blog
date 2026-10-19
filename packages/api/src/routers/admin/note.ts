@@ -7,6 +7,7 @@ import { auth } from "@sao-blog/auth";
 import { noteInputSchema } from "@sao-blog/api/schema/note";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 import { checkMdxForSave } from "../../lib/mdx-validate";
+import { upsertSourceNoteTranslation } from "../../lib/source-translation";
 
 async function getTopicSlug(topicId: string | null | undefined) {
     if (!topicId) return null;
@@ -99,6 +100,15 @@ const createNote = protectedProcedure
             }
         }
 
+        await upsertSourceNoteTranslation({
+            noteId: newNote.id,
+            locale: newNote.defaultLocale,
+            title,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
+
         if (topicId) {
             await db
                 .update(topics)
@@ -162,6 +172,15 @@ const updateNote = protectedProcedure
                 data: null,
             }
         }
+
+        await upsertSourceNoteTranslation({
+            noteId: updatedNote.id,
+            locale: updatedNote.defaultLocale,
+            title,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
 
         // 若專欄變更，調整舊專欄 -1、新專欄 +1
         const oldTopicId = currentNote?.topicId ?? null;

@@ -1,4 +1,11 @@
-import { compileMdx, type CompileError, type CompileProfile } from "@sao-blog/mdx";
+import {
+  compileMdx,
+  hashSource,
+  type CompileError,
+  type CompileProfile,
+  type CompiledContent,
+  type TocItem,
+} from "@sao-blog/mdx";
 import { mdxToExcerpt } from "./mdx-to-text";
 
 export const formatMdxErrors = (errors: CompileError[]) =>
@@ -6,12 +13,26 @@ export const formatMdxErrors = (errors: CompileError[]) =>
     .map((e) => (e.line ? `第 ${e.line} 行${e.column ? `:${e.column}` : ""}：${e.message}` : e.message))
     .join("\n");
 
-const excerpt = (text: string, maxLength = 160) =>
-  text.length <= maxLength ? text : text.slice(0, maxLength).trimEnd() + "…";
+// 摘要是單行文字：plainText 的分段換行收成空白
+const excerpt = (plainText: string, maxLength = 160) => {
+  const text = plainText.replace(/\s*\n\s*/g, " ").trim();
+  return text.length <= maxLength ? text : text.slice(0, maxLength).trimEnd() + "…";
+};
+
+/** 編譯產物，直接寫入 *_translations；編譯失敗（草稿）時全為 null，之後再重編 */
+export interface MdxArtifacts {
+  compiled: CompiledContent | null;
+  toc: TocItem[] | null;
+  plainText: string | null;
+  readingTime: number | null;
+  /** compiled 對應的內容 hash；未編譯成功為 null */
+  compiledHash: string | null;
+  /** 目前 content 的 hash（原文的 sourceHash） */
+  hash: string;
+}
 
 export type MdxCheck =
-  | { ok: true; summary: string; warning?: undefined }
-  | { ok: true; summary: string; warning: string }
+  | { ok: true; summary: string; warning?: string; artifacts: MdxArtifacts }
   | { ok: false; message: string };
 
 /**
@@ -34,7 +55,18 @@ export async function checkMdxForSave(
   const hasSummary = !!summary && summary.trim() !== "";
 
   if (result.ok) {
-    return { ok: true, summary: hasSummary ? summary! : excerpt(result.plainText) };
+    return {
+      ok: true,
+      summary: hasSummary ? summary! : excerpt(result.plainText),
+      artifacts: {
+        compiled: result.compiled,
+        toc: result.toc,
+        plainText: result.plainText,
+        readingTime: result.readingTime,
+        compiledHash: result.hash,
+        hash: result.hash,
+      },
+    };
   }
 
   const detail = formatMdxErrors(result.errors);
@@ -45,5 +77,13 @@ export async function checkMdxForSave(
     ok: true,
     summary: hasSummary ? summary! : await mdxToExcerpt(content).catch(() => ""),
     warning: `草稿已儲存，但 MDX 有錯誤，發布前需修正：\n${detail}`,
+    artifacts: {
+      compiled: null,
+      toc: null,
+      plainText: null,
+      readingTime: null,
+      compiledHash: null,
+      hash: await hashSource(content),
+    },
   };
 }

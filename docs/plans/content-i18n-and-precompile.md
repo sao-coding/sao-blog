@@ -4,7 +4,7 @@
 >
 > ⚠️ **前台目標改為 `apps/tan-blog`（`tanstack` 分支）**，下文提到 `apps/mdx-blog` 的前台部分一律改讀 tan-blog。
 > tan-blog 已有 Paraglide 與 URL 前綴路由（`zh-Hant` / `en` / `ja`），§5 第 1 點大部分已存在；
-> 但本計畫的語系代碼寫 `zh-TW`，與 tan-blog 的 `zh-Hant` 不一致 —— **PR2 開工前需定案**（建議 DB 直接沿用 `zh-Hant`，與 Paraglide 單一來源一致）。
+> 語系代碼已定案（2026-10-19）：**DB 用 `zh-TW`**（`SUPPORTED_LOCALES` 在 `packages/db/src/schema/index.ts`）；tan-blog 的 Paraglide 維持 `zh-Hant`，在 PR5 以對照表 `zh-Hant ↔ zh-TW` 轉換。
 > 背景討論結論：維持 **MDX 為原始格式**（不換 WYSIWYG/Lexical），渲染改為**發布時預編譯**，並加入**多語言**。
 
 ## 0. 已確認的決策
@@ -304,7 +304,7 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 2. `posts.default_locale` = 'zh-TW'
 3. `INSERT INTO post_translations (post_id, locale, title, summary, content, status, is_source, translated_by) SELECT id, 'zh-TW', title, summary, content, status, true, 'human' FROM posts`
 4. notes、categories 同理
-5. **先不 drop 舊欄位**：第一階段讓舊欄位改為 nullable 並停止寫入；確認上線無誤後，下一個 migration 再 drop
+5. **先不 drop 舊欄位**：PR2 期間舊欄位維持 notNull 並**雙寫**（主表仍是讀取來源，每次存檔同步 upsert 原文 translation）；PR3 改讀 translation、停止寫入舊欄位時再改為 nullable；確認上線無誤後，下一個 migration 再 drop
 6. 部署後跑 `recompileAll` 產生 `compiled` / `toc` / `plainText`（或靠 lazy 重編）
 7. 遷移前備份資料庫
 
@@ -317,6 +317,9 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 1.5 **PR1.5 – AI 發文驗證**（因優先順序調整，自 PR3 提前）：API 新增 `previewMdx`；`createPost` / `updatePost` / `createNote` / `updateNote` 存檔前以 `compileMdx` 驗證，失敗回傳帶行號的錯誤、不存檔；未填摘要改用 compile 產出的 plainText；MCP 新增 `admin_content_previewMdx`，工具描述附上 registry 元件規格
    - ✅ 已完成：`packages/api/src/lib/mdx-validate.ts`（`checkMdxForSave`）；發布時錯誤拒存、**草稿仍可存但回傳警告**（避免後台半成品存不了）；新增 `admin/content` router → MCP `admin_content_previewMdx`、`admin_content_getComponents`（回傳 registry JSON Schema）；post / note 建立與更新的 route summary 寫明驗證規則，AI 從工具描述即可得知
 2. **PR2 – Schema + 資料遷移**：translation 表、relations、data migration（舊欄位保留）
+   - ✅ 已完成：migration `0003_content_translations`（enum `locale` / `translation_source`、三張 translation 表、`posts` / `notes.default_locale`、回填既有內容為 zh-TW 原文，`source_hash` 以 SQL 計算且與 `hashSource` 一致）；後台 post / note / category 存檔**雙寫**原文 translation（含 compiled / toc / plainText）；以 PGlite 實測遷移與雙寫
+   - 決定：notes 的 `mood` / `weather` 是固定選項值 → 留主表（UI 標籤走 Paraglide）；`location` 暫留主表
+   - 部署：`pnpm db:migrate` 前先備份；既有內容的 compiled 為空，PR3 讀取時 lazy 重編或跑 recompileAll
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
 5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、Paraglide 設定與 middleware、hreflang、語言切換、fallback 提示
@@ -341,7 +344,7 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
 ## 10. 待實作時確認
 
 - ~~現有文章是否用到 MDX JS 表達式 / `export`~~ → 已發布內容皆未使用，hast JSON 方案可行（草稿待確認）
-- notes 的 `mood` / `weather` 是自由文字還是固定選項（決定放主表或翻譯表）
+- ~~notes 的 `mood` / `weather` 是自由文字還是固定選項~~ → 固定選項，留主表
 - 預設語系 URL 是否省略前綴（本計畫假設省略）
 - Typesense 版本的 CJK 分詞設定方式（決定每語系 collection vs 每語系欄位；預設每語系 collection）
 - Typesense 部署位置（自架 docker 與 Postgres 同機，或 Typesense Cloud）

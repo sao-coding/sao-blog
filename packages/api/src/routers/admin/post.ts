@@ -6,6 +6,7 @@ import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
 import { checkMdxForSave } from "../../lib/mdx-validate";
+import { upsertSourcePostTranslation } from "../../lib/source-translation";
 import { slugify } from "../../lib/slugify";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 
@@ -225,6 +226,16 @@ const createPost = protectedProcedure
             };
         }
 
+        await upsertSourcePostTranslation({
+            postId: createdPost.id,
+            locale: createdPost.defaultLocale,
+            title,
+            summary: resolvedSummary,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
+
         // 建立標籤關聯
         if (tags && tags.length > 0) {
             const tagInserts = tags.map((t) => ({
@@ -355,6 +366,16 @@ const updatePost = protectedProcedure
                 data: null,
             };
         }
+
+        await upsertSourcePostTranslation({
+            postId: updatedPost.id,
+            locale: updatedPost.defaultLocale,
+            title,
+            summary: resolvedSummary,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
 
         // 更新標籤關聯：先刪除再新增
         await db.delete(postTags).where(eq(postTags.postId, id));
