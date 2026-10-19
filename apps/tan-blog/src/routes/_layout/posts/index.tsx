@@ -116,10 +116,10 @@ function PostsIndexPage() {
   const activeTagName = tag ? (view?.tags.find((t) => t.slug === tag)?.name ?? tag) : undefined
 
   return (
-    <div className="mx-auto mt-28 w-full max-w-[67rem] px-4 pb-24 lg:mt-32">
-      {/* 參考 innei.in：「列表 44rem ＋ 間距 3rem ＋ 側欄 18rem」整組置中；lg 以下只留置中的列表 */}
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,44rem)_18rem]">
-        <main className="mx-auto w-full min-w-0 max-w-[44rem]">
+    <div className="mx-auto mt-28 w-full max-w-[67rem] px-4 pb-24 2xl:max-w-[75rem] lg:mt-32">
+      {/* 參考 innei.in：「列表 44rem（2xl 起 52rem）＋ 間距 3rem ＋ 側欄 18rem」整組置中；lg 以下只留置中的列表 */}
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,44rem)_18rem] 2xl:grid-cols-[minmax(0,52rem)_18rem]">
+        <main className="mx-auto w-full min-w-0 max-w-[44rem] 2xl:max-w-[52rem]">
           <header className="mb-10">
             <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
             <p className="mt-3 font-wenkai text-sm text-muted-foreground">{m.posts_subtitle()}</p>
