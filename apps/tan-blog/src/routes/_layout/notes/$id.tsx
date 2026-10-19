@@ -3,6 +3,8 @@ import { getCachedNote } from '@/lib/isr/note'
 import { MdxContent } from '@/lib/mdx/mdx-content'
 import { defaultMDXComponents } from '@/components/mdx'
 import { blogPostingJsonLd, pageHead } from '@/lib/seo'
+import { noteOgImagePath } from '@/lib/og/og-url'
+import { mdxToPlainText } from '@/lib/plain-text'
 import { NoteLeftSidebar } from './-components/note-left-sidebar'
 import { NoteClientPage } from './-components/note-client-page'
 
@@ -16,10 +18,11 @@ export const Route = createFileRoute('/_layout/notes/$id')({
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return {}
-    const description = loaderData.content.substring(0, 150)
+    const description = mdxToPlainText(loaderData.content, 150)
     const publishedTime = loaderData.createdAt.toISOString()
     const modifiedTime = loaderData.updatedAt.toISOString()
     const path = `/notes/${params.id}`
+    const image = noteOgImagePath(params.id)
 
     return {
       ...pageHead({
@@ -27,6 +30,7 @@ export const Route = createFileRoute('/_layout/notes/$id')({
         description,
         path,
         type: 'article',
+        image,
         publishedTime,
         modifiedTime,
         alternates: false,
@@ -36,6 +40,7 @@ export const Route = createFileRoute('/_layout/notes/$id')({
           title: loaderData.title,
           description,
           path,
+          image,
           publishedTime,
           modifiedTime,
         }),

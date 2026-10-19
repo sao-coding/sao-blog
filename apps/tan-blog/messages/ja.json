@@ -11,19 +11,15 @@
   "nav_timeline_topics": "コラム",
   "nav_more": "もっと見る",
   "nav_github": "GitHub",
-
   "mobile_menu_open": "メニューを開く",
   "mobile_menu_close": "メニューを閉じる",
   "mobile_menu_title": "モバイルメニュー",
   "mobile_menu_description": "モバイル用メニューです。項目をタップすると該当ページに移動します。空白部分をタップすると閉じます。",
   "mobile_menu_more": "もっと見る",
   "reader_login": "読者ログイン",
-
   "footer_copyright": "© {year} {siteName}. All rights reserved.",
   "footer_language_label": "言語",
-
   "fab_back_to_top": "トップへ戻る",
-
   "login_title": "アカウントにログイン",
   "login_description": "ユーザー名とパスワードを入力してください",
   "login_username_label": "ユーザー名",
@@ -35,10 +31,8 @@
   "login_google": "Google でログイン",
   "login_failed": "ログインに失敗しました",
   "login_success": "ログインしました！",
-
   "not_found_title": "ページが見つかりません",
   "not_found_back_home": "ホームに戻る",
-
   "page_home_title": "ホーム",
   "page_posts_title": "記事",
   "page_posts_description": "すべての記事一覧",
@@ -53,7 +47,6 @@
   "page_category_title": "カテゴリー - {slug}",
   "page_category_description": "「{slug}」カテゴリーのすべての記事",
   "page_login_title": "ログイン",
-
   "comment_section_title": "コメント",
   "comment_section_loading": "コメント欄を読み込み中...",
   "comment_count": "コメント {count} 件",
@@ -73,5 +66,22 @@
   "comment_sort_newest": "新しい順",
   "comment_sort_oldest": "古い順",
   "comment_sort_by": "並び替え",
-  "comment_empty": "まだコメントがありません。最初のコメントを投稿してみましょう！"
+  "comment_empty": "まだコメントがありません。最初のコメントを投稿してみましょう！",
+  "posts_eyebrow": "BLOG",
+  "posts_pinned": "固定",
+  "posts_total": "全 {count} 件",
+  "posts_sort_newest": "新しい順",
+  "posts_sort_oldest": "古い順",
+  "posts_sort_updated": "最近更新",
+  "posts_search_placeholder": "記事を検索",
+  "posts_tags_title": "タグ",
+  "posts_clear_filter": "フィルターを解除",
+  "posts_filter_tag": "タグ：{tag}",
+  "posts_filter_query": "検索：{q}",
+  "posts_empty": "条件に一致する記事はありません",
+  "posts_load_failed": "記事の読み込みに失敗しました",
+  "posts_load_failed_hint": "ネットワークを確認するか、後でもう一度お試しください。",
+  "posts_retry": "再試行",
+  "posts_views": "{count} 回閲覧",
+  "posts_comments": "{count} 件のコメント"
 }

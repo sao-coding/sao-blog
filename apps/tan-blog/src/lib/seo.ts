@@ -1,11 +1,12 @@
 import { env } from '@sao-blog/env/tan-blog'
 import { deLocalizeHref, locales, localizeHref } from '#/paraglide/runtime'
+import { pageOgImagePath } from '@/lib/og/og-url'
 
 export const SITE_NAME = '唯一のBlog'
 export const SITE_DESCRIPTION = '這雖然是遊戲，但可不是鬧著玩的'
 export const SITE_LOCALE = 'zh_TW'
-// 目前尚無專用的預設 OG 圖，暫用現有大頭貼；之後若有設計資源
-// 再換成 public/og.png（TDD 8.1 列為 ⭐ 選配）。
+// pageHead() 未指定 image 時改用動態 OG 圖（src/routes/og/*）；這張大頭貼只剩
+// JSON-LD 的 fallback 與 OG 渲染失敗時的退路。
 export const DEFAULT_OG_IMAGE = '/img/avatar.jpg'
 
 export function absoluteUrl(path: string): string {
@@ -23,6 +24,9 @@ export interface PageSeoInput {
   publishedTime?: string
   modifiedTime?: string
   tags?: string[]
+  // <meta name="keywords"> / <meta name="author">（對應 mdx-blog generateMetadata 的欄位）
+  keywords?: string[]
+  author?: string
   noindex?: boolean
   // UI chrome 頁（首頁/列表/登入等）三語都有獨立文案，加上 hreflang alternates；
   // 文章/日記內容頁只有 zh-Hant 內容，三語 URL 顯示相同內容，故不產生 alternates，
@@ -55,15 +59,17 @@ export function pageHead({
   description = SITE_DESCRIPTION,
   path,
   type = 'website',
-  image = DEFAULT_OG_IMAGE,
+  image,
   publishedTime,
   modifiedTime,
   tags,
+  keywords,
+  author,
   noindex,
   alternates = true,
 }: PageSeoInput) {
   const url = alternates ? absoluteUrl(path) : contentCanonicalUrl(path)
-  const imageUrl = absoluteUrl(image)
+  const imageUrl = absoluteUrl(image ?? pageOgImagePath(title, description))
 
   const meta = [
     { title },
@@ -91,6 +97,13 @@ export function pageHead({
     for (const tag of tags) {
       meta.push({ property: 'article:tag', content: tag })
     }
+  }
+  if (keywords && keywords.length > 0) {
+    meta.push({ name: 'keywords', content: keywords.join(', ') })
+  }
+  if (author) {
+    meta.push({ name: 'author', content: author })
+    if (type === 'article') meta.push({ property: 'article:author', content: author })
   }
   if (noindex) {
     meta.push({ name: 'robots', content: 'noindex, nofollow' })

@@ -3,6 +3,7 @@ import { getCachedPost } from '@/lib/isr/post'
 import { MdxContent } from '@/lib/mdx/mdx-content'
 import { defaultMDXComponents } from '@/components/mdx'
 import { blogPostingJsonLd, pageHead } from '@/lib/seo'
+import { postOgImagePath } from '@/lib/og/og-url'
 import { PostClientPage } from './-components/post-client-page'
 
 export const Route = createFileRoute('/_layout/posts/$slug')({
@@ -20,6 +21,9 @@ export const Route = createFileRoute('/_layout/posts/$slug')({
     const modifiedTime = loaderData.updatedAt.toISOString()
     const tags = loaderData.tags.map((tag) => tag.name)
     const path = `/posts/${params.slug}`
+    const authorName = loaderData.author.name ?? loaderData.author.displayUsername ?? undefined
+    // 有封面用封面，沒有就用動態產生的文章卡片
+    const image = loaderData.cover ?? postOgImagePath(params.slug)
 
     return {
       ...pageHead({
@@ -27,10 +31,12 @@ export const Route = createFileRoute('/_layout/posts/$slug')({
         description,
         path,
         type: 'article',
-        image: loaderData.cover ?? undefined,
+        image,
         publishedTime,
         modifiedTime,
         tags,
+        keywords: tags,
+        author: authorName,
         alternates: false,
       }),
       scripts: [
@@ -38,8 +44,8 @@ export const Route = createFileRoute('/_layout/posts/$slug')({
           title: loaderData.title,
           description,
           path,
-          image: loaderData.cover ?? undefined,
-          authorName: loaderData.author.name ?? loaderData.author.displayUsername ?? undefined,
+          image,
+          authorName,
           publishedTime,
           modifiedTime,
           tags,
