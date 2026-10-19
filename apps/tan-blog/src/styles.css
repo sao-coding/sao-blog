@@ -722,46 +722,62 @@
 }
 
 /* ── 雲海 ──────────────────────────────────────────────────────────────────
- * 畫面下方兩層緩慢漂移的雲，用 SVG 湍流雜訊產生，不用圖片資源。
- * 疊在 body 背景之上、所有內容之下，pointer-events 關閉。
+ * 畫面下方兩層緩慢漂移的雲。每層是一排橢圓漸層（雲團）組成的橫向重複圖樣，
+ * 每團雲都落在圖樣寬度內且邊緣淡出到透明，所以重複接縫處不會出現線條；
+ * 再加 blur 讓雲團邊緣更柔。疊在 body 背景之上、所有內容之下。
  */
 .cloud-sea {
   position: fixed;
   inset: auto 0 0 0;
   /* -1：畫在 body 背景之上、所有內容之下 */
   z-index: -1;
-  height: 45vh;
+  height: 50vh;
   overflow: hidden;
   pointer-events: none;
-  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.6) 40%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.7) 35%, transparent 100%);
 }
 .cloud-sea::before,
 .cloud-sea::after {
   content: '';
   position: absolute;
-  inset: 0 -1300px 0 0;
-  background-color: var(--cloud);
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .012' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .78 0 0 0 0 .82 0 0 0 0 .92 0 0 0 1.6 -.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
-  mask-size: 900px 100%;
-  mask-repeat: repeat-x;
-  opacity: 0.16;
-  animation: cloud-drift 140s linear infinite;
+  /* 下緣往外多延伸，避免 blur 讓底部邊緣變淡出現一條亮帶 */
+  top: 0;
+  bottom: -60px;
+  left: -200px;
+  width: calc(100% + 200px + 1600px);
+  background-image:
+    radial-gradient(16% 38% at 12% 78%, color-mix(in oklch, var(--cloud) 70%, transparent), transparent 70%),
+    radial-gradient(12% 30% at 27% 88%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(18% 42% at 46% 74%, color-mix(in oklch, var(--cloud) 65%, transparent), transparent 70%),
+    radial-gradient(11% 28% at 63% 90%, color-mix(in oklch, var(--cloud) 50%, transparent), transparent 70%),
+    radial-gradient(17% 40% at 82% 80%, color-mix(in oklch, var(--cloud) 70%, transparent), transparent 70%);
+  background-size: 1600px 100%;
+  background-repeat: repeat-x;
+  filter: blur(18px);
+  opacity: 0.22;
+  animation: cloud-drift 160s linear infinite;
 }
 .cloud-sea::after {
-  top: 30%;
-  mask-size: 1300px 100%;
-  opacity: 0.11;
+  width: calc(100% + 200px + 2200px);
+  background-image:
+    radial-gradient(20% 34% at 18% 60%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(14% 26% at 44% 72%, color-mix(in oklch, var(--cloud) 45%, transparent), transparent 70%),
+    radial-gradient(22% 38% at 70% 58%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(12% 24% at 90% 74%, color-mix(in oklch, var(--cloud) 40%, transparent), transparent 70%);
+  background-size: 2200px 100%;
+  filter: blur(28px);
+  opacity: 0.16;
   animation-name: cloud-drift-far;
-  animation-duration: 220s;
+  animation-duration: 260s;
 }
 @keyframes cloud-drift {
   to {
-    translate: -900px 0;
+    translate: -1600px 0;
   }
 }
 @keyframes cloud-drift-far {
   to {
-    translate: -1300px 0;
+    translate: -2200px 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
