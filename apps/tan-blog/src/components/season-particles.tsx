@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { SEASONS, type Season } from '@/lib/season'
 
 // 依 <html data-season> 在背景畫當季的飄落物：春桃瓣、夏螢火、秋楓葉、冬雪。
-// - canvas 固定在內容之下（z-index -1），pointer-events 關閉，不影響閱讀與點擊
+// - 填滿父元素（首頁主視覺），pointer-events 關閉，不影響點擊
 // - 分頁不可見時暫停；prefers-reduced-motion 時完全不畫
 // - 監聽 data-season 變化（頁尾的季節切換），即時換成新的粒子
 
@@ -140,7 +140,7 @@ export function SeasonParticles() {
     let frame = 0
 
     const count = () => {
-      const base = season === 'winter' ? 60 : season === 'summer' ? 22 : 26
+      const base = season === 'winter' ? 45 : season === 'summer' ? 18 : 18
       return Math.round(base * (w < 640 ? 0.5 : 1))
     }
     const reseed = () => {
@@ -148,8 +148,9 @@ export function SeasonParticles() {
     }
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      w = window.innerWidth
-      h = window.innerHeight
+      const rect = (canvas.parentElement ?? canvas).getBoundingClientRect()
+      w = rect.width
+      h = rect.height
       canvas.width = w * dpr
       canvas.height = h * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -210,7 +211,7 @@ export function SeasonParticles() {
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
+      className="pointer-events-none absolute inset-0 h-full w-full"
     />
   )
 }

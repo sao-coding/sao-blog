@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import {
   HeadContent,
   Link,
@@ -11,7 +10,6 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '../components/theme-provider'
 import { getSolarTerm, SEASON_INIT_SCRIPT } from '../lib/season'
-import { SeasonParticles } from '../components/season-particles'
 
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
@@ -112,11 +110,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <ThemeProvider>
           {children}
           <div aria-hidden className="cloud-sea" />
-          <SeasonParticles />
-          <canvas
-            id="universe"
-            className="pointer-events-none fixed left-0 top-0 z-[1] m-0 block h-full w-full border-0 p-0 outline-0"
-          />
         </ThemeProvider>
         <TanStackDevtools
           config={{
@@ -133,26 +126,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
           ]}
         />
-        <UniverseScript />
         <Scripts />
       </body>
     </html>
   )
-}
-
-// universe.js 直接寫入 canvas 的 width/height 屬性，若以 SSR <script> 標籤載入，
-// async 執行時機不保證晚於 hydration，會造成 canvas 屬性的 hydration mismatch。
-// 改用 useEffect 注入，確保一定在 hydration 完成後才執行。
-function UniverseScript() {
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.src = '/js/universe.js'
-    script.async = true
-    document.body.appendChild(script)
-    return () => {
-      document.body.removeChild(script)
-    }
-  }, [])
-
-  return null
 }

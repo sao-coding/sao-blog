@@ -14,13 +14,13 @@ const Welcome = () => {
             <div className="group [&_*]:inline-block leading-[4]">
               <AnimatedText
                 text={'嗨，我是唯一👋。'}
-                className="text-4xl font-black text-center md:text-left w-full"
+                className="font-wenkai text-4xl text-center md:text-left w-full"
                 delay={0.1}
               />
               <br />
               <AnimatedText
                 text={'一個正在學習的全端'}
-                className="text-4xl font-black text-center w-full md:text-left md:w-fit"
+                className="font-wenkai text-4xl text-center w-full md:text-left md:w-fit"
                 delay={1}
               />
               <AnimatedText
@@ -35,7 +35,7 @@ const Welcome = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: [20, -10, 0] }}
               transition={{ delay: 2 }}
-              className="text-center md:text-left"
+              className="text-center font-wenkai text-muted-foreground md:text-left"
             >
               喜歡寫程式、看動漫😆
             </motion.div>
@@ -60,14 +60,17 @@ const Welcome = () => {
             </div>
           </div>
         </div>
-        <div className="flex w-full lg:w-1/2 justify-center">
-          <img
-            className="rounded-full size-60 lg:size-80"
-            src="/img/avatar.jpg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
+        {/* 頭像當作山水畫裡的月亮（月暈見 styles.css 的 .moon-avatar）：手機排在文字上方，桌機往上提到山的上方 */}
+        <div className="order-first flex w-full justify-center lg:order-none lg:w-1/2 lg:-translate-y-[14vh]">
+          <div className="moon-avatar">
+            <img
+              className="size-44 rounded-full lg:size-60"
+              src="/img/avatar.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         </div>
       </div>
       <ChevronDownIcon className="absolute bottom-4 h-6 w-full animate-bounce stroke-2" />
