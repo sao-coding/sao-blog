@@ -14,7 +14,8 @@
 | 留言 | 不分語言，仍掛在 `postId` / `noteId` |
 | Notes | **要**多語言 |
 | Topics、Thinkings | 本次不處理（之後可比照） |
-| 支援語系 | `zh-TW`（預設 / 原文）、`en`、`ja` — 集中定義一份常數 |
+| 支援語系 | `zh-TW`（預設 / 原文）、`en`、`ja` — 以 Paraglide 設定為單一來源 |
+| i18n 框架 | **Paraglide JS**（與 tan-blog 一致） |
 
 ## 1. 現況（相關檔案）
 
@@ -177,8 +178,8 @@ compileMdx(source: string): Promise<
 ## 5. 前台（apps/mdx-blog）
 
 1. **i18n 路由**：引入 locale segment
-   - `app/[locale]/(blog)/...`，`middleware.ts` 依 cookie / `Accept-Language` 導向；預設語系是否省略前綴（`/posts/x` = zh-TW）→ 建議**省略**，保持現有網址不變
-   - UI 字串 i18n 框架：mdx-blog 目前沒有；可用 next-intl 或 Paraglide（tan-blog 已採 Paraglide，若要一致就選 Paraglide）。**本計畫只要求內容多語言，UI 翻譯可另開任務**
+   - 使用 **Paraglide JS**（`@inlang/paraglide-js`，與 tan-blog 一致）：`project.inlang/settings.json` 設定 `baseLocale: "zh-TW"`、`locales: ["zh-TW","en","ja"]`；用 Paraglide 的 Next.js 整合（`paraglideMiddleware` + URL strategy）處理 locale 偵測與導向，`app/[locale]/(blog)/...` 或 rewrite 皆可，依 Paraglide 版本的官方 Next.js 範例決定。預設語系**省略前綴**（`/posts/x` = zh-TW），保持現有網址不變
+   - `SUPPORTED_LOCALES`（DB enum）與 Paraglide 的 `locales` 必須一致：以 Paraglide 產生的 `locales` / `Locale` 型別為準，DB 常數與 API zod schema 從同一份設定產生或加型別檢查斷言。UI 字串用 `messages/{locale}.json` + `m.xxx()`；內容（文章）翻譯走 DB，不放進 messages
 2. **渲染**：`posts/[slug]/page.tsx`、`notes/[id]/page.tsx` 改為 `renderCompiled(compiled, registry)`；移除 `evaluate-note.ts` 的 runtime evaluate
 3. **SEO**：`generateMetadata` 輸出 `alternates.languages`（hreflang）、`<html lang>`；sitemap 列出各語言版本
 4. **UI**：文章頁語言切換器（只列 `availableLocales`）、`isFallback` 時顯示「本文尚無此語言版本」提示；AI 翻譯版本可顯示小標記
@@ -213,7 +214,7 @@ compileMdx(source: string): Promise<
 2. **PR2 – Schema + 資料遷移**：translation 表、relations、data migration（舊欄位保留）
 3. **PR3 – API**：後台 / 前台 procedure 改讀寫 translation，locale + fallback；MCP 工具
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
-5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、middleware、hreflang、語言切換、fallback 提示
+5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、Paraglide 設定與 middleware、hreflang、語言切換、fallback 提示
 6. **PR6 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
 7. （後續）AI 翻譯流程：MCP 一鍵翻譯、mdast 區塊級增量翻譯、後台即時預覽 Worker 化
 
@@ -231,5 +232,4 @@ compileMdx(source: string): Promise<
 
 - 現有文章是否用到 MDX JS 表達式 / `export`（決定 hast JSON 方案可行性）
 - notes 的 `mood` / `weather` 是自由文字還是固定選項（決定放主表或翻譯表）
-- 前台 UI 字串 i18n 框架選型（next-intl vs Paraglide）
 - 預設語系 URL 是否省略前綴（本計畫假設省略）
