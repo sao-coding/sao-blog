@@ -117,5 +117,8 @@
   "posts_filter_toggle": "検索・タグ",
   "theme_day": "昼",
   "theme_night": "夜読み",
-  "theme_toggle": "昼／夜読みを切り替え"
+  "theme_toggle": "昼／夜読みを切り替え",
+  "content_fallback_notice": "この記事はまだ日本語に翻訳されていません。原文を表示しています。",
+  "content_ai_translated": "この記事は AI によって翻訳されたため、不正確な箇所があるかもしれません。",
+  "content_available_in": "他の言語："
 }

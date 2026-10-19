@@ -15,6 +15,7 @@ import { ChevronDownIcon, ChevronUpIcon, MenuIcon, X } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { VisuallyHidden } from 'radix-ui'
 import { m } from '#/paraglide/messages'
+import { currentContentLocale } from '@/lib/content-locale'
 
 const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
     const navLinks = getNavLinks()
@@ -24,7 +25,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
     // 「文章」分類改為與電腦版一致，動態抓取真實分類清單，而非用設定檔寫死的清單
     // 僅在手機版時才啟用查詢，避免桌機版（此元件雖有渲染但被 CSS 隱藏）也發出多餘請求
     const { data: menuRes } = useQuery({
-        ...orpc.menu.getMenu.queryOptions(),
+        ...orpc.menu.getMenu.queryOptions({ input: { locale: currentContentLocale() } }),
         enabled: isMobile,
     })
     const dynamicCategories =

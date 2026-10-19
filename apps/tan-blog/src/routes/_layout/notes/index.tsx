@@ -9,6 +9,7 @@ import { PageWithSidebar } from '@/components/layout/page-shell'
 import { NotePreviewCard } from './-components/note-preview-card'
 import { NotesJournal, type JournalNote } from './-components/notes-journal'
 import { NotesCalendar } from './-components/notes-calendar'
+import { currentContentLocale } from '@/lib/content-locale'
 
 type NotesHomeData = {
   current: NoteItem | null
@@ -20,11 +21,11 @@ export const Route = createFileRoute('/_layout/notes/')({
   loader: async () => {
     // 首頁精選（最新一篇全文＋最新 9 篇摘要）與所有日記的日期清單（日記本、寫作足跡用）並行取得
     const [home, timeline] = await Promise.all([
-      client.note.getNotes({}).catch((err) => {
+      client.note.getNotes({ locale: currentContentLocale() }).catch((err) => {
         console.error('Failed to fetch notes:', err)
         return null
       }),
-      client.timeline.getTimeLine({ type: 'note' }).catch((err) => {
+      client.timeline.getTimeLine({ type: 'note', locale: currentContentLocale() }).catch((err) => {
         console.error('Failed to fetch note timeline:', err)
         return null
       }),

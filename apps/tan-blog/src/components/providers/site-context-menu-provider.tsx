@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/context-menu'
 import { orpc } from '@/lib/orpc'
 import { springScrollToTop } from '@/hooks/use-page-scroll'
+import { currentContentLocale } from '@/lib/content-locale'
 
 type TargetInfo = {
   linkHref: string | null
@@ -52,7 +53,7 @@ export function SiteContextMenuProvider({
   const [target, setTarget] = useState<TargetInfo>(EMPTY_TARGET)
 
   const { data: postsData } = useQuery(
-    orpc.post.getPosts.queryOptions({ input: {} }),
+    orpc.post.getPosts.queryOptions({ input: { locale: currentContentLocale() } }),
   )
 
   useEffect(() => {

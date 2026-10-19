@@ -44,6 +44,8 @@ export interface HastJsonRoot {
 export interface CompiledContent {
   v: typeof COMPILED_VERSION
   tree: HastJsonRoot
+  /** frontmatter 中的純量值（例如 showToc）；舊資料可能沒有此欄位 */
+  frontmatter?: Record<string, string | number | boolean | null>
 }
 
 /**

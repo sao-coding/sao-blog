@@ -1,4 +1,5 @@
 import {
+  COMPILED_VERSION,
   compileMdx,
   type CompiledContent,
   type CompileError,
@@ -59,4 +60,29 @@ export async function compileMdxSource(
     plainText: result.plainText,
     readingTime: result.readingTime,
   }
+}
+
+/**
+ * API（getPost / getNote）已附發布時預編譯的 compiled / toc 時直接採用；
+ * 沒有（舊 API、或後端編譯失敗回 null）才在這裡編譯原文。
+ */
+export async function resolveCompiled(
+  data: {
+    content: string
+    compiled?: CompiledContent | null
+    toc?: TocItem[] | null
+    readingTime?: number | null
+  },
+  variant: MdxVariant
+): Promise<Omit<CompiledMdx, 'plainText'>> {
+  if (data.compiled?.v === COMPILED_VERSION) {
+    return {
+      compiled: data.compiled,
+      toc: data.toc ?? [],
+      frontmatter: (data.compiled.frontmatter ?? {}) as MdxFrontmatter,
+      readingTime: data.readingTime ?? 0,
+    }
+  }
+  const { plainText: _plainText, ...rest } = await compileMdxSource(data.content, variant)
+  return rest
 }

@@ -18,6 +18,7 @@ import {
   PROFILE_PAGE_LINKS,
   SITE_OWNER,
 } from '@/config/mega-menu'
+import { currentContentLocale } from '@/lib/content-locale'
 
 dayjs.extend(relativeTime)
 
@@ -27,7 +28,7 @@ type MenuData = NonNullable<
 
 const fromNow = (iso: string) => dayjs(iso).locale(dayjsLocale()).fromNow()
 
-const useMenuData = () => useQuery(orpc.menu.getMenu.queryOptions())
+const useMenuData = () => useQuery(orpc.menu.getMenu.queryOptions({ input: { locale: currentContentLocale() } }))
 
 // --- 共用小元件 ---
 

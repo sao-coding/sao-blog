@@ -4,10 +4,13 @@ import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
 import { blogPostingJsonLd, pageHead } from '@/lib/seo'
 import { postOgImagePath } from '@/lib/og/og-url'
 import { PostClientPage } from './-components/post-client-page'
+import { ContentLocaleNotice } from '@/components/content-locale-notice'
+import { currentContentLocale, toUiLocale } from '@/lib/content-locale'
 
 export const Route = createFileRoute('/_layout/posts/$slug')({
   loader: async ({ params }) => {
-    const data = await getCachedPost({ data: params.slug })
+    // 語系在 loader 算好再傳進 server fn（server fn 的 RPC 網址沒有語系前綴）
+    const data = await getCachedPost({ data: { slug: params.slug, locale: currentContentLocale() } })
     if (!data) {
       throw notFound()
     }
@@ -36,7 +39,7 @@ export const Route = createFileRoute('/_layout/posts/$slug')({
         tags,
         keywords: tags,
         author: authorName,
-        alternates: false,
+        contentLocales: (loaderData.availableLocales ?? []).map(toUiLocale),
       }),
       scripts: [
         blogPostingJsonLd({
@@ -78,6 +81,12 @@ function PostDetailPage() {
         url: `/posts/${slug}`,
       }}
     >
+      <ContentLocaleNotice
+        path={`/posts/${slug}`}
+        isFallback={data.isFallback}
+        translatedBy={data.translatedBy}
+        availableLocales={data.availableLocales}
+      />
       <CompiledMdx compiled={data.compiled} />
     </PostClientPage>
   )

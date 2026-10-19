@@ -9,11 +9,12 @@ import LocationCard from './-components/location-card'
 import SkillsCard from './-components/skills-card'
 import { WritingTimelineStrip } from './-components/writing-timeline-strip'
 import { HomeFooter } from './-components/home-footer'
+import { currentContentLocale } from '@/lib/content-locale'
 
 export const Route = createFileRoute('/_layout/(home)/')({
   loader: async ({ context }) => {
     const res = await context.queryClient.ensureQueryData(
-      orpc.home.getHome.queryOptions()
+      orpc.home.getHome.queryOptions({ input: { locale: currentContentLocale() } })
     )
     return res
   },

@@ -9,6 +9,7 @@ import { m } from '#/paraglide/messages'
 import { PageWithSidebar } from '@/components/layout/page-shell'
 import { PostItem, type PostListItem } from './-components/post-item'
 import { PostsSidebar, type TagStat } from './-components/posts-sidebar'
+import { currentContentLocale } from '@/lib/content-locale'
 
 const SORTS = ['newest', 'oldest', 'updated'] as const
 type Sort = (typeof SORTS)[number]
@@ -23,7 +24,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/_layout/posts/')({
   validateSearch: searchSchema,
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(orpc.post.getPosts.queryOptions({ input: {} }))
+    await context.queryClient.ensureQueryData(orpc.post.getPosts.queryOptions({ input: { locale: currentContentLocale() } }))
   },
   head: () =>
     pageHead({
@@ -80,7 +81,7 @@ function collectTags(posts: PostListItem[]): TagStat[] {
 function PostsIndexPage() {
   const { sort = 'newest', tag, q } = Route.useSearch()
   const { data, error, isLoading, refetch } = useQuery(
-    orpc.post.getPosts.queryOptions({ input: {} }),
+    orpc.post.getPosts.queryOptions({ input: { locale: currentContentLocale() } }),
   )
   const posts = data?.status === 'success' ? data.data : undefined
   const dateKey = sort === 'updated' ? 'updatedAt' : 'createdAt'

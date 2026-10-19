@@ -328,6 +328,12 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - `CompiledContent.tree` 改為自訂 `HastJsonRoot`（hast 的純 JSON 子集），避免 @types/hast 的 `data` 擴充讓跨端序列化型別失效
 4. **PR4 – 後台 UI**：語言 tabs、狀態 badge、分類翻譯表單
 5. **PR5 – 前台 i18n 路由 + SEO**：locale segment、Paraglide 設定與 middleware、hreflang、語言切換、fallback 提示
+   - ✅ 已完成（tan-blog，先於 PR4 進行：AI 以 MCP 管理譯文，後台 UI 較不急）：`lib/content-locale.ts` 對照 `zh-Hant ↔ zh-TW`；所有 API 呼叫與 query key 帶 `locale`（loader 算好再傳入 server fn，因 server fn 的 RPC 網址沒有語系前綴）
+   - Nitro ISR 快取 key 改為「語系:slug」，`/api/revalidate` 一次清掉所有語系
+   - 文章 / 日記頁直接使用 API 的 `compiled`（`resolveCompiled`，沒有時才本地編譯）；`CompiledContent` 加入 frontmatter 純量值（`showToc` 等）
+   - `ContentLocaleNotice`：fallback 提示、AI 翻譯標註、其他語言版本連結；`pageHead({ contentLocales })`：hreflang 只列已發布語系，canonical 指向目前語系（有譯文時）或原文，`og:locale` 依語系
+   - 以本機測試 API（PGlite + 正式站匯入的 2 篇文章 / 3 則日記 + 測試譯文）驗證 SSR 與 client 導航
+   - 未做：sitemap 列出各語言版本、RSS 多語
 6. **PR6 – 搜尋**：Typesense docker / env、`packages/search`、collection + alias、寫入時同步、`reindexAll`、搜尋 API proxy、前台 ⌘K、MCP `content_search`（依賴 PR3 的 translation 寫入路徑與 PR1 的 plainText）
 7. **PR7 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
 8. （後續）AI 翻譯流程：MCP 一鍵翻譯、mdast 區塊級增量翻譯、後台即時預覽 Worker 化

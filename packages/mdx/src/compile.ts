@@ -135,6 +135,19 @@ export function hastToPlainText(tree: HastRoot): string {
     .join('\n')
 }
 
+/** 只保留 frontmatter 的純量值，確保 compiled 可 JSON 序列化（日期轉 ISO 字串） */
+function scalarFrontmatter(matter: Record<string, unknown> | undefined) {
+  const out: Record<string, string | number | boolean | null> = {}
+  for (const [key, value] of Object.entries(matter ?? {})) {
+    if (value === null || ["string", "number", "boolean"].includes(typeof value)) {
+      out[key] = value as string | number | boolean | null
+    } else if (value instanceof Date) {
+      out[key] = value.toISOString()
+    }
+  }
+  return out
+}
+
 function toCompileError(err: unknown): CompileError {
   type Point = { line?: number; column?: number }
   const e = err as Point & {
@@ -200,7 +213,11 @@ export async function compileMdx(
   return {
     ok: true,
     // cleanTree 已移除 data / position / doctype，剩下的就是 HastJsonRoot 描述的純資料
-    compiled: { v: COMPILED_VERSION, tree: tree as unknown as HastJsonRoot },
+    compiled: {
+      v: COMPILED_VERSION,
+      tree: tree as unknown as HastJsonRoot,
+      frontmatter: scalarFrontmatter(data.matter),
+    },
     toc: (data.toc ?? []).map(({ data: _data, ...item }) => item),
     plainText,
     readingTime: estimateReadingTime(plainText),
