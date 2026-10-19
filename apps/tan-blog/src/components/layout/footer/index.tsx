@@ -2,6 +2,7 @@ import { m } from '#/paraglide/messages'
 import { SITE_NAME } from '@/lib/seo'
 import { LocaleSwitcher } from '@/components/locale-switcher'
 import { SeasonSwitcher } from '@/components/season-switcher'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const Footer = () => {
   return (
@@ -12,6 +13,7 @@ const Footer = () => {
         </p>
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
           <SeasonSwitcher />
+          <ThemeToggle />
           <LocaleSwitcher />
         </div>
       </div>

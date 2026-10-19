@@ -41,7 +41,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
             <DrawerTrigger asChild>
                 <button
                     aria-label={m.mobile_menu_open()}
-                    className="flex items-center justify-center size-9 rounded-full text-neutral-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                    className="flex items-center justify-center size-9 rounded-full text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-all duration-200"
                 >
                     <MenuIcon className="size-5" />
                 </button>
@@ -61,9 +61,9 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                 </VisuallyHidden.Root>
 
                 {/* 頂部欄 */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                     <span
-                        className="text-base text-white/80"
+                        className="text-base text-foreground/80"
                         style={{ fontFamily: "'Noto Serif JP', serif", letterSpacing: '0.18em' }}
                     >
                         {SITE_NAME}
@@ -71,7 +71,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                     <DrawerClose asChild>
                         <button
                             aria-label={m.mobile_menu_close()}
-                            className="flex items-center justify-center size-7 rounded-full text-white/40 hover:text-white/75 hover:bg-white/10 transition-all duration-200"
+                            className="flex items-center justify-center size-7 rounded-full text-foreground/40 hover:text-foreground/75 hover:bg-foreground/10 transition-all duration-200"
                         >
                             <X className="size-3.5" />
                         </button>
@@ -97,13 +97,13 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                                 <DrawerClose asChild>
                                                     <Link
                                                         to={link.href}
-                                                        className="flex-1 text-base text-white/70 hover:text-white tracking-wide transition-colors duration-150"
+                                                        className="flex-1 text-base text-foreground/70 hover:text-foreground tracking-wide transition-colors duration-150"
                                                     >
                                                         {link.text}
                                                     </Link>
                                                 </DrawerClose>
                                             ) : (
-                                                <span className="flex-1 text-base text-white/70 tracking-wide">
+                                                <span className="flex-1 text-base text-foreground/70 tracking-wide">
                                                     {link.text}
                                                 </span>
                                             )}
@@ -125,13 +125,13 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                                 <DrawerClose asChild>
                                                     <Link
                                                         to={link.href}
-                                                        className="flex-1 flex items-center min-h-12 px-5 text-base text-white/70 hover:text-white tracking-wide transition-colors duration-150"
+                                                        className="flex-1 flex items-center min-h-12 px-5 text-base text-foreground/70 hover:text-foreground tracking-wide transition-colors duration-150"
                                                     >
                                                         {link.text}
                                                     </Link>
                                                 </DrawerClose>
                                             ) : (
-                                                <span className="flex-1 flex items-center min-h-12 px-5 text-base text-white/70 tracking-wide">
+                                                <span className="flex-1 flex items-center min-h-12 px-5 text-base text-foreground/70 tracking-wide">
                                                     {link.text}
                                                 </span>
                                             )}
@@ -139,7 +139,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                             {/* 右側：獨立展開按鈕，足夠大的觸控區域 */}
                                             <AccordionPrimitive.Trigger
                                                 aria-label={`展開 ${link.text}`}
-                                                className="group/trigger flex items-center justify-center w-14 min-h-12 shrink-0 text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors duration-150 outline-none"
+                                                className="group/trigger flex items-center justify-center w-14 min-h-12 shrink-0 text-foreground/30 hover:text-foreground/60 hover:bg-foreground/5 transition-colors duration-150 outline-none"
                                             >
                                                 <ChevronDownIcon className="size-3.5 pointer-events-none group-aria-expanded/trigger:hidden" />
                                                 <ChevronUpIcon className="size-3.5 pointer-events-none hidden group-aria-expanded/trigger:inline" />
@@ -153,9 +153,9 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                                     <DrawerClose asChild key={childIndex}>
                                                         <Link
                                                             to={child.href}
-                                                            className="flex items-center pl-9 pr-5 min-h-10 text-base text-white/40 hover:text-white/70 transition-colors duration-150"
+                                                            className="flex items-center pl-9 pr-5 min-h-10 text-base text-foreground/40 hover:text-foreground/70 transition-colors duration-150"
                                                         >
-                                                            <span className="w-3 h-px bg-white/20 mr-3 shrink-0" />
+                                                            <span className="w-3 h-px bg-foreground/20 mr-3 shrink-0" />
                                                             {child.text}
                                                         </Link>
                                                     </DrawerClose>
@@ -170,8 +170,8 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
 
                     {/* 更多連結區塊 */}
                     {moreLinks?.children && (
-                        <div className="px-5 pt-4 pb-6 border-t border-white/10">
-                            <p className="text-base text-white/20 tracking-widest uppercase mb-3 select-none">
+                        <div className="px-5 pt-4 pb-6 border-t border-border">
+                            <p className="text-base text-foreground/20 tracking-widest uppercase mb-3 select-none">
                                 {m.mobile_menu_more()}
                             </p>
                             <div className="flex flex-wrap gap-x-5 gap-y-2.5">
@@ -181,7 +181,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                         <DrawerClose asChild key={index}>
                                             <Link
                                                 to={child.href}
-                                                className="text-base text-white/40 hover:text-white/70 tracking-wide transition-colors duration-150"
+                                                className="text-base text-foreground/40 hover:text-foreground/70 tracking-wide transition-colors duration-150"
                                             >
                                                 {child.text}
                                             </Link>
@@ -193,7 +193,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                 </div>
 
                 {/* 底部 — 讀者登錄 */}
-                <div className="flex justify-end px-5 py-3 border-t border-white/10">
+                <div className="flex justify-end px-5 py-3 border-t border-border">
                     <DrawerClose asChild>
                         <Link
                             to="/login"

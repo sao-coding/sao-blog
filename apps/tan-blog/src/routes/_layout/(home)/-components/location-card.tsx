@@ -2,8 +2,12 @@
 import React from 'react'
 import createGlobe from 'cobe'
 import { motion, useInView, useSpring } from 'motion/react'
+import { useTheme } from '@/components/theme-provider'
 
 const LocationCard = () => {
+  // 晝：宣紙色的淺色地球＋朱色標記；夜讀：原本的深色地球
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const pointerInteracting = React.useRef<number | null>(null)
   const pointerInteractionMovement = React.useRef(0)
@@ -42,13 +46,13 @@ const LocationCard = () => {
         height: width * 2,
         phi: 1.08,
         theta: -0.1,
-        dark: 1,
+        dark: isDark ? 1 : 0,
         diffuse: 1.6,
         mapSamples: 36_000,
-        mapBrightness: 2,
-        baseColor: [0.55, 0.55, 0.55],
-        markerColor: [244 / 255, 63 / 255, 94 / 255],
-        glowColor: [0.18, 0.18, 0.2],
+        mapBrightness: isDark ? 2 : 6,
+        baseColor: isDark ? [0.55, 0.55, 0.55] : [0.93, 0.91, 0.86],
+        markerColor: isDark ? [244 / 255, 63 / 255, 94 / 255] : [0.72, 0.22, 0.16],
+        glowColor: isDark ? [0.18, 0.18, 0.2] : [0.96, 0.94, 0.9],
         markers: [{ location: [25.136379, 121.4590044], size: 0.1 }],
         scale: 1.05,
       })
@@ -74,7 +78,7 @@ const LocationCard = () => {
       if (animationFrameId !== undefined) cancelAnimationFrame(animationFrameId)
       globe?.destroy()
     }
-  }, [r])
+  }, [r, isDark])
 
   return (
     <motion.div

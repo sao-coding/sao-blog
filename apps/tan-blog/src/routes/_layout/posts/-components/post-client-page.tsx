@@ -8,6 +8,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { CommentSection } from '@/components/comment'
 import { useAdminShortcutStore } from '@/store/admin-shortcut-store'
 import { WrittenOn } from '@/components/written-season'
+import { LetterPaper, LetterSignature } from '@/components/letter-paper'
 
 type PostClientPageProps = {
   children: ReactNode
@@ -56,16 +57,19 @@ export function PostClientPage({
     <div className="mx-auto mt-[120px] w-full max-w-[1136px] px-4 xl:px-0">
       <div className="relative min-h-[120px] lg:grid lg:grid-cols-[minmax(0,920px)_200px] lg:gap-4">
         <div className="min-w-0">
-          {/* 文章標題：原本只出現在捲動後的 header，手機與首屏都看不到 */}
-          <header className="mb-8">
-            <h1 className="font-wenkai text-3xl leading-snug text-foreground text-balance sm:text-4xl">
-              {metaData.title}
-            </h1>
-            <WrittenOn date={writtenAt} className="mt-3" />
-          </header>
-          <article className="prose dark:prose-invert max-w-full" ref={targetRef}>
-            {children}
-          </article>
+          <LetterPaper date={writtenAt} className="mb-12">
+            {/* 文章標題：原本只出現在捲動後的 header，手機與首屏都看不到 */}
+            <header className="mb-8">
+              <h1 className="font-wenkai text-3xl leading-snug text-foreground text-balance sm:text-4xl">
+                {metaData.title}
+              </h1>
+              <WrittenOn date={writtenAt} className="mt-3" />
+            </header>
+            <article className="prose dark:prose-invert max-w-full" ref={targetRef}>
+              {children}
+            </article>
+            <LetterSignature date={writtenAt} />
+          </LetterPaper>
           <CommentSection postId={postId} lazyLoad />
         </div>
         <div className="relative hidden lg:block">

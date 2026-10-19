@@ -10,7 +10,7 @@
 - **MDX**：`@mdx-js/mdx evaluate()` + 既有 unified pipeline；内容来自 API，非文件系统
 - **i18n**：Paraglide JS 2，zh-Hant（base）/ en / ja，URL 前缀路由
 - **Rendering**：文章/日记/专栏详情页 SSR + Nitro ISR 快取（`src/lib/isr/*.ts`，非 build-time prerender）；列表页 SSR + 短 TTL
-- **Theme**：shadcn ScriptOnce ThemeProvider（暗色预设）
+- **Theme**：shadcn ScriptOnce ThemeProvider（预设浅色宣纸，暗色为「夜读」可切换）
 
 ---
 
