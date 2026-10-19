@@ -92,5 +92,6 @@
   "thinking_count": "則隨手記下的心情",
   "thinking_intro": "零碎的念頭與當下的心情，不一定完整，也不一定深刻，只是想說說而已。",
   "thinking_empty": "板子上還空空的",
-  "thinking_from_note": "寫進日記：{title}"
+  "thinking_from_note": "寫進日記：{title}",
+  "thinking_latest": "最新一則"
 }

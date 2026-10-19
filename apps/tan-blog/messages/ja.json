@@ -92,5 +92,6 @@
   "thinking_count": "件のつぶやき",
   "thinking_intro": "とりとめのない思いつきや、その時の気持ち。完全でも深くもないけれど、ただ言ってみたかったこと。",
   "thinking_empty": "ボードはまだ空っぽです",
-  "thinking_from_note": "日記に書いた：{title}"
+  "thinking_from_note": "日記に書いた：{title}",
+  "thinking_latest": "最新"
 }
