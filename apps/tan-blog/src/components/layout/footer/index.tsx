@@ -1,15 +1,19 @@
 import { m } from '#/paraglide/messages'
 import { SITE_NAME } from '@/lib/seo'
 import { LocaleSwitcher } from '@/components/locale-switcher'
+import { SeasonSwitcher } from '@/components/season-switcher'
 
 const Footer = () => {
   return (
-    <footer className="w-full border-t bg-white text-center dark:bg-gray-900 dark:text-gray-300 py-6 mt-32">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-3 px-4 sm:flex-row sm:justify-between">
-        <p className="text-sm">
+    <footer className="relative mt-32 w-full border-t border-rule bg-background/40 py-6 text-center backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-4 px-4 md:flex-row md:justify-between">
+        <p className="text-sm text-muted-foreground">
           {m.footer_copyright({ year: String(new Date().getFullYear()), siteName: SITE_NAME })}
         </p>
-        <LocaleSwitcher />
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
+          <SeasonSwitcher />
+          <LocaleSwitcher />
+        </div>
       </div>
     </footer>
   )

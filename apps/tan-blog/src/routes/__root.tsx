@@ -10,6 +10,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '../components/theme-provider'
+import { getSolarTerm, SEASON_INIT_SCRIPT } from '../lib/season'
 
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
@@ -100,14 +101,16 @@ function NotFound() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={getLocale()} suppressHydrationWarning>
+    <html lang={getLocale()} data-season={getSolarTerm().season} suppressHydrationWarning>
       <head>
         <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
+        <ScriptOnce>{SEASON_INIT_SCRIPT}</ScriptOnce>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body className="font-sans antialiased [overflow-wrap:anywhere]">
         <ThemeProvider>
           {children}
+          <div aria-hidden className="cloud-sea" />
           <canvas
             id="universe"
             className="pointer-events-none fixed left-0 top-0 z-[1] m-0 block h-full w-full border-0 p-0 outline-0"

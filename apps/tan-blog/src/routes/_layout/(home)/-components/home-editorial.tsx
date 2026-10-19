@@ -75,7 +75,7 @@ export function HomeEditorial({
             return (
               <div key={item.id} className="relative py-4 pl-10">
                 <span
-                  className={`absolute top-4 left-[19px] -translate-x-1/2 bg-stone-900 px-1 text-xs font-medium tracking-[0.5px] tabular-nums ${
+                  className={`absolute top-4 left-[19px] -translate-x-1/2 bg-background px-1 text-xs font-medium tracking-[0.5px] tabular-nums ${
                     isFeatured ? 'text-primary' : 'text-neutral-10/40'
                   }`}
                 >

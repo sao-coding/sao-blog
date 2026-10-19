@@ -93,5 +93,12 @@
   "thinking_intro": "Scattered thoughts and passing moods — not always complete, not always deep. Just things I wanted to say.",
   "thinking_empty": "The board is still empty",
   "thinking_from_note": "In my diary: {title}",
-  "thinking_latest": "Latest"
+  "thinking_latest": "Latest",
+  "season_spring": "Spring",
+  "season_summer": "Summer",
+  "season_autumn": "Autumn",
+  "season_winter": "Winter",
+  "season_switch": "Switch season palette",
+  "season_now": "Now: {term} · {season}",
+  "season_preview": "Preview {season} (click the current season to reset)"
 }

@@ -13,6 +13,8 @@
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-rule: var(--rule);
+  --color-jade: var(--jade);
+  --color-season: var(--season);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -119,45 +121,66 @@
 }
 
 .dark {
-  --ink: oklch(0.76 0.06 190);
-  --ink-soft: oklch(0.76 0.06 190 / 0.12);
-  --rule: oklch(0.9 0.01 190 / 0.12);
-  --background: oklch(0.147 0.004 49.25);
-  --foreground: oklch(0.985 0.001 106.423);
-  --card: oklch(0.216 0.006 56.043);
-  --card-foreground: oklch(0.985 0.001 106.423);
-  --popover: oklch(0.216 0.006 56.043);
-  --popover-foreground: oklch(0.985 0.001 106.423);
-  --primary: oklch(0.705 0.213 47.604);
-  --primary-foreground: oklch(0.98 0.016 73.684);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.268 0.007 34.298);
-  --muted-foreground: oklch(0.709 0.01 56.259);
-  --accent: oklch(0.268 0.007 34.298);
-  --accent-foreground: oklch(0.985 0.001 106.423);
+  /* ── 玄方・雲梭夜航 ────────────────────────────────────────────────
+   * 底色：夢州夜空的深靛（不是純黑），文字：偏暖的宣紙白
+   * 主色：燈影暖金（--primary / --ink），輔助：玉青（--jade，機關金屬光）
+   * 季節點綴：--season，依二十四節氣切換（見 [data-season] 與 src/lib/season.ts）
+   */
+  --ink: oklch(0.8 0.1 78);
+  --ink-soft: oklch(0.8 0.1 78 / 0.1);
+  --rule: oklch(0.85 0.03 255 / 0.14);
+  --jade: oklch(0.76 0.06 190);
+  --background: oklch(0.165 0.03 264);
+  --foreground: oklch(0.94 0.012 85);
+  --card: oklch(0.21 0.03 262);
+  --card-foreground: oklch(0.94 0.012 85);
+  --popover: oklch(0.21 0.03 262);
+  --popover-foreground: oklch(0.94 0.012 85);
+  --primary: oklch(0.8 0.1 78);
+  --primary-foreground: oklch(0.2 0.03 262);
+  --secondary: oklch(0.25 0.03 262);
+  --secondary-foreground: oklch(0.94 0.012 85);
+  --muted: oklch(0.24 0.028 262);
+  --muted-foreground: oklch(0.72 0.02 255);
+  --accent: oklch(0.26 0.035 262);
+  --accent-foreground: oklch(0.94 0.012 85);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.553 0.013 58.071);
-  --chart-1: oklch(0.837 0.128 66.29);
-  --chart-2: oklch(0.705 0.213 47.604);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.553 0.195 38.402);
-  --chart-5: oklch(0.47 0.157 37.304);
-  --sidebar: oklch(0.216 0.006 56.043);
-  --sidebar-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-primary: oklch(0.705 0.213 47.604);
-  --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
-  --sidebar-accent: oklch(0.268 0.007 34.298);
-  --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.553 0.013 58.071);
-  --timeline-line: oklch(0.3 0.01 270);
-  --timeline-dot: oklch(0.7 0.08 200);
-  --timeline-date: oklch(0.6 0.02 270);
+  --border: oklch(0.85 0.03 255 / 12%);
+  --input: oklch(0.85 0.03 255 / 16%);
+  --ring: oklch(0.8 0.1 78 / 60%);
+  --chart-1: oklch(0.8 0.1 78);
+  --chart-2: oklch(0.76 0.06 190);
+  --chart-3: oklch(0.7 0.13 40);
+  --chart-4: oklch(0.78 0.09 150);
+  --chart-5: oklch(0.8 0.08 10);
+  --sidebar: oklch(0.21 0.03 262);
+  --sidebar-foreground: oklch(0.94 0.012 85);
+  --sidebar-primary: oklch(0.8 0.1 78);
+  --sidebar-primary-foreground: oklch(0.2 0.03 262);
+  --sidebar-accent: oklch(0.26 0.035 262);
+  --sidebar-accent-foreground: oklch(0.94 0.012 85);
+  --sidebar-border: oklch(0.85 0.03 255 / 12%);
+  --sidebar-ring: oklch(0.8 0.1 78 / 60%);
+  --timeline-line: oklch(0.85 0.03 255 / 0.18);
+  --timeline-dot: oklch(0.8 0.1 78);
+  --timeline-date: oklch(0.72 0.02 255);
   --selection-background-color-lightness: 60%;
   --selection-color-lightness: 85%;
+}
+
+/* 四季點綴色：只用在少數地方（紙膠帶、季節切換、天際線的微光），主色不跟著換 */
+:root,
+[data-season='autumn'] {
+  --season: oklch(0.7 0.13 40); /* 楓 */
+}
+[data-season='spring'] {
+  --season: oklch(0.8 0.08 10); /* 桃 */
+}
+[data-season='summer'] {
+  --season: oklch(0.78 0.09 150); /* 竹 */
+}
+[data-season='winter'] {
+  --season: oklch(0.9 0.025 240); /* 雪 */
 }
 
 @layer base {
@@ -168,8 +191,16 @@
     font-size: 14px;
   }
   body {
-    background-color: var(--background);
     color: var(--foreground);
+    background-color: var(--background);
+  }
+  /* 雲海夜空：上深下淺的夜色，天際線處透出一點當季的微光（.dark 才套用） */
+  .dark body {
+    background-image:
+      radial-gradient(120% 55% at 50% 112%, color-mix(in oklch, var(--season) 14%, transparent), transparent 70%),
+      radial-gradient(70% 40% at 85% 0%, oklch(0.8 0.1 78 / 0.06), transparent 70%),
+      linear-gradient(180deg, oklch(0.14 0.03 266) 0%, var(--background) 45%, oklch(0.19 0.035 256) 100%);
+    background-attachment: fixed;
   }
 
   ::selection {
@@ -632,7 +663,8 @@
  * 用 --tape 換顏色、--tape-rotate 換角度。
  */
 .washi-tape {
-  --tape: oklch(0.8 0.045 190 / 0.62);
+  /* 紙膠帶跟著季節換色 */
+  --tape: color-mix(in oklch, var(--season) 55%, transparent);
   --tape-rotate: -6deg;
   position: absolute;
   z-index: 1;
@@ -661,4 +693,53 @@
     2px 100%,
     0 89%, 3px 77%, 0 66%, 2px 53%, 0 41%, 3px 29%, 0 17%, 2px 7%
   );
+}
+
+/* ── 雲海 ──────────────────────────────────────────────────────────────────
+ * 畫面下方兩層緩慢漂移的雲，用 SVG 湍流雜訊產生，不用圖片資源。
+ * 疊在 body 背景之上、所有內容之下，pointer-events 關閉。
+ */
+.cloud-sea {
+  position: fixed;
+  inset: auto 0 0 0;
+  /* -1：畫在 body 背景之上、所有內容之下 */
+  z-index: -1;
+  height: 45vh;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.6) 40%, transparent 100%);
+}
+.cloud-sea::before,
+.cloud-sea::after {
+  content: '';
+  position: absolute;
+  inset: 0 -1300px 0 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .012' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .78 0 0 0 0 .82 0 0 0 0 .92 0 0 0 1.6 -.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+  background-size: 900px 100%;
+  background-repeat: repeat-x;
+  opacity: 0.09;
+  animation: cloud-drift 140s linear infinite;
+}
+.cloud-sea::after {
+  top: 30%;
+  background-size: 1300px 100%;
+  opacity: 0.07;
+  animation-name: cloud-drift-far;
+  animation-duration: 220s;
+}
+@keyframes cloud-drift {
+  to {
+    translate: -900px 0;
+  }
+}
+@keyframes cloud-drift-far {
+  to {
+    translate: -1300px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cloud-sea::before,
+  .cloud-sea::after {
+    animation: none;
+  }
 }

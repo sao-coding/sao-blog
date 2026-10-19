@@ -154,7 +154,7 @@ function LatestNote({ thinking }: { thinking: Thinking }) {
     <div className="sticky-note-wrap mb-16 max-w-sm">
       <p className="mb-3 font-wenkai text-xs text-muted-foreground">{m.thinking_latest()}</p>
       <div className="origin-top -rotate-1 transition-[rotate,translate] duration-300 ease-out motion-reduce:transition-none sm:hover:-translate-y-0.5 sm:hover:rotate-0">
-        <article style={{ '--paper': 'oklch(0.83 0.055 88)' } as CSSProperties} className="sticky-note px-5 pt-9 pb-5">
+        <article style={{ '--paper': 'oklch(0.88 0.022 85)' } as CSSProperties} className="sticky-note px-5 pt-9 pb-5">
           {/* 紙膠帶（.washi-tape 定義在 styles.css），斜斜跨過便條上緣 */}
           <span aria-hidden className="washi-tape" />
           <div

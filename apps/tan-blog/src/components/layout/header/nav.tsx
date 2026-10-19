@@ -255,7 +255,7 @@ const Nav = ({
         'relative mx-auto h-9 max-w-fit items-center justify-between rounded-full border px-4 md:flex overflow-visible group transition-all duration-100',
         variant === 'integrated'
           ? 'bg-transparent border-transparent shadow-none'
-          : 'bg-gray-900/95 backdrop-blur-md border-gray-700/50 shadow-lg',
+          : 'bg-background/75 backdrop-blur-md border-border shadow-lg',
         className
       )}
       onMouseMove={handleMouseMove}
@@ -308,7 +308,7 @@ const Nav = ({
                           }}
                           className="absolute inset-0 flex items-center justify-center"
                         >
-                          <item.icon size={16} className="text-teal-400" />
+                          <item.icon size={16} className="text-ink" />
                         </m.div>
                       </AnimatePresence>
                     </m.div>
@@ -316,7 +316,7 @@ const Nav = ({
 
                   {isActive && !shouldAnimate && item.icon && (
                     <div className="flex items-center justify-center w-5">
-                      <item.icon size={16} className="text-teal-400" />
+                      <item.icon size={16} className="text-ink" />
                     </div>
                   )}
 
@@ -331,8 +331,8 @@ const Nav = ({
                       mass: 0.6,
                     }}
                     className={cn(
-                      'text-sm font-medium whitespace-nowrap hover:text-teal-400',
-                      isActive ? 'text-teal-400' : 'text-gray-300'
+                      'text-sm font-medium whitespace-nowrap hover:text-ink',
+                      isActive ? 'text-ink' : 'text-gray-300'
                     )}
                   >
                     {item.text}
@@ -343,7 +343,7 @@ const Nav = ({
                 {isActive && shouldAnimate && (
                   <m.span
                     layoutId={`active-nav-underline-${id}`}
-                    className="absolute inset-x-0 bottom-px h-px bg-gradient-to-r from-transparent via-teal-400 to-transparent pointer-events-none rounded-full"
+                    className="absolute inset-x-0 bottom-px h-px bg-gradient-to-r from-transparent via-ink to-transparent pointer-events-none rounded-full"
                     transition={{
                       type: 'spring',
                       stiffness: 350,
@@ -359,7 +359,7 @@ const Nav = ({
                   <span
                     className={cn(
                       'absolute inset-x-0 bottom-px h-0.5 pointer-events-none rounded-full transition-all duration-300 ease-out',
-                      'bg-gradient-to-r from-transparent via-teal-400 to-transparent',
+                      'bg-gradient-to-r from-transparent via-ink to-transparent',
                       isActive
                         ? 'opacity-100 scale-x-100'
                         : 'opacity-0 scale-x-0'
@@ -398,7 +398,7 @@ const Nav = ({
                     className={cn(
                       'relative flex items-center justify-center rounded-full px-4 py-2 transition-all duration-200 group/item',
                       'focus-visible:outline-0',
-                      isHovered && 'text-teal-300'
+                      isHovered && 'text-ink/80'
                     )}
                   >
                     {content}
@@ -411,7 +411,7 @@ const Nav = ({
                       'relative flex items-center justify-center rounded-full px-4 py-2 transition-all duration-200 group/item cursor-pointer',
                       'text-gray-300',
                       'focus-visible:outline-0',
-                      isHovered && 'text-teal-300'
+                      isHovered && 'text-ink/80'
                     )}
                   >
                     {content}
@@ -444,7 +444,7 @@ const Nav = ({
                   damping: 32,
                   mass: 0.8,
                 }}
-                className="absolute top-full mt-3 bg-gray-800/95 backdrop-blur-md border border-gray-600/50 rounded-lg shadow-xl overflow-hidden z-50"
+                className="absolute top-full mt-3 bg-popover/95 backdrop-blur-md border border-border rounded-lg shadow-xl overflow-hidden z-50"
                 onMouseEnter={handleDropdownMouseEnter}
                 onMouseLeave={handleDropdownMouseLeave}
               >
