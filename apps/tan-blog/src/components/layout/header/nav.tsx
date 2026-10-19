@@ -332,7 +332,7 @@ const Nav = ({
                     }}
                     className={cn(
                       'text-sm font-medium whitespace-nowrap hover:text-ink',
-                      isActive ? 'text-ink' : 'text-gray-300'
+                      isActive ? 'text-ink' : 'text-foreground/80'
                     )}
                   >
                     {item.text}
@@ -409,7 +409,7 @@ const Nav = ({
                     title={item.text}
                     className={cn(
                       'relative flex items-center justify-center rounded-full px-4 py-2 transition-all duration-200 group/item cursor-pointer',
-                      'text-gray-300',
+                      'text-foreground/80',
                       'focus-visible:outline-0',
                       isHovered && 'text-ink/80'
                     )}

@@ -114,5 +114,8 @@
   "notes_empty_hint": "There are no entries yet, or the server could not be reached. Please try again later.",
   "notes_weather": "Weather",
   "notes_mood": "Mood",
-  "posts_filter_toggle": "Search · Tags"
+  "posts_filter_toggle": "Search · Tags",
+  "theme_day": "Day",
+  "theme_night": "Night",
+  "theme_toggle": "Toggle day / night reading"
 }

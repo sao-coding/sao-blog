@@ -32,7 +32,7 @@ const useMenuData = () => useQuery(orpc.menu.getMenu.queryOptions())
 // --- 共用小元件 ---
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="mb-2 text-xs font-medium text-gray-500">{children}</p>
+  <p className="mb-2 text-xs font-medium text-muted-foreground">{children}</p>
 )
 
 const isExternal = (href: string) => /^https?:\/\//.test(href)
@@ -79,7 +79,7 @@ const CardPlaceholder = ({
   label?: string
   loading?: boolean
 }) => (
-  <div className="flex h-40 w-80 flex-col items-center justify-center gap-2 text-gray-500">
+  <div className="flex h-40 w-80 flex-col items-center justify-center gap-2 text-muted-foreground">
     <Inbox className={cn('size-8 opacity-60', loading && 'animate-pulse')} />
     <p className="text-sm">{label}</p>
   </div>
@@ -108,19 +108,19 @@ const HomeCard = ({
           <AvatarImage src={SITE_OWNER.avatar} />
           <AvatarFallback>{SITE_OWNER.fallback}</AvatarFallback>
         </Avatar>
-        <p className="mt-3 text-base font-semibold text-gray-100">
+        <p className="mt-3 text-base font-semibold text-foreground">
           {SITE_OWNER.name}
         </p>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-400">
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
           <span className="size-2 rounded-full bg-green-500" />
           {SITE_OWNER.status}
         </p>
 
-        <div className="mt-4 flex gap-4 border-t border-gray-700/50 pt-3">
+        <div className="mt-4 flex gap-4 border-t border-border pt-3">
           {stats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-lg font-semibold text-gray-100">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-lg font-semibold text-foreground">{stat.value}</p>
+              <p className="text-xs text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -132,7 +132,7 @@ const HomeCard = ({
               href={social.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 transition-colors hover:text-ink"
+              className="text-muted-foreground transition-colors hover:text-ink"
             >
               <social.icon size={18} />
             </a>
@@ -149,7 +149,7 @@ const HomeCard = ({
               key={link.text}
               href={link.href}
               onNavigate={onNavigate}
-              className="rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
+              className="rounded-md px-2 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-ink"
             >
               {link.text}
             </CardLink>
@@ -199,11 +199,11 @@ const PostsCard = ({
                 'flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors',
                 hoveredSlug === null
                   ? 'bg-accent text-ink'
-                  : 'text-gray-300 hover:bg-accent hover:text-ink'
+                  : 'text-foreground/80 hover:bg-accent hover:text-ink'
               )}
             >
               <span>全部</span>
-              <span className="text-xs text-gray-500">{data.postTotal}</span>
+              <span className="text-xs text-muted-foreground">{data.postTotal}</span>
             </button>
 
             {data.categories.map((category) => (
@@ -215,17 +215,17 @@ const PostsCard = ({
                   'flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors',
                   hoveredSlug === category.slug
                     ? 'bg-accent text-ink'
-                    : 'text-gray-300 hover:bg-accent hover:text-ink'
+                    : 'text-foreground/80 hover:bg-accent hover:text-ink'
                 )}
                 onMouseEnter={() => setHoveredSlug(category.slug)}
               >
                 <span>{category.name}</span>
-                <span className="text-xs text-gray-500">{category.postCount}</span>
+                <span className="text-xs text-muted-foreground">{category.postCount}</span>
               </CardLink>
             ))}
 
             {data.categories.length === 0 && (
-              <p className="px-2 py-1.5 text-sm text-gray-500">尚無分類</p>
+              <p className="px-2 py-1.5 text-sm text-muted-foreground">尚無分類</p>
             )}
           </div>
         </div>
@@ -241,14 +241,14 @@ const PostsCard = ({
                 onNavigate={onNavigate}
                 className="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
               >
-                <p className="line-clamp-1 text-sm text-gray-200">{post.title}</p>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="line-clamp-1 text-sm text-foreground/90">{post.title}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {fromNow(post.createdAt)}
                 </p>
               </CardLink>
             ))}
             {rightPosts.length === 0 && (
-              <p className="px-2 py-1.5 text-sm text-gray-500">此分類尚無文章</p>
+              <p className="px-2 py-1.5 text-sm text-muted-foreground">此分類尚無文章</p>
             )}
           </div>
         </div>
@@ -281,7 +281,7 @@ const NotesCard = ({
               key={topic.id}
               href={`/notes/topics/${topic.slug}`}
               onNavigate={onNavigate}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-ink"
             >
               <span
                 className="size-2.5 shrink-0 rounded-full"
@@ -291,7 +291,7 @@ const NotesCard = ({
             </CardLink>
           ))}
           {data.topics.length === 0 && (
-            <p className="px-2 py-1.5 text-sm text-gray-500">尚無專欄</p>
+            <p className="px-2 py-1.5 text-sm text-muted-foreground">尚無專欄</p>
           )}
         </div>
       </div>
@@ -307,8 +307,8 @@ const NotesCard = ({
               onNavigate={onNavigate}
               className="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
             >
-              <p className="line-clamp-1 text-sm text-gray-200">{note.title}</p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="line-clamp-1 text-sm text-foreground/90">{note.title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {fromNow(note.createdAt)}
               </p>
             </CardLink>
@@ -343,16 +343,16 @@ const ThinkingCard = ({
             onNavigate={onNavigate}
             className="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
           >
-            <p className="line-clamp-2 text-sm text-gray-200">
+            <p className="line-clamp-2 text-sm text-foreground/90">
               {thinking.content}
             </p>
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               {fromNow(thinking.createdAt)}
             </p>
           </CardLink>
         ))}
         {data.recentThinkings.length === 0 && (
-          <p className="px-2 py-1.5 text-sm text-gray-500">尚無想法</p>
+          <p className="px-2 py-1.5 text-sm text-muted-foreground">尚無想法</p>
         )}
       </div>
     </div>
@@ -381,13 +381,13 @@ const TimelineCard = ({
 }) => (
   <div className="w-[24rem]">
     <div className="p-3">
-      <div className="flex items-center justify-around gap-2 border-b border-gray-700/50 pb-3">
+      <div className="flex items-center justify-around gap-2 border-b border-border pb-3">
         {TIMELINE_TABS.map((tab) => (
           <CardLink
             key={tab.text}
             href={tab.href}
             onNavigate={onNavigate}
-            className="rounded-md px-3 py-1 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
+            className="rounded-md px-3 py-1 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-ink"
           >
             {tab.text}
           </CardLink>
@@ -405,14 +405,14 @@ const TimelineCard = ({
               className="flex items-start justify-between gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
             >
               <span className="min-w-0">
-                <span className="line-clamp-1 text-sm text-gray-200">
+                <span className="line-clamp-1 text-sm text-foreground/90">
                   {item.title}
                 </span>
-                <span className="mt-0.5 block text-xs text-gray-500">
+                <span className="mt-0.5 block text-xs text-muted-foreground">
                   {fromNow(item.createdAt)}
                 </span>
               </span>
-              <span className="shrink-0 text-xs text-gray-500">
+              <span className="shrink-0 text-xs text-muted-foreground">
                 {ACTIVITY_LABEL[item.type]}
               </span>
             </CardLink>
@@ -430,7 +430,7 @@ const MoreCard = ({ onNavigate }: { onNavigate?: () => void }) => (
         key={link.text}
         href={link.href}
         onNavigate={onNavigate}
-        className="block rounded-md px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
+        className="block rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-ink"
       >
         {link.text}
       </CardLink>
@@ -448,21 +448,21 @@ const CardFooter = ({
   right?: string | { text: string; href: string }
   onNavigate?: () => void
 }) => (
-  <div className="flex items-center justify-between border-t border-gray-700/50 p-3 text-sm">
+  <div className="flex items-center justify-between border-t border-border p-3 text-sm">
     <CardLink
       href={left.href}
       onNavigate={onNavigate}
-      className="text-gray-300 transition-colors hover:text-ink"
+      className="text-foreground/80 transition-colors hover:text-ink"
     >
       {left.text}
     </CardLink>
     {typeof right === 'string' ? (
-      <span className="text-gray-500">{right}</span>
+      <span className="text-muted-foreground">{right}</span>
     ) : right ? (
       <CardLink
         href={right.href}
         onNavigate={onNavigate}
-        className="text-gray-500 transition-colors hover:text-ink"
+        className="text-muted-foreground transition-colors hover:text-ink"
       >
         {right.text}
       </CardLink>

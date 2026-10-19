@@ -6,11 +6,7 @@ import type { MouseEvent } from 'react'
 import type z from 'zod'
 
 import { openArticlePreview } from '@/components/preview/preview-url'
-
-const MONTH_EN = [
-  'JAN', 'FEB', 'MAR', 'APR', 'MAY',
-  'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
-] as const
+import { MONTH_NAMES, TermMark } from '@/components/written-season'
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
@@ -109,10 +105,10 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
         transition={{ duration: 0.48, delay: yearDelay, ease: EASE }}
         className="mb-4 flex items-baseline gap-3 pl-6"
       >
-        <h2 className="text-5xl leading-none font-extralight tracking-tighter text-transparent [-webkit-text-stroke:1px_rgba(115,115,115,0.8)]">
+        <h2 className="font-wenkai text-5xl leading-none text-ink/25 tabular-nums select-none">
           <time dateTime={String(year)}>{year}</time>
         </h2>
-        <span className="text-sm text-muted-foreground">
+        <span className="font-wenkai text-sm text-muted-foreground">
           <span className="sr-only">共有</span>
           {count} 篇文章
         </span>
@@ -143,10 +139,10 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                 show: { opacity: 1, transition: { duration: 0.3 } },
               }}
             >
-              <span className="text-xs text-muted-foreground shrink-0">
-                {month + 1}月 · {MONTH_EN[month]}
+              <span className="shrink-0 font-wenkai text-sm text-muted-foreground">
+                {MONTH_NAMES[month]}
               </span>
-              <span className="flex-1 border-t border-border/40" />
+              <span className="flex-1 border-t border-dashed border-rule" />
             </motion.div>
 
             {items.map((article, i) => {
@@ -187,14 +183,15 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                     onClick={(e) => handlePreviewClick(e, goTo)}
                     className="flex items-baseline gap-3 transition-colors md:gap-6"
                   >
-                    <time className="w-8 shrink-0 text-sm text-muted-foreground tabular-nums group-hover:text-primary md:w-24">
-                      {day}
-                    </time>
+                    <span className="flex w-8 shrink-0 items-baseline gap-2 font-wenkai text-sm md:w-24">
+                      <time className="text-muted-foreground tabular-nums group-hover:text-ink">{day}</time>
+                      <TermMark date={date} className="hidden text-xs md:inline" />
+                    </span>
                     {/* 手機版允許換行（最多兩行），寬螢幕才截成一行 */}
-                    <span className="line-clamp-2 min-w-0 text-foreground transition-colors md:line-clamp-1">
+                    <span className="line-clamp-2 min-w-0 font-wenkai text-foreground transition-colors group-hover:text-ink md:line-clamp-1">
                       {article.title}
                     </span>
-                    <span className="ml-auto text-sm text-muted-foreground hidden md:inline">
+                    <span className="ml-auto hidden shrink-0 font-wenkai text-xs text-muted-foreground md:inline">
                       {article.category && <>{article.category} / 文章</>}
                       {article.type === 'note' && (
                         <>心情: {article.mood} / 天氣: {article.weather} / 筆記</>

@@ -6,6 +6,7 @@ import type { TocItem } from '@/types/toc'
 import { useHeaderStore } from '@/store/header-store'
 import { CommentSection } from '@/components/comment'
 import { NoteHeader } from './note-header'
+import { LetterPaper, LetterSignature } from '@/components/letter-paper'
 
 interface NoteClientPageProps {
   note: NoteItem
@@ -28,17 +29,18 @@ export function NoteClientPage({ note, toc, children }: NoteClientPageProps) {
   return (
     <>
       <div>
-        <div
-          ref={targetRef}
-          className="lg:p-[30px_45px] p-[2rem_1rem] bg-white dark:bg-card border-zinc-200/70 dark:border-neutral-800 border note-card-enter"
-        >
-          <NoteHeader note={note} />
-          <NoteMainContainer>
-            <article className="prose dark:prose-invert max-w-full mt-10 note-content">
-              {children}
-            </article>
-          </NoteMainContainer>
-        </div>
+        {/* 日記也是一張信箋：寫作當時季節的花木與落款 */}
+        <LetterPaper date={note.createdAt} className="note-card-enter">
+          <div ref={targetRef}>
+            <NoteHeader note={note} />
+            <NoteMainContainer>
+              <article className="prose dark:prose-invert max-w-full mt-10 note-content">
+                {children}
+              </article>
+            </NoteMainContainer>
+          </div>
+          <LetterSignature date={note.createdAt} />
+        </LetterPaper>
         <CommentSection postId={note.id} lazyLoad />
       </div>
       <div className="relative hidden min-w-0 xl:block mt-[120px]">

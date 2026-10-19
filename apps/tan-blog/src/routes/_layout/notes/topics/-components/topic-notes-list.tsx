@@ -3,13 +3,9 @@ import { motion } from "motion/react"
 import { Link } from "@tanstack/react-router"
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import type z from "zod"
+import { MONTH_NAMES, TermMark } from "@/components/written-season"
 
 type NoteItem = z.infer<typeof NoteInTopicSchema>
-
-const MONTH_EN = [
-  'JAN','FEB','MAR','APR','MAY',
-  'JUN','JUL','AUG','SEP','OCT','NOV','DEC',
-] as const
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
@@ -67,10 +63,10 @@ function YearSection({
         transition={{ duration: 0.48, delay: yearDelay, ease: EASE }}
         className="mb-4 flex items-baseline gap-3 pl-6"
       >
-        <h2 className="text-5xl leading-none font-extralight tracking-tighter text-transparent [-webkit-text-stroke:1px_rgba(115,115,115,0.8)]">
+        <h2 className="font-wenkai text-5xl leading-none text-ink/25 tabular-nums select-none">
           <time dateTime={String(year)}>{year}</time>
         </h2>
-        <span className="text-sm text-muted-foreground">
+        <span className="font-wenkai text-sm text-muted-foreground">
           <span className="sr-only">共有</span>
           {count} 篇筆記
         </span>
@@ -101,10 +97,10 @@ function YearSection({
                 show: { opacity: 1, transition: { duration: 0.3 } },
               }}
             >
-              <span className="text-xs text-muted-foreground shrink-0">
-                {month + 1}月 · {MONTH_EN[month]}
+              <span className="shrink-0 font-wenkai text-sm text-muted-foreground">
+                {MONTH_NAMES[month]}
               </span>
-              <span className="flex-1 border-t border-border/40" />
+              <span className="flex-1 border-t border-dashed border-rule" />
             </motion.div>
 
             {items.map((note, i) => {
@@ -130,15 +126,16 @@ function YearSection({
                   <Link
                     to="/notes/$id"
                     params={{ id: note.id }}
-                    className="flex items-baseline gap-6 transition-colors"
+                    className="flex items-baseline gap-3 font-wenkai transition-colors md:gap-6"
                   >
-                    <time className="text-sm text-muted-foreground tabular-nums shrink-0 w-24 group-hover:text-primary">
-                      {day}
-                    </time>
-                    <span className="text-foreground transition-colors truncate">
+                    <span className="flex w-8 shrink-0 items-baseline gap-2 text-sm md:w-24">
+                      <time className="text-muted-foreground tabular-nums group-hover:text-ink">{day}</time>
+                      <TermMark date={note.createdAt} className="hidden text-xs md:inline" />
+                    </span>
+                    <span className="truncate text-foreground transition-colors group-hover:text-ink">
                       {note.title}
                     </span>
-                    <span className="ml-auto text-sm text-muted-foreground hidden md:inline">
+                    <span className="ml-auto hidden shrink-0 text-xs text-muted-foreground md:inline">
                       心情: {note.mood} / 天氣: {note.weather}
                     </span>
                   </Link>

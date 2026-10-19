@@ -59,7 +59,7 @@ function CodeBlock({
     if (!language || !code) return
 
     let cancelled = false
-    const theme = resolvedTheme === 'dark' ? 'github-dark' : 'github-light'
+    const theme = resolvedTheme === 'dark' ? 'github-dark' : 'kanagawa-lotus'
 
     codeToHtml(code, {
       lang: language,

@@ -13,6 +13,7 @@
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-rule: var(--rule);
+  --color-neutral-10: var(--foreground);
   --color-jade: var(--jade);
   --color-season: var(--season);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -77,45 +78,53 @@
 }
 
 :root {
-  /* 筆記本風格：降飽和青綠墨色、淡橫線 */
-  --ink: oklch(0.52 0.06 190);
-  --ink-soft: oklch(0.52 0.06 190 / 0.12);
-  --rule: oklch(0.5 0.01 190 / 0.18);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.147 0.004 49.25);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.147 0.004 49.25);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: oklch(0.646 0.222 41.116);
-  --primary-foreground: oklch(0.98 0.016 73.684);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.97 0.001 106.424);
-  --muted-foreground: oklch(0.553 0.013 58.071);
-  --accent: oklch(0.97 0.001 106.424);
-  --accent-foreground: oklch(0.216 0.006 56.043);
+  /* ── 四季信箋（預設・晝）───────────────────────────────────────────────
+   * 宣紙色底、墨色字、朱紅點綴（連結、目前位置、印章、格線）。
+   * 紙色依季節微微偏色：--paper-h / --paper-c 定義在各 [data-season] 區塊。
+   * 深色「夜讀」模式見下方 .dark。
+   */
+  --paper-h: 80;
+  --paper-c: 0.014;
+  --zhu: oklch(0.53 0.16 32); /* 朱 */
+  --ink: var(--zhu);
+  --ink-soft: color-mix(in oklch, var(--zhu) 9%, transparent);
+  --rule: oklch(0.32 0.02 60 / 0.16);
+  --jade: oklch(0.5 0.06 190);
+  --background: oklch(0.955 var(--paper-c) var(--paper-h));
+  --foreground: oklch(0.27 0.015 60);
+  --card: oklch(0.975 calc(var(--paper-c) * 0.7) var(--paper-h));
+  --card-foreground: oklch(0.27 0.015 60);
+  --popover: oklch(0.975 calc(var(--paper-c) * 0.7) var(--paper-h));
+  --popover-foreground: oklch(0.27 0.015 60);
+  --primary: var(--zhu);
+  --primary-foreground: oklch(0.97 0.015 85);
+  --secondary: oklch(0.92 var(--paper-c) var(--paper-h));
+  --secondary-foreground: oklch(0.27 0.015 60);
+  --muted: oklch(0.92 var(--paper-c) var(--paper-h));
+  --muted-foreground: oklch(0.48 0.015 60);
+  --accent: oklch(0.91 calc(var(--paper-c) + 0.01) var(--paper-h));
+  --accent-foreground: oklch(0.27 0.015 60);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.923 0.003 48.717);
-  --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.709 0.01 56.259);
-  --chart-1: oklch(0.837 0.128 66.29);
-  --chart-2: oklch(0.705 0.213 47.604);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.553 0.195 38.402);
-  --chart-5: oklch(0.47 0.157 37.304);
+  --border: oklch(0.32 0.02 60 / 14%);
+  --input: oklch(0.32 0.02 60 / 18%);
+  --ring: color-mix(in oklch, var(--zhu) 55%, transparent);
+  --chart-1: oklch(0.53 0.16 32);
+  --chart-2: oklch(0.5 0.06 190);
+  --chart-3: oklch(0.6 0.12 70);
+  --chart-4: oklch(0.55 0.09 150);
+  --chart-5: oklch(0.6 0.1 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0.001 106.423);
-  --sidebar-foreground: oklch(0.147 0.004 49.25);
-  --sidebar-primary: oklch(0.646 0.222 41.116);
-  --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
-  --sidebar-accent: oklch(0.97 0.001 106.424);
-  --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
-  --sidebar-border: oklch(0.923 0.003 48.717);
-  --sidebar-ring: oklch(0.709 0.01 56.259);
-  --timeline-line: oklch(0.75 0.02 85);
-  --timeline-dot: oklch(0.45 0.08 45);
-  --timeline-date: oklch(0.55 0.02 85);
+  --sidebar: oklch(0.975 calc(var(--paper-c) * 0.7) var(--paper-h));
+  --sidebar-foreground: oklch(0.27 0.015 60);
+  --sidebar-primary: var(--zhu);
+  --sidebar-primary-foreground: oklch(0.97 0.015 85);
+  --sidebar-accent: oklch(0.91 calc(var(--paper-c) + 0.01) var(--paper-h));
+  --sidebar-accent-foreground: oklch(0.27 0.015 60);
+  --sidebar-border: oklch(0.32 0.02 60 / 14%);
+  --sidebar-ring: color-mix(in oklch, var(--zhu) 55%, transparent);
+  --timeline-line: oklch(0.32 0.02 60 / 0.18);
+  --timeline-dot: var(--zhu);
+  --timeline-date: oklch(0.48 0.015 60);
   --selection-background-color-lightness: 40%;
   --selection-color-lightness: 30%;
 }
@@ -133,6 +142,9 @@
  */
 :root,
 [data-season='autumn'] {
+  /* 晝：米黃宣紙 */
+  --paper-h: 80;
+  --paper-c: 0.016;
   /* 秋・雲梭燈影：靛藍夜空、燈影暖金、楓紅 */
   --h: 264;
   --c: 0.03;
@@ -141,6 +153,9 @@
   --cloud: oklch(0.8 0.04 70);
 }
 [data-season='spring'] {
+  /* 晝：淡桃花箋 */
+  --paper-h: 20;
+  --paper-c: 0.012;
   /* 春・桃苑：暮紫夜空、桃粉、櫻白 */
   --h: 330;
   --c: 0.035;
@@ -149,6 +164,9 @@
   --cloud: oklch(0.85 0.05 340);
 }
 [data-season='summer'] {
+  /* 晝：淡竹青箋 */
+  --paper-h: 140;
+  --paper-c: 0.011;
   /* 夏・竹影螢火：深青夜空、竹青、螢黃綠 */
   --h: 195;
   --c: 0.035;
@@ -157,6 +175,9 @@
   --cloud: oklch(0.8 0.05 180);
 }
 [data-season='winter'] {
+  /* 晝：霜白箋 */
+  --paper-h: 240;
+  --paper-c: 0.01;
   /* 冬・雪原：冷灰藍夜空、霜銀藍、雪白 */
   --h: 240;
   --c: 0.02;
@@ -218,6 +239,14 @@
   body {
     color: var(--foreground);
     background-color: var(--background);
+  }
+  /* 晝：宣紙纖維紋理＋四角微暗，像攤開的一張紙 */
+  :root:not(.dark) body {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .32 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"),
+      radial-gradient(130% 90% at 50% 40%, transparent 60%, oklch(0.4 0.03 60 / 0.07) 100%);
+    background-attachment: fixed;
+    transition: background-color 0.8s ease;
   }
   /* 雲海夜空：上深下淺的夜色，天際線處透出一點當季的微光（.dark 才套用） */
   .dark body {
@@ -500,12 +529,13 @@
 }
 
 /* Shiki 雙主題（light/dark）以 CSS variables 切換，對應 rehype 設定的
-   themes: { light: 'github-light', dark: 'github-dark' } + defaultColor: false。
+   themes: { light: 'kanagawa-lotus', dark: 'github-dark' } + defaultColor: false。
    background-color 只放在 .shiki 本身——如果連 span 也套用背景色，每個文字
-   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。 */
+   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。
+   淺色底不用主題自帶的米黃，改取信箋紙色再壓一點墨，像紙上另貼的一方箋。 */
 .shiki {
   color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+  background-color: color-mix(in oklch, var(--foreground) 4%, var(--card));
 }
 .shiki span {
   color: var(--shiki-light);
@@ -915,4 +945,114 @@
   .ink-lantern {
     opacity: 0.7;
   }
+}
+
+/* ── 晝：宣紙上的水墨山水 ─────────────────────────────────────────────────── */
+:root:not(.dark) .ink-landscape {
+  --mtn-far: oklch(0.8 0.012 60);
+  --mtn-near: oklch(0.3 0.015 60);
+  --sky-top: var(--background);
+  --sky-low: var(--background);
+  --cloud: oklch(0.99 0.005 85);
+  background:
+    radial-gradient(55% 40% at 72% 30%, oklch(0.6 0.17 30 / 0.08), transparent 70%),
+    var(--background);
+}
+:root:not(.dark) .ink-stars,
+:root:not(.dark) .ink-lanterns,
+:root:not(.dark) .cloud-sea {
+  display: none;
+}
+/* 頭像當紅日：朱色日暈 */
+:root:not(.dark) .moon-avatar::before {
+  background: radial-gradient(closest-side, oklch(0.6 0.17 30 / 0.3), oklch(0.6 0.17 30 / 0.08) 55%, transparent);
+}
+:root:not(.dark) .moon-avatar img {
+  box-shadow:
+    0 0 0 1px oklch(0.53 0.16 32 / 0.45),
+    0 0 40px 6px oklch(0.6 0.17 30 / 0.22);
+}
+
+/* ── 四季信箋（文章／日記閱讀區）──────────────────────────────────────────
+ * 箋框：朱色「文武線」——外框較粗、內框細，兩線之間留一點空
+ * 天地：上下留白較寬，像信紙的天頭地腳
+ */
+.letter-paper {
+  --frame: color-mix(in oklch, var(--zhu, var(--primary)) 55%, transparent);
+  position: relative;
+  padding: 3.5rem 2.75rem 3rem;
+  background-color: var(--card);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 2px var(--frame),
+    inset 0 0 0 6px var(--card),
+    inset 0 0 0 7px color-mix(in oklch, var(--frame) 70%, transparent),
+    0 1px 2px oklch(0.3 0.02 60 / 0.06),
+    0 12px 32px -18px oklch(0.3 0.02 60 / 0.25);
+}
+.dark .letter-paper {
+  --frame: color-mix(in oklch, var(--pri) 35%, transparent);
+  box-shadow:
+    inset 0 0 0 2px var(--frame),
+    inset 0 0 0 6px var(--card),
+    inset 0 0 0 7px color-mix(in oklch, var(--frame) 70%, transparent);
+}
+@media (max-width: 640px) {
+  .letter-paper {
+    padding: 2.5rem 1.25rem 2rem;
+  }
+}
+
+/* 花箋角落的季節花木：淡彩、在文字之下，從右上角垂下 */
+.letter-sprig {
+  /* 右上角垂下的枝條（上下翻轉），避開右下角的落款與印章 */
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  scale: 1 -1;
+  width: 9rem;
+  height: 9rem;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.sprig-branch {
+  fill: none;
+  stroke: color-mix(in oklch, var(--foreground) 55%, transparent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.sprig-petal,
+.sprig-leaf {
+  fill: color-mix(in oklch, var(--season) 75%, transparent);
+}
+:root:not(.dark) .sprig-petal,
+:root:not(.dark) .sprig-leaf {
+  fill: color-mix(in oklch, var(--season) 70%, var(--foreground) 15%);
+}
+.sprig-heart {
+  fill: oklch(0.75 0.13 85);
+}
+
+/* 朱印：白文方印，邊緣略不規則、微微歪斜 */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  rotate: -4deg;
+  background: oklch(0.53 0.17 30);
+  border-radius: 3px 5px 4px 6px;
+  box-shadow: inset 0 0 0 2px oklch(0.53 0.17 30), inset 0 0 0 3.5px oklch(0.97 0.01 85 / 0.85);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  mask-size: cover;
+}
+.seal-text {
+  writing-mode: vertical-rl;
+  font-family: var(--font-wenkai);
+  font-size: 1.15rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: oklch(0.97 0.01 85);
 }
