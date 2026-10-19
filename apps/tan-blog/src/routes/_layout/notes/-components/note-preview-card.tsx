@@ -12,14 +12,14 @@ interface NotePreviewCardProps {
 // 內容超出高度就裁切，並附上「閱讀全文」連結導向 /notes/[id] 的完整頁面。
 export function NotePreviewCard({ note, children }: NotePreviewCardProps) {
   return (
-    <div className="lg:p-[30px_45px] p-[2rem_1rem] bg-white dark:bg-zinc-900 border-zinc-200/70 dark:border-neutral-800 border note-card-enter">
+    <div className="lg:p-[30px_45px] p-[2rem_1rem] bg-white dark:bg-card border-zinc-200/70 dark:border-neutral-800 border note-card-enter">
       <NoteHeader note={note} />
 
       <div className="relative mt-10 max-h-[max(calc(100vh-40rem),500px)] overflow-hidden">
         <article className="prose dark:prose-invert max-w-full note-content">
           {children}
         </article>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-zinc-900" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-card" />
       </div>
 
       <div className="mt-6 text-right">

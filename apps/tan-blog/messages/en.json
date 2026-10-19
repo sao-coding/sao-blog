@@ -88,5 +88,18 @@
   "posts_comments_short": "{count} notes",
   "posts_year_count": "{count} posts",
   "posts_subtitle": "If it is not written down, it was not really thought through.",
-  "posts_search_label": "Search"
+  "posts_search_label": "Search",
+  "thinking_count": "passing thoughts",
+  "thinking_intro": "Scattered thoughts and passing moods — not always complete, not always deep. Just things I wanted to say.",
+  "thinking_empty": "The board is still empty",
+  "thinking_from_note": "In my diary: {title}",
+  "thinking_latest": "Latest",
+  "season_spring": "Spring",
+  "season_summer": "Summer",
+  "season_autumn": "Autumn",
+  "season_winter": "Winter",
+  "season_switch": "Switch season palette",
+  "season_now": "Now: {term} · {season}",
+  "season_preview": "Preview {season} (click the current season to reset)",
+  "written_on": "Written {date} ·"
 }

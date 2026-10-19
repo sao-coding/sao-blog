@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import {
   HeadContent,
   Link,
@@ -10,6 +9,8 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '../components/theme-provider'
+import { getSolarTerm, seasonInitScript } from '../lib/season'
+import { SEASON_ACCENTS, TERM_THEMES } from '../lib/term-themes'
 
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
@@ -18,6 +19,8 @@ import appCss from '../styles.css?url'
 import { SITE_DESCRIPTION, SITE_NAME } from '../lib/seo'
 
 import type { QueryClient } from '@tanstack/react-query'
+
+const SEASON_INIT_SCRIPT = seasonInitScript(SEASON_ACCENTS)
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -99,19 +102,25 @@ function NotFound() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // 依真實節氣寫入季節（底色）、節氣（飄落物）與點綴色；訪客預覽別的季節時由 SEASON_INIT_SCRIPT 覆寫
+  const now = getSolarTerm()
   return (
-    <html lang={getLocale()} suppressHydrationWarning>
+    <html
+      lang={getLocale()}
+      data-season={now.season}
+      data-term={now.index}
+      style={{ '--season': TERM_THEMES[now.index].accent } as React.CSSProperties}
+      suppressHydrationWarning
+    >
       <head>
         <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
+        <ScriptOnce>{SEASON_INIT_SCRIPT}</ScriptOnce>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body className="font-sans antialiased [overflow-wrap:anywhere]">
         <ThemeProvider>
           {children}
-          <canvas
-            id="universe"
-            className="pointer-events-none fixed left-0 top-0 z-[1] m-0 block h-full w-full border-0 p-0 outline-0"
-          />
+          <div aria-hidden className="cloud-sea" />
         </ThemeProvider>
         <TanStackDevtools
           config={{
@@ -128,26 +137,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
           ]}
         />
-        <UniverseScript />
         <Scripts />
       </body>
     </html>
   )
-}
-
-// universe.js 直接寫入 canvas 的 width/height 屬性，若以 SSR <script> 標籤載入，
-// async 執行時機不保證晚於 hydration，會造成 canvas 屬性的 hydration mismatch。
-// 改用 useEffect 注入，確保一定在 hydration 完成後才執行。
-function UniverseScript() {
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.src = '/js/universe.js'
-    script.async = true
-    document.body.appendChild(script)
-    return () => {
-      document.body.removeChild(script)
-    }
-  }, [])
-
-  return null
 }

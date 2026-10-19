@@ -132,7 +132,7 @@ const HomeCard = ({
               href={social.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 transition-colors hover:text-teal-400"
+              className="text-gray-400 transition-colors hover:text-ink"
             >
               <social.icon size={18} />
             </a>
@@ -149,7 +149,7 @@ const HomeCard = ({
               key={link.text}
               href={link.href}
               onNavigate={onNavigate}
-              className="rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-gray-700/50 hover:text-teal-400"
+              className="rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
             >
               {link.text}
             </CardLink>
@@ -198,8 +198,8 @@ const PostsCard = ({
               className={cn(
                 'flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors',
                 hoveredSlug === null
-                  ? 'bg-gray-700/60 text-teal-400'
-                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-teal-400'
+                  ? 'bg-accent text-ink'
+                  : 'text-gray-300 hover:bg-accent hover:text-ink'
               )}
             >
               <span>全部</span>
@@ -214,8 +214,8 @@ const PostsCard = ({
                 className={cn(
                   'flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors',
                   hoveredSlug === category.slug
-                    ? 'bg-gray-700/60 text-teal-400'
-                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-teal-400'
+                    ? 'bg-accent text-ink'
+                    : 'text-gray-300 hover:bg-accent hover:text-ink'
                 )}
                 onMouseEnter={() => setHoveredSlug(category.slug)}
               >
@@ -239,7 +239,7 @@ const PostsCard = ({
                 key={post.id}
                 href={`/posts/${post.slug}`}
                 onNavigate={onNavigate}
-                className="block rounded-md px-2 py-1.5 transition-colors hover:bg-gray-700/50"
+                className="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
               >
                 <p className="line-clamp-1 text-sm text-gray-200">{post.title}</p>
                 <p className="mt-0.5 text-xs text-gray-500">
@@ -281,7 +281,7 @@ const NotesCard = ({
               key={topic.id}
               href={`/notes/topics/${topic.slug}`}
               onNavigate={onNavigate}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-gray-700/50 hover:text-teal-400"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
             >
               <span
                 className="size-2.5 shrink-0 rounded-full"
@@ -305,7 +305,7 @@ const NotesCard = ({
               key={note.id}
               href={`/notes/${note.id}`}
               onNavigate={onNavigate}
-              className="block rounded-md px-2 py-1.5 transition-colors hover:bg-gray-700/50"
+              className="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
             >
               <p className="line-clamp-1 text-sm text-gray-200">{note.title}</p>
               <p className="mt-0.5 text-xs text-gray-500">
@@ -341,7 +341,7 @@ const ThinkingCard = ({
             key={thinking.id}
             href="/thinking"
             onNavigate={onNavigate}
-            className="block rounded-md px-2 py-1.5 transition-colors hover:bg-gray-700/50"
+            className="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
           >
             <p className="line-clamp-2 text-sm text-gray-200">
               {thinking.content}
@@ -387,7 +387,7 @@ const TimelineCard = ({
             key={tab.text}
             href={tab.href}
             onNavigate={onNavigate}
-            className="rounded-md px-3 py-1 text-sm text-gray-300 transition-colors hover:bg-gray-700/50 hover:text-teal-400"
+            className="rounded-md px-3 py-1 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
           >
             {tab.text}
           </CardLink>
@@ -402,7 +402,7 @@ const TimelineCard = ({
               key={`${item.type}-${item.id}`}
               href={item.href}
               onNavigate={onNavigate}
-              className="flex items-start justify-between gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-700/50"
+              className="flex items-start justify-between gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
             >
               <span className="min-w-0">
                 <span className="line-clamp-1 text-sm text-gray-200">
@@ -430,7 +430,7 @@ const MoreCard = ({ onNavigate }: { onNavigate?: () => void }) => (
         key={link.text}
         href={link.href}
         onNavigate={onNavigate}
-        className="block rounded-md px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-700/50 hover:text-teal-400"
+        className="block rounded-md px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-accent hover:text-ink"
       >
         {link.text}
       </CardLink>
@@ -452,7 +452,7 @@ const CardFooter = ({
     <CardLink
       href={left.href}
       onNavigate={onNavigate}
-      className="text-gray-300 transition-colors hover:text-teal-400"
+      className="text-gray-300 transition-colors hover:text-ink"
     >
       {left.text}
     </CardLink>
@@ -462,7 +462,7 @@ const CardFooter = ({
       <CardLink
         href={right.href}
         onNavigate={onNavigate}
-        className="text-gray-500 transition-colors hover:text-teal-400"
+        className="text-gray-500 transition-colors hover:text-ink"
       >
         {right.text}
       </CardLink>

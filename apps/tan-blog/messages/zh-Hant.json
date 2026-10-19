@@ -88,5 +88,18 @@
   "posts_comments_short": "{count} 言",
   "posts_year_count": "{count} 篇",
   "posts_subtitle": "寫下來的，才算真的想過。",
-  "posts_search_label": "翻找"
+  "posts_search_label": "翻找",
+  "thinking_count": "則隨手記下的心情",
+  "thinking_intro": "零碎的念頭與當下的心情，不一定完整，也不一定深刻，只是想說說而已。",
+  "thinking_empty": "板子上還空空的",
+  "thinking_from_note": "寫進日記：{title}",
+  "thinking_latest": "最新一則",
+  "season_spring": "春",
+  "season_summer": "夏",
+  "season_autumn": "秋",
+  "season_winter": "冬",
+  "season_switch": "切換季節配色",
+  "season_now": "現在是 {term}・{season}",
+  "season_preview": "預覽{season}（點目前的季節回到現在）",
+  "written_on": "寫於 {date}・"
 }

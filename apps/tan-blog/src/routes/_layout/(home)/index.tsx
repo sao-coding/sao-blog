@@ -3,6 +3,7 @@ import { orpc } from '@/lib/orpc'
 import { pageHead, websiteJsonLd } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import Welcome from './-components/welcome'
+import { InkLandscape } from '@/components/ink-landscape'
 import { HomeEditorial } from './-components/home-editorial'
 import LocationCard from './-components/location-card'
 import SkillsCard from './-components/skills-card'
@@ -33,7 +34,10 @@ function HomePage() {
   return (
     <div>
       <div className="relative mt-[-4.5rem] h-dvh">
-        <Welcome />
+        <InkLandscape />
+        <div className="relative z-40 h-full">
+          <Welcome />
+        </div>
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl py-12">

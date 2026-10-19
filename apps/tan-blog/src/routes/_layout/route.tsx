@@ -11,7 +11,7 @@ export const Route = createFileRoute('/_layout')({
 
 function BlogLayout() {
   return (
-    <div className="h-full bg-stone-900">
+    <div className="h-full">
       <PageScrollInfoProvider />
       <Header />
       {/* AdminShortcutProvider 需要 /login route 已就緒（Phase 5 完成），

@@ -69,6 +69,7 @@ function PostDetailPage() {
   return (
     <PostClientPage
       postId={data.id}
+      writtenAt={data.createdAt}
       showToc={data.frontmatter.showToc !== false}
       toc={data.toc}
       metaData={{

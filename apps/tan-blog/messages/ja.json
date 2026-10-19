@@ -88,5 +88,18 @@
   "posts_comments_short": "{count} 件",
   "posts_year_count": "{count} 件",
   "posts_subtitle": "書き留めたものだけが、本当に考えたことになる。",
-  "posts_search_label": "探す"
+  "posts_search_label": "探す",
+  "thinking_count": "件のつぶやき",
+  "thinking_intro": "とりとめのない思いつきや、その時の気持ち。完全でも深くもないけれど、ただ言ってみたかったこと。",
+  "thinking_empty": "ボードはまだ空っぽです",
+  "thinking_from_note": "日記に書いた：{title}",
+  "thinking_latest": "最新",
+  "season_spring": "春",
+  "season_summer": "夏",
+  "season_autumn": "秋",
+  "season_winter": "冬",
+  "season_switch": "季節の配色を切り替え",
+  "season_now": "いまは{term}・{season}",
+  "season_preview": "{season}をプレビュー（今の季節を押すと戻ります）",
+  "written_on": "{date} に記す・"
 }
