@@ -18,7 +18,6 @@ export type ParticleKind =
   | 'ginkgo' // 銀杏
   | 'snow' // 雪
   | 'rain' // 雨
-  | 'sunmote' // 晴天的光塵
 
 export type ParticleMix = [ParticleKind, number][]
 
@@ -61,11 +60,3 @@ export const SEASON_ACCENTS: Record<Season, string> = {
   winter: TERM_THEMES[SEASON_REPRESENTATIVE_TERM.winter].accent,
 }
 
-// 日記的「天氣」是自由文字（晴天、小雨…），抓關鍵字對應成飄落物與光暈色；對不上就回 null，改用節氣
-export function weatherTheme(weather: string | null | undefined): TermTheme | null {
-  if (!weather) return null
-  if (/雪/.test(weather)) return { accent: 'oklch(0.92 0.02 240)', mix: [['snow', 1.5]] }
-  if (/雨/.test(weather)) return { accent: 'oklch(0.72 0.04 240)', mix: [['rain', 2]] }
-  if (/晴|陽|日/.test(weather)) return { accent: 'oklch(0.86 0.12 85)', mix: [['sunmote', 1.4]] }
-  return null
-}

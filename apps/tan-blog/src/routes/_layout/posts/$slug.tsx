@@ -5,7 +5,6 @@ import { defaultMDXComponents } from '@/components/mdx'
 import { blogPostingJsonLd, pageHead } from '@/lib/seo'
 import { postOgImagePath } from '@/lib/og/og-url'
 import { PostClientPage } from './-components/post-client-page'
-import { SeasonBand } from '@/components/written-season'
 
 export const Route = createFileRoute('/_layout/posts/$slug')({
   loader: async ({ params }) => {
@@ -68,23 +67,19 @@ function PostDetailPage() {
   const { slug } = Route.useParams()
 
   return (
-    // 頁首的季節帶用「文章寫作當時的節氣」，不是現在的季節
-    <div className="relative">
-      <SeasonBand date={data.createdAt} />
-      <PostClientPage
-        postId={data.id}
-        writtenAt={data.createdAt}
-        showToc={data.frontmatter.showToc !== false}
-        toc={data.toc}
-        metaData={{
-          category: data.category.name,
-          tags: data.tags.map((tag) => tag.name),
-          title: data.title,
-          url: `/posts/${slug}`,
-        }}
-      >
-        <MdxContent compiledSource={data.compiledSource} components={defaultMDXComponents} />
-      </PostClientPage>
-    </div>
+    <PostClientPage
+      postId={data.id}
+      writtenAt={data.createdAt}
+      showToc={data.frontmatter.showToc !== false}
+      toc={data.toc}
+      metaData={{
+        category: data.category.name,
+        tags: data.tags.map((tag) => tag.name),
+        title: data.title,
+        url: `/posts/${slug}`,
+      }}
+    >
+      <MdxContent compiledSource={data.compiledSource} components={defaultMDXComponents} />
+    </PostClientPage>
   )
 }

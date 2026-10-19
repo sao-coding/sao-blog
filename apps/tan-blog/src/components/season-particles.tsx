@@ -1,12 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { TERM_THEMES, type ParticleKind, type ParticleMix } from '@/lib/term-themes'
 
-// 依節氣（或指定的 mix）在父元素範圍內畫飄落物：梅、桃、櫻、油桐、鳳凰花、螢火、荷、桂、欒樹、楓、銀杏、雪、雨、光塵。
-// - 沒給 mix 時讀 <html data-term>，並監聽它變化（頁尾的季節切換）即時更新
-// - 給 mix 時固定使用（例如文章頁用「寫作當時的節氣」、日記頁用當天天氣）
+// 依目前節氣在父元素範圍內畫飄落物：梅、桃、櫻、油桐、鳳凰花、螢火、荷、桂、欒樹、楓、銀杏、雪、雨。
+// - 讀 <html data-term>，並監聽它變化（頁尾的季節切換）即時更新
 // - 填滿父元素、pointer-events 關閉；分頁隱藏時暫停；prefers-reduced-motion 時不繪製
 
-type Motion = 'fall' | 'wander' | 'rain' | 'rise'
+type Motion = 'fall' | 'wander' | 'rain'
 
 interface Particle {
   kind: ParticleKind
@@ -267,16 +266,6 @@ const ELEMENTS: Record<ParticleKind, Element> = {
       ctx.stroke()
     },
   },
-  sunmote: {
-    colors: ['#ffe7a8', '#fff2c9', '#ffd98a'],
-    size: [1.6, 3],
-    motion: 'rise',
-    speed: [0.1, 0.3],
-    draw: (ctx, p) => {
-      ctx.globalAlpha *= 0.55 + 0.45 * Math.max(0, Math.sin(p.phase))
-      glow(ctx, p, p.size * 6)
-    },
-  },
 }
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min)
@@ -308,8 +297,6 @@ function spawn(mix: ParticleMix, w: number, h: number, initial: boolean): Partic
   switch (el.motion) {
     case 'wander':
       return { ...base, y: rand(h * 0.3, h), vx: rand(-speed, speed), vy: rand(-speed, speed * 0.6), spin: rand(0.01, 0.03) }
-    case 'rise':
-      return { ...base, y: initial ? rand(0, h) : h + 10, vx: rand(-0.1, 0.1), vy: -speed, spin: rand(0.01, 0.02) }
     case 'rain':
       return { ...base, y: initial ? rand(-h, h) : rand(-h * 0.3, -20), vx: rand(-1.2, -0.6), vy: speed }
     default:
@@ -322,10 +309,8 @@ function termMix(): ParticleMix {
   return (TERM_THEMES[term] ?? TERM_THEMES[18]).mix
 }
 
-export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; density?: number }) {
+export function SeasonParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  // mix 以 JSON 當 effect 依賴，避免父元件每次 render 傳新陣列就重建
-  const mixKey = mix ? JSON.stringify(mix) : ''
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -333,7 +318,7 @@ export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; densi
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
 
-    let current: ParticleMix = mixKey ? (JSON.parse(mixKey) as ParticleMix) : termMix()
+    let current: ParticleMix = termMix()
     let particles: Particle[] = []
     let w = 0
     let h = 0
@@ -342,7 +327,7 @@ export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; densi
     const count = () => {
       // 依面積換算，雨與雪需要多一點才有感覺
       const heavy = current.some(([k]) => k === 'rain' || k === 'snow') ? 2 : 1
-      return Math.min(80, Math.round(((w * h) / (1440 * 900)) * 22 * heavy * density + 4))
+      return Math.min(80, Math.round(((w * h) / (1440 * 900)) * 22 * heavy + 4))
     }
     const reseed = () => {
       particles = Array.from({ length: count() }, () => spawn(current, w, h, true))
@@ -369,10 +354,6 @@ export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; densi
           p.x += p.vx + Math.sin(p.phase) * 0.2
           p.y += p.vy + Math.cos(p.phase * 0.7) * 0.15
           if (p.x < -20 || p.x > w + 20 || p.y < h * 0.2 || p.y > h + 20) p = particles[i] = spawn(current, w, h, true)
-        } else if (el.motion === 'rise') {
-          p.x += p.vx + Math.sin(p.phase) * 0.15
-          p.y += p.vy
-          if (p.y < -10) p = particles[i] = spawn(current, w, h, false)
         } else {
           p.x += p.vx + (el.motion === 'rain' ? 0 : Math.sin(p.phase) * 0.5)
           p.y += p.vy
@@ -396,13 +377,12 @@ export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; densi
     resize()
     start()
 
-    // 沒指定 mix 時跟著 <html data-term> 走
+    // 跟著 <html data-term> 走
     const observer = new MutationObserver(() => {
-      if (mixKey) return
       current = termMix()
       reseed()
     })
-    if (!mixKey) observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-term'] })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-term'] })
     const resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(canvas.parentElement ?? canvas)
     document.addEventListener('visibilitychange', start)
@@ -413,7 +393,7 @@ export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; densi
       resizeObserver.disconnect()
       document.removeEventListener('visibilitychange', start)
     }
-  }, [mixKey, density])
+  }, [])
 
   return <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
 }
