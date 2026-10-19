@@ -101,5 +101,17 @@
   "season_switch": "Switch season palette",
   "season_now": "Now: {term} · {season}",
   "season_preview": "Preview {season} (click the current season to reset)",
-  "written_on": "Written {date} ·"
+  "written_on": "Written {date} ·",
+  "notes_subtitle": "Writing the days down so they do not slip away so quickly.",
+  "notes_total": "{count} entries",
+  "notes_latest": "Latest",
+  "notes_continue": "Keep reading",
+  "notes_footprint": "Writing footprint",
+  "notes_footprint_month": "{count} entries this month",
+  "notes_prev_month": "Previous month",
+  "notes_next_month": "Next month",
+  "notes_empty": "No diary entries yet",
+  "notes_empty_hint": "There are no entries yet, or the server could not be reached. Please try again later.",
+  "notes_weather": "Weather",
+  "notes_mood": "Mood"
 }
