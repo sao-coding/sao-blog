@@ -4,6 +4,7 @@ import type z from 'zod'
 import type { postSchema } from '@sao-blog/api/schema/post'
 import { cn } from '@/lib/utils'
 import { m } from '#/paraglide/messages'
+import { TermMark } from '@/components/written-season'
 
 export type PostListItem = z.infer<typeof postSchema>
 
@@ -31,7 +32,11 @@ export function PostItem({
         {pinned ? (
           <span className="font-wenkai text-sm text-ink">{m.posts_pinned()}</span>
         ) : (
-          <time dateTime={date.toISOString()}>{date.format('MM.DD')}</time>
+          <>
+            <time dateTime={date.toISOString()}>{date.format('MM.DD')}</time>
+            {/* 寫作當時的節氣 */}
+            <TermMark date={post[dateKey]} className="mt-1.5 block text-[0.7rem] leading-none" />
+          </>
         )}
       </div>
 

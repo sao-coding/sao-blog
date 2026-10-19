@@ -49,12 +49,13 @@ function ridgePath(seed: number, baseY: number, amplitude: number, roughness: nu
 }
 
 // 由遠到近：基準高度越來越低（越靠近畫面下方）、起伏越來越大
+// 山只佔主視覺底部約三分之一，當作「遠山淡影」點綴，不搶文字與月亮
 const LAYERS = [
-  { d: ridgePath(11, 330, 120, 0.48, [{ x: 0.74, height: 190, width: 0.07 }, { x: 0.86, height: 120, width: 0.05 }]), parallax: 0.05 },
-  { d: ridgePath(23, 380, 130, 0.48, [{ x: 0.12, height: 200, width: 0.07 }, { x: 0.24, height: 90, width: 0.05 }]), parallax: 0.1 },
-  { d: ridgePath(37, 430, 120, 0.5, [{ x: 0.93, height: 170, width: 0.07 }, { x: 0.62, height: 60, width: 0.06 }]), parallax: 0.16 },
-  { d: ridgePath(41, 485, 110, 0.52, [{ x: 0.03, height: 150, width: 0.08 }]), parallax: 0.24 },
-  { d: ridgePath(59, 545, 80, 0.52, [{ x: 0.8, height: 60, width: 0.12 }]), parallax: 0.34 },
+  { d: ridgePath(11, 360, 80, 0.48, [{ x: 0.76, height: 110, width: 0.07 }]), parallax: 0.05 },
+  { d: ridgePath(23, 400, 90, 0.48, [{ x: 0.12, height: 120, width: 0.07 }]), parallax: 0.1 },
+  { d: ridgePath(37, 445, 80, 0.5, [{ x: 0.92, height: 100, width: 0.07 }]), parallax: 0.16 },
+  { d: ridgePath(41, 495, 70, 0.52, [{ x: 0.04, height: 80, width: 0.08 }]), parallax: 0.24 },
+  { d: ridgePath(59, 550, 50, 0.52), parallax: 0.34 },
 ]
 
 const STARS = (() => {

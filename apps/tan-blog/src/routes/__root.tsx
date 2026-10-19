@@ -9,7 +9,8 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '../components/theme-provider'
-import { getSolarTerm, SEASON_INIT_SCRIPT } from '../lib/season'
+import { getSolarTerm, seasonInitScript } from '../lib/season'
+import { SEASON_ACCENTS, TERM_THEMES } from '../lib/term-themes'
 
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
@@ -18,6 +19,8 @@ import appCss from '../styles.css?url'
 import { SITE_DESCRIPTION, SITE_NAME } from '../lib/seo'
 
 import type { QueryClient } from '@tanstack/react-query'
+
+const SEASON_INIT_SCRIPT = seasonInitScript(SEASON_ACCENTS)
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -99,8 +102,16 @@ function NotFound() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // 依真實節氣寫入季節（底色）、節氣（飄落物）與點綴色；訪客預覽別的季節時由 SEASON_INIT_SCRIPT 覆寫
+  const now = getSolarTerm()
   return (
-    <html lang={getLocale()} data-season={getSolarTerm().season} suppressHydrationWarning>
+    <html
+      lang={getLocale()}
+      data-season={now.season}
+      data-term={now.index}
+      style={{ '--season': TERM_THEMES[now.index].accent } as React.CSSProperties}
+      suppressHydrationWarning
+    >
       <head>
         <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
         <ScriptOnce>{SEASON_INIT_SCRIPT}</ScriptOnce>

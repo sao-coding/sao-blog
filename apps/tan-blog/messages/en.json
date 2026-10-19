@@ -100,5 +100,6 @@
   "season_winter": "Winter",
   "season_switch": "Switch season palette",
   "season_now": "Now: {term} · {season}",
-  "season_preview": "Preview {season} (click the current season to reset)"
+  "season_preview": "Preview {season} (click the current season to reset)",
+  "written_on": "Written {date} ·"
 }

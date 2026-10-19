@@ -779,7 +779,7 @@
  */
 .ink-landscape {
   --mtn-far: oklch(0.34 calc(var(--c) + 0.02) var(--h));
-  --mtn-near: oklch(0.11 var(--c) var(--h));
+  --mtn-near: oklch(0.14 var(--c) var(--h));
   --sky-top: oklch(0.12 var(--c) var(--h));
   --sky-low: oklch(0.3 calc(var(--c) + 0.03) var(--h));
   --lantern: oklch(0.82 0.13 70);
@@ -813,7 +813,7 @@
 .ink-layer {
   position: absolute;
   inset: auto 0 0 0;
-  height: 60%;
+  height: 42%;
   translate: 0 calc(var(--scroll) * var(--parallax) * 1px);
   will-change: translate;
 }
@@ -827,7 +827,7 @@
 .ink-stop-ridge {
   stop-color: color-mix(in oklch, var(--mtn-near) calc(var(--t) * 100%), var(--mtn-far));
   /* 遠山淡、近山濃 */
-  stop-opacity: calc(0.4 + var(--t) * 0.6);
+  stop-opacity: calc(0.3 + var(--t) * 0.5);
 }
 .ink-stop-foot {
   stop-color: color-mix(in oklch, var(--mtn-near) calc(var(--t) * 100%), var(--cloud) 18%);

@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 import { ClockIcon } from 'lucide-react'
 import type { NoteItem } from '@/types/note'
+import { TermMark } from '@/components/written-season'
 
 interface NoteHeaderProps {
   note: Pick<NoteItem, 'title' | 'createdAt' | 'weather' | 'mood'>
@@ -17,6 +18,7 @@ export function NoteHeader({ note }: NoteHeaderProps) {
         <span className="inline-flex items-center space-x-1">
           <ClockIcon className="size-4" />
           <span>{format(new Date(note.createdAt), 'yyyy-MM-dd')}</span>
+          <TermMark date={note.createdAt} className="ml-1.5" />
         </span>
         <span className="mx-2">•</span>
         <span className="inline-flex items-center space-x-1">

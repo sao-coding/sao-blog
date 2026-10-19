@@ -100,5 +100,6 @@
   "season_winter": "冬",
   "season_switch": "季節の配色を切り替え",
   "season_now": "いまは{term}・{season}",
-  "season_preview": "{season}をプレビュー（今の季節を押すと戻ります）"
+  "season_preview": "{season}をプレビュー（今の季節を押すと戻ります）",
+  "written_on": "{date} に記す・"
 }

@@ -7,6 +7,7 @@ import { noteOgImagePath } from '@/lib/og/og-url'
 import { mdxToPlainText } from '@/lib/plain-text'
 import { NoteLeftSidebar } from './-components/note-left-sidebar'
 import { NoteClientPage } from './-components/note-client-page'
+import { SeasonBand } from '@/components/written-season'
 
 export const Route = createFileRoute('/_layout/notes/$id')({
   loader: async ({ params }) => {
@@ -57,19 +58,23 @@ function NoteDetailPage() {
   const note = Route.useLoaderData()
 
   return (
-    <div className="grid max-w-[60rem] mt-12 mx-auto gap-4 xl:max-w-[calc(60rem+400px)] xl:grid-cols-[1fr_minmax(auto,60rem)_1fr] md:grid-cols-1">
-      <NoteLeftSidebar className="relative hidden min-w-0 xl:block" />
-      <NoteClientPage
-        note={{
-          ...note,
-          topic: null,
-          createdAt: note.createdAt.toISOString(),
-          updatedAt: note.updatedAt.toISOString(),
-        }}
-        toc={note.toc}
-      >
-        <MdxContent compiledSource={note.compiledSource} components={defaultMDXComponents} />
-      </NoteClientPage>
+    // 頁首的季節帶用寫日記那天的節氣；有填天氣（晴、雨、雪）時改用天氣
+    <div className="relative">
+      <SeasonBand date={note.createdAt} weather={note.weather} />
+      <div className="grid max-w-[60rem] mt-12 mx-auto gap-4 xl:max-w-[calc(60rem+400px)] xl:grid-cols-[1fr_minmax(auto,60rem)_1fr] md:grid-cols-1">
+        <NoteLeftSidebar className="relative hidden min-w-0 xl:block" />
+        <NoteClientPage
+          note={{
+            ...note,
+            topic: null,
+            createdAt: note.createdAt.toISOString(),
+            updatedAt: note.updatedAt.toISOString(),
+          }}
+          toc={note.toc}
+        >
+          <MdxContent compiledSource={note.compiledSource} components={defaultMDXComponents} />
+        </NoteClientPage>
+      </div>
     </div>
   )
 }

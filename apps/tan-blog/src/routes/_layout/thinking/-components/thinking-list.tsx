@@ -10,6 +10,7 @@ import { dayjsLocale } from '@/lib/date-locale'
 import { cn } from '@/lib/utils'
 import { CommentMarkdownRenderer } from '@/components/comment/comment-markdown-renderer'
 import { m } from '#/paraglide/messages'
+import { TermMark } from '@/components/written-season'
 
 dayjs.extend(relativeTime)
 dayjs.extend(utc)
@@ -133,6 +134,7 @@ function ThinkingEntry({ thinking }: { thinking: Thinking }) {
         >
           {created.format('HH:mm')}
         </time>
+        <TermMark date={thinking.createdAt} />
         {thinking.note && (
           <Link
             to="/notes/$id"

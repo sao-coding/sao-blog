@@ -47,6 +47,8 @@ function localYmd(date: Date) {
 export interface SolarTermInfo {
   // 目前所在的節氣（最近一個已經過的節氣）
   term: string
+  // 節氣索引：0 = 小寒 … 23 = 冬至（依公曆順序）
+  index: number
   season: Season
 }
 
@@ -66,11 +68,26 @@ export function getSolarTerm(date = new Date()): SolarTermInfo {
   }
   // 立春(2)~穀雨(7) 春、立夏(8)~大暑(13) 夏、立秋(14)~霜降(19) 秋、其餘冬
   const season: Season = index >= 2 && index < 8 ? 'spring' : index < 14 && index >= 8 ? 'summer' : index < 20 && index >= 14 ? 'autumn' : 'winter'
-  return { term: TERMS[index].name, season }
+  return { term: TERMS[index].name, index, season }
+}
+
+export const TERM_NAMES = TERMS.map((t) => t.name)
+
+// 頁尾預覽某個季節時，用該季中間的節氣代表（春分／夏至／秋分／冬至）
+export const SEASON_REPRESENTATIVE_TERM: Record<Season, number> = {
+  spring: 5,
+  summer: 11,
+  autumn: 17,
+  winter: 23,
 }
 
 export const SEASON_STORAGE_KEY = 'season-override'
 
 // 在 <head> 以 ScriptOnce 執行：先套用訪客手動選的季節（若有），避免換色閃爍。
-// 伺服器已依真實節氣在 <html data-season> 寫好預設值，這裡只處理覆寫。
-export const SEASON_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem('${SEASON_STORAGE_KEY}');if(s==='spring'||s==='summer'||s==='autumn'||s==='winter'){document.documentElement.dataset.season=s;}}catch(e){}})();`
+// 伺服器已依真實節氣在 <html> 寫好 data-season / data-term / --season，這裡只處理覆寫。
+// accents：各季代表節氣的點綴色（由 term-themes.ts 提供）。
+export function seasonInitScript(accents: Record<Season, string>) {
+  const terms = JSON.stringify(SEASON_REPRESENTATIVE_TERM)
+  const colors = JSON.stringify(accents)
+  return `(function(){try{var s=localStorage.getItem('${SEASON_STORAGE_KEY}');var t=${terms};var a=${colors};if(t[s]!==undefined){var r=document.documentElement;r.dataset.season=s;r.dataset.term=String(t[s]);r.style.setProperty('--season',a[s]);}}catch(e){}})();`
+}

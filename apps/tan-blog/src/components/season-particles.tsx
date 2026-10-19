@@ -1,12 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { SEASONS, type Season } from '@/lib/season'
+import { TERM_THEMES, type ParticleKind, type ParticleMix } from '@/lib/term-themes'
 
-// 依 <html data-season> 在背景畫當季的飄落物：春桃瓣、夏螢火、秋楓葉、冬雪。
-// - 填滿父元素（首頁主視覺），pointer-events 關閉，不影響點擊
-// - 分頁不可見時暫停；prefers-reduced-motion 時完全不畫
-// - 監聽 data-season 變化（頁尾的季節切換），即時換成新的粒子
+// 依節氣（或指定的 mix）在父元素範圍內畫飄落物：梅、桃、櫻、油桐、鳳凰花、螢火、荷、桂、欒樹、楓、銀杏、雪、雨、光塵。
+// - 沒給 mix 時讀 <html data-term>，並監聽它變化（頁尾的季節切換）即時更新
+// - 給 mix 時固定使用（例如文章頁用「寫作當時的節氣」、日記頁用當天天氣）
+// - 填滿父元素、pointer-events 關閉；分頁隱藏時暫停；prefers-reduced-motion 時不繪製
+
+type Motion = 'fall' | 'wander' | 'rain' | 'rise'
 
 interface Particle {
+  kind: ParticleKind
   x: number
   y: number
   size: number
@@ -18,114 +21,311 @@ interface Particle {
   color: string
 }
 
-const COLORS: Record<Season, string[]> = {
-  spring: ['#f6c6d2', '#f2b3c4', '#fadbe3', '#efa9bd'],
-  summer: ['#e9f7a1', '#d4f08a', '#f4fbc0'],
-  autumn: ['#c8553d', '#d9783f', '#b8432f', '#e09a4b'],
-  winter: ['#ffffff', '#eef4ff', '#dfe9f7'],
+interface Element {
+  colors: string[]
+  size: [number, number]
+  motion: Motion
+  speed: [number, number]
+  draw: (ctx: CanvasRenderingContext2D, p: Particle) => void
+}
+
+const TAU = Math.PI * 2
+
+// 一片花瓣：一端圓、一端略尖，notch 時尖端有小缺口（櫻）
+function petal(ctx: CanvasRenderingContext2D, s: number, notch = false) {
+  ctx.beginPath()
+  if (notch) {
+    ctx.moveTo(-s * 0.22, -s * 0.85)
+    ctx.lineTo(0, -s * 0.62)
+    ctx.lineTo(s * 0.22, -s * 0.85)
+    ctx.bezierCurveTo(s * 0.9, -s * 0.5, s * 0.7, s * 0.8, 0, s)
+    ctx.bezierCurveTo(-s * 0.7, s * 0.8, -s * 0.9, -s * 0.5, -s * 0.22, -s * 0.85)
+  } else {
+    ctx.moveTo(0, -s)
+    ctx.bezierCurveTo(s * 0.9, -s * 0.6, s * 0.7, s * 0.8, 0, s)
+    ctx.bezierCurveTo(-s * 0.7, s * 0.8, -s * 0.9, -s * 0.6, 0, -s)
+  }
+  ctx.fill()
+}
+
+// 翻轉中的物件：沿一軸以 cos 壓扁，看起來像在空中翻面
+function tumble(ctx: CanvasRenderingContext2D, p: Particle) {
+  ctx.rotate(p.angle)
+  ctx.scale(1, Math.max(0.2, Math.abs(Math.cos(p.phase))))
+}
+
+function flower(ctx: CanvasRenderingContext2D, p: Particle, petals: number, petalScale: number, center: string) {
+  ctx.rotate(p.angle)
+  const s = p.size
+  for (let i = 0; i < petals; i++) {
+    ctx.save()
+    ctx.rotate((i * TAU) / petals)
+    ctx.translate(0, -s * 0.45)
+    ctx.beginPath()
+    ctx.ellipse(0, 0, s * 0.32 * petalScale, s * 0.45, 0, 0, TAU)
+    ctx.fill()
+    ctx.restore()
+  }
+  ctx.fillStyle = center
+  ctx.beginPath()
+  ctx.arc(0, 0, s * 0.18, 0, TAU)
+  ctx.fill()
+}
+
+function mapleLeaf(ctx: CanvasRenderingContext2D, p: Particle) {
+  ctx.rotate(p.angle)
+  ctx.scale(Math.cos(p.phase), 1)
+  const s = p.size
+  ctx.beginPath()
+  for (let i = 0; i <= 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5
+    const r = i % 2 === 0 ? s : s * 0.55
+    if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r)
+    else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r)
+  }
+  ctx.closePath()
+  ctx.fill()
+  ctx.strokeStyle = p.color
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(0, s * 0.3)
+  ctx.lineTo(0, s * 1.2)
+  ctx.stroke()
+}
+
+const glow = (ctx: CanvasRenderingContext2D, p: Particle, radius: number) => {
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, radius)
+  g.addColorStop(0, p.color)
+  g.addColorStop(0.25, p.color + '88')
+  g.addColorStop(1, p.color + '00')
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(0, 0, radius, 0, TAU)
+  ctx.fill()
+}
+
+const ELEMENTS: Record<ParticleKind, Element> = {
+  plum: {
+    colors: ['#f6d7de', '#f1b6c4', '#fbe9ec'],
+    size: [6, 9],
+    motion: 'fall',
+    speed: [0.3, 0.7],
+    draw: (ctx, p) => flower(ctx, p, 5, 1.1, '#e9c46a'),
+  },
+  peach: {
+    colors: ['#f4a6b8', '#ef93a9', '#f8c3cf'],
+    size: [4, 7],
+    motion: 'fall',
+    speed: [0.35, 0.8],
+    draw: (ctx, p) => {
+      tumble(ctx, p)
+      petal(ctx, p.size)
+    },
+  },
+  sakura: {
+    colors: ['#fbe0e6', '#f7cdd7', '#fdeef1'],
+    size: [4, 7],
+    motion: 'fall',
+    speed: [0.3, 0.7],
+    draw: (ctx, p) => {
+      tumble(ctx, p)
+      petal(ctx, p.size, true)
+    },
+  },
+  tung: {
+    colors: ['#fbfaf5', '#f3f1ea'],
+    size: [7, 10],
+    motion: 'fall',
+    speed: [0.5, 1],
+    draw: (ctx, p) => {
+      tumble(ctx, p)
+      flower(ctx, p, 5, 1, '#d4574e')
+    },
+  },
+  phoenix: {
+    colors: ['#e8553a', '#f07a3a', '#d9432f'],
+    size: [4, 7],
+    motion: 'fall',
+    speed: [0.4, 0.9],
+    draw: (ctx, p) => {
+      tumble(ctx, p)
+      petal(ctx, p.size)
+    },
+  },
+  firefly: {
+    colors: ['#e9f7a1', '#d4f08a', '#f4fbc0'],
+    size: [1.2, 2.4],
+    motion: 'wander',
+    speed: [0.05, 0.15],
+    draw: (ctx, p) => {
+      ctx.globalAlpha *= 0.35 + 0.65 * Math.max(0, Math.sin(p.phase))
+      glow(ctx, p, p.size * 6)
+    },
+  },
+  lotus: {
+    colors: ['#f2a7bd', '#f6c1d0', '#eb8fab'],
+    size: [8, 12],
+    motion: 'fall',
+    speed: [0.3, 0.6],
+    draw: (ctx, p) => {
+      tumble(ctx, p)
+      petal(ctx, p.size)
+    },
+  },
+  osmanthus: {
+    colors: ['#f0a830', '#f5bd4f', '#e89a20'],
+    size: [2.5, 4],
+    motion: 'fall',
+    speed: [0.3, 0.6],
+    draw: (ctx, p) => flower(ctx, p, 4, 1.2, '#c97f12'),
+  },
+  luan: {
+    colors: ['#e7a1a0', '#d98b7f', '#eab38f'],
+    size: [6, 9],
+    motion: 'fall',
+    speed: [0.4, 0.8],
+    draw: (ctx, p) => {
+      // 臺灣欒樹的蒴果：像小燈籠的三瓣紙質果莢
+      tumble(ctx, p)
+      const s = p.size
+      ctx.beginPath()
+      ctx.moveTo(0, -s)
+      ctx.quadraticCurveTo(s * 0.9, -s * 0.2, 0, s)
+      ctx.quadraticCurveTo(-s * 0.9, -s * 0.2, 0, -s)
+      ctx.fill()
+      ctx.strokeStyle = 'rgba(120,60,40,0.35)'
+      ctx.lineWidth = 0.8
+      ctx.beginPath()
+      ctx.moveTo(0, -s)
+      ctx.lineTo(0, s)
+      ctx.stroke()
+    },
+  },
+  'maple-yellow': {
+    colors: ['#e0a23a', '#d98f2b', '#e8b44e'],
+    size: [9, 14],
+    motion: 'fall',
+    speed: [0.5, 1.1],
+    draw: mapleLeaf,
+  },
+  'maple-red': {
+    colors: ['#c8553d', '#b8432f', '#d6643f'],
+    size: [9, 14],
+    motion: 'fall',
+    speed: [0.5, 1.1],
+    draw: mapleLeaf,
+  },
+  ginkgo: {
+    colors: ['#e9c04a', '#f0cf63', '#dcae35'],
+    size: [8, 12],
+    motion: 'fall',
+    speed: [0.5, 1],
+    draw: (ctx, p) => {
+      // 扇形葉，中間一道淺缺口
+      ctx.rotate(p.angle)
+      ctx.scale(Math.cos(p.phase), 1)
+      const s = p.size
+      ctx.beginPath()
+      ctx.moveTo(0, s * 0.6)
+      ctx.arc(0, s * 0.6, s, -Math.PI * 0.82, -Math.PI * 0.53)
+      ctx.lineTo(0, -s * 0.2)
+      ctx.arc(0, s * 0.6, s, -Math.PI * 0.47, -Math.PI * 0.18)
+      ctx.closePath()
+      ctx.fill()
+      ctx.strokeStyle = p.color
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(0, s * 0.6)
+      ctx.lineTo(0, s * 1.3)
+      ctx.stroke()
+    },
+  },
+  snow: {
+    colors: ['#ffffff', '#eef4ff', '#dfe9f7'],
+    size: [1, 3.2],
+    motion: 'fall',
+    speed: [0.35, 0.9],
+    draw: (ctx, p) => {
+      ctx.globalAlpha *= 0.5 + p.size * 0.12
+      ctx.beginPath()
+      ctx.arc(0, 0, p.size, 0, TAU)
+      ctx.fill()
+    },
+  },
+  rain: {
+    colors: ['#b9c9dc', '#a7b9cf'],
+    size: [10, 18],
+    motion: 'rain',
+    speed: [5, 8],
+    draw: (ctx, p) => {
+      ctx.strokeStyle = p.color
+      ctx.globalAlpha *= 0.35
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(p.vx * 2, p.size)
+      ctx.stroke()
+    },
+  },
+  sunmote: {
+    colors: ['#ffe7a8', '#fff2c9', '#ffd98a'],
+    size: [1.6, 3],
+    motion: 'rise',
+    speed: [0.1, 0.3],
+    draw: (ctx, p) => {
+      ctx.globalAlpha *= 0.55 + 0.45 * Math.max(0, Math.sin(p.phase))
+      glow(ctx, p, p.size * 6)
+    },
+  },
 }
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min)
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
-function spawn(season: Season, w: number, h: number, initial: boolean): Particle {
+function pickKind(mix: ParticleMix): ParticleKind {
+  const total = mix.reduce((sum, [, w]) => sum + w, 0)
+  let r = Math.random() * total
+  for (const [kind, w] of mix) {
+    r -= w
+    if (r <= 0) return kind
+  }
+  return mix[0][0]
+}
+
+function spawn(mix: ParticleMix, w: number, h: number, initial: boolean): Particle {
+  const kind = pickKind(mix)
+  const el = ELEMENTS[kind]
+  const speed = rand(...el.speed)
   const base = {
+    kind,
     x: rand(0, w),
-    angle: rand(0, Math.PI * 2),
-    phase: rand(0, Math.PI * 2),
-    color: pick(COLORS[season]),
+    size: rand(...el.size),
+    angle: rand(0, TAU),
+    phase: rand(0, TAU),
+    spin: rand(-0.025, 0.025),
+    color: pick(el.colors),
   }
-  switch (season) {
-    case 'summer':
-      // 螢火蟲：集中在畫面下半部緩慢遊走
-      return { ...base, y: rand(h * 0.35, h), size: rand(1.2, 2.4), vx: rand(-0.15, 0.15), vy: rand(-0.12, 0.08), spin: rand(0.01, 0.03) }
-    case 'winter':
-      return { ...base, y: initial ? rand(0, h) : rand(-40, -10), size: rand(1, 3.2), vx: rand(-0.2, 0.2), vy: rand(0.35, 0.9), spin: rand(0.005, 0.015) }
-    case 'autumn':
-      return { ...base, y: initial ? rand(0, h) : rand(-40, -10), size: rand(9, 15), vx: rand(-0.3, 0.3), vy: rand(0.5, 1.1), spin: rand(-0.025, 0.025) }
+  switch (el.motion) {
+    case 'wander':
+      return { ...base, y: rand(h * 0.3, h), vx: rand(-speed, speed), vy: rand(-speed, speed * 0.6), spin: rand(0.01, 0.03) }
+    case 'rise':
+      return { ...base, y: initial ? rand(0, h) : h + 10, vx: rand(-0.1, 0.1), vy: -speed, spin: rand(0.01, 0.02) }
+    case 'rain':
+      return { ...base, y: initial ? rand(-h, h) : rand(-h * 0.3, -20), vx: rand(-1.2, -0.6), vy: speed }
     default:
-      return { ...base, y: initial ? rand(0, h) : rand(-40, -10), size: rand(4, 7), vx: rand(0.1, 0.5), vy: rand(0.35, 0.8), spin: rand(-0.03, 0.03) }
+      return { ...base, y: initial ? rand(0, h) : rand(-40, -10), vx: rand(-0.3, 0.3), vy: speed }
   }
 }
 
-function drawPetal(ctx: CanvasRenderingContext2D, p: Particle) {
-  ctx.rotate(p.angle)
-  ctx.scale(1, Math.max(0.25, Math.abs(Math.cos(p.phase))))
-  ctx.beginPath()
-  // 桃花瓣：一端圓、一端帶小缺口
-  ctx.moveTo(0, -p.size)
-  ctx.bezierCurveTo(p.size * 0.9, -p.size * 0.6, p.size * 0.7, p.size * 0.8, 0, p.size)
-  ctx.bezierCurveTo(-p.size * 0.7, p.size * 0.8, -p.size * 0.9, -p.size * 0.6, 0, -p.size)
-  ctx.fillStyle = p.color
-  ctx.globalAlpha = 0.75
-  ctx.fill()
+function termMix(): ParticleMix {
+  const term = Number(document.documentElement.dataset.term)
+  return (TERM_THEMES[term] ?? TERM_THEMES[18]).mix
 }
 
-function drawLeaf(ctx: CanvasRenderingContext2D, p: Particle) {
-  ctx.rotate(p.angle)
-  // 以 cos 壓扁 X 軸，模擬葉片在空中翻轉
-  ctx.scale(Math.cos(p.phase), 1)
-  const s = p.size
-  ctx.beginPath()
-  // 簡化的五裂楓葉輪廓
-  const points = 5
-  for (let i = 0; i <= points * 2; i++) {
-    const a = -Math.PI / 2 + (i * Math.PI) / points
-    const r = i % 2 === 0 ? s : s * 0.55
-    const x = Math.cos(a) * r
-    const y = Math.sin(a) * r
-    if (i === 0) ctx.moveTo(x, y)
-    else ctx.lineTo(x, y)
-  }
-  ctx.closePath()
-  ctx.fillStyle = p.color
-  ctx.globalAlpha = 0.7
-  ctx.fill()
-  // 葉柄
-  ctx.beginPath()
-  ctx.moveTo(0, s * 0.3)
-  ctx.lineTo(0, s * 1.2)
-  ctx.strokeStyle = p.color
-  ctx.lineWidth = 1
-  ctx.stroke()
-}
-
-function drawSnow(ctx: CanvasRenderingContext2D, p: Particle) {
-  ctx.beginPath()
-  ctx.arc(0, 0, p.size, 0, Math.PI * 2)
-  ctx.fillStyle = p.color
-  ctx.globalAlpha = 0.35 + p.size * 0.12
-  ctx.fill()
-}
-
-function drawFirefly(ctx: CanvasRenderingContext2D, p: Particle) {
-  const glow = 0.35 + 0.65 * Math.max(0, Math.sin(p.phase))
-  const r = p.size * 6
-  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r)
-  g.addColorStop(0, p.color)
-  g.addColorStop(0.2, p.color + '88')
-  g.addColorStop(1, p.color + '00')
-  ctx.globalAlpha = glow
-  ctx.fillStyle = g
-  ctx.beginPath()
-  ctx.arc(0, 0, r, 0, Math.PI * 2)
-  ctx.fill()
-}
-
-const DRAW: Record<Season, (ctx: CanvasRenderingContext2D, p: Particle) => void> = {
-  spring: drawPetal,
-  summer: drawFirefly,
-  autumn: drawLeaf,
-  winter: drawSnow,
-}
-
-const currentSeason = (): Season => {
-  const s = document.documentElement.dataset.season as Season | undefined
-  return s && SEASONS.includes(s) ? s : 'autumn'
-}
-
-export function SeasonParticles() {
+export function SeasonParticles({ mix, density = 1 }: { mix?: ParticleMix; density?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  // mix 以 JSON 當 effect 依賴，避免父元件每次 render 傳新陣列就重建
+  const mixKey = mix ? JSON.stringify(mix) : ''
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -133,18 +333,19 @@ export function SeasonParticles() {
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
 
-    let season = currentSeason()
+    let current: ParticleMix = mixKey ? (JSON.parse(mixKey) as ParticleMix) : termMix()
     let particles: Particle[] = []
     let w = 0
     let h = 0
     let frame = 0
 
     const count = () => {
-      const base = season === 'winter' ? 45 : season === 'summer' ? 18 : 18
-      return Math.round(base * (w < 640 ? 0.5 : 1))
+      // 依面積換算，雨與雪需要多一點才有感覺
+      const heavy = current.some(([k]) => k === 'rain' || k === 'snow') ? 2 : 1
+      return Math.min(80, Math.round(((w * h) / (1440 * 900)) * 22 * heavy * density + 4))
     }
     const reseed = () => {
-      particles = Array.from({ length: count() }, () => spawn(season, w, h, true))
+      particles = Array.from({ length: count() }, () => spawn(current, w, h, true))
     }
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -160,21 +361,28 @@ export function SeasonParticles() {
     const tick = () => {
       ctx.clearRect(0, 0, w, h)
       for (let i = 0; i < particles.length; i++) {
-        const p = particles[i]
-        p.phase += p.spin * 2
+        let p = particles[i]
+        const el = ELEMENTS[p.kind]
+        p.phase += Math.abs(p.spin) * 2
         p.angle += p.spin
-        if (season === 'summer') {
+        if (el.motion === 'wander') {
           p.x += p.vx + Math.sin(p.phase) * 0.2
           p.y += p.vy + Math.cos(p.phase * 0.7) * 0.15
-          if (p.x < -20 || p.x > w + 20 || p.y < h * 0.25 || p.y > h + 20) particles[i] = spawn(season, w, h, true)
-        } else {
-          p.x += p.vx + Math.sin(p.phase) * (season === 'winter' ? 0.3 : 0.6)
+          if (p.x < -20 || p.x > w + 20 || p.y < h * 0.2 || p.y > h + 20) p = particles[i] = spawn(current, w, h, true)
+        } else if (el.motion === 'rise') {
+          p.x += p.vx + Math.sin(p.phase) * 0.15
           p.y += p.vy
-          if (p.y > h + 30 || p.x < -40 || p.x > w + 40) particles[i] = spawn(season, w, h, false)
+          if (p.y < -10) p = particles[i] = spawn(current, w, h, false)
+        } else {
+          p.x += p.vx + (el.motion === 'rain' ? 0 : Math.sin(p.phase) * 0.5)
+          p.y += p.vy
+          if (p.y > h + 30 || p.x < -40 || p.x > w + 40) p = particles[i] = spawn(current, w, h, false)
         }
         ctx.save()
         ctx.translate(p.x, p.y)
-        DRAW[season](ctx, particles[i])
+        ctx.globalAlpha = 0.8
+        ctx.fillStyle = p.color
+        ELEMENTS[p.kind].draw(ctx, p)
         ctx.restore()
       }
       frame = requestAnimationFrame(tick)
@@ -188,30 +396,24 @@ export function SeasonParticles() {
     resize()
     start()
 
+    // 沒指定 mix 時跟著 <html data-term> 走
     const observer = new MutationObserver(() => {
-      const next = currentSeason()
-      if (next !== season) {
-        season = next
-        reseed()
-      }
+      if (mixKey) return
+      current = termMix()
+      reseed()
     })
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-season'] })
-    window.addEventListener('resize', resize)
+    if (!mixKey) observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-term'] })
+    const resizeObserver = new ResizeObserver(resize)
+    resizeObserver.observe(canvas.parentElement ?? canvas)
     document.addEventListener('visibilitychange', start)
 
     return () => {
       cancelAnimationFrame(frame)
       observer.disconnect()
-      window.removeEventListener('resize', resize)
+      resizeObserver.disconnect()
       document.removeEventListener('visibilitychange', start)
     }
-  }, [])
+  }, [mixKey, density])
 
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      className="pointer-events-none absolute inset-0 h-full w-full"
-    />
-  )
+  return <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
 }

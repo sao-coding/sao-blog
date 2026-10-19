@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { getSolarTerm, SEASON_STORAGE_KEY, SEASONS, type Season } from '@/lib/season'
+import { getSolarTerm, SEASON_REPRESENTATIVE_TERM, SEASON_STORAGE_KEY, SEASONS, type Season } from '@/lib/season'
+import { TERM_THEMES } from '@/lib/term-themes'
 import { m } from '#/paraglide/messages'
 
 const SEASON_LABEL: Record<Season, () => string> = {
@@ -26,7 +27,12 @@ export function SeasonSwitcher() {
 
   const choose = (season: Season) => {
     setActive(season)
-    document.documentElement.dataset.season = season
+    // 點回目前季節＝恢復真實節氣；其他季節用該季的代表節氣預覽
+    const term = season === now.season ? now.index : SEASON_REPRESENTATIVE_TERM[season]
+    const root = document.documentElement
+    root.dataset.season = season
+    root.dataset.term = String(term)
+    root.style.setProperty('--season', TERM_THEMES[term].accent)
     try {
       if (season === now.season) localStorage.removeItem(SEASON_STORAGE_KEY)
       else localStorage.setItem(SEASON_STORAGE_KEY, season)
