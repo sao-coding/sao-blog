@@ -73,9 +73,10 @@ function NotesIndexPage() {
   const earlier = journal.filter((note) => note.id !== current.id)
 
   return (
-    <div className="mx-auto mt-28 w-full max-w-5xl px-4 pb-24 lg:mt-32">
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_14rem]">
-        <main className="min-w-0">
+    <div className="mx-auto mt-28 w-full max-w-7xl px-4 pb-24 lg:mt-32">
+      {/* 三欄：主欄固定寬度置於畫面正中，側欄放右欄、不推擠主欄；xl 以下只留置中的主欄 */}
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,44rem)_minmax(0,1fr)]">
+        <main className="mx-auto w-full min-w-0 max-w-[44rem] xl:col-start-2">
           <header className="mb-12">
             <h1 className="font-wenkai text-4xl text-foreground">{m.page_notes_title()}</h1>
             <p className="mt-3 font-wenkai text-sm text-muted-foreground">
@@ -95,7 +96,7 @@ function NotesIndexPage() {
           )}
         </main>
 
-        <div className="hidden lg:block">
+        <div className="hidden xl:col-start-3 xl:block xl:w-56">
           <NotesCalendar notes={journal} />
         </div>
       </div>
