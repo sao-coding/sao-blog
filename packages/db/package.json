@@ -22,15 +22,15 @@
   "dependencies": {
     "@sao-blog/env": "workspace:*",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.1",
-    "pg": "^8.17.1",
-    "uuid": "^13.0.0",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1",
+    "uuid": "^13.0.2",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@sao-blog/config": "workspace:*",
-    "@types/pg": "^8.16.0",
-    "drizzle-kit": "^0.31.8",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
     "typescript": "catalog:"
   }
 }

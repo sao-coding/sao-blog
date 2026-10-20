@@ -6,6 +6,9 @@ import { useMonacoShortcuts } from './monaco-shortcuts'
 import { MonacoTextHelper } from './monaco-text-helper'
 import type { MonacoEditorProps } from './types'
 
+// 整段剪貼簿內容剛好是一個 excalidraw.com 分享連結時才轉換（混在其他文字裡的不動）
+const EXCALIDRAW_SHARE_LINK = /^https:\/\/excalidraw\.com\/#json=[\w-]+,[\w-]+$/
+
 export default function MonacoEditor({
   value,
   onChange,
@@ -61,6 +64,22 @@ export default function MonacoEditor({
       // 偵測到圖片時用 stopPropagation 避免 Monaco 之後又把（若存在的）文字內容
       // 也貼一次。
       const handleDocumentPaste = (event: ClipboardEvent) => {
+        if (!editor.hasTextFocus()) return
+
+        // 貼上 excalidraw.com 分享連結（https://excalidraw.com/#json=ID,KEY）→ 直接換成 <Excalidraw> 元件
+        const pastedText = event.clipboardData?.getData('text/plain').trim() ?? ''
+        if (EXCALIDRAW_SHARE_LINK.test(pastedText)) {
+          event.preventDefault()
+          event.stopPropagation()
+          const selection = editor.getSelection()
+          if (selection) {
+            editor.executeEdits('paste-excalidraw', [
+              { range: selection, text: `<Excalidraw src="${pastedText}" />`, forceMoveMarkers: true },
+            ])
+          }
+          return
+        }
+
         const uploadImage = onImageUploadRef.current
         if (!uploadImage) return
         if (!editor.hasTextFocus()) return
