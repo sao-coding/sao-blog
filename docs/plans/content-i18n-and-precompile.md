@@ -341,6 +341,12 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - 未做：sitemap 列出各語言版本、RSS 多語
 6. **PR6 – 搜尋**：Typesense docker / env、`packages/search`、collection + alias、寫入時同步、`reindexAll`、搜尋 API proxy、前台 ⌘K、MCP `content_search`（依賴 PR3 的 translation 寫入路徑與 PR1 的 plainText）
 7. **PR7 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
+   - ✅ 已完成（依賴 / 死碼）：tan-blog 移除 `@mdx-js/mdx`、`gray-matter`、`@shikijs/{colorized-brackets,langs,themes}`、`rehype-katex`、`rehype-slug`、`remark-{breaks,flexible-toc,gfm,math}` 與未使用的 `src/utils/index.ts`（`calculateSomeHow` / `getSourceSomeHow`）
+   - 保留：`shiki`、`@shikijs/transformers`（留言 Markdown 渲染與 `CodeBlock` 仍用）、`katex`（`styles.css` 引入 CSS）、`hast-util-to-jsx-runtime`（`CompiledMdx`）、`@types/mdx`（`MDXComponents` 型別仍用於元件表，可日後改用 `hast-util-to-jsx-runtime` 的 `Components` 型別後再移除）；`packages/api/src/lib/mdx-to-text.ts` 仍用於列表摘要
+   - **未做：舊欄位**。`posts.title/summary/content`、`notes.title/content` 仍雙寫並作為無 translation 時的 fallback，本 PR 不改 nullable、不 drop。要 drop 需依序：
+     1. 後台 / MCP 的 create / update 改為只寫原文 translation（主表不再寫 title/summary/content）
+     2. 所有讀取（後台 `getPost` / `getNote`、列表、公開 API fallback、`mdxToExcerpt` 摘要、搜尋索引）改從原文 translation（`is_source = true`）取值
+     3. migration 改 nullable → 上線觀察 → 下一個 migration drop
 8. （後續）AI 翻譯流程：MCP 一鍵翻譯、mdast 區塊級增量翻譯、後台即時預覽 Worker 化
 9. （後續）互動元件擴充：依 §3.2，先做 Sandbox 元件；Android App 渲染端（非近期，契約已保留）
 
