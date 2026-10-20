@@ -10,71 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TopicsIndexRouteImport } from './routes/topics/index'
-import { Route as ThinkingIndexRouteImport } from './routes/thinking/index'
-import { Route as TagsIndexRouteImport } from './routes/tags/index'
-import { Route as StorageSettingsIndexRouteImport } from './routes/storage-settings/index'
-import { Route as PostsIndexRouteImport } from './routes/posts/index'
-import { Route as NotesIndexRouteImport } from './routes/notes/index'
-import { Route as FilesIndexRouteImport } from './routes/files/index'
-import { Route as CommentsIndexRouteImport } from './routes/comments/index'
-import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as ApiKeysIndexRouteImport } from './routes/api-keys/index'
-import { Route as ThinkingEditorIndexRouteImport } from './routes/thinking/editor/index'
-import { Route as PostsEditorIndexRouteImport } from './routes/posts/editor/index'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as CommentsIndexRouteImport } from './routes/comments/index'
+import { Route as FilesIndexRouteImport } from './routes/files/index'
+import { Route as NotesIndexRouteImport } from './routes/notes/index'
+import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as StorageSettingsIndexRouteImport } from './routes/storage-settings/index'
+import { Route as TagsIndexRouteImport } from './routes/tags/index'
+import { Route as ThinkingIndexRouteImport } from './routes/thinking/index'
+import { Route as TopicsIndexRouteImport } from './routes/topics/index'
 import { Route as NotesEditorIndexRouteImport } from './routes/notes/editor/index'
-import { Route as ThinkingEditorThinkingIdRouteImport } from './routes/thinking/editor/$thinkingId'
-import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
 import { Route as NotesEditorNoteIdRouteImport } from './routes/notes/editor/$noteId'
+import { Route as PostsEditorIndexRouteImport } from './routes/posts/editor/index'
+import { Route as PostsEditorPostIdRouteImport } from './routes/posts/editor/$postId'
+import { Route as ThinkingEditorIndexRouteImport } from './routes/thinking/editor/index'
+import { Route as ThinkingEditorThinkingIdRouteImport } from './routes/thinking/editor/$thinkingId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TopicsIndexRoute = TopicsIndexRouteImport.update({
-  id: '/topics/',
-  path: '/topics/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ThinkingIndexRoute = ThinkingIndexRouteImport.update({
-  id: '/thinking/',
-  path: '/thinking/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TagsIndexRoute = TagsIndexRouteImport.update({
-  id: '/tags/',
-  path: '/tags/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StorageSettingsIndexRoute = StorageSettingsIndexRouteImport.update({
-  id: '/storage-settings/',
-  path: '/storage-settings/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostsIndexRoute = PostsIndexRouteImport.update({
-  id: '/posts/',
-  path: '/posts/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotesIndexRoute = NotesIndexRouteImport.update({
-  id: '/notes/',
-  path: '/notes/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FilesIndexRoute = FilesIndexRouteImport.update({
-  id: '/files/',
-  path: '/files/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommentsIndexRoute = CommentsIndexRouteImport.update({
-  id: '/comments/',
-  path: '/comments/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
-  id: '/categories/',
-  path: '/categories/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiKeysIndexRoute = ApiKeysIndexRouteImport.update({
@@ -82,9 +37,59 @@ const ApiKeysIndexRoute = ApiKeysIndexRouteImport.update({
   path: '/api-keys/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ThinkingEditorIndexRoute = ThinkingEditorIndexRouteImport.update({
-  id: '/thinking/editor/',
-  path: '/thinking/editor/',
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommentsIndexRoute = CommentsIndexRouteImport.update({
+  id: '/comments/',
+  path: '/comments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilesIndexRoute = FilesIndexRouteImport.update({
+  id: '/files/',
+  path: '/files/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesIndexRoute = NotesIndexRouteImport.update({
+  id: '/notes/',
+  path: '/notes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsIndexRoute = PostsIndexRouteImport.update({
+  id: '/posts/',
+  path: '/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageSettingsIndexRoute = StorageSettingsIndexRouteImport.update({
+  id: '/storage-settings/',
+  path: '/storage-settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TagsIndexRoute = TagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThinkingIndexRoute = ThinkingIndexRouteImport.update({
+  id: '/thinking/',
+  path: '/thinking/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsIndexRoute = TopicsIndexRouteImport.update({
+  id: '/topics/',
+  path: '/topics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesEditorIndexRoute = NotesEditorIndexRouteImport.update({
+  id: '/notes/editor/',
+  path: '/notes/editor/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotesEditorNoteIdRoute = NotesEditorNoteIdRouteImport.update({
+  id: '/notes/editor/$noteId',
+  path: '/notes/editor/$noteId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsEditorIndexRoute = PostsEditorIndexRouteImport.update({
@@ -92,9 +97,14 @@ const PostsEditorIndexRoute = PostsEditorIndexRouteImport.update({
   path: '/posts/editor/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NotesEditorIndexRoute = NotesEditorIndexRouteImport.update({
-  id: '/notes/editor/',
-  path: '/notes/editor/',
+const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
+  id: '/posts/editor/$postId',
+  path: '/posts/editor/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThinkingEditorIndexRoute = ThinkingEditorIndexRouteImport.update({
+  id: '/thinking/editor/',
+  path: '/thinking/editor/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ThinkingEditorThinkingIdRoute =
@@ -103,16 +113,6 @@ const ThinkingEditorThinkingIdRoute =
     path: '/thinking/editor/$thinkingId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const PostsEditorPostIdRoute = PostsEditorPostIdRouteImport.update({
-  id: '/posts/editor/$postId',
-  path: '/posts/editor/$postId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotesEditorNoteIdRoute = NotesEditorNoteIdRouteImport.update({
-  id: '/notes/editor/$noteId',
-  path: '/notes/editor/$noteId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -261,60 +261,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/topics/': {
-      id: '/topics/'
-      path: '/topics'
-      fullPath: '/topics/'
-      preLoaderRoute: typeof TopicsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/thinking/': {
-      id: '/thinking/'
-      path: '/thinking'
-      fullPath: '/thinking/'
-      preLoaderRoute: typeof ThinkingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tags/': {
-      id: '/tags/'
-      path: '/tags'
-      fullPath: '/tags/'
-      preLoaderRoute: typeof TagsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/storage-settings/': {
-      id: '/storage-settings/'
-      path: '/storage-settings'
-      fullPath: '/storage-settings/'
-      preLoaderRoute: typeof StorageSettingsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/posts/': {
-      id: '/posts/'
-      path: '/posts'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof PostsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notes/': {
-      id: '/notes/'
-      path: '/notes'
-      fullPath: '/notes/'
-      preLoaderRoute: typeof NotesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/files/': {
-      id: '/files/'
-      path: '/files'
-      fullPath: '/files/'
-      preLoaderRoute: typeof FilesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/comments/': {
-      id: '/comments/'
-      path: '/comments'
-      fullPath: '/comments/'
-      preLoaderRoute: typeof CommentsIndexRouteImport
+    '/api-keys/': {
+      id: '/api-keys/'
+      path: '/api-keys'
+      fullPath: '/api-keys/'
+      preLoaderRoute: typeof ApiKeysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories/': {
@@ -324,25 +275,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api-keys/': {
-      id: '/api-keys/'
-      path: '/api-keys'
-      fullPath: '/api-keys/'
-      preLoaderRoute: typeof ApiKeysIndexRouteImport
+    '/comments/': {
+      id: '/comments/'
+      path: '/comments'
+      fullPath: '/comments/'
+      preLoaderRoute: typeof CommentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/thinking/editor/': {
-      id: '/thinking/editor/'
-      path: '/thinking/editor'
-      fullPath: '/thinking/editor/'
-      preLoaderRoute: typeof ThinkingEditorIndexRouteImport
+    '/files/': {
+      id: '/files/'
+      path: '/files'
+      fullPath: '/files/'
+      preLoaderRoute: typeof FilesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/editor/': {
-      id: '/posts/editor/'
-      path: '/posts/editor'
-      fullPath: '/posts/editor/'
-      preLoaderRoute: typeof PostsEditorIndexRouteImport
+    '/notes/': {
+      id: '/notes/'
+      path: '/notes'
+      fullPath: '/notes/'
+      preLoaderRoute: typeof NotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/': {
+      id: '/posts/'
+      path: '/posts'
+      fullPath: '/posts/'
+      preLoaderRoute: typeof PostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage-settings/': {
+      id: '/storage-settings/'
+      path: '/storage-settings'
+      fullPath: '/storage-settings/'
+      preLoaderRoute: typeof StorageSettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tags/': {
+      id: '/tags/'
+      path: '/tags'
+      fullPath: '/tags/'
+      preLoaderRoute: typeof TagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/thinking/': {
+      id: '/thinking/'
+      path: '/thinking'
+      fullPath: '/thinking/'
+      preLoaderRoute: typeof ThinkingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/': {
+      id: '/topics/'
+      path: '/topics'
+      fullPath: '/topics/'
+      preLoaderRoute: typeof TopicsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notes/editor/': {
@@ -352,11 +338,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesEditorIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/thinking/editor/$thinkingId': {
-      id: '/thinking/editor/$thinkingId'
-      path: '/thinking/editor/$thinkingId'
-      fullPath: '/thinking/editor/$thinkingId'
-      preLoaderRoute: typeof ThinkingEditorThinkingIdRouteImport
+    '/notes/editor/$noteId': {
+      id: '/notes/editor/$noteId'
+      path: '/notes/editor/$noteId'
+      fullPath: '/notes/editor/$noteId'
+      preLoaderRoute: typeof NotesEditorNoteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/editor/': {
+      id: '/posts/editor/'
+      path: '/posts/editor'
+      fullPath: '/posts/editor/'
+      preLoaderRoute: typeof PostsEditorIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/editor/$postId': {
@@ -366,11 +359,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsEditorPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notes/editor/$noteId': {
-      id: '/notes/editor/$noteId'
-      path: '/notes/editor/$noteId'
-      fullPath: '/notes/editor/$noteId'
-      preLoaderRoute: typeof NotesEditorNoteIdRouteImport
+    '/thinking/editor/': {
+      id: '/thinking/editor/'
+      path: '/thinking/editor'
+      fullPath: '/thinking/editor/'
+      preLoaderRoute: typeof ThinkingEditorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/thinking/editor/$thinkingId': {
+      id: '/thinking/editor/$thinkingId'
+      path: '/thinking/editor/$thinkingId'
+      fullPath: '/thinking/editor/$thinkingId'
+      preLoaderRoute: typeof ThinkingEditorThinkingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
