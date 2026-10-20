@@ -6,11 +6,12 @@ import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { CategoriesTimeline } from './-components/categories-timeline'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { currentContentLocale } from '@/lib/content-locale'
 
 export const Route = createFileRoute('/_layout/categories/$slug')({
   loader: async ({ context, params }) => {
     await context.queryClient.ensureQueryData(
-      orpc.post.getPosts.queryOptions({ input: { category: params.slug } })
+      orpc.post.getPosts.queryOptions({ input: { category: params.slug, locale: currentContentLocale() } })
     )
   },
   head: ({ params }) => pageHead({
@@ -28,7 +29,7 @@ function CategoryDetailPage() {
   const { slug } = Route.useParams()
 
   const { data, isLoading, error } = useQuery(
-    orpc.post.getPosts.queryOptions({ input: { category: slug } })
+    orpc.post.getPosts.queryOptions({ input: { category: slug, locale: currentContentLocale() } })
   )
 
   if (isLoading) {

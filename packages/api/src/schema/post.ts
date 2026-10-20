@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createApiResponseSchema } from "./api";
+import { compiledShape, localizedMetaShape } from "./i18n";
 import { categorySchema } from "./category";
 import { tagSchema } from "./tag";
 
@@ -84,6 +85,8 @@ export const postSchema = z.object({
   updatedAt: z.date(),
   category: categorySchema,
   tags: z.array(tagSchema),
+  ...localizedMetaShape,
+  ...compiledShape,
   author: z.object({
     id: z.string(),
     username: z.string().nullable(),

@@ -1,6 +1,8 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { apiErrorMessage, LOCALE_LABELS, LOCALES, type Locale } from '@/components/translations/locales'
 import { Button } from '@sao-blog/ui/components/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { categoryInputSchema } from '@sao-blog/api/schema/category'
@@ -69,6 +71,31 @@ export function CategoryForm({ mode, category, onSuccess, onCancel }: CategoryFo
     formState: { errors },
   } = form
 
+  // 其他語系的分類名稱 / 描述（原文為上方的名稱與描述；留空表示該語系沿用原文）
+  const translationLocales = LOCALES.filter((l): l is Exclude<Locale, 'zh-TW'> => l !== 'zh-TW')
+  type TranslationFields = Record<(typeof translationLocales)[number], { name: string; description: string }>
+  const emptyTranslations = Object.fromEntries(
+    translationLocales.map((l) => [l, { name: '', description: '' }])
+  ) as TranslationFields
+  const [translations, setTranslations] = useState<TranslationFields>(emptyTranslations)
+
+  const { data: translationData } = useQuery({
+    ...orpc.admin.category.getCategoryTranslations.queryOptions({ input: { categoryId: category?.id ?? '' } }),
+    enabled: isEditMode && Boolean(category?.id),
+  })
+  useEffect(() => {
+    const next = { ...emptyTranslations }
+    for (const t of translationData?.data ?? []) {
+      if (t.locale in next) next[t.locale as keyof TranslationFields] = { name: t.name, description: t.description ?? '' }
+    }
+    setTranslations(next)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [translationData])
+
+  const upsertTranslationMutation = useMutation(
+    orpc.admin.category.upsertCategoryTranslation.mutationOptions()
+  )
+
   const createCategoryMutation = useMutation(
     orpc.admin.category.createCategory.mutationOptions()
   )
@@ -77,20 +104,39 @@ export function CategoryForm({ mode, category, onSuccess, onCancel }: CategoryFo
   )
 
   const isSubmitting =
-    createCategoryMutation.isPending || updateCategoryMutation.isPending
+    createCategoryMutation.isPending ||
+    updateCategoryMutation.isPending ||
+    upsertTranslationMutation.isPending
 
   const submitLabel = isEditMode ? '儲存變更' : '建立分類'
   const submittingLabel = isEditMode ? '儲存中...' : '建立中...'
 
   const onSubmit = async (values: CategoryFormValues) => {
     try {
-      if (isEditMode) {
-        await updateCategoryMutation.mutateAsync(values)
-        toast.success('分類更新成功！')
-      } else {
-        await createCategoryMutation.mutateAsync(values)
-        toast.success('分類建立成功！')
+      const res = isEditMode
+        ? await updateCategoryMutation.mutateAsync(values)
+        : await createCategoryMutation.mutateAsync(values)
+      const error = apiErrorMessage(res)
+      const categoryId = res.data?.id
+      if (error || !categoryId) {
+        toast.error(error ?? '分類儲存失敗')
+        return
       }
+
+      // 儲存有填寫的其他語系譯名
+      for (const locale of translationLocales) {
+        const t = translations[locale]
+        if (!t.name.trim()) continue
+        const tr = await upsertTranslationMutation.mutateAsync({
+          categoryId,
+          locale,
+          name: t.name.trim(),
+          description: t.description.trim() ? t.description.trim() : null,
+        })
+        const trError = apiErrorMessage(tr)
+        if (trError) toast.error(`${LOCALE_LABELS[locale]} 譯名儲存失敗：${trError}`)
+      }
+      toast.success(isEditMode ? '分類更新成功！' : '分類建立成功！')
 
       await queryClient.invalidateQueries({
         queryKey: orpc.admin.category.getCategories.queryOptions().queryKey,
@@ -142,6 +188,27 @@ export function CategoryForm({ mode, category, onSuccess, onCancel }: CategoryFo
           />
           <FieldError errors={errors.description ? [errors.description] : []} />
         </Field>
+
+        {translationLocales.map((locale) => (
+          <Field key={locale}>
+            <FieldLabel>{LOCALE_LABELS[locale]} 名稱 / 描述（選填，留空沿用原文）</FieldLabel>
+            <Input
+              value={translations[locale].name}
+              onChange={(e) =>
+                setTranslations((prev) => ({ ...prev, [locale]: { ...prev[locale], name: e.target.value } }))
+              }
+              placeholder={`${LOCALE_LABELS[locale]} 名稱`}
+              maxLength={100}
+            />
+            <Input
+              value={translations[locale].description}
+              onChange={(e) =>
+                setTranslations((prev) => ({ ...prev, [locale]: { ...prev[locale], description: e.target.value } }))
+              }
+              placeholder={`${LOCALE_LABELS[locale]} 描述`}
+            />
+          </Field>
+        ))}
 
         <Field data-invalid={!!errors.color}>
           <FieldLabel>顏色</FieldLabel>

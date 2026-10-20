@@ -10,7 +10,7 @@ import {
 
 type Locale = (typeof locales)[number]
 
-const LOCALE_LABELS: Record<Locale, string> = {
+export const LOCALE_LABELS: Record<Locale, string> = {
   'zh-Hant': '繁體中文',
   en: 'English',
   ja: '日本語',

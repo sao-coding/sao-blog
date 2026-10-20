@@ -117,5 +117,8 @@
   "posts_filter_toggle": "Search · Tags",
   "theme_day": "Day",
   "theme_night": "Night",
-  "theme_toggle": "Toggle day / night reading"
+  "theme_toggle": "Toggle day / night reading",
+  "content_fallback_notice": "This article is not available in English yet. Showing the original.",
+  "content_ai_translated": "This article was translated by AI and may contain inaccuracies.",
+  "content_available_in": "Also available in:"
 }

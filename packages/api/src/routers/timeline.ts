@@ -4,6 +4,7 @@ import { categories, notes, posts } from "@sao-blog/db/schema/index";
 import { eq } from "drizzle-orm";
 import { TimelineInputSchema, TimelineResponseSchema } from "../schema/timeline";
 import { toIso } from "../lib/datetime";
+import { localizedCategories, localizedTitles } from "../lib/i18n";
 
 const getTimeLine = publicProcedure
     .route({ method: "GET", path: "/timeline" })
@@ -20,6 +21,7 @@ const getTimeLine = publicProcedure
                     slug: posts.slug,
                     title: posts.title,
                     category: categories.name,
+                    categoryId: posts.categoryId,
                     createdAt: posts.createdAt,
                     updatedAt: posts.updatedAt,
                 })
@@ -42,13 +44,20 @@ const getTimeLine = publicProcedure
                 .where(eq(notes.status, true))
             : [];
 
+        // 疊上請求語系的標題與分類名稱（無譯文時沿用原文）
+        const [postTitles, noteTitles, categoryNames] = await Promise.all([
+            localizedTitles("post", postRows.map((p) => p.id), input.locale),
+            localizedTitles("note", noteRows.map((n) => n.id), input.locale),
+            localizedCategories(postRows.map((p) => p.categoryId), input.locale),
+        ]);
+
         const timelineItems = [
             ...postRows.map((post) => ({
                 id: String(post.id),
-                title: post.title,
+                title: postTitles.get(post.id) ?? post.title,
                 slug: post.slug,
                 type: "post" as const,
-                category: post.category,
+                category: (post.categoryId && categoryNames.get(post.categoryId)?.name) || post.category,
                 weather: null,
                 mood: null,
                 createdAt: toIso(post.createdAt),
@@ -56,7 +65,7 @@ const getTimeLine = publicProcedure
             })),
             ...noteRows.map((note) => ({
                 id: String(note.id),
-                title: note.title,
+                title: noteTitles.get(note.id) ?? note.title,
                 slug: String(note.id),
                 type: "note" as const,
                 category: null,

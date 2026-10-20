@@ -5,6 +5,21 @@ import { eq, desc, asc, and, lt, gt } from "drizzle-orm";
 import z from "zod";
 import { NoteLatestResponseSchema, NoteResponseSchema } from "../schema/note";
 import { mdxToExcerpt } from "../lib/mdx-to-text";
+import { ensureCompiled, localizedTitles, localizeNotes } from "../lib/i18n";
+import { localeInput, type Locale } from "../schema/i18n";
+
+// 單篇日記疊上請求語系並附上預編譯結果（hast JSON）
+async function localizeFullNote<T extends { id: string; title: string; content: string }>(note: T, locale: Locale) {
+    const { items, chosen } = await localizeNotes([note], locale);
+    const translationId = chosen.get(note.id);
+    const compiled = translationId ? await ensureCompiled("note", translationId) : null;
+    return {
+        ...items[0]!,
+        compiled: compiled?.compiled ?? null,
+        toc: compiled?.toc ?? null,
+        readingTime: compiled?.readingTime ?? null,
+    };
+}
 
 // notes?id= 獲取日記列表（用於首頁或日記列表頁面）
 // 註：此 procedure 會依是否帶 id 回傳兩種不同形狀（{current,list} 或陣列），
@@ -13,8 +28,10 @@ const getNotes = publicProcedure
     .route({ method: "GET", path: "/notes" })
     .input(z.object({
         id: z.string().optional(), // 可選的 id 參數，用於獲取特定日記的前後日記
+        ...localeInput,
     }))
     .handler(async ({ input }) => {
+        const { locale } = input;
         // 取得目前日記 加上目前日記之前的 4 篇 跟 目前日記之後的 4 篇（如果有的話
         const noteId = input.id;
 
@@ -35,17 +52,19 @@ const getNotes = publicProcedure
                 .limit(9);
 
             // 清單只需要摘要，避免把完整內容傳到前端
+            const { items } = await localizeNotes(rows, locale);
             const list = await Promise.all(
-                rows.map(async ({ content, ...rest }) => ({
+                items.map(async ({ content, ...rest }) => ({
                     ...rest,
                     excerpt: await mdxToExcerpt(content, 80),
                 }))
             );
 
             const latestId = rows[0]?.id;
-            const current = latestId
+            const latest = latestId
                 ? (await db.select().from(notes).where(eq(notes.id, latestId)).limit(1))[0] ?? null
                 : null;
+            const current = latest ? await localizeFullNote(latest, locale) : null;
 
             return {
                 status: "success",
@@ -108,7 +127,9 @@ const getNotes = publicProcedure
         ]);
 
         // 依時間由新到舊排列：較新的日記（反轉為新到舊）、目前日記、較舊的日記
-        const list = [...nextNotes.slice().reverse(), ...currentRows, ...prevNotes];
+        const ordered = [...nextNotes.slice().reverse(), ...currentRows, ...prevNotes];
+        const titles = await localizedTitles("note", ordered.map((n) => n.id), locale);
+        const list = ordered.map((n) => ({ ...n, title: titles.get(n.id) ?? n.title }));
 
         return {
             status: "success",
@@ -145,6 +166,7 @@ const getNote = publicProcedure
     .route({ method: "GET", path: "/notes/{id}" })
     .input(z.object({
         id: z.string(),
+        ...localeInput,
     }))
     .output(NoteResponseSchema)
     .handler(async ({ input }) => {
@@ -168,7 +190,7 @@ const getNote = publicProcedure
         return {
             status: "success",
             message: "日記取得成功",
-            data: note[0] ?? null,
+            data: note[0] ? await localizeFullNote(note[0], input.locale) : null,
         };
     });
 

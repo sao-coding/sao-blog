@@ -2,14 +2,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { client } from '@/lib/orpc'
 import type { NoteItem } from '@/types/note'
 import { compileMdx } from '@/lib/mdx/compile'
-import { MdxContent } from '@/lib/mdx/mdx-content'
-import { defaultMDXComponents } from '@/components/mdx'
+import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { PageWithSidebar } from '@/components/layout/page-shell'
 import { NotePreviewCard } from './-components/note-preview-card'
 import { NotesJournal, type JournalNote } from './-components/notes-journal'
 import { NotesCalendar } from './-components/notes-calendar'
+import { currentContentLocale } from '@/lib/content-locale'
 
 type NotesHomeData = {
   current: NoteItem | null
@@ -21,23 +21,23 @@ export const Route = createFileRoute('/_layout/notes/')({
   loader: async () => {
     // 首頁精選（最新一篇全文＋最新 9 篇摘要）與所有日記的日期清單（日記本、寫作足跡用）並行取得
     const [home, timeline] = await Promise.all([
-      client.note.getNotes({}).catch((err) => {
+      client.note.getNotes({ locale: currentContentLocale() }).catch((err) => {
         console.error('Failed to fetch notes:', err)
         return null
       }),
-      client.timeline.getTimeLine({ type: 'note' }).catch((err) => {
+      client.timeline.getTimeLine({ type: 'note', locale: currentContentLocale() }).catch((err) => {
         console.error('Failed to fetch note timeline:', err)
         return null
       }),
     ])
     const data = (home?.data ?? null) as NotesHomeData | null
     const all = (timeline?.data ?? []).flatMap((year) => year.items)
-    if (!data?.current) return { data, all, compiledSource: null }
+    if (!data?.current) return { data, all, compiled: null }
     // 只有最新一篇需要渲染 MDX，其餘只顯示標題與摘要
     const mdx = await compileMdx({
       data: { source: data.current.content, variant: 'basic' },
     })
-    return { data, all, compiledSource: mdx.compiledSource }
+    return { data, all, compiled: mdx.compiled }
   },
   head: () =>
     pageHead({
@@ -52,10 +52,10 @@ export const Route = createFileRoute('/_layout/notes/')({
 })
 
 function NotesIndexPage() {
-  const { data, all, compiledSource } = Route.useLoaderData()
+  const { data, all, compiled } = Route.useLoaderData()
   const current = data?.current ?? null
 
-  if (!current || !compiledSource) {
+  if (!current || !compiled) {
     return (
       <div className="container mx-auto flex min-h-[calc(100vh-80px)] items-center justify-center text-center">
         <div>
@@ -84,7 +84,7 @@ function NotesIndexPage() {
       </header>
 
       <NotePreviewCard note={{ ...current, topic: current.topic ?? null }}>
-        <MdxContent compiledSource={compiledSource} components={defaultMDXComponents} />
+        <CompiledMdx compiled={compiled} />
       </NotePreviewCard>
 
       {earlier.length > 0 && (

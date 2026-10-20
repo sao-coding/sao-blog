@@ -29,6 +29,13 @@
       "when": 1784644169970,
       "tag": "0002_lame_microchip",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792425108658,
+      "tag": "0003_content_translations",
+      "breakpoints": true
     }
   ]
 }

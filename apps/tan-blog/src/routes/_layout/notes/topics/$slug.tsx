@@ -4,10 +4,11 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { TopicNotesList } from './-components/topic-notes-list'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { currentContentLocale } from '@/lib/content-locale'
 
 export const Route = createFileRoute('/_layout/notes/topics/$slug')({
   loader: async ({ params }) => {
-    const data = await getCachedTopic({ data: params.slug })
+    const data = await getCachedTopic({ data: { slug: params.slug, locale: currentContentLocale() } })
     if (!data) {
       throw notFound()
     }

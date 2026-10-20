@@ -1,5 +1,6 @@
 import React from 'react'
 import type { MDXComponents } from 'mdx/types'
+import type { MdxComponentName } from '@sao-blog/mdx/registry'
 import {
   Echarts,
   Mermaid,
@@ -35,6 +36,23 @@ function nodeToText(node: React.ReactNode): string {
   }
   return ''
 }
+
+// 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）。
+// `satisfies` 確保 @sao-blog/mdx registry 登記的每個元件在 Web 端都有實作。
+const blockComponents = {
+  Count,
+  CustomQuote,
+  Alert: MdxAlert,
+  Accordion: MdxAccordion,
+  AccordionItem: MdxAccordionItem,
+  Tabs: MdxTabs,
+  Tab: MdxTab,
+  Carousel: MdxCarousel,
+  Slide: MdxSlide,
+  Progress: MdxProgress,
+  Benchmark: MdxBenchmark,
+  BenchmarkItem: MdxBenchmarkItem,
+} satisfies Record<MdxComponentName, React.ComponentType<never>>
 
 // 預設 MDX components 配置
 export const defaultMDXComponents: MDXComponents = {
@@ -145,20 +163,8 @@ export const defaultMDXComponents: MDXComponents = {
     }
     return <code className={className}>{children}</code>
   },
-  Count,
-  CustomQuote,
   img: MdxImage,
-  // 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）
-  Alert: MdxAlert,
-  Accordion: MdxAccordion,
-  AccordionItem: MdxAccordionItem,
-  Tabs: MdxTabs,
-  Tab: MdxTab,
-  Carousel: MdxCarousel,
-  Slide: MdxSlide,
-  Progress: MdxProgress,
-  Benchmark: MdxBenchmark,
-  BenchmarkItem: MdxBenchmarkItem,
+  ...blockComponents,
 }
 
 // 擴充的 MDX components 型別，允許 null/false 來禁用 components

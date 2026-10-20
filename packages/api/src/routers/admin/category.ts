@@ -1,7 +1,9 @@
 import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc } from "drizzle-orm";
-import { categories } from "@sao-blog/db/schema/index";
+import { categories, DEFAULT_LOCALE } from "@sao-blog/db/schema/index";
+import { upsertCategoryTranslation } from "../../lib/source-translation";
+import { categoryTranslationProcedures } from "./translation";
 import z from "zod";
 import { categoryInputSchema } from "@sao-blog/api/schema/category";
 
@@ -80,6 +82,16 @@ const createCategory = protectedProcedure
             })
             .returning();
 
+        // 雙寫原文語系的分類翻譯（categories.name 仍為讀取來源）
+        if (row) {
+            await upsertCategoryTranslation({
+                categoryId: row.id,
+                locale: DEFAULT_LOCALE,
+                name,
+                description: description ?? null,
+            });
+        }
+
         return {
             status: "success",
             message: "分類創建成功",
@@ -111,6 +123,13 @@ const updateCategory = protectedProcedure
                 data: null,
             }
         }
+
+        await upsertCategoryTranslation({
+            categoryId: row.id,
+            locale: DEFAULT_LOCALE,
+            name,
+            description: description ?? null,
+        });
 
         return {
             status: "success",
@@ -154,5 +173,6 @@ export default {
     getCategory,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    ...categoryTranslationProcedures,
 }

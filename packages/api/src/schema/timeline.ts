@@ -1,5 +1,6 @@
 import z from "zod";
 import { createApiResponseSchema } from "./api";
+import { localeInput } from "./i18n";
 
 // 要分年分還要知道有幾篇
 export const TimelineSchema = z.object({
@@ -48,6 +49,7 @@ export const TimelinePostSchema = z.object({
 });
 
 export const TimelineInputSchema = z.object({
+    ...localeInput,
     type: z.enum(["post", "note"]).optional(),
 });
 

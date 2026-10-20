@@ -11,6 +11,7 @@ import { ArticlePreviewModal } from '@/components/preview/article-preview-modal'
 import ProgressNumber from '@/components/animation/progress-number'
 import { pageShellClass } from '@/components/layout/page-shell'
 import { TermMark } from '@/components/written-season'
+import { currentContentLocale } from '@/lib/content-locale'
 
 const timelineSearchSchema = z.object({
   type: z.enum(['post', 'note']).optional(),
@@ -20,7 +21,7 @@ export const Route = createFileRoute('/_layout/timeline/')({
   validateSearch: timelineSearchSchema,
   loaderDeps: ({ search }) => ({ type: search.type }),
   loader: async ({ deps }) => {
-    const data = await orpc.timeline.getTimeLine.call({ type: deps.type })
+    const data = await orpc.timeline.getTimeLine.call({ type: deps.type, locale: currentContentLocale() })
     return data
   },
   head: () => pageHead({

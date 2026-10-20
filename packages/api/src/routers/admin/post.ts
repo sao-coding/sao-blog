@@ -5,7 +5,9 @@ import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blo
 import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
-import { mdxToExcerpt } from "../../lib/mdx-to-text";
+import { checkMdxForSave } from "../../lib/mdx-validate";
+import { upsertSourcePostTranslation } from "../../lib/source-translation";
+import { listTranslationStatus, postTranslationProcedures } from "./translation";
 import { slugify } from "../../lib/slugify";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 
@@ -62,10 +64,13 @@ const getPosts = protectedProcedure
             .innerJoin(categories, eq(posts.categoryId, categories.id))
             .orderBy(desc(posts.updatedAt));
 
+        // 各語言版本狀態（後台列表 badge；outdated = 原文改過、譯文待更新）
+        const translations = await listTranslationStatus("post", result.map((r) => r.id));
+
         return {
             status: "success",
             message: "文章列表取得成功",
-            data: result,
+            data: result.map((r) => ({ ...r, translations: translations.get(r.id) ?? [] })),
         }
     });
 
@@ -134,7 +139,7 @@ async function resolveCategoryId(categoryId?: string | null) {
 
 // 創建貼文
 const createPost = protectedProcedure
-    .route({ method: "POST", path: "/posts" })
+    .route({ method: "POST", path: "/posts", summary: "建立文章。content 為 MDX，存檔前以前台同一條管線驗證：發布狀態下有錯誤會被拒絕（錯誤含行號），草稿則可存但會回傳警告。建議先用 admin_content_previewMdx 驗證、用 admin_content_getComponents 查可用元件。 summary 未填會自動由內文產生。" })
     .input(postInputSchema)
     .handler(async ({ input, context }) => {
         const {
@@ -165,10 +170,17 @@ const createPost = protectedProcedure
             };
         }
 
-        // summary 未填時，於儲存階段先從 content 產生純文字摘要，
-        // 避免前台列表每次請求都即時解析 MDX
-        const resolvedSummary =
-            summary && summary.trim() ? summary : await mdxToExcerpt(content);
+        // 用前台同一條編譯管線驗證 MDX：發布時有錯誤直接拒絕存檔（錯誤帶行號）；
+        // summary 未填時順便從編譯出的純文字產生摘要，避免前台列表每次請求都即時解析 MDX
+        const mdx = await checkMdxForSave(content, {
+            profile: "post",
+            publish: status === "published",
+            summary,
+        });
+        if (!mdx.ok) {
+            return { status: "error", message: mdx.message, meta: undefined, data: null };
+        }
+        const resolvedSummary = mdx.summary;
 
         // slug 未填寫時，依標題自動產生；已填寫則檢查是否與既有文章衝突
         let resolvedSlug = slug?.trim();
@@ -218,6 +230,16 @@ const createPost = protectedProcedure
             };
         }
 
+        await upsertSourcePostTranslation({
+            postId: createdPost.id,
+            locale: createdPost.defaultLocale,
+            title,
+            summary: resolvedSummary,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
+
         // 建立標籤關聯
         if (tags && tags.length > 0) {
             const tagInserts = tags.map((t) => ({
@@ -237,13 +259,13 @@ const createPost = protectedProcedure
 
         return {
             status: "success",
-            message: "文章建立成功",
+            message: mdx.warning ? `文章建立成功。${mdx.warning}` : "文章建立成功",
             data: createdPost,
         };
     });
 // 更新貼文
 const updatePost = protectedProcedure
-    .route({ method: "PUT", path: "/posts/{id}" })
+    .route({ method: "PUT", path: "/posts/{id}", summary: "更新文章。content 為 MDX，存檔前以前台同一條管線驗證：發布狀態下有錯誤會被拒絕（錯誤含行號），草稿則可存但會回傳警告。建議先用 admin_content_previewMdx 驗證、用 admin_content_getComponents 查可用元件。" })
     .input(postInputSchema)
     .handler(async ({ input }) => {
         const {
@@ -299,9 +321,16 @@ const updatePost = protectedProcedure
             }
         }
 
-        // summary 未填時，於儲存階段先從 content 產生純文字摘要
-        const resolvedSummary =
-            summary && summary.trim() ? summary : await mdxToExcerpt(content);
+        // 驗證 MDX（規則同 createPost）
+        const mdx = await checkMdxForSave(content, {
+            profile: "post",
+            publish: status === "published",
+            summary,
+        });
+        if (!mdx.ok) {
+            return { status: "error", message: mdx.message, meta: undefined, data: null };
+        }
+        const resolvedSummary = mdx.summary;
 
         // 分類為必填：未選擇時自動歸到「其他」(slug=others) 預設分類
         const resolvedCategoryId = await resolveCategoryId(category?.id);
@@ -342,6 +371,16 @@ const updatePost = protectedProcedure
             };
         }
 
+        await upsertSourcePostTranslation({
+            postId: updatedPost.id,
+            locale: updatedPost.defaultLocale,
+            title,
+            summary: resolvedSummary,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
+
         // 更新標籤關聯：先刪除再新增
         await db.delete(postTags).where(eq(postTags.postId, id));
 
@@ -375,7 +414,7 @@ const updatePost = protectedProcedure
 
         return {
             status: "success",
-            message: "文章更新成功",
+            message: mdx.warning ? `文章更新成功。${mdx.warning}` : "文章更新成功",
             data: updatedPost,
         };
     });
@@ -445,5 +484,6 @@ export default {
     getPost,
     createPost,
     updatePost,
-    deletePosts
+    deletePosts,
+    ...postTranslationProcedures,
 };

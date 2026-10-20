@@ -1,10 +1,11 @@
 import { env } from '@sao-blog/env/tan-blog'
-import { deLocalizeHref, locales, localizeHref } from '#/paraglide/runtime'
+import { deLocalizeHref, getLocale, locales, localizeHref, type Locale } from '#/paraglide/runtime'
 import { pageOgImagePath } from '@/lib/og/og-url'
 
 export const SITE_NAME = '唯一のBlog'
 export const SITE_DESCRIPTION = '這雖然是遊戲，但可不是鬧著玩的'
 export const SITE_LOCALE = 'zh_TW'
+const OG_LOCALE: Record<string, string> = { 'zh-Hant': 'zh_TW', en: 'en_US', ja: 'ja_JP' }
 // pageHead() 未指定 image 時改用動態 OG 圖（src/routes/og/*）；這張大頭貼只剩
 // JSON-LD 的 fallback 與 OG 渲染失敗時的退路。
 export const DEFAULT_OG_IMAGE = '/img/avatar.jpg'
@@ -32,6 +33,9 @@ export interface PageSeoInput {
   // 文章/日記內容頁只有 zh-Hant 內容，三語 URL 顯示相同內容，故不產生 alternates，
   // canonical 一律指回未帶 locale 前綴的原文版本（見 TDD 第八部分）。
   alternates?: boolean
+  // 多語內容頁（文章 / 日記）：已發布的語言版本（UI 語系）。有值時 hreflang 只列這些語系，
+  // canonical 指向目前語系（若該語系有譯文）或原文（fallback 時），優先於 alternates。
+  contentLocales?: Locale[]
 }
 
 // 供文章/日記等「內容不翻譯」頁面使用：canonical 一律指回無 locale 前綴的版本。
@@ -39,9 +43,9 @@ export function contentCanonicalUrl(path: string): string {
   return absoluteUrl(deLocalizeHref(path))
 }
 
-function localeAlternateLinks(path: string) {
+function localeAlternateLinks(path: string, only: readonly Locale[] = locales) {
   const base = deLocalizeHref(path)
-  const links = locales.map((locale) => ({
+  const links = only.map((locale) => ({
     rel: 'alternate' as const,
     hrefLang: locale === 'zh-Hant' ? 'zh-Hant' : locale,
     href: absoluteUrl(localizeHref(base, { locale })),
@@ -67,8 +71,16 @@ export function pageHead({
   author,
   noindex,
   alternates = true,
+  contentLocales,
 }: PageSeoInput) {
-  const url = alternates ? absoluteUrl(path) : contentCanonicalUrl(path)
+  const current = getLocale()
+  const url = contentLocales
+    ? contentLocales.includes(current)
+      ? absoluteUrl(localizeHref(deLocalizeHref(path), { locale: current }))
+      : contentCanonicalUrl(path)
+    : alternates
+      ? absoluteUrl(path)
+      : contentCanonicalUrl(path)
   const imageUrl = absoluteUrl(image ?? pageOgImagePath(title, description))
 
   const meta = [
@@ -80,7 +92,7 @@ export function pageHead({
     { property: 'og:description', content: description },
     { property: 'og:url', content: url },
     { property: 'og:image', content: imageUrl },
-    { property: 'og:locale', content: SITE_LOCALE },
+    { property: 'og:locale', content: OG_LOCALE[current] ?? SITE_LOCALE },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: description },
@@ -113,7 +125,13 @@ export function pageHead({
     meta,
     links: [
       { rel: 'canonical', href: url },
-      ...(alternates ? localeAlternateLinks(path) : []),
+      ...(contentLocales
+        ? contentLocales.length > 1
+          ? localeAlternateLinks(path, contentLocales)
+          : []
+        : alternates
+          ? localeAlternateLinks(path)
+          : []),
     ],
   }
 }
