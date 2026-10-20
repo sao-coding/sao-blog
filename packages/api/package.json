@@ -11,7 +11,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1085.0",
+    "@aws-sdk/client-s3": "^3.1153.0",
     "@modelcontextprotocol/sdk": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
@@ -23,7 +23,7 @@
     "@sao-blog/mdx": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.4",
     "ip2region-ts": "^2.0.1",
     "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
