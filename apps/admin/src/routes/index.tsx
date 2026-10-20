@@ -6,6 +6,7 @@ import { CommentTrendChart } from '@/components/dashboard/comment-trend-chart'
 import { CountBarChart } from '@/components/dashboard/count-bar-chart'
 import { RecentCommentsList } from '@/components/dashboard/recent-comments-list'
 import { RecentUsersList } from '@/components/dashboard/recent-users-list'
+import { SearchIndexCard } from '@/components/dashboard/search-index-card'
 import { orpc } from '@/utils/orpc'
 
 export const Route = createFileRoute('/')({ component: App })
@@ -22,6 +23,7 @@ function App() {
     <AdminShell title="儀表板">
       <div className="space-y-6">
         <StatCards counts={overview?.counts} isLoading={isLoading} />
+        <SearchIndexCard />
         <CommentTrendChart
           data={overview?.commentTrend}
           isLoading={isLoading}

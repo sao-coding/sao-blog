@@ -1,7 +1,8 @@
 import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc } from "drizzle-orm";
-import { categories, DEFAULT_LOCALE } from "@sao-blog/db/schema/index";
+import { categories, DEFAULT_LOCALE, posts } from "@sao-blog/db/schema/index";
+import { queueCategorySearchSync, queueSearchSync } from "../../lib/search";
 import { upsertCategoryTranslation } from "../../lib/source-translation";
 import { categoryTranslationProcedures } from "./translation";
 import z from "zod";
@@ -130,6 +131,7 @@ const updateCategory = protectedProcedure
             name,
             description: description ?? null,
         });
+        queueCategorySearchSync(row.id);
 
         return {
             status: "success",
@@ -146,6 +148,9 @@ const deleteCategory = protectedProcedure
     .handler(async ({ input }) => {
         const { id } = input;
 
+        // 刪除後文章的 categoryId 會被清空，先記下受影響文章以便重新索引
+        const affectedPosts = await db.select({ id: posts.id }).from(posts).where(eq(posts.categoryId, id));
+
         // 直接刪除分類，底下文章的 categoryId 會由 FK（onDelete: set null）自動設為未分類
         const [row] = await db
             .delete(categories)
@@ -159,6 +164,8 @@ const deleteCategory = protectedProcedure
                 data: null,
             }
         }
+
+        queueSearchSync("post", affectedPosts.map((p) => p.id));
 
         return {
             status: "success",

@@ -33,6 +33,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@sao-blog/config": "workspace:*",
     "elysia": "catalog:",
     "typescript": "catalog:"

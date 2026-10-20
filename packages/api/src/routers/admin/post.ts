@@ -10,6 +10,7 @@ import { upsertSourcePostTranslation } from "../../lib/source-translation";
 import { listTranslationStatus, postTranslationProcedures } from "./translation";
 import { slugify } from "../../lib/slugify";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+import { queueSearchSync } from "../../lib/search";
 
 // 管理員系統員系統
 
@@ -255,6 +256,7 @@ const createPost = protectedProcedure
             .set({ postCount: sql`${categories.postCount} + 1` })
             .where(eq(categories.id, resolvedCategoryId));
 
+        queueSearchSync("post", [createdPost.id]);
         await notifyBlogRevalidate(["/", "/posts", `/posts/${createdPost.slug}`]);
 
         return {
@@ -410,6 +412,7 @@ const updatePost = protectedProcedure
             }
         }
 
+        queueSearchSync("post", [updatedPost.id]);
         await notifyBlogRevalidate(["/", "/posts", `/posts/${updatedPost.slug}`]);
 
         return {
@@ -454,6 +457,7 @@ const deletePosts = protectedProcedure
           .where(eq(categories.id, categoryId));
       }
 
+      queueSearchSync("post", deletedPosts.map((p) => p.id));
       await notifyBlogRevalidate([
         "/",
         "/posts",

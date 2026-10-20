@@ -120,5 +120,13 @@
   "theme_toggle": "昼／夜読みを切り替え",
   "content_fallback_notice": "この記事はまだ日本語に翻訳されていません。原文を表示しています。",
   "content_ai_translated": "この記事は AI によって翻訳されたため、不正確な箇所があるかもしれません。",
-  "content_available_in": "他の言語："
+  "content_available_in": "他の言語：",
+  "search_open": "検索",
+  "search_placeholder": "記事と日記を検索…",
+  "search_hint": "キーワードを入力して検索",
+  "search_loading": "検索中…",
+  "search_empty": "該当する内容が見つかりません",
+  "search_error": "検索サービスは一時的に利用できません",
+  "search_disabled": "検索機能は有効になっていません",
+  "search_all_locales": "すべての言語で検索"
 }

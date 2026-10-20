@@ -6,6 +6,7 @@ import z from "zod";
 import { auth } from "@sao-blog/auth";
 import { noteInputSchema } from "@sao-blog/api/schema/note";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+import { queueSearchSync } from "../../lib/search";
 import { checkMdxForSave } from "../../lib/mdx-validate";
 import { upsertSourceNoteTranslation } from "../../lib/source-translation";
 import { listTranslationStatus, noteTranslationProcedures } from "./translation";
@@ -120,6 +121,7 @@ const createNote = protectedProcedure
                 .where(eq(topics.id, topicId));
         }
 
+        queueSearchSync("note", [newNote.id]);
         const topicSlug = await getTopicSlug(topicId);
         await notifyBlogRevalidate([
             "/notes",
@@ -204,6 +206,7 @@ const updateNote = protectedProcedure
             }
         }
 
+        queueSearchSync("note", [updatedNote.id]);
         const [oldSlug, newSlug] = await Promise.all([
             getTopicSlug(oldTopicId),
             getTopicSlug(newTopicId),
@@ -257,6 +260,7 @@ const deleteNote = protectedProcedure
                     .where(eq(topics.id, tid));
             }
 
+            queueSearchSync("note", deletedNotes.map((n) => n.id));
             const topicSlugs = (await Promise.all(topicIds.map(getTopicSlug))).filter(
                 (s): s is string => s !== null
             );
