@@ -221,6 +221,9 @@ export const runtimeStatus: SearchRuntimeStatus = {
 
 let ensured = false;
 
+/** 重建中、尚未切換 alias 的新 collection。同步時一併寫入（Typesense 文件建議的雙寫） */
+const pendingCollections = new Map<SearchLocale, string>();
+
 /** 第一次寫入前確認各語系 alias 存在（尚未跑過 reindexAll 時自動建立空 collection） */
 export async function ensureCollections(client: SearchClient) {
   if (ensured) return;
@@ -237,6 +240,7 @@ export async function ensureCollections(client: SearchClient) {
 /** 測試用：重設模組狀態 */
 export function resetSearchState() {
   ensured = false;
+  pendingCollections.clear();
   runtimeStatus.lastSyncAt = null;
   runtimeStatus.lastSyncError = null;
   runtimeStatus.reindexing = false;
@@ -254,14 +258,16 @@ export async function syncContents(deps: SearchDeps, type: SearchContentType, id
     await ensureCollections(deps.client);
     const docs = await buildDocuments(deps.db, type, ids);
     for (const locale of SEARCH_LOCALES) {
-      const alias = searchAlias(locale);
       const present = docs.filter((d) => d.locale === locale);
       const presentIds = new Set(present.map((d) => d.refId));
       const absent = ids.filter((id) => !presentIds.has(id));
-      if (absent.length) await deps.client.deleteByFilter(alias, `type:=${type} && ${refIdFilter(absent)}`);
-      if (present.length) {
-        const { failed } = await deps.client.importDocuments(alias, present);
-        if (failed) throw new Error(`${failed} 筆文件寫入失敗`);
+      const pending = pendingCollections.get(locale);
+      for (const target of pending ? [searchAlias(locale), pending] : [searchAlias(locale)]) {
+        if (absent.length) await deps.client.deleteByFilter(target, `type:=${type} && ${refIdFilter(absent)}`);
+        if (present.length) {
+          const { failed } = await deps.client.importDocuments(target, present);
+          if (failed) throw new Error(`${failed} 筆文件寫入失敗`);
+        }
       }
     }
     runtimeStatus.lastSyncAt = new Date().toISOString();
@@ -288,8 +294,9 @@ export async function syncCategoryPosts(deps: SearchDeps, categoryId: string): P
 }
 
 /**
- * 全量重建（零停機）：每語系建立新 collection → 寫入全部文件 → alias 指向新 collection → 刪除舊的。
- * 重建期間的寫入會進到舊 collection，所以切換後再補同步一次期間內有更新的內容。
+ * 全量重建（零停機，依 Typesense「Update a Collection > Using an alias」流程）：
+ * 建立新 collection → 期間同步雙寫新舊 collection → 匯入全部文件 → alias 指向新 collection → 刪除舊的。
+ * 匯入的是開始時的 DB 快照，可能蓋掉期間雙寫的較新版本，所以切換後再補同步一次期間有更新的內容。
  */
 export async function reindexAll(deps: SearchDeps): Promise<{ documents: Record<SearchLocale, number> }> {
   if (runtimeStatus.reindexing) throw new Error("索引重建進行中");
@@ -297,23 +304,30 @@ export async function reindexAll(deps: SearchDeps): Promise<{ documents: Record<
   runtimeStatus.reindexing = true;
   runtimeStatus.lastReindex = { startedAt: started.toISOString(), finishedAt: null, ok: false, error: null, documents: 0 };
   try {
+    const stamp = started.getTime();
+    // 先建好新 collection 並開始雙寫，再讀 DB 快照，避免漏掉期間的變更
+    for (const locale of SEARCH_LOCALES) {
+      const name = `${searchAlias(locale)}_${stamp}`;
+      await deps.client.createCollection(collectionSchema(locale, name));
+      pendingCollections.set(locale, name);
+    }
+
     const docs = [...(await buildPostDocuments(deps.db)), ...(await buildNoteDocuments(deps.db))];
     const documents = { "zh-TW": 0, en: 0, ja: 0 } as Record<SearchLocale, number>;
-    const stamp = started.getTime();
+
+    for (const locale of SEARCH_LOCALES) {
+      const { failed } = await deps.client.importDocuments(pendingCollections.get(locale)!, docs.filter((d) => d.locale === locale));
+      if (failed) throw new Error(`${locale}：${failed} 筆文件寫入失敗，未切換 alias`);
+    }
 
     for (const locale of SEARCH_LOCALES) {
       const alias = searchAlias(locale);
-      const name = `${alias}_${stamp}`;
+      const name = pendingCollections.get(locale)!;
       const localeDocs = docs.filter((d) => d.locale === locale);
-      await deps.client.createCollection(collectionSchema(locale, name));
-      const { failed } = await deps.client.importDocuments(name, localeDocs);
-      if (failed) {
-        await deps.client.deleteCollection(name);
-        throw new Error(`${locale}：${failed} 筆文件寫入失敗，未切換 alias`);
-      }
       const previous = await deps.client.getAlias(alias);
       await deps.client.upsertAlias(alias, name);
       if (previous && previous !== name) await deps.client.deleteCollection(previous);
+      pendingCollections.delete(locale);
       documents[locale] = localeDocs.length;
     }
     ensured = true;
@@ -353,6 +367,9 @@ export async function reindexAll(deps: SearchDeps): Promise<{ documents: Record<
     };
     throw error;
   } finally {
+    // 失敗時清掉尚未切換的新 collection（成功時這裡已是空的）
+    for (const name of pendingCollections.values()) await deps.client.deleteCollection(name).catch(() => {});
+    pendingCollections.clear();
     runtimeStatus.reindexing = false;
   }
 }

@@ -343,7 +343,8 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - ✅ 已完成：`packages/api/src/lib/search/`（`query.ts` 瀏覽器可用的共用定義、`client.ts` 以 fetch 實作的最小 Typesense client、`indexer.ts` 索引 / 重建、`index.ts` env 接線）；不另開 `packages/search`、不裝 Typesense SDK
    - Collection：**每語系一個**，前台 / API 一律查 alias `contents_zh-TW` / `contents_en` / `contents_ja`，實體名稱為 `<alias>_<毫秒時間戳>`（後台由此推得最後重建時間）。CJK：字串欄位設 Typesense 欄位層級 `locale`（zh-TW → `zh`、ja → `ja`，en 不設）
    - 同步：`createPost` / `updatePost` / `deletePosts`、日記同理、譯文 upsert / delete、分類改名 / 譯名 / 刪除後呼叫 `queueSearchSync`（背景執行、不 await），依 DB 現況 upsert 或刪除各語系文件；失敗只記 log 與後台狀態，不阻擋存檔。舊資料沒有 `plainText` 時即時由 MDX 轉純文字
-   - `reindexAll`：每語系建新 collection → 匯入 → 切 alias → 刪舊；匯入有失敗則不切換。切換後補同步重建期間有更新的內容
+   - `reindexAll`（依 Typesense 文件的 alias 零停機流程）：先建新 collection 並開始雙寫（期間的存檔同步同時寫新舊 collection）→ 匯入 DB 快照 → 切 alias → 刪舊；匯入有失敗則不切換並清掉新 collection。切換後再補同步期間有更新的內容（快照可能蓋掉雙寫的較新版本）
+   - 已以 Context7 查證 Typesense 29.0 文件：欄位 `locale`（`zh` 繁簡皆支援、`ja`）、import JSONL 回應（HTTP 一律 200，需逐行檢查 `success`）、`DELETE documents?filter_by=`、`PUT /aliases`、`POST /keys`（`collections` 支援 regex）、filter 字串用反引號
    - API：`content.search`（公開，`q` / `locale` / `allLocales` / `type` / `page` / `perPage`）→ MCP `content_search`；後台 `admin.search.getStatus` / `admin.search.reindexAll`（MCP `admin_search_*`），儀表板加「搜尋索引」卡片
    - 前台：header 搜尋鈕 + ⌘K / Ctrl+K command palette；有 `VITE_TYPESENSE_URL` + `VITE_TYPESENSE_SEARCH_KEY` 時瀏覽器直查 Typesense，否則走 API proxy；高亮以 `splitHighlight` 切段後以文字渲染（不用 innerHTML）
    - 測試：`bun test packages/api/src/lib/search`（PGlite 套用 repo migrations + 記憶體版 Typesense client）；尚未對真實 Typesense 實測

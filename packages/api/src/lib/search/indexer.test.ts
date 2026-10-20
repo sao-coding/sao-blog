@@ -300,13 +300,43 @@ describe("reindexAll", () => {
     expect(status.locales[0]?.builtAt).not.toBeNull();
   });
 
-  test("寫入失敗時不切換 alias", async () => {
+  test("重建期間的同步會雙寫新舊 collection", async () => {
+    const post = await createPost({ slug: "dual" });
+    await syncContents(deps(), "post", [post.id]);
+
+    const targets: string[] = [];
+    const importDocuments = fake.importDocuments.bind(fake);
+    fake.importDocuments = async (collection, docs) => {
+      targets.push(collection);
+      return importDocuments(collection, docs);
+    };
+    // 三個新 collection 建好後（尚未切換 alias）模擬一次存檔同步
+    const createCollection = fake.createCollection.bind(fake);
+    let created = 0;
+    fake.createCollection = async (s) => {
+      await createCollection(s);
+      if (++created === 3) {
+        targets.length = 0;
+        await syncContents(deps(), "post", [post.id]);
+        expect(targets).toContain("contents_zh-TW");
+        expect(targets).toContain(s.name.replace("contents_ja", "contents_zh-TW"));
+      }
+    };
+
+    await new Promise((r) => setTimeout(r, 5));
+    await reindexAll(deps());
+    expect(created).toBe(3);
+    expect(fake.docs("zh-TW").map((d) => d.slug)).toEqual(["dual"]);
+  });
+
+  test("寫入失敗時不切換 alias，並清掉新建的 collection", async () => {
     await createPost({ slug: "x" });
     await reindexAll(deps());
     const before = new Map(fake.aliases);
     fake.importDocuments = async () => ({ failed: 1 });
     await expect(reindexAll(deps())).rejects.toThrow("未切換 alias");
     expect(fake.aliases).toEqual(before);
+    expect(fake.collections.size).toBe(3);
     expect(runtimeStatus.reindexing).toBe(false);
   });
 });
