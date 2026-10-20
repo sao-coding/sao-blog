@@ -18,7 +18,14 @@ export default defineConfig({
       outdir: './src/paraglide',
       strategy: ['url', 'baseLocale'],
     }),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      rollupConfig: { external: [/^@sentry\//] },
+      // /admin 轉到獨立部署的後台
+      routeRules: {
+        '/admin': { redirect: { to: 'https://blog-admin.sao-x.com/admin' } },
+        '/admin/**': { redirect: { to: 'https://blog-admin.sao-x.com/admin/**' } },
+      },
+    }),
     tailwindcss(),
     tanstackStart({
       // 文章/日記/專欄詳情頁不再走 build-time 靜態清單（新內容不必等重新 build
