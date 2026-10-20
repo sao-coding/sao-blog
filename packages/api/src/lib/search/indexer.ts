@@ -8,7 +8,8 @@ import {
   postTranslations,
   tags,
 } from "@sao-blog/db/schema/index";
-import type { db as appDb } from "@sao-blog/db";
+import type * as schema from "@sao-blog/db/schema/index";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { and, eq, gte, inArray, or, type SQL } from "drizzle-orm";
 import { mdxToText } from "../mdx-to-text";
 import type { CollectionSchema, SearchClient } from "./client";
@@ -20,8 +21,8 @@ import { SEARCH_LOCALES, searchAlias, type SearchContentType, type SearchDocumen
 // 規則：一篇內容的某語系「主表與該語系 translation 皆為已發布」才建立文件，否則刪除；
 // 未翻譯的語系不建立 fallback 文件（避免搜尋結果重複）。
 
-// 型別沿用正式 db（type-only import，不會連線）；測試的 PGlite drizzle 以 cast 傳入
-export type SearchDb = typeof appDb;
+// 不綁定 driver：正式環境的 node-postgres 與測試的 PGlite 都是 PgDatabase
+export type SearchDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 export interface SearchDeps {
   db: SearchDb;
   client: SearchClient;

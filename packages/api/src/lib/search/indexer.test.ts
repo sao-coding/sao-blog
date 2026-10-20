@@ -96,7 +96,7 @@ beforeAll(async () => {
   const pg = new PGlite();
   const d = drizzle(pg, { schema });
   await migrate(d, { migrationsFolder: path.resolve(import.meta.dir, "../../../../db/src/migrations") });
-  db = d as unknown as SearchDb;
+  db = d;
   // migrations 的 user 表欄位比 drizzle 定義多，直接以 SQL 補齊必要欄位
   await pg.query(
     `insert into "user" (id, name, email, email_verified, created_at, updated_at) values ($1, 'sao', 'sao@example.com', false, now(), now())`,

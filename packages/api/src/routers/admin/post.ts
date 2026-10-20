@@ -1,10 +1,9 @@
-import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
+import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and, inArray, sql } from "drizzle-orm";
+import { eq, desc, inArray, sql } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
-import { auth } from "@sao-blog/auth";
-import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
+import { postInputSchema, PostResponseSchema } from "@sao-blog/api/schema/post";
 import { checkMdxForSave } from "../../lib/mdx-validate";
 import { upsertSourcePostTranslation } from "../../lib/source-translation";
 import { listTranslationStatus, postTranslationProcedures } from "./translation";

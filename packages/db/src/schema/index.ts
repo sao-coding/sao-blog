@@ -6,8 +6,6 @@ import {
   varchar,
   boolean,
   integer,
-  serial,
-  json,
   timestamp,
   primaryKey,
   index,

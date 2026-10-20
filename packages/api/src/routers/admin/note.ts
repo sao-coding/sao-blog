@@ -1,9 +1,8 @@
 import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc, and, inArray, sql } from "drizzle-orm";
-import { categories, posts, user, tags, postTags, type TagModel, notes, topics } from "@sao-blog/db/schema/index";
+import { notes, topics } from "@sao-blog/db/schema/index";
 import z from "zod";
-import { auth } from "@sao-blog/auth";
 import { noteInputSchema } from "@sao-blog/api/schema/note";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 import { queueSearchSync } from "../../lib/search";

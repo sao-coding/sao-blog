@@ -72,6 +72,9 @@ importers:
         specifier: 'catalog:'
         version: 4.3.6
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: 0.5.10
+        version: 0.5.10
       '@sao-blog/config':
         specifier: workspace:*
         version: link:packages/config
@@ -929,9 +932,6 @@ importers:
         specifier: 'catalog:'
         version: 4.3.6
     devDependencies:
-      '@electric-sql/pglite':
-        specifier: ^0.5.10
-        version: 0.5.10
       '@sao-blog/config':
         specifier: workspace:*
         version: link:../config

@@ -1,10 +1,9 @@
-import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
+import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and, inArray } from "drizzle-orm";
-import { categories, posts, user, tags, postTags, type TagModel, topics } from "@sao-blog/db/schema/index";
+import { eq, desc } from "drizzle-orm";
+import { topics } from "@sao-blog/db/schema/index";
 import z from "zod";
-import { auth } from "@sao-blog/auth";
-import { topicSchema, topicInputSchema } from "@sao-blog/api/schema/topic";
+import { topicInputSchema } from "@sao-blog/api/schema/topic";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
 
 const getTopics = protectedProcedure
