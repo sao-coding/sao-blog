@@ -335,9 +335,36 @@
 }
 
 /* classname prose 裡面 的 pre 裡面 的 div 若是 mermaid 或 echarts 的話，則pre 無背景 */
-.prose pre:has(> div.mermaid),
+.prose pre:has(.mermaid),
 .prose pre:has(> div.echarts) {
   background-color: transparent;
+}
+
+/* beautiful-mermaid 輸出的 SVG：置中、窄螢幕縮小不溢出 */
+.prose .mermaid-beautiful {
+  display: flex;
+  justify-content: center;
+}
+.prose .mermaid-beautiful svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Excalidraw 圖：透明底直接畫在紙上；夜讀時整張反相（白底黑線 → 深底淺線），hue-rotate 把顏色轉回原本色相 */
+.excalidraw-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+}
+.dark .excalidraw-canvas svg {
+  filter: invert(93%) hue-rotate(180deg);
+}
+.excalidraw-placeholder {
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+  background: color-mix(in oklch, var(--foreground) 5%, transparent);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .prose div.echarts {
@@ -974,28 +1001,85 @@
 }
 
 /* ── 四季信箋（文章／日記閱讀區）──────────────────────────────────────────
- * 箋框：朱色「文武線」——外框較粗、內框細，兩線之間留一點空
+ * 結構（由下到上）：
+ *   .letter-stack     底下疊著的兩張信紙，往右下錯開露出紙邊
+ *   ::before          紙本身：紙色＋紙紋，經 #letter-deckle 濾鏡做出手抄紙的毛邊
+ *   內容
+ *   ::after           箋框：朱色「文武線」——外框較粗、內框細，兩線之間留一點空
  * 天地：上下留白較寬，像信紙的天頭地腳
  */
 .letter-paper {
   --frame: color-mix(in oklch, var(--zhu, var(--primary)) 55%, transparent);
+  --paper-shadow: oklch(0.3 0.02 60 / 0.22);
+  /* 紙紋（全部 multiply 在紙色上，不影響文字對比）：
+   * 1. 細顆粒：高頻雜訊，像紙面的毛孔
+   * 2. 放大噪點：一張小噪點圖放大很多倍，變成柔和的斑駁
+   * 3. 纖維：x 方向拉長的雜訊，模擬宣紙裡的長纖維
+   * 4. 雲紋：大片淡淡的濃淡不均（紙漿厚薄）
+   * 5. 四邊微微泛黃，像放久的紙 */
+  --paper-texture:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .38 0 0 0 0 .32 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.25' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .44 0 0 0 0 .36 0 0 0 .22 -.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E") 0 0 / 700px 700px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .3' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .32 0 0 0 1.4 -1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .44 0 0 0 0 .34 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E"),
+    radial-gradient(120% 90% at 50% 45%, transparent 60%, oklch(0.6 0.05 75 / 0.14) 100%);
+  --paper-blend: multiply;
   position: relative;
+  isolation: isolate;
   padding: 3.5rem 2.75rem 3rem;
-  background-color: var(--card);
-  border-radius: 2px;
-  box-shadow:
-    inset 0 0 0 2px var(--frame),
-    inset 0 0 0 6px var(--card),
-    inset 0 0 0 7px color-mix(in oklch, var(--frame) 70%, transparent),
-    0 1px 2px oklch(0.3 0.02 60 / 0.06),
-    0 12px 32px -18px oklch(0.3 0.02 60 / 0.25);
+}
+.letter-paper::before,
+.letter-sheet {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--paper-texture), var(--card);
+  background-blend-mode: var(--paper-blend);
+  filter: url(#letter-deckle) drop-shadow(0 6px 14px var(--paper-shadow));
+  pointer-events: none;
+}
+.letter-paper::before {
+  z-index: -1;
+}
+/* 底下疊著的信紙：兩張跟上面同大小的紙，往右下平移，從右緣與下緣露出平行的紙邊，
+ * 像一疊紙擺在桌上。只平移、不旋轉也不斜，所以文章再長，露出的寬度都一樣 */
+.letter-stack {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+.letter-sheet:nth-of-type(1) {
+  z-index: -1;
+  translate: 8px 8px;
+  filter: url(#letter-deckle) brightness(0.97) drop-shadow(0 1px 3px var(--paper-shadow));
+}
+.letter-sheet:nth-of-type(2) {
+  z-index: -2;
+  translate: 16px 16px;
+  filter: url(#letter-deckle) brightness(0.93) drop-shadow(0 4px 10px var(--paper-shadow));
+}
+/* 箋框往內收一點，避開毛邊 */
+.letter-paper::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  z-index: 1;
+  border: 2px solid var(--frame);
+  outline: 1px solid color-mix(in oklch, var(--frame) 70%, transparent);
+  outline-offset: -6px;
+  pointer-events: none;
 }
 .dark .letter-paper {
   --frame: color-mix(in oklch, var(--pri) 35%, transparent);
-  box-shadow:
-    inset 0 0 0 2px var(--frame),
-    inset 0 0 0 6px var(--card),
-    inset 0 0 0 7px color-mix(in oklch, var(--frame) 70%, transparent);
+  --paper-shadow: oklch(0 0 0 / 0.5);
+  /* 夜讀：深色紙上 multiply 看不出來，改成淺色紋路直接疊（normal），透明度拉高一些 */
+  --paper-texture:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.25' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .14 -.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E") 0 0 / 700px 700px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .3' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.48'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, oklch(0 0 0 / 0.3) 100%);
+  --paper-blend: normal;
 }
 @media (max-width: 640px) {
   .letter-paper {
@@ -1055,4 +1139,88 @@
   line-height: 1;
   letter-spacing: 0.05em;
   color: oklch(0.97 0.01 85);
+}
+
+/* ── 燈箱（圖片／mermaid／Excalidraw 放大檢視）──────────────────────────────
+ * 底色用頁面背景色半透明＋模糊，晝夜都順；內容置中、最大 92vw × 84vh，
+ * 縮放與平移由 transform 處理（見 components/mdx/renderers/zoomable.tsx） */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: color-mix(in oklch, var(--background) 96%, transparent);
+  backdrop-filter: blur(6px);
+  animation: lightbox-in 160ms ease-out;
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+.lightbox-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+.lightbox-content {
+  transform-origin: center;
+  will-change: transform;
+}
+.lightbox-content > svg,
+.lightbox-content > img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 92vw;
+  max-height: 84vh;
+  pointer-events: none;
+}
+/* SVG 是向量圖，直接撐滿可用區域（viewBox 的 meet 會維持比例、置中），小圖也會放大到看得清楚 */
+.lightbox-content > svg {
+  width: 92vw;
+  height: 84vh;
+}
+.lightbox-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  color: var(--foreground);
+  background: var(--card);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 8px 24px -8px oklch(0 0 0 / 0.25);
+}
+.lightbox-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  transition: background-color 120ms;
+}
+.lightbox-toolbar button:hover {
+  background: var(--accent);
+}
+.lightbox-caption {
+  position: absolute;
+  left: 50%;
+  top: 1.25rem;
+  translate: -50% 0;
+  max-width: 80vw;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  pointer-events: none;
 }

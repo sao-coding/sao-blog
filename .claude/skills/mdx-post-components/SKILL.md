@@ -1,6 +1,6 @@
 ---
 name: mdx-post-components
-description: Reference for the JSX block components available when writing apps/mdx-blog article content (Alert, Accordion, Tabs, Carousel, Progress, Benchmark, CustomQuote, Playground, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
+description: Reference for the JSX block components available when writing apps/mdx-blog article content (Alert, Accordion, Tabs, Carousel, Progress, Benchmark, CustomQuote, Playground, Excalidraw, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
 ---
 
 # mdx-blog 文章區塊元件
@@ -196,6 +196,17 @@ console.log('hi')
 - meta 加上 `hidden`：不顯示分頁，但仍參與執行（適合樣式等樣板）
 - 不要直接寫 `<PlaygroundFile>`（那是編譯器產生的內部節點）
 - `console.log` / 錯誤會顯示在預覽下方的 Console
+
+### Excalidraw（手繪風圖表）
+
+```mdx
+<Excalidraw src="https://cdn.example.com/diagrams/flow.excalidraw" caption="請求流程" />
+```
+
+- `src`: 必填，excalidraw.com 分享連結（`https://excalidraw.com/#json=ID,KEY`，後台編輯器直接貼上連結會自動轉成此元件），或 `.excalidraw`（JSON）檔的完整網址；瀏覽器端轉成 SVG，進入畫面才載入
+- `caption`: 選填，圖說，同時作為無障礙替代文字（會被翻譯）
+- 底色透明、深色模式自動反相，畫圖時用淺色背景即可
+- 結構化的流程圖／時序圖優先用 `mermaid`；需要自由排版、註解或手繪質感時才用 Excalidraw
 
 ## 例外：mermaid / echarts 仍用 fence
 

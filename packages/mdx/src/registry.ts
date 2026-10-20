@@ -150,6 +150,18 @@ export const componentRegistry = {
     },
     children: true,
   }),
+  Excalidraw: define({
+    description:
+      'Excalidraw 手繪風圖表。src 為 excalidraw.com 分享連結（#json=ID,KEY）或 .excalidraw（JSON）檔的網址，於瀏覽器端轉成 SVG 顯示；' +
+      '深色模式自動反相。適合需要自由排版或手繪質感的圖，結構化的流程圖請用 mermaid。',
+    props: {
+      src: z.string().url(),
+      /** 圖說，顯示在圖下方，同時作為無障礙替代文字 */
+      caption: z.string().optional(),
+    },
+    children: false,
+    translatableProps: ['caption'],
+  }),
   Count: define({
     description: '計數器示範元件',
     props: {},

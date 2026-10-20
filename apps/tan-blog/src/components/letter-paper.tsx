@@ -23,9 +23,26 @@ export function LetterPaper({
   return (
     // --season 用寫作當時的節氣色，花木顏色跟著那一季，而不是現在的季節
     <div className={cn('letter-paper', className)} style={{ '--season': TERM_THEMES[index].accent } as CSSProperties}>
+      <DeckleFilter />
+      <span aria-hidden className="letter-stack">
+        <span className="letter-sheet" />
+        <span className="letter-sheet" />
+      </span>
       <SeasonSprig season={season} />
       <div className="relative">{children}</div>
     </div>
+  )
+}
+
+// 毛邊：用雜訊把紙的邊緣推得參差不齊（像手抄紙的 deckle edge），CSS 以 filter: url(#letter-deckle) 套用
+function DeckleFilter() {
+  return (
+    <svg aria-hidden width="0" height="0" className="absolute">
+      <filter id="letter-deckle" x="-2%" y="-2%" width="104%" height="104%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="5" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
   )
 }
 

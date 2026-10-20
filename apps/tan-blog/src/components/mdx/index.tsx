@@ -20,6 +20,7 @@ import {
   CodeBlockHeader,
   MdxPlayground,
   MdxPlaygroundFile,
+  MdxExcalidraw,
 } from './renderers'
 import EnhancedLink from './renderers/link'
 import { cn } from '@/lib/utils'
@@ -56,6 +57,7 @@ const blockComponents = {
   BenchmarkItem: MdxBenchmarkItem,
   Playground: MdxPlayground,
   PlaygroundFile: MdxPlaygroundFile,
+  Excalidraw: MdxExcalidraw,
 } satisfies Record<MdxComponentName, React.ComponentType<never>>
 
 // 預設 MDX components 配置
