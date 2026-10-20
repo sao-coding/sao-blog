@@ -19,5 +19,24 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # 全文搜尋（本機開發用）。api key 需與 apps/server 的 TYPESENSE_ADMIN_API_KEY 相同，
+  # 正式環境請改用強隨機值。
+  typesense:
+    image: typesense/typesense:29.0
+    container_name: sao-blog-typesense
+    command: ["--data-dir", "/data", "--api-key", "${TYPESENSE_ADMIN_API_KEY:-local-dev-admin-key}", "--enable-cors"]
+    ports:
+      - "8108:8108"
+    volumes:
+      - sao-blog_typesense_data:/data
+    healthcheck:
+      # 映像檔不保證有 curl，改用 bash 的 /dev/tcp 確認埠已開啟
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/8108' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   sao-blog_postgres_data:
+  sao-blog_typesense_data:

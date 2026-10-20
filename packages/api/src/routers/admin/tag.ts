@@ -1,9 +1,8 @@
-import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
+import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and } from "drizzle-orm";
-import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
+import { eq, desc } from "drizzle-orm";
+import { tags } from "@sao-blog/db/schema/index";
 import z from "zod";
-import { auth } from "@sao-blog/auth";
 import { tagInputSchema } from "@sao-blog/api/schema/tag";
 
 const getTags = protectedProcedure

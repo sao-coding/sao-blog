@@ -12,6 +12,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import z from "zod";
 import { checkMdxForSave } from "../../lib/mdx-validate";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+import { queueCategorySearchSync, queueSearchSync } from "../../lib/search";
 import { localeSchema, type Locale } from "../../schema/i18n";
 
 // 後台 / MCP 的翻譯管理。原文（isSource）一律透過 createPost / updatePost（日記同理）
@@ -162,6 +163,7 @@ const upsertPostTranslation = protectedProcedure
       })
       .returning({ locale: postTranslations.locale, status: postTranslations.status });
 
+    queueSearchSync("post", [input.postId]);
     await notifyBlogRevalidate(["/", "/posts", `/posts/${post.slug}`]);
 
     return {
@@ -193,6 +195,7 @@ const deletePostTranslation = protectedProcedure
       return { status: "error", message: "找不到該語言版本，或它是原文（不可刪除）", data: null };
     }
     const [post] = await db.select({ slug: posts.slug }).from(posts).where(eq(posts.id, input.postId)).limit(1);
+    queueSearchSync("post", [input.postId]);
     if (post) await notifyBlogRevalidate(["/", "/posts", `/posts/${post.slug}`]);
     return { status: "success", message: "譯文已刪除", data: deleted[0] };
   });
@@ -290,6 +293,7 @@ const upsertNoteTranslation = protectedProcedure
       })
       .returning({ locale: noteTranslations.locale, status: noteTranslations.status });
 
+    queueSearchSync("note", [input.noteId]);
     await notifyBlogRevalidate(["/notes", `/notes/${input.noteId}`]);
 
     return {
@@ -320,6 +324,7 @@ const deleteNoteTranslation = protectedProcedure
     if (!deleted.length) {
       return { status: "error", message: "找不到該語言版本，或它是原文（不可刪除）", data: null };
     }
+    queueSearchSync("note", [input.noteId]);
     await notifyBlogRevalidate(["/notes", `/notes/${input.noteId}`]);
     return { status: "success", message: "譯文已刪除", data: deleted[0] };
   });
@@ -376,6 +381,7 @@ const upsertCategoryTranslation = protectedProcedure
         target: [categoryTranslations.categoryId, categoryTranslations.locale],
         set: values,
       });
+    queueCategorySearchSync(input.categoryId);
     await notifyBlogRevalidate(["/", "/posts"]);
     return { status: "success", message: "分類譯名已儲存", data: { locale: input.locale, ...values } };
   });

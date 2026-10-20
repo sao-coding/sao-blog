@@ -1,15 +1,15 @@
-import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
+import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { eq, desc, and, inArray, sql } from "drizzle-orm";
+import { eq, desc, inArray, sql } from "drizzle-orm";
 import { categories, posts, user, tags, postTags, type TagModel } from "@sao-blog/db/schema/index";
 import z from "zod";
-import { auth } from "@sao-blog/auth";
-import { postInputSchema, PostResponseSchema, postSchema } from "@sao-blog/api/schema/post";
+import { postInputSchema, PostResponseSchema } from "@sao-blog/api/schema/post";
 import { checkMdxForSave } from "../../lib/mdx-validate";
 import { upsertSourcePostTranslation } from "../../lib/source-translation";
 import { listTranslationStatus, postTranslationProcedures } from "./translation";
 import { slugify } from "../../lib/slugify";
 import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+import { queueSearchSync } from "../../lib/search";
 
 // 管理員系統員系統
 
@@ -255,6 +255,7 @@ const createPost = protectedProcedure
             .set({ postCount: sql`${categories.postCount} + 1` })
             .where(eq(categories.id, resolvedCategoryId));
 
+        queueSearchSync("post", [createdPost.id]);
         await notifyBlogRevalidate(["/", "/posts", `/posts/${createdPost.slug}`]);
 
         return {
@@ -410,6 +411,7 @@ const updatePost = protectedProcedure
             }
         }
 
+        queueSearchSync("post", [updatedPost.id]);
         await notifyBlogRevalidate(["/", "/posts", `/posts/${updatedPost.slug}`]);
 
         return {
@@ -454,6 +456,7 @@ const deletePosts = protectedProcedure
           .where(eq(categories.id, categoryId));
       }
 
+      queueSearchSync("post", deletedPosts.map((p) => p.id));
       await notifyBlogRevalidate([
         "/",
         "/posts",

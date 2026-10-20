@@ -344,6 +344,21 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
    - 以本機測試 API（PGlite + 正式站匯入的 2 篇文章 / 3 則日記 + 測試譯文）驗證 SSR 與 client 導航
    - 未做：sitemap 列出各語言版本、RSS 多語
 6. **PR6 – 搜尋**：Typesense docker / env、`packages/search`、collection + alias、寫入時同步、`reindexAll`、搜尋 API proxy、前台 ⌘K、MCP `content_search`（依賴 PR3 的 translation 寫入路徑與 PR1 的 plainText）
+   - ✅ 已完成：`packages/api/src/lib/search/`（`query.ts` 瀏覽器可用的共用定義、`client.ts` 以 fetch 實作的最小 Typesense client、`indexer.ts` 索引 / 重建、`index.ts` env 接線）；不另開 `packages/search`、不裝 Typesense SDK
+   - Collection：**每語系一個**，前台 / API 一律查 alias `contents_zh-TW` / `contents_en` / `contents_ja`，實體名稱為 `<alias>_<毫秒時間戳>`（後台由此推得最後重建時間）。CJK：字串欄位設 Typesense 欄位層級 `locale`（zh-TW → `zh`、ja → `ja`，en 不設）
+   - 同步：`createPost` / `updatePost` / `deletePosts`、日記同理、譯文 upsert / delete、分類改名 / 譯名 / 刪除後呼叫 `queueSearchSync`（背景執行、不 await），依 DB 現況 upsert 或刪除各語系文件；失敗只記 log 與後台狀態，不阻擋存檔。舊資料沒有 `plainText` 時即時由 MDX 轉純文字
+   - `reindexAll`（依 Typesense 文件的 alias 零停機流程）：先建新 collection 並開始雙寫（期間的存檔同步同時寫新舊 collection）→ 匯入 DB 快照 → 切 alias → 刪舊；匯入有失敗則不切換並清掉新 collection。切換後再補同步期間有更新的內容（快照可能蓋掉雙寫的較新版本）
+   - 已以 Context7 查證 Typesense 29.0 文件：欄位 `locale`（`zh` 繁簡皆支援、`ja`）、import JSONL 回應（HTTP 一律 200，需逐行檢查 `success`）、`DELETE documents?filter_by=`、`PUT /aliases`、`POST /keys`（`collections` 支援 regex）、filter 字串用反引號
+   - API：`content.search`（公開，`q` / `locale` / `allLocales` / `type` / `page` / `perPage`）→ MCP `content_search`；後台 `admin.search.getStatus` / `admin.search.reindexAll`（MCP `admin_search_*`），儀表板加「搜尋索引」卡片
+   - 前台：header 搜尋鈕 + ⌘K / Ctrl+K command palette；有 `VITE_TYPESENSE_URL` + `VITE_TYPESENSE_SEARCH_KEY` 時瀏覽器直查 Typesense，否則走 API proxy；高亮以 `splitHighlight` 切段後以文字渲染（不用 innerHTML）
+   - 測試：`bun test packages/api/src/lib/search`（PGlite 套用 repo migrations + 記憶體版 Typesense client）；尚未對真實 Typesense 實測
+   - **設定（全部選填，未設定時搜尋停用、其他功能不受影響）**：
+     - `apps/server`：`TYPESENSE_HOST`、`TYPESENSE_PORT`（預設 8108）、`TYPESENSE_PROTOCOL`（`http` / `https`，預設 http）、`TYPESENSE_ADMIN_API_KEY`
+     - `apps/tan-blog`：`VITE_TYPESENSE_URL`（瀏覽器可連到的完整網址，如 `https://search.example.com`）、`VITE_TYPESENSE_SEARCH_KEY`
+     - search-only key 以 admin key 建立（只允許搜尋、只限 contents_* collection；索引內只有已發布內容，不需 filter）：
+       `curl -X POST "$TS/keys" -H "X-TYPESENSE-API-KEY: $ADMIN_KEY" -H 'Content-Type: application/json' -d '{"description":"tan-blog search-only","actions":["documents:search"],"collections":["contents_.*"]}'`，回應中的 `value` 只會顯示一次
+     - Typesense 需允許前台網域的 CORS（啟動參數 `--enable-cors`，可用 `--cors-domains` 限定）
+     - 首次設定後到後台儀表板按「重建索引」
 7. **PR7 – 清理**：drop 舊欄位、移除 runtime evaluate 相關程式碼
    - ✅ 已完成（依賴 / 死碼）：tan-blog 移除 `@mdx-js/mdx`、`gray-matter`、`@shikijs/{colorized-brackets,langs,themes}`、`rehype-katex`、`rehype-slug`、`remark-{breaks,flexible-toc,gfm,math}` 與未使用的 `src/utils/index.ts`（`calculateSomeHow` / `getSourceSomeHow`）
    - 保留：`shiki`、`@shikijs/transformers`（留言 Markdown 渲染與 `CodeBlock` 仍用）、`katex`（`styles.css` 引入 CSS）、`hast-util-to-jsx-runtime`（`CompiledMdx`）、`@types/mdx`（`MDXComponents` 型別仍用於元件表，可日後改用 `hast-util-to-jsx-runtime` 的 `Components` 型別後再移除）；`packages/api/src/lib/mdx-to-text.ts` 仍用於列表摘要

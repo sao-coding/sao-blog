@@ -120,5 +120,13 @@
   "theme_toggle": "Toggle day / night reading",
   "content_fallback_notice": "This article is not available in English yet. Showing the original.",
   "content_ai_translated": "This article was translated by AI and may contain inaccuracies.",
-  "content_available_in": "Also available in:"
+  "content_available_in": "Also available in:",
+  "search_open": "Search",
+  "search_placeholder": "Search posts and notes…",
+  "search_hint": "Type to start searching",
+  "search_loading": "Searching…",
+  "search_empty": "No results found",
+  "search_error": "Search is temporarily unavailable",
+  "search_disabled": "Search is not enabled",
+  "search_all_locales": "Search all languages"
 }

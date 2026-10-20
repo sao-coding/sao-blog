@@ -15,6 +15,7 @@ import {
   usePageScrollDirection,
 } from '@/hooks/use-page-scroll'
 import UserButton from './user-button'
+import { SearchCommand } from './search-command'
 
 /** 判斷「已滾動」的閾值（px） */
 const SCROLL_THRESHOLD = 50
@@ -100,7 +101,8 @@ const Header = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-1">
+            <SearchCommand />
             <UserButton />
           </div>
         </div>
