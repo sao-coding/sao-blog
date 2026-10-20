@@ -20,10 +20,11 @@ export default defineConfig({
     }),
     nitro({
       rollupConfig: { external: [/^@sentry\//] },
-      // /admin 轉到獨立部署的後台
+      // /admin 代理到獨立部署的後台（等同舊 mdx-blog next.config 的 rewrites，網址不變）。
+      // admin 的 router basepath / vite base 皆為 /admin，所以目的地保留 /admin 前綴。
       routeRules: {
-        '/admin': { redirect: { to: 'https://blog-admin.sao-x.com/admin' } },
-        '/admin/**': { redirect: { to: 'https://blog-admin.sao-x.com/admin/**' } },
+        '/admin': { proxy: 'https://blog-admin.sao-x.com/admin' },
+        '/admin/**': { proxy: 'https://blog-admin.sao-x.com/admin/**' },
       },
     }),
     tailwindcss(),
