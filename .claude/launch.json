@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "mdx-blog",
+      "name": "admin",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "mdx-blog", "run", "dev"],
-      "port": 3002
+      "runtimeArgs": ["--filter", "admin", "run", "dev"],
+      "port": 3003
     },
     {
       "name": "server",
