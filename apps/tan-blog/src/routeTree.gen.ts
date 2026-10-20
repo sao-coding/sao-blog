@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
+import { Route as EditorPreviewRouteImport } from './routes/editor-preview'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -32,6 +33,11 @@ import { Route as LayoutNotesTopicsSlugRouteImport } from './routes/_layout/note
 
 const LayoutRouteRoute = LayoutRouteRouteImport.update({
   id: '/_layout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorPreviewRoute = EditorPreviewRouteImport.update({
+  id: '/editor-preview',
+  path: '/editor-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -132,6 +138,7 @@ const LayoutNotesTopicsSlugRoute = LayoutNotesTopicsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof LayouthomeIndexRoute
+  '/editor-preview': typeof EditorPreviewRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/notes/topics/': typeof LayoutNotesTopicsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/editor-preview': typeof EditorPreviewRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -174,6 +182,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteRouteWithChildren
+  '/editor-preview': typeof EditorPreviewRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/editor-preview'
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/notes/topics/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/editor-preview'
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_layout'
+    | '/editor-preview'
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
@@ -262,6 +274,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   LayoutRouteRoute: typeof LayoutRouteRouteWithChildren
+  EditorPreviewRoute: typeof EditorPreviewRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof LayoutRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editor-preview': {
+      id: '/editor-preview'
+      path: '/editor-preview'
+      fullPath: '/editor-preview'
+      preLoaderRoute: typeof EditorPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -460,6 +480,7 @@ const LayoutRouteRouteWithChildren = LayoutRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRouteRoute: LayoutRouteRouteWithChildren,
+  EditorPreviewRoute: EditorPreviewRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
