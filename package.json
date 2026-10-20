@@ -30,7 +30,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.5.10",
     "@sao-blog/config": "workspace:*",
     "@types/bun": "catalog:",
     "husky": "^9.1.7",
