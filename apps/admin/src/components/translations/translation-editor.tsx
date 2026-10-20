@@ -200,14 +200,12 @@ export function TranslationEditor({ kind, ownerId, locale }: TranslationEditorPr
         {showSource && (
           <div className="overflow-hidden rounded-lg border">
             <p className="border-b bg-muted px-3 py-1.5 text-xs text-muted-foreground">原文（唯讀）</p>
-            <MonacoEditor
-              value={source?.content ?? ''}
-              onChange={() => {}}
-              language="markdown"
-              height={isMobile ? '300px' : '650px'}
-              showToolbar={false}
-              options={{ readOnly: true }}
-            />
+            <pre
+              className="overflow-auto whitespace-pre-wrap break-words bg-muted/30 p-3 font-mono text-xs leading-relaxed"
+              style={{ height: isMobile ? '300px' : '700px' }}
+            >
+              {source?.content ?? ''}
+            </pre>
           </div>
         )}
         <div className="overflow-hidden rounded-lg">
