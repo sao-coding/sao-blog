@@ -7,7 +7,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-} from '@/components/ui/carousel'
+} from '@sao-blog/ui/components/carousel'
 import { cn } from '@/lib/utils'
 
 export interface MdxSlideProps {

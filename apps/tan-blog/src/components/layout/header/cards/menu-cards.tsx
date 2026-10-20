@@ -10,7 +10,7 @@ import { Inbox } from 'lucide-react'
 
 import { orpc, type client } from '@/lib/orpc'
 import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
 import type { NavCard } from '@/config/menu'
 import { SOCIAL_LINKS } from '@/config/menu'
 import {

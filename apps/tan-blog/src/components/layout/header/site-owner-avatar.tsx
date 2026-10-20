@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@sao-blog/ui/components/avatar";
 import { Link } from "@tanstack/react-router";
 
 const SiteOwnerAvatar = () => {

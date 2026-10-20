@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { PlayIcon, RotateCcwIcon, SquareIcon, TerminalIcon } from 'lucide-react'
 import type { PlaygroundLang, PlaygroundTemplate } from '@sao-blog/mdx/registry'
-import { Button } from '@/components/ui/button'
+import { Button } from '@sao-blog/ui/components/button'
 import { useTheme } from '@/components/theme-provider'
 import { cn } from '@/lib/utils'
 import {

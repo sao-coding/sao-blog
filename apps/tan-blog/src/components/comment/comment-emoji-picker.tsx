@@ -13,7 +13,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { useTheme } from '@/components/theme-provider'
 import { SmileIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@sao-blog/ui/components/button'
 // NOTE: mdx-blog imports the zh-hant locale data here but never wires it to
 // <EmojiPicker>; carried over unused-import bug removed for tan-blog's
 // stricter noUnusedLocals. Original source: apps/mdx-blog's copy of this file.

@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useInView } from 'motion/react'
 import { LockIcon, MessageCircleIcon } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@sao-blog/ui/components/toast'
 import { useLocation } from '@tanstack/react-router'
 
 import type { CommentSortOrder, FlatComment } from '@/types/comment'
@@ -11,7 +11,7 @@ import type { CommentFormValues } from '@/schemas/comment'
 import { orpc } from '@/lib/orpc'
 import { authClient } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Button } from '@sao-blog/ui/components/button'
 import { countCommentsAndReplies } from './constants'
 import { CommentForm } from './comment-form'
 import { CommentList } from './comment-list'
@@ -71,9 +71,9 @@ function CommentSectionContent({ postId }: { postId: string }) {
     orpc.comment.createComment.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey })
-        toast.success('留言已送出！')
+        toast.add({ title: '留言已送出！', type: 'success' })
       },
-      onError: () => toast.error('送出失敗，請稍後再試'),
+      onError: () => toast.add({ title: '送出失敗，請稍後再試', type: 'error' }),
     })
   )
 
@@ -132,7 +132,7 @@ function CommentSectionContent({ postId }: { postId: string }) {
       if (context?.previousData !== undefined) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
-      toast.error('操作失敗，請稍後再試')
+      toast.add({ title: '操作失敗，請稍後再試', type: 'error' })
     },
 
     onSettled: () => {

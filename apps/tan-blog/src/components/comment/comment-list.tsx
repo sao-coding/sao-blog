@@ -5,7 +5,7 @@ import { ArrowUpDownIcon, ClockIcon, HistoryIcon } from 'lucide-react'
 
 import type { Comment, CommentSortOrder } from '@/types/comment'  // ✅ 移除 VoteType
 import type { CommentFormValues } from '@/schemas/comment'
-import { Button } from '@/components/ui/button'
+import { Button } from '@sao-blog/ui/components/button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuGroup,
-} from '@/components/ui/dropdown-menu'
+} from '@sao-blog/ui/components/dropdown-menu'
 import { CommentItem } from './comment-item'
 import { m } from '#/paraglide/messages'
 

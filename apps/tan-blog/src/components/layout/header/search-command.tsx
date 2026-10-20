@@ -21,8 +21,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command'
-import { Button } from '@/components/ui/button'
+} from '@sao-blog/ui/components/command'
+import { Button } from '@sao-blog/ui/components/button'
 import { client } from '@/lib/orpc'
 import {
   currentContentLocale,

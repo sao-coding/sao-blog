@@ -8,7 +8,7 @@ import HeaderTitle from './header-title'
 import { useIsMobile } from '@/hooks/use-mobile'
 import {
   Drawer,
-} from '@/components/ui/drawer'
+} from '@sao-blog/ui/components/drawer'
 import MobileMenu from './mobile-menu'
 import {
   usePageScrollLocation,

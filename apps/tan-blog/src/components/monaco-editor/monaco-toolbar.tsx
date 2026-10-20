@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@sao-blog/ui/components/button'
+import { Separator } from '@sao-blog/ui/components/separator'
 import {
   Bold,
   Italic,

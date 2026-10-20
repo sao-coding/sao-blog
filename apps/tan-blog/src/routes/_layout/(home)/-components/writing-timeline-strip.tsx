@@ -8,7 +8,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '@/components/ui/hover-card'
+} from '@sao-blog/ui/components/hover-card'
 
 type HomeData = InferClientOutputs<typeof client>['home']['getHome']['data']
 type TimelineData = HomeData['timeline']

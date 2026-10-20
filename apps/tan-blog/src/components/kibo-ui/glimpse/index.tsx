@@ -6,7 +6,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '@/components/ui/hover-card'
+} from '@sao-blog/ui/components/hover-card'
 
 export type GlimpseProps = ComponentProps<typeof HoverCard>
 

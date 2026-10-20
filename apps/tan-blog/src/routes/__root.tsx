@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
+import { Toaster } from '@sao-blog/ui/components/toast'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '../components/theme-provider'
 import { getSolarTerm, seasonInitScript } from '../lib/season'
 import { SEASON_ACCENTS, TERM_THEMES } from '../lib/term-themes'
@@ -119,8 +120,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere]">
         <ThemeProvider>
-          {children}
-          <div aria-hidden className="cloud-sea" />
+          <Toaster>
+            {children}
+            <div aria-hidden className="cloud-sea" />
+          </Toaster>
         </ThemeProvider>
         <TanStackDevtools
           config={{

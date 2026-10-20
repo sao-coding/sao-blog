@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@sao-blog/ui/components/select'
 
 type Locale = (typeof locales)[number]
 

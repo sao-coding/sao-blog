@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@sao-blog/ui/components/tooltip'
 import { env } from '@sao-blog/env/tan-blog'
 
 // Types

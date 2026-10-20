@@ -5,7 +5,7 @@ import { getServerSession } from '@/lib/get-session'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { LoginForm } from './-components/login-form'
-import Loading from '@/components/ui/loading'
+import Loading from '@/components/loading'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),

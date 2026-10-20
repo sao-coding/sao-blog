@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { CheckIcon, ChevronDownIcon, CopyIcon, FileCode2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import { toast } from '@sao-blog/ui/components/toast'
+import { Button } from '@sao-blog/ui/components/button'
 import { cn } from '@/lib/utils'
 
 // 超過這個行數就預設收合，避免長程式碼把文章版面撐爆
@@ -50,10 +50,10 @@ export function CodeBlockHeader({
     try {
       await navigator.clipboard.writeText(codeText)
       setCopied(true)
-      toast.success('已複製程式碼')
+      toast.add({ title: '已複製程式碼', type: 'success' })
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error('複製失敗')
+      toast.add({ title: '複製失敗', type: 'error' })
     }
   }
 

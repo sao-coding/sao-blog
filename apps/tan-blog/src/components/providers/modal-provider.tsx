@@ -9,14 +9,14 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@sao-blog/ui/components/dialog"
 import {
   Drawer,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-} from "@/components/ui/drawer"
+} from "@sao-blog/ui/components/drawer"
 import type { OverlayItem, OverlayType } from "@/store/modal-store"
 import { useModalStackStore } from "@/store/modal-store"
 
@@ -63,7 +63,15 @@ const OverlayDialog = ({ item, zIndex }: { item: OverlayItem; zIndex: number }) 
   )
 }
 
-const OverlayDrawer = ({ item, zIndex }: { item: OverlayItem; zIndex: number }) => {
+// modal-store 沿用 top/bottom/left/right，轉成 base-ui 的滑動方向
+const SWIPE_DIRECTION = {
+  top: "up",
+  bottom: "down",
+  left: "left",
+  right: "right",
+} as const
+
+const OverlayDrawer =({ item, zIndex }: { item: OverlayItem; zIndex: number }) => {
   const dismiss = useModalStackStore((state) => state.dismiss)
   const close = useCallback(() => {
     dismiss(item.id)
@@ -73,7 +81,7 @@ const OverlayDrawer = ({ item, zIndex }: { item: OverlayItem; zIndex: number }) 
   if (item.kind !== "drawer") return null
 
   return (
-    <Drawer direction={item.direction} open onOpenChange={(next) => !next && close()}>
+    <Drawer swipeDirection={SWIPE_DIRECTION[item.direction ?? "bottom"]} open onOpenChange={(next) => !next && close()}>
       <DrawerContent className={cn(item.className)} style={{ zIndex }}>
         {(item.title || item.description) && (
           <DrawerHeader>

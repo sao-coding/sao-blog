@@ -7,15 +7,15 @@ import { useCallback, useMemo } from 'react'
 
 import { ErrorComponent } from '@/components/index'
 import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
-import { Button } from '@/components/ui/button'
+import { Button } from '@sao-blog/ui/components/button'
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@sao-blog/ui/components/dialog'
+import { Skeleton } from '@sao-blog/ui/components/skeleton'
 import { getArticlePreview } from './preview-action'
 import { parseGoTo, removeGoToUrl } from './preview-url'
 

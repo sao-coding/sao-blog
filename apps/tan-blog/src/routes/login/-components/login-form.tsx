@@ -1,18 +1,18 @@
 import React, { useState } from 'react'
 import { useSearch } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Button } from '@sao-blog/ui/components/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@sao-blog/ui/components/card'
+import { Input } from '@sao-blog/ui/components/input'
+import { Label } from '@sao-blog/ui/components/label'
 import { authClient } from '@/lib/auth-client'
-import { toast } from 'sonner'
+import { toast } from '@sao-blog/ui/components/toast'
 import { Loader2Icon } from 'lucide-react'
 import { m } from '#/paraglide/messages'
 
@@ -37,9 +37,9 @@ export function LoginForm({
       password: loginData.password,
     })
     if (error) {
-      toast.error(error.message || m.login_failed())
+      toast.add({ title: error.message || m.login_failed(), type: 'error' })
     } else {
-      toast.success(m.login_success())
+      toast.add({ title: m.login_success(), type: 'success' })
       // redirect 目標可能是本站路徑，也可能是 admin app 的完整網址（跨 origin），
       // 用 window.location 而非 router navigate 才能涵蓋兩種情況。
       window.location.href = search.redirect ?? '/admin'

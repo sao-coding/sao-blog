@@ -6,7 +6,7 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-} from '@/components/ui/tabs'
+} from '@sao-blog/ui/components/tabs'
 import { cn } from '@/lib/utils'
 
 export interface MdxTabProps {

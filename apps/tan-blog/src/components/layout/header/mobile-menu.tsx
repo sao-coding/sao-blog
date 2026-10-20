@@ -7,7 +7,7 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from '@/components/ui/drawer'
+} from '@sao-blog/ui/components/drawer'
 import { getNavLinks } from '@/config/menu'
 import { orpc } from '@/lib/orpc'
 import { SITE_NAME } from '@/lib/seo'
@@ -39,19 +39,16 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
 
     return (
         <div className="relative flex size-full items-center justify-center lg:hidden">
-            <DrawerTrigger asChild>
+            <DrawerTrigger render={
                 <button
                     aria-label={m.mobile_menu_open()}
                     className="flex items-center justify-center size-9 rounded-full text-foreground/80 hover:text-foreground hover:bg-foreground/10 transition-all duration-200"
                 >
                     <MenuIcon className="size-5" />
                 </button>
-            </DrawerTrigger>
+            } />
 
-            <DrawerContent
-                className="!rounded-none !border-0 !outline-none !shadow-none"
-                style={{ background: '#111110' }}
-            >
+            <DrawerContent>
                 <VisuallyHidden.Root>
                     <DrawerHeader>
                         <DrawerTitle>{m.mobile_menu_title()}</DrawerTitle>
@@ -69,14 +66,14 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                     >
                         {SITE_NAME}
                     </span>
-                    <DrawerClose asChild>
+                    <DrawerClose render={
                         <button
                             aria-label={m.mobile_menu_close()}
                             className="flex items-center justify-center size-7 rounded-full text-foreground/40 hover:text-foreground/75 hover:bg-foreground/10 transition-all duration-200"
                         >
                             <X className="size-3.5" />
                         </button>
-                    </DrawerClose>
+                    } />
                 </div>
 
                 {/* 主導航 */}
@@ -95,14 +92,14 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                     return (
                                         <div key={index} className="flex items-center min-h-12 px-5">
                                             {link.href ? (
-                                                <DrawerClose asChild>
+                                                <DrawerClose render={
                                                     <Link
                                                         to={link.href}
                                                         className="flex-1 text-base text-foreground/70 hover:text-foreground tracking-wide transition-colors duration-150"
                                                     >
                                                         {link.text}
                                                     </Link>
-                                                </DrawerClose>
+                                                } />
                                             ) : (
                                                 <span className="flex-1 text-base text-foreground/70 tracking-wide">
                                                     {link.text}
@@ -123,14 +120,14 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                         <AccordionPrimitive.Header className="flex items-center">
                                             {/* 左側：點擊導航（若有 href） */}
                                             {link.href ? (
-                                                <DrawerClose asChild>
+                                                <DrawerClose render={
                                                     <Link
                                                         to={link.href}
                                                         className="flex-1 flex items-center min-h-12 px-5 text-base text-foreground/70 hover:text-foreground tracking-wide transition-colors duration-150"
                                                     >
                                                         {link.text}
                                                     </Link>
-                                                </DrawerClose>
+                                                } />
                                             ) : (
                                                 <span className="flex-1 flex items-center min-h-12 px-5 text-base text-foreground/70 tracking-wide">
                                                     {link.text}
@@ -151,7 +148,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                         <AccordionPrimitive.Panel className="overflow-hidden data-open:animate-accordion-down data-closed:animate-accordion-up">
                                             <div className="flex flex-col pb-1.5">
                                                 {visibleChildren.map((child, childIndex) => (
-                                                    <DrawerClose asChild key={childIndex}>
+                                                    <DrawerClose key={childIndex} render={
                                                         <Link
                                                             to={child.href}
                                                             className="flex items-center pl-9 pr-5 min-h-10 text-base text-foreground/40 hover:text-foreground/70 transition-colors duration-150"
@@ -159,7 +156,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                                             <span className="w-3 h-px bg-foreground/20 mr-3 shrink-0" />
                                                             {child.text}
                                                         </Link>
-                                                    </DrawerClose>
+                                                    } />
                                                 ))}
                                             </div>
                                         </AccordionPrimitive.Panel>
@@ -179,14 +176,14 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                 {moreLinks.children
                                     .filter(child => child.show)
                                     .map((child, index) => (
-                                        <DrawerClose asChild key={index}>
+                                        <DrawerClose key={index} render={
                                             <Link
                                                 to={child.href}
                                                 className="text-base text-foreground/40 hover:text-foreground/70 tracking-wide transition-colors duration-150"
                                             >
                                                 {child.text}
                                             </Link>
-                                        </DrawerClose>
+                                        } />
                                     ))}
                             </div>
                         </div>
@@ -195,14 +192,14 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
 
                 {/* 底部 — 讀者登錄 */}
                 <div className="flex justify-end px-5 py-3 border-t border-border">
-                    <DrawerClose asChild>
+                    <DrawerClose render={
                         <Link
                             to="/login"
                             className="text-xs text-red-500 hover:text-red-400 tracking-widest transition-colors duration-150"
                         >
                             {m.reader_login()}
                         </Link>
-                    </DrawerClose>
+                    } />
                 </div>
             </DrawerContent>
         </div>

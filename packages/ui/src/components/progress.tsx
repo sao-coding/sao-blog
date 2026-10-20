@@ -1,6 +1,7 @@
-import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
+"use client"
 
-import { cn } from "@sao-blog/ui/lib/utils"
+import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
+import { cn } from "cn"
 
 function Progress({
   className,

@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { toast } from '@sao-blog/ui/components/toast'
 import {
   ArrowLeft,
   ArrowRight,
@@ -28,7 +28,7 @@ import {
   ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from '@/components/ui/context-menu'
+} from '@sao-blog/ui/components/context-menu'
 import { orpc } from '@/lib/orpc'
 import { springScrollToTop } from '@/hooks/use-page-scroll'
 import { currentContentLocale } from '@/lib/content-locale'
@@ -80,7 +80,7 @@ export function SiteContextMenuProvider({
   const handleRandomPost = useCallback(() => {
     const posts = postsData?.status === 'success' ? postsData.data : null
     if (!posts || posts.length === 0) {
-      toast.error('文章資料載入中，請再試一次')
+      toast.add({ title: '文章資料載入中，請再試一次', type: 'error' })
       return
     }
     const post = posts[Math.floor(Math.random() * posts.length)]

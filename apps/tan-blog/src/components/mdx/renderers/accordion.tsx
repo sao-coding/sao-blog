@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '@/components/ui/accordion'
+} from '@sao-blog/ui/components/accordion'
 import { cn } from '@/lib/utils'
 
 export interface MdxAccordionItemProps {

@@ -3,7 +3,7 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@sao-blog/ui/components/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +12,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+} from "@sao-blog/ui/components/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
+import { Button } from '@sao-blog/ui/components/button'
 import { SITE_OWNER } from '@/config/mega-menu'
 import { IconBrandGithub, IconBrandGoogle, IconUserBolt } from '@tabler/icons-react'
 import { authClient } from "@/lib/auth-client"
