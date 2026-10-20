@@ -6,7 +6,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**"],
-      "env": ["REVALIDATE_SECRET"]
+      "env": ["REVALIDATE_SECRET", "VITE_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
