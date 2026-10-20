@@ -17,7 +17,7 @@ function BlogLayout() {
       {/* AdminShortcutProvider 需要 /login route 已就緒（Phase 5 完成），
           按 "." 快捷鍵會導到 /login?redirect=... 或直接進對應的 admin 編輯頁。 */}
       <AdminShortcutProvider>
-        <div className="pt-[4.5rem] fill-content px-4 md:px-0">
+        <div className="pt-[4.5rem] fill-content">
           <Outlet />
         </div>
       </AdminShortcutProvider>

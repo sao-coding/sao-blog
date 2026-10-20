@@ -61,7 +61,7 @@ function NoteDetailPage() {
 
   return (
     // 比照 innei.in 日記頁：日記卡片 778px 置中，左（其他日記）右（目錄）側欄放在兩旁
-    <div className="mx-auto mt-12 grid w-full max-w-[778px] gap-4 xl:max-w-[calc(778px+400px)] xl:grid-cols-[1fr_minmax(0,778px)_1fr]">
+    <div className="mx-auto mt-12 grid w-full max-w-[778px] px-4 md:px-0 gap-4 xl:max-w-[calc(778px+400px)] xl:grid-cols-[1fr_minmax(0,778px)_1fr]">
       <NoteLeftSidebar className="relative hidden min-w-0 xl:block" />
       <NoteClientPage
         note={{
