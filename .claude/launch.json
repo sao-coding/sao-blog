@@ -12,6 +12,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "server", "run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "tan-blog",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "tan-blog", "run", "dev"],
+      "port": 3004
     }
   ]
 }

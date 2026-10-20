@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createApiResponseSchema } from "./api";
+import { compiledShape, localizedMetaShape } from "./i18n";
 
 export const noteSchema = z.object({
     id: z.string(),
@@ -15,6 +16,8 @@ export const noteSchema = z.object({
     topicId: z.string().nullable(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    ...localizedMetaShape,
+    ...compiledShape,
 });
 
 export const noteInputSchema = z.object({

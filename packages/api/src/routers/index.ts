@@ -17,9 +17,12 @@ import adminDashboardRouter from "./admin/dashboard";
 import adminThinkingRouter from "./admin/thinking";
 import adminStorageConfigRouter from "./admin/storage-config";
 import adminFileRouter from "./admin/file";
+import adminContentRouter from "./admin/content";
 import linkPreviewRouter from "./link-preview";
 import topicRouter from "./topic";
 import menuRouter from "./menu";
+import contentRouter from "./content";
+import adminSearchRouter from "./admin/search";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -40,6 +43,7 @@ export const appRouter = {
   linkPreview: linkPreviewRouter,
   topic: topicRouter,
   menu: menuRouter,
+  content: contentRouter,
   admin: adminProcedure.prefix('/admin').router({
     post: adminPostRouter,
     category: adminCategoryRouter,
@@ -51,6 +55,8 @@ export const appRouter = {
     thinking: adminThinkingRouter,
     storageConfig: adminStorageConfigRouter,
     file: adminFileRouter,
+    content: adminContentRouter,
+    search: adminSearchRouter,
   })
 };
 export type AppRouter = typeof appRouter;

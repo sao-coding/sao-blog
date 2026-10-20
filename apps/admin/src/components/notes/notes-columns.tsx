@@ -5,6 +5,7 @@ import { Badge } from '@sao-blog/ui/components/badge'
 import { Checkbox } from '@sao-blog/ui/components/checkbox'
 import { cn } from '@sao-blog/ui/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
+import { TranslationBadges } from '@/components/translations/translation-badges'
 import { Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { moodMap, weatherMap } from '@/config/note'
@@ -134,6 +135,13 @@ export const columns: ColumnDef<Notes[number]>[] = [
         </div>
       )
     },
+  },
+  {
+    id: 'translations',
+    header: () => <span className="text-xs">語言</span>,
+    enableSorting: false,
+    // 各語言版本狀態：綠 已發布／灰 草稿／琥珀 原文改過譯文過期／虛線 尚無
+    cell: ({ row }) => <TranslationBadges translations={row.original.translations} />,
   },
   {
     accessorKey: 'createdAt',

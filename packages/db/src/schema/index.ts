@@ -6,18 +6,26 @@ import {
   varchar,
   boolean,
   integer,
-  serial,
-  json,
   timestamp,
   primaryKey,
   index,
   text,
   uuid,
   pgEnum,
+  jsonb,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import type { InferSelectModel } from 'drizzle-orm'
 import { v7 as uuidv7 } from 'uuid'
+
+// 內容語系（DB 為單一來源；tan-blog 的 Paraglide 以 zh-Hant 對應 zh-TW）
+export const SUPPORTED_LOCALES = ['zh-TW', 'en', 'ja'] as const
+export type Locale = (typeof SUPPORTED_LOCALES)[number]
+export const DEFAULT_LOCALE: Locale = 'zh-TW'
+export const localeEnum = pgEnum('locale', SUPPORTED_LOCALES)
+// 譯文來源：人工 / AI
+export const translationSourceEnum = pgEnum('translation_source', ['human', 'ai'])
 
 // 分類表
 export const categories = pgTable(
@@ -136,6 +144,9 @@ export const posts = pgTable(
     // 允許留言
     allowComments: boolean('allow_comments').default(true).notNull(),
 
+    // 原文語系（post_translations 中 isSource 的那筆）
+    defaultLocale: localeEnum('default_locale').notNull().default('zh-TW'),
+
     // 時間戳
     createdAt: timestamp('created_at', { withTimezone: true })
       .$defaultFn(() => new Date())
@@ -227,6 +238,8 @@ export const notes = pgTable('notes', {
   topicId: uuid('topic_id').references(() => topics.id, {
     onDelete: 'set null',
   }),
+  // 原文語系（note_translations 中 isSource 的那筆）
+  defaultLocale: localeEnum('default_locale').notNull().default('zh-TW'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
@@ -241,6 +254,109 @@ export const notes = pgTable('notes', {
   index('notes_author_idx').on(table.authorId),
   index('notes_topic_idx').on(table.topicId),
 ])
+
+// ─── 多語言內容 ─────────────────────────────────────────────────────────────
+// 每篇文章 / 日記的每個語言版本一筆。isSource 那筆是原文（locale = 主表 defaultLocale）。
+// - content：MDX 原文（source of truth）
+// - compiled / toc / plainText / readingTime：@sao-blog/mdx 的編譯結果（compiled 為 { v, tree } hast JSON）
+// - compiledHash：compiled 對應的 content sha256，不等於目前 content 的 hash 即需重編
+// - sourceHash：翻譯當下原文 content 的 sha256（原文為自身 hash），與原文目前 hash 不同 → 譯文過期
+
+export const postTranslations = pgTable(
+  'post_translations',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => posts.id, { onDelete: 'cascade' }),
+    locale: localeEnum('locale').notNull(),
+    title: varchar('title', { length: 512 }).notNull(),
+    summary: text('summary'),
+    content: text('content').notNull(),
+    compiled: jsonb('compiled'),
+    toc: jsonb('toc'),
+    plainText: text('plain_text'),
+    readingTime: integer('reading_time'),
+    // 該語言版本是否發布；前台可見 = posts.status 與此欄皆為 published
+    status: postStatusEnum('status').notNull().default('draft'),
+    isSource: boolean('is_source').notNull().default(false),
+    translatedBy: translationSourceEnum('translated_by').notNull().default('human'),
+    sourceHash: varchar('source_hash', { length: 64 }),
+    compiledHash: varchar('compiled_hash', { length: 64 }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('post_translations_post_locale_uidx').on(table.postId, table.locale),
+    index('post_translations_locale_status_idx').on(table.locale, table.status),
+  ]
+)
+
+export const noteTranslations = pgTable(
+  'note_translations',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    noteId: uuid('note_id')
+      .notNull()
+      .references(() => notes.id, { onDelete: 'cascade' }),
+    locale: localeEnum('locale').notNull(),
+    title: varchar('title', { length: 256 }).notNull(),
+    content: text('content').notNull(),
+    compiled: jsonb('compiled'),
+    toc: jsonb('toc'),
+    plainText: text('plain_text'),
+    readingTime: integer('reading_time'),
+    // mood / weather 是固定選項值（UI 標籤由 Paraglide 翻譯），留在 notes 主表
+    status: boolean('status').notNull().default(false), // true: published
+    isSource: boolean('is_source').notNull().default(false),
+    translatedBy: translationSourceEnum('translated_by').notNull().default('human'),
+    sourceHash: varchar('source_hash', { length: 64 }),
+    compiledHash: varchar('compiled_hash', { length: 64 }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('note_translations_note_locale_uidx').on(table.noteId, table.locale),
+    index('note_translations_locale_status_idx').on(table.locale, table.status),
+  ]
+)
+
+// 分類名稱翻譯；categories.name 保留為原文名（後台顯示、unique 檢查），前台讀翻譯、fallback 到原文
+export const categoryTranslations = pgTable(
+  'category_translations',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    categoryId: uuid('category_id')
+      .notNull()
+      .references(() => categories.id, { onDelete: 'cascade' }),
+    locale: localeEnum('locale').notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: text('description'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('category_translations_category_locale_uidx').on(table.categoryId, table.locale),
+  ]
+)
 
 // 想法（隨手記錄當下的心情、碎碎念）
 export const thinkings = pgTable(
@@ -584,6 +700,7 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
     relationName: 'categories_self',
   }),
   posts: many(posts),
+  translations: many(categoryTranslations),
 }))
 
 export const tagsRelations = relations(tags, ({ many }) => ({
@@ -600,6 +717,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
     references: [categories.id],
   }),
   postTags: many(postTags),
+  translations: many(postTranslations),
 }))
 
 export const postTagsRelations = relations(postTags, ({ one }) => ({
@@ -628,6 +746,31 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   }),
 }))
 
+export const postTranslationsRelations = relations(postTranslations, ({ one }) => ({
+  post: one(posts, {
+    fields: [postTranslations.postId],
+    references: [posts.id],
+  }),
+}))
+
+export const notesRelations = relations(notes, ({ many }) => ({
+  translations: many(noteTranslations),
+}))
+
+export const noteTranslationsRelations = relations(noteTranslations, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteTranslations.noteId],
+    references: [notes.id],
+  }),
+}))
+
+export const categoryTranslationsRelations = relations(categoryTranslations, ({ one }) => ({
+  category: one(categories, {
+    fields: [categoryTranslations.categoryId],
+    references: [categories.id],
+  }),
+}))
+
 // Convenience exported select-model types so other packages can import them directly
 export type PostModel = InferSelectModel<typeof posts>
 export type CategoryModel = InferSelectModel<typeof categories>
@@ -635,3 +778,6 @@ export type TagModel = InferSelectModel<typeof tags>
 export type UserModel = InferSelectModel<typeof user>
 export type StorageConfigModel = InferSelectModel<typeof storageConfigs>
 export type FileModel = InferSelectModel<typeof files>
+export type PostTranslationModel = InferSelectModel<typeof postTranslations>
+export type NoteTranslationModel = InferSelectModel<typeof noteTranslations>
+export type CategoryTranslationModel = InferSelectModel<typeof categoryTranslations>

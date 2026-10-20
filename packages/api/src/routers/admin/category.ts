@@ -1,7 +1,10 @@
 import { protectedProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
 import { eq, desc } from "drizzle-orm";
-import { categories } from "@sao-blog/db/schema/index";
+import { categories, DEFAULT_LOCALE, posts } from "@sao-blog/db/schema/index";
+import { queueCategorySearchSync, queueSearchSync } from "../../lib/search";
+import { upsertCategoryTranslation } from "../../lib/source-translation";
+import { categoryTranslationProcedures } from "./translation";
 import z from "zod";
 import { categoryInputSchema } from "@sao-blog/api/schema/category";
 
@@ -80,6 +83,16 @@ const createCategory = protectedProcedure
             })
             .returning();
 
+        // 雙寫原文語系的分類翻譯（categories.name 仍為讀取來源）
+        if (row) {
+            await upsertCategoryTranslation({
+                categoryId: row.id,
+                locale: DEFAULT_LOCALE,
+                name,
+                description: description ?? null,
+            });
+        }
+
         return {
             status: "success",
             message: "分類創建成功",
@@ -112,6 +125,14 @@ const updateCategory = protectedProcedure
             }
         }
 
+        await upsertCategoryTranslation({
+            categoryId: row.id,
+            locale: DEFAULT_LOCALE,
+            name,
+            description: description ?? null,
+        });
+        queueCategorySearchSync(row.id);
+
         return {
             status: "success",
             message: "分類更新成功",
@@ -127,6 +148,9 @@ const deleteCategory = protectedProcedure
     .handler(async ({ input }) => {
         const { id } = input;
 
+        // 刪除後文章的 categoryId 會被清空，先記下受影響文章以便重新索引
+        const affectedPosts = await db.select({ id: posts.id }).from(posts).where(eq(posts.categoryId, id));
+
         // 直接刪除分類，底下文章的 categoryId 會由 FK（onDelete: set null）自動設為未分類
         const [row] = await db
             .delete(categories)
@@ -141,6 +165,8 @@ const deleteCategory = protectedProcedure
             }
         }
 
+        queueSearchSync("post", affectedPosts.map((p) => p.id));
+
         return {
             status: "success",
             message: "分類刪除成功",
@@ -154,5 +180,6 @@ export default {
     getCategory,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    ...categoryTranslationProcedures,
 }

@@ -5,6 +5,8 @@ import { eq, desc, and } from "drizzle-orm";
 import z from "zod";
 import { toIso } from "../lib/datetime";
 import { TopicListResponseSchema, TopicWithNotesResponseSchema } from "../schema/topic";
+import { localizedTitles } from "../lib/i18n";
+import { localeInput } from "../schema/i18n";
 
 const getTopics = publicProcedure
     .route({ method: "GET", path: "/topics" })
@@ -30,7 +32,7 @@ const getTopics = publicProcedure
 
 const getTopicBySlug = publicProcedure
     .route({ method: "GET", path: "/topics/{slug}" })
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ slug: z.string(), ...localeInput }))
     .output(TopicWithNotesResponseSchema)
     .handler(async ({ input }) => {
         const [topic] = await db
@@ -60,6 +62,9 @@ const getTopicBySlug = publicProcedure
             .where(and(eq(notes.topicId, topic.id), eq(notes.status, true)))
             .orderBy(desc(notes.createdAt));
 
+        // 日記標題疊上請求語系（無譯文時沿用原文）
+        const titles = await localizedTitles("note", noteRows.map((n) => n.id), input.locale);
+
         return {
             status: "success",
             message: "專欄取得成功",
@@ -73,7 +78,7 @@ const getTopicBySlug = publicProcedure
                 },
                 notes: noteRows.map((n) => ({
                     id: n.id,
-                    title: n.title,
+                    title: titles.get(n.id) ?? n.title,
                     mood: n.mood,
                     weather: n.weather,
                     createdAt: toIso(n.createdAt),

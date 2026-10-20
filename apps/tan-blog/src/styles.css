@@ -1,0 +1,1058 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@import 'tw-animate-css';
+@import 'katex/dist/katex.min.css';
+/* 霞鶩文楷 TC：Fontsource 依 unicode-range 分包，頁面只會下載實際用到的字 */
+@import '@fontsource/lxgw-wenkai-tc/400.css';
+@import '@fontsource/lxgw-wenkai-tc/700.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-wenkai: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-neutral-10: var(--foreground);
+  --color-jade: var(--jade);
+  --color-season: var(--season);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-timeline-line: var(--timeline-line);
+  --color-timeline-dot: var(--timeline-dot);
+  --color-timeline-date: var(--timeline-date);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+}
+
+:root {
+  /* ── 四季信箋（預設・晝）───────────────────────────────────────────────
+   * 宣紙色底、墨色字、朱紅點綴（連結、目前位置、印章、格線）。
+   * 紙色依季節微微偏色：--paper-h / --paper-c 定義在各 [data-season] 區塊。
+   * 深色「夜讀」模式見下方 .dark。
+   */
+  --paper-h: 80;
+  --paper-c: 0.014;
+  --zhu: oklch(0.53 0.16 32); /* 朱 */
+  --ink: var(--zhu);
+  --ink-soft: color-mix(in oklch, var(--zhu) 9%, transparent);
+  --rule: oklch(0.32 0.02 60 / 0.16);
+  --jade: oklch(0.5 0.06 190);
+  --background: oklch(0.955 var(--paper-c) var(--paper-h));
+  --foreground: oklch(0.27 0.015 60);
+  --card: oklch(0.975 calc(var(--paper-c) * 0.7) var(--paper-h));
+  --card-foreground: oklch(0.27 0.015 60);
+  --popover: oklch(0.975 calc(var(--paper-c) * 0.7) var(--paper-h));
+  --popover-foreground: oklch(0.27 0.015 60);
+  --primary: var(--zhu);
+  --primary-foreground: oklch(0.97 0.015 85);
+  --secondary: oklch(0.92 var(--paper-c) var(--paper-h));
+  --secondary-foreground: oklch(0.27 0.015 60);
+  --muted: oklch(0.92 var(--paper-c) var(--paper-h));
+  --muted-foreground: oklch(0.48 0.015 60);
+  --accent: oklch(0.91 calc(var(--paper-c) + 0.01) var(--paper-h));
+  --accent-foreground: oklch(0.27 0.015 60);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.32 0.02 60 / 14%);
+  --input: oklch(0.32 0.02 60 / 18%);
+  --ring: color-mix(in oklch, var(--zhu) 55%, transparent);
+  --chart-1: oklch(0.53 0.16 32);
+  --chart-2: oklch(0.5 0.06 190);
+  --chart-3: oklch(0.6 0.12 70);
+  --chart-4: oklch(0.55 0.09 150);
+  --chart-5: oklch(0.6 0.1 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.975 calc(var(--paper-c) * 0.7) var(--paper-h));
+  --sidebar-foreground: oklch(0.27 0.015 60);
+  --sidebar-primary: var(--zhu);
+  --sidebar-primary-foreground: oklch(0.97 0.015 85);
+  --sidebar-accent: oklch(0.91 calc(var(--paper-c) + 0.01) var(--paper-h));
+  --sidebar-accent-foreground: oklch(0.27 0.015 60);
+  --sidebar-border: oklch(0.32 0.02 60 / 14%);
+  --sidebar-ring: color-mix(in oklch, var(--zhu) 55%, transparent);
+  --timeline-line: oklch(0.32 0.02 60 / 0.18);
+  --timeline-dot: var(--zhu);
+  --timeline-date: oklch(0.48 0.015 60);
+  --selection-background-color-lightness: 40%;
+  --selection-color-lightness: 30%;
+}
+
+/* ── 玄方・四季主題 ───────────────────────────────────────────────────────
+ * 「一地看盡四季」：每個季節是一整套主題——夜空底色、主色、雲的顏色、天際線微光
+ * 都會換，並搭配 SeasonParticles 的飄落物（桃瓣／螢火／楓葉／雪）。
+ * 季節由 <html data-season> 決定（伺服器依二十四節氣寫入，訪客可在頁尾預覽其他季節）。
+ *
+ * 每季只定義少數「原料」變數，.dark 內所有 shadcn token 由它們推導：
+ *   --h / --c     夜空底色的色相與彩度
+ *   --pri         主色（連結、目前導覽、強調、--ink）
+ *   --season      季節點綴色（紙膠帶、粒子、天際線微光）
+ *   --cloud       雲海顏色
+ */
+:root,
+[data-season='autumn'] {
+  /* 晝：米黃宣紙 */
+  --paper-h: 80;
+  --paper-c: 0.016;
+  /* 秋・雲梭燈影：靛藍夜空、燈影暖金、楓紅 */
+  --h: 264;
+  --c: 0.03;
+  --pri: oklch(0.8 0.1 78);
+  --season: oklch(0.68 0.14 38);
+  --cloud: oklch(0.8 0.04 70);
+}
+[data-season='spring'] {
+  /* 晝：淡桃花箋 */
+  --paper-h: 20;
+  --paper-c: 0.012;
+  /* 春・桃苑：暮紫夜空、桃粉、櫻白 */
+  --h: 330;
+  --c: 0.035;
+  --pri: oklch(0.83 0.08 10);
+  --season: oklch(0.86 0.07 0);
+  --cloud: oklch(0.85 0.05 340);
+}
+[data-season='summer'] {
+  /* 晝：淡竹青箋 */
+  --paper-h: 140;
+  --paper-c: 0.011;
+  /* 夏・竹影螢火：深青夜空、竹青、螢黃綠 */
+  --h: 195;
+  --c: 0.035;
+  --pri: oklch(0.82 0.1 160);
+  --season: oklch(0.9 0.15 120);
+  --cloud: oklch(0.8 0.05 180);
+}
+[data-season='winter'] {
+  /* 晝：霜白箋 */
+  --paper-h: 240;
+  --paper-c: 0.01;
+  /* 冬・雪原：冷灰藍夜空、霜銀藍、雪白 */
+  --h: 240;
+  --c: 0.02;
+  --pri: oklch(0.87 0.045 225);
+  --season: oklch(0.96 0.01 240);
+  --cloud: oklch(0.92 0.015 240);
+}
+
+.dark {
+  --ink: var(--pri);
+  --ink-soft: color-mix(in oklch, var(--pri) 10%, transparent);
+  --rule: oklch(0.85 0.03 var(--h) / 0.14);
+  --jade: oklch(0.76 0.06 190);
+  --background: oklch(0.165 var(--c) var(--h));
+  --foreground: oklch(0.94 0.012 85);
+  --card: oklch(0.21 var(--c) var(--h));
+  --card-foreground: oklch(0.94 0.012 85);
+  --popover: oklch(0.21 var(--c) var(--h));
+  --popover-foreground: oklch(0.94 0.012 85);
+  --primary: var(--pri);
+  --primary-foreground: oklch(0.2 var(--c) var(--h));
+  --secondary: oklch(0.25 var(--c) var(--h));
+  --secondary-foreground: oklch(0.94 0.012 85);
+  --muted: oklch(0.24 var(--c) var(--h));
+  --muted-foreground: oklch(0.72 0.02 var(--h));
+  --accent: oklch(0.26 calc(var(--c) + 0.005) var(--h));
+  --accent-foreground: oklch(0.94 0.012 85);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(0.85 0.03 var(--h) / 12%);
+  --input: oklch(0.85 0.03 var(--h) / 16%);
+  --ring: color-mix(in oklch, var(--pri) 60%, transparent);
+  --chart-1: oklch(0.8 0.1 78);
+  --chart-2: oklch(0.76 0.06 190);
+  --chart-3: oklch(0.7 0.13 40);
+  --chart-4: oklch(0.78 0.09 150);
+  --chart-5: oklch(0.8 0.08 10);
+  --sidebar: oklch(0.21 var(--c) var(--h));
+  --sidebar-foreground: oklch(0.94 0.012 85);
+  --sidebar-primary: var(--pri);
+  --sidebar-primary-foreground: oklch(0.2 var(--c) var(--h));
+  --sidebar-accent: oklch(0.26 var(--c) var(--h));
+  --sidebar-accent-foreground: oklch(0.94 0.012 85);
+  --sidebar-border: oklch(0.85 0.03 var(--h) / 12%);
+  --sidebar-ring: color-mix(in oklch, var(--pri) 60%, transparent);
+  --timeline-line: oklch(0.85 0.03 var(--h) / 0.18);
+  --timeline-dot: var(--pri);
+  --timeline-date: oklch(0.72 0.02 var(--h));
+  --selection-background-color-lightness: 60%;
+  --selection-color-lightness: 85%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    font-size: 14px;
+  }
+  body {
+    color: var(--foreground);
+    background-color: var(--background);
+  }
+  /* 晝：宣紙纖維紋理＋四角微暗，像攤開的一張紙 */
+  :root:not(.dark) body {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .32 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"),
+      radial-gradient(130% 90% at 50% 40%, transparent 60%, oklch(0.4 0.03 60 / 0.07) 100%);
+    background-attachment: fixed;
+    transition: background-color 0.8s ease;
+  }
+  /* 雲海夜空：上深下淺的夜色，天際線處透出一點當季的微光（.dark 才套用） */
+  .dark body {
+    background-image:
+      radial-gradient(120% 60% at 50% 112%, color-mix(in oklch, var(--season) 22%, transparent), transparent 70%),
+      radial-gradient(70% 45% at 85% 0%, color-mix(in oklch, var(--pri) 12%, transparent), transparent 70%),
+      linear-gradient(180deg, oklch(0.13 var(--c) var(--h)) 0%, var(--background) 45%, oklch(0.2 calc(var(--c) + 0.01) var(--h)) 100%);
+    background-attachment: fixed;
+    transition: background-color 0.8s ease;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 35%, transparent);
+    color: var(--foreground);
+  }
+}
+
+/* Custom variants */
+@custom-variant data-open {
+  &:where([data-state="open"]),
+  &:where([data-open]:not([data-open="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-closed {
+  &:where([data-state="closed"]),
+  &:where([data-closed]:not([data-closed="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-checked {
+  &:where([data-state="checked"]),
+  &:where([data-checked]:not([data-checked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-unchecked {
+  &:where([data-state="unchecked"]),
+  &:where([data-unchecked]:not([data-unchecked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-selected {
+  &:where([data-selected="true"]) {
+    @slot;
+  }
+}
+
+@custom-variant data-disabled {
+  &:where([data-disabled="true"]),
+  &:where([data-disabled]:not([data-disabled="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-active {
+  &:where([data-state="active"]),
+  &:where([data-active]:not([data-active="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-horizontal {
+  &:where([data-orientation="horizontal"]) {
+    @slot;
+  }
+}
+
+@custom-variant data-vertical {
+  &:where([data-orientation="vertical"]) {
+    @slot;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* classname prose 裡面 的 pre 裡面 的 div 若是 mermaid 或 echarts 的話，則pre 無背景 */
+.prose pre:has(> div.mermaid),
+.prose pre:has(> div.echarts) {
+  background-color: transparent;
+}
+
+.prose div.echarts {
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+@layer base {
+  .note-content > .mdx-wrapper > p:first-of-type::first-letter {
+    float: left;
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 0.75;
+    margin-right: 0.75rem;
+    color: var(--tw-prose-primary);
+  }
+}
+
+/* 卷軸樣式 只有在電腦版才會出現 */
+@media screen and (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 12px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333;
+  }
+
+  ::-webkit-scrollbar-track-piece {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+
+/* 主要內容 */
+.fill-content {
+  min-height: calc(100vh - 12.5rem);
+}
+
+@layer components {
+  .active-underline {
+    pointer-events: none;
+    will-change: transform, opacity;
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 140ms linear;
+  }
+
+  .underline-fallback {
+    transform-origin: left center;
+    transform: scaleX(0);
+    opacity: 0;
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 120ms linear;
+    pointer-events: none;
+  }
+
+  .underline-fallback.opacity-100 {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .active-underline,
+    .underline-fallback {
+      box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+    }
+  }
+}
+
+@layer components {
+  .timeline-list {
+    position: relative;
+    min-width: 0;
+    flex: 1 1 0%;
+    list-style-position: inside;
+  }
+
+  .timeline-list > li {
+    position: relative;
+    list-style-type: none;
+    line-height: 1.6;
+    padding: 3px 0;
+    margin: 0 0 0 1rem;
+  }
+
+  .timeline-list > li:before {
+    content: '';
+    position: absolute;
+    left: -17px;
+    bottom: 0;
+    border-left: 2px solid var(--color-timeline-line);
+  }
+
+  .timeline-list > li:first-child:last-child:before {
+    border-left: 0;
+  }
+
+  .timeline-list > li:not(:first-child):not(:last-child):before {
+    top: 0;
+  }
+
+  .timeline-list > li:first-child:before {
+    top: 50%;
+  }
+
+  .timeline-list > li:last-child:before {
+    bottom: 50%;
+    top: 0;
+  }
+
+  .timeline-list > li:after {
+    content: '';
+    left: calc(-1rem - 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    position: absolute;
+    background-color: var(--color-timeline-dot);
+  }
+}
+
+.sao-link {
+  @apply underline decoration-[oklch(0.2103_0.0059_285.89_/_.2)] underline-offset-3;
+  @apply bg-linear-to-r from-teal-500 to-teal-500 bg-size-[0_1.5px] bg-no-repeat bg-[left_1.3em];
+  @apply transition-all duration-250;
+  @apply hover:bg-size-[100%_1.5px] hover:no-underline;
+  @variant dark {
+    @apply decoration-[oklch(0.9674_0.0013_286.37_/_.2)];
+  }
+}
+
+.note-card-enter {
+  animation: note-card-rise 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes note-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-indicator::before {
+  content: "";
+  width: 2px;
+  left: -2px;
+  top: var(--indicator-top, 0);
+  height: var(--indicator-height, 0);
+  opacity: var(--indicator-opacity, 0);
+  background-color: var(--color-primary);
+  pointer-events: none;
+  z-index: 1;
+  transition: top .2s, height .2s, opacity .15s;
+  position: absolute;
+}
+
+.sao-timeline li:hover {
+  background: linear-gradient(90deg,
+    color-mix(in oklch, var(--color-primary) 4%, transparent), transparent 70%);
+}
+
+@layer utilities {
+  .prose :where(p):not(:where([class~=not-prose],[class~=not-prose] *)) {
+    @apply leading-[1.7];
+  }
+}
+
+/* Shiki 雙主題（light/dark）以 CSS variables 切換，對應 rehype 設定的
+   themes: { light: 'kanagawa-lotus', dark: 'github-dark' } + defaultColor: false。
+   background-color 只放在 .shiki 本身——如果連 span 也套用背景色，每個文字
+   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。
+   淺色底不用主題自帶的米黃，改取信箋紙色再壓一點墨，像紙上另貼的一方箋。 */
+.shiki {
+  color: var(--shiki-light);
+  background-color: color-mix(in oklch, var(--foreground) 4%, var(--card));
+}
+.shiki span {
+  color: var(--shiki-light);
+}
+
+.dark .shiki {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+.dark .shiki span {
+  color: var(--shiki-dark);
+}
+
+/* 行號：純 CSS counter，不需要額外 JS，也不會被複製到剪貼簿 */
+.shiki code {
+  counter-reset: line;
+}
+
+/* 水平內距放在每一行的 .line 本身，而不是外層 <pre>（見 index.tsx 的
+   pre 只留 py-4），這樣 .line.highlighted 的背景才能直接吃滿整行寬度，
+   不需要再用負 margin 把背景「拉」到 pre 的邊緣。 */
+.shiki .line {
+  display: inline-block;
+  width: 100%;
+  padding-inline: 1rem;
+}
+
+.shiki .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: var(--muted-foreground);
+  user-select: none;
+}
+
+/* 部分行數高亮，對應 fenced code block 的 {1,3-5} meta 語法
+   （由 parsers.ts 的 transformerMetaHighlight 加上 .highlighted class） */
+.shiki .line.highlighted {
+  background-color: color-mix(in oklch, var(--color-primary) 12%, transparent);
+}
+
+.dark .shiki .line.highlighted {
+  background-color: color-mix(in oklch, var(--color-primary) 18%, transparent);
+}
+
+/* 滑鼠反白效果 */
+.mdx-wrapper {
+  > :nth-child(6n)::selection,
+  > :nth-child(6n) ::selection,
+  > :nth-child(6n)::target-text,
+  > :nth-child(6n) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 0);
+    background: oklch(var(--selection-background-color-lightness) 0.111 0 / 35%);
+  }
+  > :nth-child(6n + 1)::selection,
+  > :nth-child(6n + 1) ::selection,
+  > :nth-child(6n + 1)::target-text,
+  > :nth-child(6n + 1) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 60);
+    background: oklch(var(--selection-background-color-lightness) 0.111 60 / 35%);
+  }
+  > :nth-child(6n + 2)::selection,
+  > :nth-child(6n + 2) ::selection,
+  > :nth-child(6n + 2)::target-text,
+  > :nth-child(6n + 2) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 120);
+    background: oklch(var(--selection-background-color-lightness) 0.111 120 / 35%);
+  }
+  > :nth-child(6n + 3)::selection,
+  > :nth-child(6n + 3) ::selection,
+  > :nth-child(6n + 3)::target-text,
+  > :nth-child(6n + 3) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 180);
+    background: oklch(var(--selection-background-color-lightness) 0.111 180 / 35%);
+  }
+  > :nth-child(6n + 4)::selection,
+  > :nth-child(6n + 4) ::selection,
+  > :nth-child(6n + 4)::target-text,
+  > :nth-child(6n + 4) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 240);
+    background: oklch(var(--selection-background-color-lightness) 0.111 240 / 35%);
+  }
+  > :nth-child(6n + 5)::selection,
+  > :nth-child(6n + 5) ::selection,
+  > :nth-child(6n + 5)::target-text,
+  > :nth-child(6n + 5) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 300);
+    background: oklch(var(--selection-background-color-lightness) 0.111 300 / 35%);
+  }
+}
+
+/* ── /thinking 便條紙 ───────────────────────────────────────────────────────
+ * 擬真 Post-it：上緣有背膠所以貼平，下緣離開牆面微微翹起、右下角翹得最多。
+ * - 紙面：背膠區略亮、往下漸暗（翹起處受光少）、疊一層極淡的紙纖維雜訊
+ * - 右下角用橢圓圓角做出捲曲的弧線
+ * - ::before / ::after 是兩塊旋轉過的陰影，從翹起的兩角下方透出來
+ * 注意：便條本身不能有 transform/rotate，否則會自成 stacking context，
+ * z-index:-1 的陰影會蓋到紙上；旋轉放在外層 <li>。
+ */
+.sticky-note {
+  --paper: oklch(0.82 0.05 88);
+  --note-ink: oklch(0.31 0.035 55);
+  position: relative;
+  color: var(--note-ink);
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgb(255 255 255 / 0.14) 0 1.75rem, rgb(0 0 0 / 0.025) 1.75rem calc(1.75rem + 1px), transparent calc(1.75rem + 1px)),
+    radial-gradient(90% 55% at 100% 100%, rgb(0 0 0 / 0.16), transparent 70%),
+    linear-gradient(180deg, transparent 45%, rgb(0 0 0 / 0.09) 100%),
+    linear-gradient(100deg, transparent 65%, rgb(0 0 0 / 0.05) 100%);
+  background-blend-mode: multiply, normal, normal, normal, normal;
+  border-radius: 1px 1px 0.75rem 3rem / 1px 1px 0.2rem 0.7rem;
+  /* 深色背景上黑色投影幾乎看不見，所以翹起感主要靠紙面本身：
+     右下角的暗部漸層 + 沿著翹起邊緣的一道細亮線（紙張邊緣反光） */
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.35),
+    inset 0 -2px 2px -1px rgb(255 255 255 / 0.28),
+    inset -1px 0 1px -0.5px rgb(255 255 255 / 0.12);
+}
+.sticky-note::before,
+.sticky-note::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  bottom: 0.7rem;
+  width: 45%;
+  height: 35%;
+  transition:
+    rotate 0.35s ease-out,
+    box-shadow 0.35s ease-out;
+}
+.sticky-note::before {
+  left: 0.5rem;
+  rotate: -2.5deg;
+  box-shadow: 0 10px 14px rgb(0 0 0 / 0.75);
+}
+.sticky-note::after {
+  right: 0.6rem;
+  rotate: 4.5deg;
+  box-shadow: 0 16px 18px rgb(0 0 0 / 0.85);
+}
+.sticky-note-wrap:hover .sticky-note::after {
+  rotate: 6.5deg;
+  box-shadow: 0 24px 22px rgb(0 0 0 / 0.55);
+}
+.sticky-note-wrap:hover .sticky-note::before {
+  box-shadow: 0 14px 16px rgb(0 0 0 / 0.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticky-note::before,
+  .sticky-note::after {
+    transition: none;
+  }
+}
+
+/* ── 紙膠帶（washi tape）───────────────────────────────────────────────────
+ * - 半透明底色，能透出底下的紙與背景；斜紋＋上亮下暗模擬和紙的纖維與光澤
+ * - 兩端用 clip-path 鋸齒做出手撕的毛邊
+ * - clip-path 會裁掉自身的 box-shadow，所以陰影放在外層 .washi-tape 用 drop-shadow
+ * 用 --tape 換顏色、--tape-rotate 換角度。
+ */
+.washi-tape {
+  /* 紙膠帶跟著季節換色 */
+  --tape: color-mix(in oklch, var(--season) 55%, transparent);
+  --tape-rotate: -6deg;
+  position: absolute;
+  z-index: 1;
+  top: -0.85rem;
+  left: 42%;
+  width: 7.25rem;
+  height: 1.7rem;
+  translate: -50% 0;
+  rotate: var(--tape-rotate);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.22));
+  pointer-events: none;
+}
+.washi-tape::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--tape);
+  background-image:
+    linear-gradient(180deg, rgb(255 255 255 / 0.28), transparent 45%, rgb(0 0 0 / 0.06)),
+    repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.1) 0 3px, transparent 3px 8px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  clip-path: polygon(
+    3px 0, calc(100% - 2px) 0,
+    100% 9%, calc(100% - 3px) 20%, 100% 31%, calc(100% - 2px) 44%, 100% 56%,
+    calc(100% - 3px) 68%, 100% 80%, calc(100% - 2px) 91%, calc(100% - 4px) 100%,
+    2px 100%,
+    0 89%, 3px 77%, 0 66%, 2px 53%, 0 41%, 3px 29%, 0 17%, 2px 7%
+  );
+}
+
+/* ── 雲海 ──────────────────────────────────────────────────────────────────
+ * 畫面下方兩層緩慢漂移的雲。每層是一排橢圓漸層（雲團）組成的橫向重複圖樣，
+ * 每團雲都落在圖樣寬度內且邊緣淡出到透明，所以重複接縫處不會出現線條；
+ * 再加 blur 讓雲團邊緣更柔。疊在 body 背景之上、所有內容之下。
+ */
+.cloud-sea {
+  position: fixed;
+  inset: auto 0 0 0;
+  /* -1：畫在 body 背景之上、所有內容之下 */
+  z-index: -1;
+  height: 50vh;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.7) 35%, transparent 100%);
+}
+.cloud-sea::before,
+.cloud-sea::after {
+  content: '';
+  position: absolute;
+  /* 下緣往外多延伸，避免 blur 讓底部邊緣變淡出現一條亮帶 */
+  top: 0;
+  bottom: -60px;
+  left: -200px;
+  width: calc(100% + 200px + 1600px);
+  background-image:
+    radial-gradient(16% 38% at 12% 78%, color-mix(in oklch, var(--cloud) 70%, transparent), transparent 70%),
+    radial-gradient(12% 30% at 27% 88%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(18% 42% at 46% 74%, color-mix(in oklch, var(--cloud) 65%, transparent), transparent 70%),
+    radial-gradient(11% 28% at 63% 90%, color-mix(in oklch, var(--cloud) 50%, transparent), transparent 70%),
+    radial-gradient(17% 40% at 82% 80%, color-mix(in oklch, var(--cloud) 70%, transparent), transparent 70%);
+  background-size: 1600px 100%;
+  background-repeat: repeat-x;
+  filter: blur(18px);
+  opacity: 0.22;
+  animation: cloud-drift 160s linear infinite;
+}
+.cloud-sea::after {
+  width: calc(100% + 200px + 2200px);
+  background-image:
+    radial-gradient(20% 34% at 18% 60%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(14% 26% at 44% 72%, color-mix(in oklch, var(--cloud) 45%, transparent), transparent 70%),
+    radial-gradient(22% 38% at 70% 58%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(12% 24% at 90% 74%, color-mix(in oklch, var(--cloud) 40%, transparent), transparent 70%);
+  background-size: 2200px 100%;
+  filter: blur(28px);
+  opacity: 0.16;
+  animation-name: cloud-drift-far;
+  animation-duration: 260s;
+}
+@keyframes cloud-drift {
+  to {
+    translate: -1600px 0;
+  }
+}
+@keyframes cloud-drift-far {
+  to {
+    translate: -2200px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cloud-sea::before,
+  .cloud-sea::after {
+    animation: none;
+  }
+}
+
+/* ── 首頁主視覺：水墨遠山 × 燈影 ─────────────────────────────────────────────
+ * 顏色全部由季節變數推導：
+ *   --mtn-far   最遠的山（接近天色、偏亮、帶霧）
+ *   --mtn-near  最近的山（接近墨色）
+ *   --sky-top / --sky-low  天空上下
+ *   --lantern   燈籠光（四季都是暖色，呼應「燈影」）
+ */
+.ink-landscape {
+  --mtn-far: oklch(0.34 calc(var(--c) + 0.02) var(--h));
+  --mtn-near: oklch(0.14 var(--c) var(--h));
+  --sky-top: oklch(0.12 var(--c) var(--h));
+  --sky-low: oklch(0.3 calc(var(--c) + 0.03) var(--h));
+  --lantern: oklch(0.82 0.13 70);
+  --scroll: 0;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 50% 62%, color-mix(in oklch, var(--season) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-low) 62%, var(--sky-low) 100%);
+}
+
+.ink-stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: oklch(0.95 0.02 90);
+  opacity: 0.8;
+}
+.ink-star-twinkle {
+  animation: ink-twinkle 4s ease-in-out infinite;
+}
+@keyframes ink-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* 每層山：整層依 --parallax 隨捲動往下位移，越近位移越多 */
+.ink-layer {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 42%;
+  translate: 0 calc(var(--scroll) * var(--parallax) * 1px);
+  will-change: translate;
+}
+.ink-layer svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* 稜線濃、山腳淡入霧氣；越近的山越濃、山腳越不透明 */
+.ink-stop-ridge {
+  stop-color: color-mix(in oklch, var(--mtn-near) calc(var(--t) * 100%), var(--mtn-far));
+  /* 遠山淡、近山濃 */
+  stop-opacity: calc(0.3 + var(--t) * 0.5);
+}
+.ink-stop-foot {
+  stop-color: color-mix(in oklch, var(--mtn-near) calc(var(--t) * 100%), var(--cloud) 18%);
+  stop-opacity: calc(0.1 + var(--t) * 0.85);
+}
+
+/* 霧帶：夾在山層之間、橫向緩慢漂移 */
+.ink-mist {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  bottom: 18%;
+  height: 22%;
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in oklch, var(--cloud) 22%, transparent), transparent 70%);
+  background-size: 50% 100%;
+  filter: blur(14px);
+  animation: ink-mist-drift 90s ease-in-out infinite alternate;
+}
+@keyframes ink-mist-drift {
+  from { translate: -8% 0; }
+  to { translate: 8% 0; }
+}
+
+/* 燈籠：一個發光的小紙燈，從下方升起到畫面上方並淡出 */
+.ink-lanterns {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+}
+.ink-lantern {
+  position: absolute;
+  bottom: 18%;
+  width: calc(10px * var(--size));
+  height: calc(14px * var(--size));
+  border-radius: 40% 40% 35% 35% / 30% 30% 45% 45%;
+  background: radial-gradient(60% 55% at 50% 45%, oklch(0.95 0.08 85), var(--lantern) 55%, oklch(0.55 0.15 45) 100%);
+  box-shadow:
+    0 0 calc(10px * var(--size)) calc(2px * var(--size)) color-mix(in oklch, var(--lantern) 55%, transparent),
+    0 0 calc(40px * var(--size)) calc(8px * var(--size)) color-mix(in oklch, var(--lantern) 18%, transparent);
+  opacity: 0;
+  animation-name: ink-lantern-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes ink-lantern-rise {
+  0% { translate: 0 0; opacity: 0; }
+  8% { opacity: 0.95; }
+  50% { translate: var(--sway) -32vh; }
+  85% { opacity: 0.6; }
+  100% { translate: calc(var(--sway) * -0.5) -62vh; opacity: 0; }
+}
+
+.ink-fade {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 30;
+  height: 22%;
+  background: linear-gradient(to bottom, transparent, var(--background));
+}
+
+/* 頭像當作月亮：背後一圈柔和的月暈 */
+.moon-avatar {
+  position: relative;
+}
+.moon-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  z-index: -1;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, color-mix(in oklch, var(--pri) 32%, transparent), color-mix(in oklch, var(--pri) 8%, transparent) 55%, transparent);
+}
+.moon-avatar img {
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--pri) 40%, transparent),
+    0 0 40px 6px color-mix(in oklch, var(--pri) 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-star-twinkle,
+  .ink-mist,
+  .ink-lantern {
+    animation: none;
+  }
+  .ink-lantern {
+    opacity: 0.7;
+  }
+}
+
+/* ── 晝：宣紙上的水墨山水 ─────────────────────────────────────────────────── */
+:root:not(.dark) .ink-landscape {
+  --mtn-far: oklch(0.8 0.012 60);
+  --mtn-near: oklch(0.3 0.015 60);
+  --sky-top: var(--background);
+  --sky-low: var(--background);
+  --cloud: oklch(0.99 0.005 85);
+  background:
+    radial-gradient(55% 40% at 72% 30%, oklch(0.6 0.17 30 / 0.08), transparent 70%),
+    var(--background);
+}
+:root:not(.dark) .ink-stars,
+:root:not(.dark) .ink-lanterns,
+:root:not(.dark) .cloud-sea {
+  display: none;
+}
+/* 頭像當紅日：朱色日暈 */
+:root:not(.dark) .moon-avatar::before {
+  background: radial-gradient(closest-side, oklch(0.6 0.17 30 / 0.3), oklch(0.6 0.17 30 / 0.08) 55%, transparent);
+}
+:root:not(.dark) .moon-avatar img {
+  box-shadow:
+    0 0 0 1px oklch(0.53 0.16 32 / 0.45),
+    0 0 40px 6px oklch(0.6 0.17 30 / 0.22);
+}
+
+/* ── 四季信箋（文章／日記閱讀區）──────────────────────────────────────────
+ * 箋框：朱色「文武線」——外框較粗、內框細，兩線之間留一點空
+ * 天地：上下留白較寬，像信紙的天頭地腳
+ */
+.letter-paper {
+  --frame: color-mix(in oklch, var(--zhu, var(--primary)) 55%, transparent);
+  position: relative;
+  padding: 3.5rem 2.75rem 3rem;
+  background-color: var(--card);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 2px var(--frame),
+    inset 0 0 0 6px var(--card),
+    inset 0 0 0 7px color-mix(in oklch, var(--frame) 70%, transparent),
+    0 1px 2px oklch(0.3 0.02 60 / 0.06),
+    0 12px 32px -18px oklch(0.3 0.02 60 / 0.25);
+}
+.dark .letter-paper {
+  --frame: color-mix(in oklch, var(--pri) 35%, transparent);
+  box-shadow:
+    inset 0 0 0 2px var(--frame),
+    inset 0 0 0 6px var(--card),
+    inset 0 0 0 7px color-mix(in oklch, var(--frame) 70%, transparent);
+}
+@media (max-width: 640px) {
+  .letter-paper {
+    padding: 2.5rem 1.25rem 2rem;
+  }
+}
+
+/* 花箋角落的季節花木：淡彩、在文字之下，從右上角垂下 */
+.letter-sprig {
+  /* 右上角垂下的枝條（上下翻轉），避開右下角的落款與印章 */
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  scale: 1 -1;
+  width: 9rem;
+  height: 9rem;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.sprig-branch {
+  fill: none;
+  stroke: color-mix(in oklch, var(--foreground) 55%, transparent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.sprig-petal,
+.sprig-leaf {
+  fill: color-mix(in oklch, var(--season) 75%, transparent);
+}
+:root:not(.dark) .sprig-petal,
+:root:not(.dark) .sprig-leaf {
+  fill: color-mix(in oklch, var(--season) 70%, var(--foreground) 15%);
+}
+.sprig-heart {
+  fill: oklch(0.75 0.13 85);
+}
+
+/* 朱印：白文方印，邊緣略不規則、微微歪斜 */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  rotate: -4deg;
+  background: oklch(0.53 0.17 30);
+  border-radius: 3px 5px 4px 6px;
+  box-shadow: inset 0 0 0 2px oklch(0.53 0.17 30), inset 0 0 0 3.5px oklch(0.97 0.01 85 / 0.85);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  mask-size: cover;
+}
+.seal-text {
+  writing-mode: vertical-rl;
+  font-family: var(--font-wenkai);
+  font-size: 1.15rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: oklch(0.97 0.01 85);
+}

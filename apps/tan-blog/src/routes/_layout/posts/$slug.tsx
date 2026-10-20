@@ -1,0 +1,93 @@
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { getCachedPost } from '@/lib/isr/post'
+import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
+import { blogPostingJsonLd, pageHead } from '@/lib/seo'
+import { postOgImagePath } from '@/lib/og/og-url'
+import { PostClientPage } from './-components/post-client-page'
+import { ContentLocaleNotice } from '@/components/content-locale-notice'
+import { currentContentLocale, toUiLocale } from '@/lib/content-locale'
+
+export const Route = createFileRoute('/_layout/posts/$slug')({
+  loader: async ({ params }) => {
+    // 語系在 loader 算好再傳進 server fn（server fn 的 RPC 網址沒有語系前綴）
+    const data = await getCachedPost({ data: { slug: params.slug, locale: currentContentLocale() } })
+    if (!data) {
+      throw notFound()
+    }
+    return data
+  },
+  head: ({ loaderData, params }) => {
+    if (!loaderData) return {}
+    const description = loaderData.summary ?? 'MDX Blog Post'
+    const publishedTime = loaderData.createdAt.toISOString()
+    const modifiedTime = loaderData.updatedAt.toISOString()
+    const tags = loaderData.tags.map((tag) => tag.name)
+    const path = `/posts/${params.slug}`
+    const authorName = loaderData.author.name ?? loaderData.author.displayUsername ?? undefined
+    // 有封面用封面，沒有就用動態產生的文章卡片
+    const image = loaderData.cover ?? postOgImagePath(params.slug)
+
+    return {
+      ...pageHead({
+        title: loaderData.title,
+        description,
+        path,
+        type: 'article',
+        image,
+        publishedTime,
+        modifiedTime,
+        tags,
+        keywords: tags,
+        author: authorName,
+        contentLocales: (loaderData.availableLocales ?? []).map(toUiLocale),
+      }),
+      scripts: [
+        blogPostingJsonLd({
+          title: loaderData.title,
+          description,
+          path,
+          image,
+          authorName,
+          publishedTime,
+          modifiedTime,
+          tags,
+        }),
+      ],
+    }
+  },
+  headers: () => ({
+    // 真正的 freshness 由伺服器端的 Nitro ISR 快取（src/lib/isr/post.ts）保證，
+    // 發文/改文時會被 /api/revalidate 立即清掉；瀏覽器這層只給很短的 max-age，
+    // 避免使用者端出現「已在 Nitro 側刷新、但瀏覽器還在吃舊的本地快取」的情況。
+    'Cache-Control': 'public, max-age=30, must-revalidate',
+  }),
+  component: PostDetailPage,
+})
+
+function PostDetailPage() {
+  const data = Route.useLoaderData()
+  const { slug } = Route.useParams()
+
+  return (
+    <PostClientPage
+      postId={data.id}
+      writtenAt={data.createdAt}
+      showToc={data.frontmatter.showToc !== false}
+      toc={data.toc}
+      metaData={{
+        category: data.category.name,
+        tags: data.tags.map((tag) => tag.name),
+        title: data.title,
+        url: `/posts/${slug}`,
+      }}
+    >
+      <ContentLocaleNotice
+        path={`/posts/${slug}`}
+        isFallback={data.isFallback}
+        translatedBy={data.translatedBy}
+        availableLocales={data.availableLocales}
+      />
+      <CompiledMdx compiled={data.compiled} />
+    </PostClientPage>
+  )
+}

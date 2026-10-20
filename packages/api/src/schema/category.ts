@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { createApiResponseSchema } from "./api";
 
 export const categorySchema = z.object({
     id: z.string(),

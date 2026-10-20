@@ -20,6 +20,7 @@
     "@sao-blog/auth": "workspace:*",
     "@sao-blog/db": "workspace:*",
     "@sao-blog/env": "workspace:*",
+    "@sao-blog/mdx": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
@@ -32,6 +33,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@sao-blog/config": "workspace:*",
     "elysia": "catalog:",
     "typescript": "catalog:"

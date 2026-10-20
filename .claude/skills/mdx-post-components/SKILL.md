@@ -1,6 +1,6 @@
 ---
 name: mdx-post-components
-description: Reference for the JSX block components available when writing apps/mdx-blog article content (Alert, Accordion, Tabs, Carousel, Progress, Benchmark, CustomQuote, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
+description: Reference for the JSX block components available when writing apps/mdx-blog article content (Alert, Accordion, Tabs, Carousel, Progress, Benchmark, CustomQuote, Playground, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
 ---
 
 # mdx-blog 文章區塊元件
@@ -143,6 +143,59 @@ description: Reference for the JSX block components available when writing apps/
 ```
 
 無 props，純示範用的 client 互動元件（點擊按鈕累加數字）。一般文章很少需要用到。
+
+### Playground（可執行的程式碼示範，僅 tan-blog）
+
+文章本體**永遠不執行程式**（不能 `export` 元件、不能寫 `{表達式}`）。需要「跑起來看」的示範，把程式碼當**資料**放進 `<Playground>`，它會在隔離的 `sandbox="allow-scripts"` iframe 中執行（碰不到部落格的 DOM / cookie）。
+
+````mdx
+<Playground template="react" title="計數器">
+```jsx App.jsx
+import { useState } from 'react'
+import Button from './Button'
+
+export default function App() {
+  const [count, setCount] = useState(0)
+  return <Button onClick={() => setCount(count + 1)}>點了 {count} 次</Button>
+}
+```
+
+```jsx Button.jsx
+export default function Button(props) {
+  return <button {...props} />
+}
+```
+
+```css styles.css hidden
+button { padding: 8px 16px; }
+```
+</Playground>
+````
+
+````mdx
+<Playground template="vanilla" height={160} autoRun>
+```html
+<p id="out"></p>
+```
+
+```js
+document.getElementById('out').textContent = new Date().toISOString()
+console.log('hi')
+```
+</Playground>
+````
+
+- `template`: 必填，`react` / `html` / `vanilla`
+  - `react`：入口是 `App.jsx`（`export default` 一個元件），可 `import` 其他檔案（`./Button`）與 npm 套件（經 esm.sh，React 固定 18.3.1）
+  - `html` / `vanilla`：html、css、js 組成單一頁面；js 以 ES module 執行，同樣可 import npm 套件
+- `title`: 選填，標題列文字
+- `height`: 選填，預覽區高度 px（80–1200，預設 320）
+- `autoRun`: 選填，進入畫面自動執行；預設需讀者按「執行」
+- **子元素只能是 code fence**，語言限 `html` / `css` / `js` / `jsx`（不支援 TypeScript）
+- fence meta 第一個字是檔名（例如 ` ```jsx App.jsx `），省略時依語言預設 `index.html` / `styles.css` / `index.js` / `App.jsx`；檔名不可重複
+- meta 加上 `hidden`：不顯示分頁，但仍參與執行（適合樣式等樣板）
+- 不要直接寫 `<PlaygroundFile>`（那是編譯器產生的內部節點）
+- `console.log` / 錯誤會顯示在預覽下方的 Console
 
 ## 例外：mermaid / echarts 仍用 fence
 

@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "sao-blog MDX component registry",
+  "components": {
+    "Alert": {
+      "description": "提示框",
+      "children": true,
+      "translatableProps": [
+        "title"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "note",
+              "info",
+              "success",
+              "warning",
+              "danger"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "Accordion": {
+      "description": "折疊面板容器，子元素為 AccordionItem",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "multiple": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "AccordionItem": {
+      "description": "單一折疊項",
+      "children": true,
+      "translatableProps": [
+        "title"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "open": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "Tabs": {
+      "description": "分頁容器，子元素為 Tab",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "defaultIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "Tab": {
+      "description": "單一分頁",
+      "children": true,
+      "translatableProps": [
+        "label"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "Carousel": {
+      "description": "輪播容器，子元素為 Slide",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "loop": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "Slide": {
+      "description": "單張輪播內容",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    "Progress": {
+      "description": "進度條",
+      "children": false,
+      "translatableProps": [
+        "label"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "label": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "blue",
+              "green",
+              "amber",
+              "red",
+              "purple",
+              "pink"
+            ]
+          },
+          "showValue": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "Benchmark": {
+      "description": "效能比較長條圖，子元素為 BenchmarkItem",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "lowerIsBetter": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "BenchmarkItem": {
+      "description": "單一比較項",
+      "children": false,
+      "translatableProps": [
+        "label"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "blue",
+              "green",
+              "amber",
+              "red",
+              "purple",
+              "pink"
+            ]
+          },
+          "highlight": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "CustomQuote": {
+      "description": "引言",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "default",
+              "warning",
+              "info",
+              "success"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "Playground": {
+      "description": "可執行的程式碼示範，在隔離的 sandbox iframe 中執行（文章本體不執行程式）。子元素只能是 code fence，語言為 html / css / js / jsx，meta 第一個字是檔名（例如 ```jsx App.jsx），加上 hidden 則不顯示分頁但仍參與執行。react：入口 App.jsx（export default 元件），可 import react 與其他 npm 套件（經 esm.sh）及 ./其他檔案；html / vanilla：html、css、js 組成單一頁面（js 以 ES module 執行）。",
+      "children": true,
+      "translatableProps": [
+        "title"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "template": {
+            "type": "string",
+            "enum": [
+              "react",
+              "html",
+              "vanilla"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 80,
+            "maximum": 1200
+          },
+          "autoRun": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "template"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "PlaygroundFile": {
+      "description": "由編譯器從 <Playground> 內的 code fence 產生（請勿直接撰寫）；子節點為單一文字節點＝原始碼",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "html",
+              "css",
+              "js",
+              "jsx"
+            ]
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "lang"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "Count": {
+      "description": "計數器示範元件",
+      "children": false,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  }
+}

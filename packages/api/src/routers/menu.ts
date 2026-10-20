@@ -9,6 +9,9 @@ import {
 } from "@sao-blog/db/schema/index";
 import { eq, desc, sql } from "drizzle-orm";
 import { mdxToExcerpt } from "../lib/mdx-to-text";
+import { localizedCategories, localizedTitles } from "../lib/i18n";
+import { localeInput } from "../schema/i18n";
+import z from "zod";
 import { toIso } from "../lib/datetime";
 import { MenuResponseSchema } from "../schema/menu";
 
@@ -24,8 +27,10 @@ const RECENT_THINKINGS_LIMIT = 4;
 // 導覽列 hover 卡片聚合資料
 const getMenu = publicProcedure
     .route({ method: "GET", path: "/menu" })
+    .input(z.object({ ...localeInput }).optional())
     .output(MenuResponseSchema)
-    .handler(async () => {
+    .handler(async ({ input }) => {
+        const locale = input?.locale ?? "zh-TW";
         const [
             postWords,
             noteWords,
@@ -61,6 +66,7 @@ const getMenu = publicProcedure
             // 分類（含篇數）
             db
                 .select({
+                    id: categories.id,
                     name: categories.name,
                     slug: categories.slug,
                     postCount: categories.postCount,
@@ -74,6 +80,7 @@ const getMenu = publicProcedure
                     slug: posts.slug,
                     title: posts.title,
                     category: categories.name,
+                    categoryId: posts.categoryId,
                     categorySlug: categories.slug,
                     createdAt: posts.createdAt,
                 })
@@ -171,17 +178,33 @@ const getMenu = publicProcedure
               )
             : 0;
 
+        // 疊上請求語系的標題與分類名稱（無譯文時沿用原文）
+        const [postTitles, noteTitles, categoryNames] = await Promise.all([
+            localizedTitles("post", [...new Set([
+                ...recentPostRows.map((p) => p.id),
+                ...categoryPostPoolRows.map((p) => p.id),
+                ...recentActivityPostRows.map((p) => p.id),
+            ])], locale),
+            localizedTitles("note", [...new Set([
+                ...recentNoteRows.map((n) => n.id),
+                ...recentActivityNoteRows.map((n) => n.id),
+            ])], locale),
+            localizedCategories(categoryRows.map((c) => c.id), locale),
+        ]);
+        const postTitle = (p: { id: string; title: string }) => postTitles.get(p.id) ?? p.title;
+        const noteTitle = (n: { id: string; title: string }) => noteTitles.get(n.id) ?? n.title;
+
         const recentActivity = [
             ...recentActivityPostRows.map((post) => ({
                 id: String(post.id),
-                title: post.title,
+                title: postTitle(post),
                 href: `/posts/${post.slug}`,
                 type: "post" as const,
                 createdAt: toIso(post.createdAt),
             })),
             ...recentActivityNoteRows.map((note) => ({
                 id: String(note.id),
-                title: note.title,
+                title: noteTitle(note),
                 href: `/notes/${note.id}`,
                 type: "note" as const,
                 createdAt: toIso(note.createdAt),
@@ -203,7 +226,7 @@ const getMenu = publicProcedure
                 bucket.push({
                     id: String(row.id),
                     slug: row.slug,
-                    title: row.title,
+                    title: postTitle(row),
                     createdAt: toIso(row.createdAt),
                 });
                 postsByCategory[slug] = bucket;
@@ -228,15 +251,15 @@ const getMenu = publicProcedure
                     days,
                 },
                 categories: categoryRows.map((c) => ({
-                    name: c.name,
+                    name: categoryNames.get(c.id)?.name ?? c.name,
                     slug: c.slug,
                     postCount: c.postCount,
                 })),
                 recentPosts: recentPostRows.map((post) => ({
                     id: String(post.id),
                     slug: post.slug,
-                    title: post.title,
-                    category: post.category ?? null,
+                    title: postTitle(post),
+                    category: (post.categoryId && categoryNames.get(post.categoryId)?.name) || (post.category ?? null),
                     categorySlug: post.categorySlug ?? null,
                     createdAt: toIso(post.createdAt),
                 })),
@@ -250,7 +273,7 @@ const getMenu = publicProcedure
                 })),
                 recentNotes: recentNoteRows.map((note) => ({
                     id: String(note.id),
-                    title: note.title,
+                    title: noteTitle(note),
                     createdAt: toIso(note.createdAt),
                 })),
                 recentActivity,

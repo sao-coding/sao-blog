@@ -41,6 +41,10 @@ import type z from 'zod'
 import { postInputSchema } from '@sao-blog/api/schema/post'
 import { useIsMobile } from '@sao-blog/ui/hooks/use-mobile'
 import { useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { LanguageTabs, useTranslationStates, type LanguageTab } from '@/components/translations/language-tabs'
+import { TranslationEditor } from '@/components/translations/translation-editor'
+import { apiErrorMessage } from '@/components/translations/locales'
 
 type PostFormValues = z.infer<typeof postInputSchema>
 
@@ -94,6 +98,9 @@ export function PostEditor({ postId }: PostEditorProps) {
   const isMobile = useIsMobile()
   const navigate = useNavigate()
   const { uploadFile } = useFileUpload()
+  const [activeTab, setActiveTab] = useState<LanguageTab>('source')
+  const { states: translationStates, sourceLocale } = useTranslationStates('post', postId)
+  const editingTranslation = isEditMode && activeTab !== 'source'
 
   const { data: postData } = useQuery({
     ...orpc.admin.post.getPost.queryOptions({ input: { id: postId! } }),
@@ -138,14 +145,20 @@ export function PostEditor({ postId }: PostEditorProps) {
       if (type === 'archive') data.status = 'archived'
       console.log('Submitting form with data:', data)  // ← 加這行
       try {
-        if (isEditMode) {
-          await updatePostMutation.mutateAsync(data)
-          toast.success('文章更新成功！')
-        } else {
-          await createPostMutation.mutateAsync(data)
-          toast.success('文章建立成功！')
-          navigate({ to: '/posts' })
+        // API 以 status: "error" 回報錯誤（例如發布時 MDX 編譯失敗，訊息含行號），不會 throw
+        const res = isEditMode
+          ? await updatePostMutation.mutateAsync(data)
+          : await createPostMutation.mutateAsync(data)
+        const error = apiErrorMessage(res)
+        if (error) {
+          toast.error(error, { duration: 10000 })
+          return
         }
+        // 草稿有 MDX 錯誤時仍會儲存，message 會附上警告
+        const warned = res.message.includes('MDX 有錯誤')
+        if (warned) toast.warning(res.message, { duration: 10000 })
+        else toast.success(isEditMode ? '文章更新成功！' : '文章建立成功！')
+        if (!isEditMode) navigate({ to: '/posts' })
       } catch (err) {
         console.error(err)
         toast.error(isEditMode ? '更新文章時發生錯誤，請稍後再試。' : '建立文章時發生錯誤，請稍後再試。')
@@ -172,7 +185,7 @@ export function PostEditor({ postId }: PostEditorProps) {
               </h1>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-3">
+            <div className={editingTranslation ? 'hidden' : 'flex items-center gap-1 sm:gap-3'}>
               <Button
                 variant="outline"
                 size="sm"
@@ -215,7 +228,20 @@ export function PostEditor({ postId }: PostEditorProps) {
       </header>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <form id="post-form">
+        {isEditMode && (
+          <div className="mb-4 sm:mb-6">
+            <LanguageTabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              sourceLocale={sourceLocale}
+              states={translationStates}
+            />
+          </div>
+        )}
+        {isEditMode && activeTab !== 'source' && (
+          <TranslationEditor kind="post" ownerId={postId!} locale={activeTab} />
+        )}
+        <form id="post-form" className={editingTranslation ? 'hidden' : undefined}>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8">
             <div className="lg:col-span-3 space-y-4 sm:space-y-6 order-1">
               <FieldGroup className="space-y-4 sm:space-y-6">
