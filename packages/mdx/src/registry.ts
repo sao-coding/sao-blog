@@ -10,10 +10,17 @@ import { z } from 'zod'
  * 這裡只放「資料」，不含任何 React 元件，讓 server（API / MCP）與
  * 各端 renderer 共用。各端以元件名稱對應自己的實作。
  *
- * ⚠️ 互動元件擴充方向尚未決定，這份表只收錄既有元件，不新增元件。
+ * 互動元件擴充方向見 docs/plans/content-i18n-and-precompile.md §3.2：
+ * 需要執行的程式碼一律以「資料」交給 <Playground>，在隔離的 sandbox 中執行。
  */
 
 const color = z.enum(['blue', 'green', 'amber', 'red', 'purple', 'pink'])
+
+export const PLAYGROUND_TEMPLATES = ['react', 'html', 'vanilla'] as const
+export type PlaygroundTemplate = (typeof PLAYGROUND_TEMPLATES)[number]
+/** Playground 內 code fence 可用的語言（瀏覽器端不做 bundling，只支援這幾種） */
+export const PLAYGROUND_LANGS = ['html', 'css', 'js', 'jsx'] as const
+export type PlaygroundLang = (typeof PLAYGROUND_LANGS)[number]
 
 export interface ComponentSpec {
   description: string
@@ -112,6 +119,34 @@ export const componentRegistry = {
     props: {
       author: z.string().optional(),
       variant: z.enum(['default', 'warning', 'info', 'success']).optional(),
+    },
+    children: true,
+  }),
+  Playground: define({
+    description:
+      '可執行的程式碼示範，在隔離的 sandbox iframe 中執行（文章本體不執行程式）。' +
+      '子元素只能是 code fence，語言為 html / css / js / jsx，meta 第一個字是檔名（例如 ```jsx App.jsx），' +
+      '加上 hidden 則不顯示分頁但仍參與執行。' +
+      'react：入口 App.jsx（export default 元件），可 import react 與其他 npm 套件（經 esm.sh）及 ./其他檔案；' +
+      'html / vanilla：html、css、js 組成單一頁面（js 以 ES module 執行）。',
+    props: {
+      template: z.enum(PLAYGROUND_TEMPLATES),
+      title: z.string().optional(),
+      /** 預覽區高度（px），預設 320 */
+      height: z.number().int().min(80).max(1200).optional(),
+      /** 進入畫面後自動執行；預設需按「執行」 */
+      autoRun: z.boolean().optional(),
+    },
+    children: true,
+    translatableProps: ['title'],
+  }),
+  PlaygroundFile: define({
+    description:
+      '由編譯器從 <Playground> 內的 code fence 產生（請勿直接撰寫）；子節點為單一文字節點＝原始碼',
+    props: {
+      name: z.string().min(1),
+      lang: z.enum(PLAYGROUND_LANGS),
+      hidden: z.boolean().optional(),
     },
     children: true,
   }),

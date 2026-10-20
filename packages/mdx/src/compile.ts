@@ -107,6 +107,8 @@ function collectText(node: HastRoot | RootContent, out: string[]) {
       const lang = code && getLanguage(code)
       if (lang && DIAGRAM_LANGS.has(lang)) return
     }
+    // Playground 的原始碼不是文章內容（不進搜尋 / 摘要 / 翻譯）
+    if (node.tagName === 'PlaygroundFile') return
     if (isRegisteredComponent(node.tagName)) {
       for (const prop of componentRegistry[node.tagName].translatableProps) {
         const value = node.properties[prop]

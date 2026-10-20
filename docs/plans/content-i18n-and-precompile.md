@@ -183,6 +183,10 @@ MDX 原文需 JS 執行環境，App 無法直接使用；但 hast JSON 是純資
   - 編譯管線需讓 sandbox 元件內的 code fence 保留原始碼（不經 Shiki 高亮，或另存原文）
   - App 端可先降級為「顯示程式碼 + 於網頁執行」連結，維持契約
 - 文章本體永遠不執行程式；「會執行的程式」被明確限縮在 sandbox 內 —— 這同時是 AI 發文的安全邊界
+- **已實作（2026-10-20）**：
+  - `packages/mdx`：registry 新增 `Playground`（`template: react | html | vanilla`、`title`（可翻譯）、`height`、`autoRun`）與內部節點 `PlaygroundFile`（`name`、`lang: html | css | js | jsx`、`hidden`）。`remark-safe-mdx` 把 `<Playground>` 內的 code fence 轉成 `PlaygroundFile`，子節點是**單一文字節點＝原始碼**（不經 Shiki）；fence meta 第一個字為檔名、`hidden` 旗標；子元素不是 fence、語言不支援、檔名重複、react 沒有 js 檔 → 編譯錯誤；作者直接寫 `<PlaygroundFile>` 也報錯。原始碼不進 plainText。hast 結構沒有不相容變更，`COMPILED_VERSION` 維持 1（舊 renderer 遇到 Playground 會走未知元件降級）
+  - `apps/tan-blog`：`renderers/playground.tsx` + `playground-runtime.ts`。採 **srcdoc iframe（`sandbox="allow-scripts"`，無 allow-same-origin）**，不用 Sandpack：無 bundler、逐檔轉成 blob module 並改寫 import（本地檔 → blob URL、npm → esm.sh，React 固定 18.3.1），JSX 用 Babel standalone（釘版本，只在有 jsx 檔時載入）；console / 錯誤以 postMessage 回傳（驗證 `event.source` + 每次執行的 id）。SSR 只輸出程式碼分頁，iframe 於按「執行」或 `autoRun` 進入畫面時才建立，不影響 hydration；iframe 跟隨部落格深淺色
+  - App 端：可把 `Playground` 降級成「顯示 PlaygroundFile 原始碼 + 於網頁執行」連結
 
 ## 4. API 變更（packages/api）
 
