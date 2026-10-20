@@ -252,6 +252,74 @@
         "additionalProperties": false
       }
     },
+    "Playground": {
+      "description": "可執行的程式碼示範，在隔離的 sandbox iframe 中執行（文章本體不執行程式）。子元素只能是 code fence，語言為 html / css / js / jsx，meta 第一個字是檔名（例如 ```jsx App.jsx），加上 hidden 則不顯示分頁但仍參與執行。react：入口 App.jsx（export default 元件），可 import react 與其他 npm 套件（經 esm.sh）及 ./其他檔案；html / vanilla：html、css、js 組成單一頁面（js 以 ES module 執行）。",
+      "children": true,
+      "translatableProps": [
+        "title"
+      ],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "template": {
+            "type": "string",
+            "enum": [
+              "react",
+              "html",
+              "vanilla"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 80,
+            "maximum": 1200
+          },
+          "autoRun": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "template"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "PlaygroundFile": {
+      "description": "由編譯器從 <Playground> 內的 code fence 產生（請勿直接撰寫）；子節點為單一文字節點＝原始碼",
+      "children": true,
+      "translatableProps": [],
+      "props": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "html",
+              "css",
+              "js",
+              "jsx"
+            ]
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "lang"
+        ],
+        "additionalProperties": false
+      }
+    },
     "Count": {
       "description": "計數器示範元件",
       "children": false,

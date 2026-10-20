@@ -11,6 +11,9 @@ import {
   allowedHtmlTags,
   componentRegistry,
   isRegisteredComponent,
+  PLAYGROUND_LANGS,
+  type PlaygroundLang,
+  type PlaygroundTemplate,
 } from './registry'
 import type { CompileError } from './types'
 
@@ -122,6 +125,86 @@ function hasMeaningfulChildren(node: JsxNode) {
   )
 }
 
+const PLAYGROUND_LANG_ALIASES: Record<string, PlaygroundLang> = {
+  javascript: 'js',
+  mjs: 'js',
+  htm: 'html',
+}
+
+const DEFAULT_FILE_NAMES: Record<PlaygroundLang, string> = {
+  html: 'index.html',
+  css: 'styles.css',
+  js: 'index.js',
+  jsx: 'App.jsx',
+}
+
+/**
+ * 把 <Playground> 的 code fence 子元素轉成 PlaygroundFile 節點（原始碼存成純文字），
+ * 不經 Shiki，讓各端 renderer 拿到「檔案資料」而不是高亮後的 HTML。
+ */
+function toPlaygroundFiles(
+  node: JsxNode,
+  template: PlaygroundTemplate,
+  report: (message: string) => void
+) {
+  const files: unknown[] = []
+  const names = new Set<string>()
+  let ok = true
+  for (const child of node.children as Nodes[]) {
+    if (child.type === 'text' && child.value.trim() === '') continue
+    if (child.type !== 'code') {
+      report('<Playground> 的子元素只能是 code fence（```jsx App.jsx）')
+      return undefined
+    }
+    const rawLang = (child.lang ?? '').toLowerCase()
+    const lang = PLAYGROUND_LANG_ALIASES[rawLang] ?? rawLang
+    if (!(PLAYGROUND_LANGS as readonly string[]).includes(lang)) {
+      report(
+        `<Playground> 不支援語言「${child.lang ?? '（未標示）'}」，可用：${PLAYGROUND_LANGS.join(' / ')}`
+      )
+      ok = false
+      continue
+    }
+    const meta = (child.meta ?? '').split(/\s+/).filter(Boolean)
+    const hidden = meta.includes('hidden')
+    const name =
+      meta.find((token) => token !== 'hidden') ??
+      DEFAULT_FILE_NAMES[lang as PlaygroundLang]
+    if (!/^[\w.-]+$/.test(name)) {
+      report(`<Playground> 檔名「${name}」只能包含英數、底線、點與減號`)
+      ok = false
+      continue
+    }
+    if (names.has(name)) {
+      report(`<Playground> 檔名重複：${name}`)
+      ok = false
+      continue
+    }
+    names.add(name)
+    files.push({
+      type: 'playgroundFile',
+      data: {
+        hName: 'PlaygroundFile',
+        hProperties: hidden ? { name, lang, hidden: true } : { name, lang },
+        hChildren: [{ type: 'text', value: child.value }],
+      },
+    })
+  }
+  if (!ok) return undefined
+  if (files.length === 0) {
+    report('<Playground> 至少需要一個 code fence')
+    return undefined
+  }
+  if (
+    template === 'react' &&
+    ![...names].some((name) => /\.(jsx?|mjs)$/.test(name))
+  ) {
+    report('<Playground template="react"> 需要 App.jsx（export default 元件）')
+    return undefined
+  }
+  return files
+}
+
 function processJsx(node: JsxNode, file: VFile) {
   const errors = getErrors(file)
   const at = node.position?.start
@@ -161,6 +244,15 @@ function processJsx(node: JsxNode, file: VFile) {
     if (!spec.children && hasMeaningfulChildren(node)) {
       report(`<${name}> 不接受子內容`)
       return false
+    }
+    if (name === 'PlaygroundFile') {
+      report('<PlaygroundFile> 由編譯器產生，請在 <Playground> 內改用 code fence')
+      return false
+    }
+    if (name === 'Playground') {
+      const files = toPlaygroundFiles(node, parsed.data.template as PlaygroundTemplate, report)
+      if (!files) return false
+      node.children = files as never
     }
     node.data = { ...node.data, hName: name, hProperties: parsed.data as never }
     return true
