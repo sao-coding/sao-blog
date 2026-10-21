@@ -214,6 +214,16 @@ export const componentRegistry = {
     props: { rt: z.string().min(1) },
     children: true,
   }),
+  Mark: define({
+    description:
+      '手繪標記（行內），捲到時才畫上去：type 為 highlight（螢光筆，預設）/ underline / strike / circle / box；' +
+      'circle、box 適合短詞。color 換色，highlight 預設赭黃、其餘預設朱筆',
+    props: {
+      type: z.enum(['highlight', 'underline', 'strike', 'circle', 'box']).optional(),
+      color: color.optional(),
+    },
+    children: true,
+  }),
   Sidenote: define({
     description: '旁註（行內）：寫在句子裡，桌機顯示在段落右側，手機收成可點開的小標記',
     props: {},

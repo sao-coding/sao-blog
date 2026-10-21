@@ -184,5 +184,9 @@
   "embed_play": "Play video: {title}",
   "github_updated": "Updated {time}",
   "github_archived": "Archived",
-  "github_stars": "stars"
+  "github_stars": "stars",
+  "github_public": "Public",
+  "github_activity": "Commits in the past year",
+  "github_forks": "forks",
+  "github_license": "License"
 }

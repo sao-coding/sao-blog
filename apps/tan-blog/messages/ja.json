@@ -184,5 +184,9 @@
   "embed_play": "動画を再生：{title}",
   "github_updated": "{time}に更新",
   "github_archived": "アーカイブ済み",
-  "github_stars": "スター"
+  "github_stars": "スター",
+  "github_public": "公開",
+  "github_activity": "過去1年のコミット",
+  "github_forks": "フォーク",
+  "github_license": "ライセンス"
 }

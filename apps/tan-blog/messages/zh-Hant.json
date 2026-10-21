@@ -184,5 +184,9 @@
   "embed_play": "播放影片：{title}",
   "github_updated": "更新於{time}",
   "github_archived": "已封存",
-  "github_stars": "顆星"
+  "github_stars": "顆星",
+  "github_public": "公開",
+  "github_activity": "過去一年的提交",
+  "github_forks": "分支",
+  "github_license": "授權"
 }

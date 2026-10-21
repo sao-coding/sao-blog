@@ -20,6 +20,10 @@
 這句話後面有一則旁註<Sidenote>桌機顯示在段落右側；手機點編號才展開。</Sidenote>，
 再來一則<Sidenote>旁註整篇連號，支援 **markdown** 與 `code`。</Sidenote>看編號有沒有接著算。
 
+用螢光筆<Mark>畫重點</Mark>，用朱筆<Mark type="underline">劃底線</Mark>、<Mark type="strike">刪掉這句</Mark>、
+把<Mark type="circle">關鍵字</Mark>圈起來或<Mark type="box">框起來</Mark>；也能<Mark color="pink">換顏色</Mark>、<Mark type="underline" color="blue">換筆色</Mark>。
+跨行也可以：<Mark>這是一段比較長、在窄螢幕上會折成兩行以上的螢光筆標記，每一行都會各自畫上一筆，不會只畫在第一行</Mark>。
+
 [^1]: 這是一個註腳。
 
 ### 清單
@@ -391,11 +395,17 @@ export default function App() {
 
 <LinkCard href="https://tanstack.com/start/latest" />
 
+<LinkCard href="https://bun.sh" />
+
+github.com/owner/repo 會自動變成 GitHub 卡片（星星、語言、過去一年的 commit）：
+
 <LinkCard href="https://github.com/TanStack/router" />
 
 <LinkCard href="https://example.com/no-preview" title="手動指定標題" description="抓不到預覽時用 title / description 補上。" />
 
 ## 便條紙
+
+捲到這裡時，這個<Mark>螢光筆標記</Mark>和<Mark type="circle">圈圈</Mark>才會畫上去。
 
 <StickyNote title="給未來的自己">
 記得每年換一次備份硬碟，**不要等到它壞掉**。

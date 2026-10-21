@@ -2,11 +2,10 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowUpRightIcon, GitForkIcon, ScaleIcon, StarIcon } from 'lucide-react'
+import { ArrowUpRightIcon } from 'lucide-react'
 import { SiGithub } from '@icons-pack/react-simple-icons'
-import { m } from '#/paraglide/messages'
-import { getLocale } from '#/paraglide/runtime'
 import { orpc } from '@/lib/orpc'
+import { MdxGithubCard } from './github-card'
 
 export interface MdxLinkCardProps {
   href: string
@@ -89,7 +88,11 @@ function RemoteImage({ src, className, onFail }: { src: string; className?: stri
  */
 export const MdxLinkCard = (props: MdxLinkCardProps) => {
   const repo = githubRepoOf(props.href)
-  return repo ? <GithubRepoCard {...props} {...repo} /> : <GenericLinkCard {...props} />
+  return repo ? (
+    <MdxGithubCard {...props} {...repo} fallback={<GenericLinkCard {...props} />} />
+  ) : (
+    <GenericLinkCard {...props} />
+  )
 }
 
 // github.com/owner/repo（可帶 .git 或結尾斜線）才當成 repo；issue、PR、個人頁走一般卡片
@@ -98,122 +101,6 @@ function githubRepoOf(href: string): { owner: string; repo: string } | null {
   const { host, segments } = parseUrl(href)
   if (host !== 'github.com' || segments.length !== 2 || GITHUB_RESERVED.has(segments[0])) return null
   return { owner: segments[0], repo: segments[1].replace(/\.git$/, '') }
-}
-
-const compact = (n: number) =>
-  new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n)
-
-function relativeTime(iso: string) {
-  const diff = (new Date(iso).getTime() - Date.now()) / 1000
-  const units: [Intl.RelativeTimeFormatUnit, number][] = [
-    ['year', 31536000],
-    ['month', 2592000],
-    ['week', 604800],
-    ['day', 86400],
-    ['hour', 3600],
-    ['minute', 60],
-  ]
-  const format = new Intl.RelativeTimeFormat(getLocale(), { numeric: 'auto' })
-  for (const [unit, seconds] of units) {
-    if (Math.abs(diff) >= seconds) return format.format(Math.round(diff / seconds), unit)
-  }
-  return format.format(0, 'minute')
-}
-
-/**
- * GitHub repo 卡片（LinkCard 遇到 github.com/owner/repo 自動切換）：同一張票根，
- * 主聯是 owner / repo、描述、topics 與語言／授權／更新時間；存根印上星星數，像票號。
- * 資料走 API 的 github.getRepo（伺服器端快取 6 小時，可選 GITHUB_TOKEN）；查不到就退回一般卡片。
- */
-function GithubRepoCard({ href, title, description, owner, repo }: MdxLinkCardProps & { owner: string; repo: string }) {
-  const { data, isLoading, isError } = useQuery({
-    ...orpc.github.getRepo.queryOptions({ input: { owner, repo } }),
-    staleTime: 60 * 60 * 1000,
-    retry: 1,
-  })
-
-  if (!isLoading && (isError || !data)) {
-    return <GenericLinkCard href={href} title={title} description={description} />
-  }
-
-  const [ownerName, repoName] = data?.fullName.split('/') ?? [owner, repo]
-  const shownDescription = description ?? data?.description
-
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mdx-block mdx-linkcard mdx-github not-prose"
-    >
-      <span className="mdx-linkcard-main">
-        <span className="mdx-github-name">
-          {data?.ownerAvatar ? (
-            <RemoteImage src={data.ownerAvatar} className="mdx-github-avatar" />
-          ) : (
-            <SiGithub className="mdx-github-avatar" aria-hidden />
-          )}
-          <span className="truncate">
-            <span className="mdx-github-owner">{ownerName}</span>
-            <span className="mdx-linkcard-sep">/</span>
-            <span className="mdx-github-repo">{title ?? repoName}</span>
-          </span>
-          {data?.archived && <span className="mdx-github-badge">{m.github_archived()}</span>}
-        </span>
-        {isLoading && !description ? (
-          <span className="mdx-linkcard-desc">
-            <span className="mdx-skeleton w-full" />
-            <span className="mdx-skeleton w-3/5" />
-          </span>
-        ) : (
-          shownDescription && <span className="mdx-linkcard-desc">{shownDescription}</span>
-        )}
-        {data && data.topics.length > 0 && (
-          <span className="mdx-github-topics">
-            {data.topics.slice(0, 4).map((topic) => (
-              <span key={topic} className="mdx-github-topic">
-                {topic}
-              </span>
-            ))}
-          </span>
-        )}
-        <span className="mdx-linkcard-path mdx-github-meta">
-          {data?.language && (
-            <span className="mdx-github-stat">
-              <span className="mdx-github-dot" />
-              {data.language}
-            </span>
-          )}
-          {data && (
-            <span className="mdx-github-stat">
-              <GitForkIcon aria-hidden />
-              {compact(data.forks)}
-            </span>
-          )}
-          {data?.license && (
-            <span className="mdx-github-stat">
-              <ScaleIcon aria-hidden />
-              {data.license}
-            </span>
-          )}
-          {data?.pushedAt && (
-            <span className="mdx-github-stat mdx-github-updated" suppressHydrationWarning>
-              {m.github_updated({ time: relativeTime(data.pushedAt) })}
-            </span>
-          )}
-          <ArrowUpRightIcon className="mdx-linkcard-arrow" aria-hidden />
-        </span>
-      </span>
-      <span className="mdx-linkcard-stub mdx-github-stub">
-        <SiGithub className="mdx-github-mark" aria-hidden />
-        <StarIcon className="mdx-github-star" aria-hidden />
-        <span className="mdx-github-stars">
-          {data ? compact(data.stars) : <span className="mdx-skeleton w-10" />}
-        </span>
-        <span className="mdx-github-stars-label">{m.github_stars()}</span>
-      </span>
-    </a>
-  )
 }
 
 function GenericLinkCard({ href, title, description }: MdxLinkCardProps) {
