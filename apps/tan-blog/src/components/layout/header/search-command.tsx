@@ -24,6 +24,7 @@ import {
 } from '@sao-blog/ui/components/command'
 import { Button } from '@sao-blog/ui/components/button'
 import { client } from '@/lib/orpc'
+import { useSearchStore } from '@/store/search-store'
 import {
   currentContentLocale,
   toUiLocale,
@@ -87,7 +88,8 @@ const hitPath = (hit: SearchHit) =>
   hit.type === 'post' ? `/posts/${hit.slug}` : `/notes/${hit.slug}`
 
 export function SearchCommand() {
-  const [open, setOpen] = useState(false)
+  const open = useSearchStore((state) => state.open)
+  const setOpen = useSearchStore((state) => state.setOpen)
   const [input, setInput] = useState('')
   const [allLocales, setAllLocales] = useState(false)
   const q = useDebounced(input.trim())
@@ -166,6 +168,8 @@ export function SearchCommand() {
         size="icon"
         aria-label={m.search_open()}
         title={`${m.search_open()} (⌘K)`}
+        // 手機版改由選單（Drawer）右上角開啟，避免擠壓使用者頭像
+        className="hidden lg:inline-flex"
         onClick={() => setOpen(true)}
       >
         <SearchIcon className="size-4" />

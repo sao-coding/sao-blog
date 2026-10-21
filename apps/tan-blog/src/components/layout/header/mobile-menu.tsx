@@ -11,13 +11,15 @@ import {
 import { getNavLinks } from '@/config/menu'
 import { orpc } from '@/lib/orpc'
 import { SITE_NAME } from '@/lib/seo'
-import { ChevronDownIcon, ChevronUpIcon, MenuIcon, X } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon, MenuIcon, SearchIcon, X } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { VisuallyHidden } from 'radix-ui'
 import { m } from '#/paraglide/messages'
 import { currentContentLocale } from '@/lib/content-locale'
+import { useSearchStore } from '@/store/search-store'
 
 const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
+    const setSearchOpen = useSearchStore(state => state.setOpen)
     const navLinks = getNavLinks()
     const moreLinks = navLinks.find(link => !link.href && !link.icon)
     const mainLinks = navLinks.filter(link => link !== moreLinks)
@@ -66,14 +68,28 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                     >
                         {SITE_NAME}
                     </span>
-                    <DrawerClose render={
-                        <button
-                            aria-label={m.mobile_menu_close()}
-                            className="flex items-center justify-center size-7 rounded-full text-foreground/40 hover:text-foreground/75 hover:bg-foreground/10 transition-all duration-200"
-                        >
-                            <X className="size-3.5" />
-                        </button>
-                    } />
+                    <div className="flex items-center gap-1">
+                        {/* 手機版搜尋入口：先關閉選單再開啟搜尋對話框 */}
+                        <DrawerClose
+                            onClick={() => setSearchOpen(true)}
+                            render={
+                                <button
+                                    aria-label={m.search_open()}
+                                    className="flex items-center justify-center size-7 rounded-full text-foreground/40 hover:text-foreground/75 hover:bg-foreground/10 transition-all duration-200"
+                                >
+                                    <SearchIcon className="size-3.5" />
+                                </button>
+                            }
+                        />
+                        <DrawerClose render={
+                            <button
+                                aria-label={m.mobile_menu_close()}
+                                className="flex items-center justify-center size-7 rounded-full text-foreground/40 hover:text-foreground/75 hover:bg-foreground/10 transition-all duration-200"
+                            >
+                                <X className="size-3.5" />
+                            </button>
+                        } />
+                    </div>
                 </div>
 
                 {/* 主導航 */}
