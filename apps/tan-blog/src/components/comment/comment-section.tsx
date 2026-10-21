@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@sao-blog/ui/components/button'
 import { countCommentsAndReplies } from './constants'
 import { CommentForm, type CommentGuardFields } from './comment-form'
-import { CommentList } from './comment-list'
+import { CommentList, CommentSortToggle } from './comment-list'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { resolveRefType, toCommentTree } from '@/utils/comment'
 import { m } from '#/paraglide/messages'
@@ -108,7 +108,8 @@ function CommentSectionContent({ postId }: { postId: string }) {
   const likeCommentMutation = useMutation({
     ...orpc.comment.likeComment.mutationOptions(),
 
-    onMutate: async ({ id: commentId, like }: { id: string; like: boolean }) => {
+    // 介面只有愛心（like: true 為切換）；API 的倒讚（like: false）目前沒用到
+    onMutate: async ({ id: commentId }: { id: string; like: boolean }) => {
       await queryClient.cancelQueries({ queryKey })
       const previousData = queryClient.getQueryData<CommentsCache>(queryKey)
 
@@ -118,12 +119,8 @@ function CommentSectionContent({ postId }: { postId: string }) {
           ...old,
           data: old.data.map((comment) => {
             if (comment.id !== commentId) return comment
-            if (like) {
-              const toggled = !comment.liked
-              return { ...comment, liked: toggled, likes: toggled ? comment.likes + 1 : comment.likes - 1 }
-            } else {
-              return { ...comment, dislikes: comment.dislikes + 1 }
-            }
+            const toggled = !comment.liked
+            return { ...comment, liked: toggled, likes: toggled ? comment.likes + 1 : comment.likes - 1 }
           }),
         }
       })
@@ -148,24 +145,29 @@ function CommentSectionContent({ postId }: { postId: string }) {
     [likeCommentMutation]
   )
 
-  const handleDislike = useCallback(
-    (commentId: string) => likeCommentMutation.mutate({ id: commentId, like: false }),
-    [likeCommentMutation]
-  )
-
   const userName = session?.user.name ?? undefined
   const userImage = session?.user.image ?? null
+  const currentUserId = session?.user.id
 
   return (
-    <div className="space-y-6 mt-12">
-      <div className="flex items-center gap-2">
-        <MessageCircleIcon className="size-5 text-foreground" />
-        <h2 className="text-lg font-semibold text-foreground">{m.comment_section_title()}</h2>
-        <span className="text-sm text-muted-foreground">
-          {m.comment_count({ count: String(commentsCount) })}
-          {repliesCount > 0 && ` ${m.comment_reply_count({ count: String(repliesCount) })}`}
+    <section className="mt-16 space-y-8" aria-labelledby="comment-section-title">
+      <header className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-dashed border-rule pb-5">
+        {/* 朱印：留言＋回覆總數 */}
+        <span className="comment-seal size-14 shrink-0 text-2xl tabular-nums" aria-hidden>
+          {commentsCount + repliesCount}
         </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <h2 id="comment-section-title" className="font-wenkai text-2xl text-foreground">
+            {m.comment_section_title()}
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {m.comment_count({ count: String(commentsCount) })}
+            {repliesCount > 0 && ` ${m.comment_reply_count({ count: String(repliesCount) })}`}
+            <span className="hidden sm:inline"> — {m.comment_section_subtitle()}</span>
+          </p>
+        </div>
+        {commentsCount > 1 && <CommentSortToggle value={sortOrder} onChange={setSortOrder} />}
+      </header>
 
       {/* 留言表單 / 登入提示 */}
       {isSessionPending ? null : isAuthenticated ? (
@@ -185,15 +187,14 @@ function CommentSectionContent({ postId }: { postId: string }) {
       <CommentList
         comments={comments}
         sortOrder={sortOrder}
-        onSortChange={setSortOrder}
         onLike={handleLike}
-        onDislike={handleDislike}
         onReply={handleReply}
         isAuthenticated={isAuthenticated}
+        currentUserId={currentUserId}
         userName={userName}
         userImage={userImage}
       />
-    </div>
+    </section>
   )
 }
 
@@ -206,29 +207,22 @@ function CommentLoginOverlay({ pathname }: { pathname: string }) {
   }
 
   return (
-    <div className="relative rounded-xl overflow-hidden">
-      {/* 背景模糊佔位（假表單） */}
-      <div className="pointer-events-none select-none blur-sm opacity-30 space-y-3 rounded-xl border border-border bg-card p-4">
-        <div className="h-7 w-32 rounded-md bg-muted" />
-        <div className="h-28 rounded-md bg-muted" />
-        <div className="flex justify-between">
-          <div className="h-8 w-20 rounded-md bg-muted" />
-          <div className="h-8 w-24 rounded-md bg-muted" />
-        </div>
+    <div className="flex flex-row-reverse items-start gap-3">
+      {/* 虛線的「空位」頭像：位子留給你 */}
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-ink/40 text-ink">
+        <LockIcon className="size-4" />
       </div>
 
-      {/* 毛玻璃遮罩 */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl backdrop-blur-md bg-background/70 border border-border/50">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-          <LockIcon className="size-5 text-muted-foreground" />
-        </div>
-
-        <div className="text-center space-y-1">
-          <p className="text-sm font-semibold text-foreground">{m.comment_login_gate_title()}</p>
+      <div
+        data-side="right"
+        className="comment-bubble flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="space-y-1">
+          <p className="font-wenkai text-base text-foreground">{m.comment_login_gate_title()}</p>
           <p className="text-xs text-muted-foreground">{m.comment_login_gate_description()}</p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex shrink-0 gap-2">
           <Button
             variant="outline"
             size="sm"

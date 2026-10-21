@@ -1,8 +1,8 @@
 /**
  * 單則留言元件
  *
- * 顯示留言內容、使用者資訊、按讚/倒讚、回覆功能。
- * 回覆預設為摺疊狀態，點擊展開。
+ * 以對話氣泡呈現：別人的留言靠左、自己的留言靠右（朱砂色調）。
+ * 按讚／倒讚／回覆是貼在氣泡下緣的小膠囊；回覆串用彎折線連到上一層。
  * 支援遞迴渲染回覆的回覆。
  *
  * @module components/comment/comment-item
@@ -12,11 +12,9 @@
 
 import { useState, useCallback } from 'react'
 import {
-  ThumbsUpIcon,
-  ThumbsDownIcon,
-  MessageSquareIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
+  HeartIcon,
+  ReplyIcon,
+  ChevronUpIcon,
   ExternalLinkIcon,
   MapPinIcon,
 } from 'lucide-react'
@@ -25,11 +23,9 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 import { cn } from '@/lib/utils'
-import type { Comment } from '@/types/comment'  // ✅ 移除 VoteType（不再需要）
+import type { Comment } from '@/types/comment'
 import type { CommentFormValues } from '@/schemas/comment'
-import { Button } from '@sao-blog/ui/components/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
-import { Badge } from '@sao-blog/ui/components/badge'
 import { CommentMarkdownRenderer } from './comment-markdown-renderer'
 import { CommentForm, type CommentGuardFields } from './comment-form'
 import { dayjsLocale } from '@/lib/date-locale'
@@ -40,16 +36,19 @@ dayjs.extend(relativeTime)
 interface CommentItemProps {
   comment: Comment
   onLike: (commentId: string) => void
-  onDislike: (commentId: string) => void
   onReply: (parentId: string, data: CommentFormValues, guard: CommentGuardFields) => Promise<boolean>
   depth?: number
   isAuthenticated?: boolean
+  currentUserId?: string
   userName?: string
   userImage?: string | null
 }
 
 /** 最大回覆巢狀深度 */
 const MAX_DEPTH = 3
+
+/** 回覆數不超過此值時預設展開，太多才摺疊 */
+const AUTO_EXPAND_REPLIES = 2
 
 /**
  * 取得暱稱的首字元作為 Avatar fallback
@@ -90,12 +89,42 @@ function safeWebsite(website?: string): string | undefined {
   return undefined
 }
 
+function CommentAvatar({ comment, small }: { comment: Comment; small?: boolean }) {
+  return (
+    <Avatar size={small ? 'sm' : 'default'} className={cn('shrink-0', !small && 'size-9')}>
+      <AvatarImage src={comment.image || ''} alt={`${comment.displayUsername} 的頭像`} />
+      <AvatarFallback
+        style={{ backgroundColor: getAvatarColor(comment.displayUsername) }}
+        className="font-semibold text-white"
+      >
+        {getInitial(comment.displayUsername)}
+      </AvatarFallback>
+    </Avatar>
+  )
+}
+
+/** 氣泡下緣的操作膠囊按鈕 */
+function PillButton({
+  active,
+  className,
+  ...props
+}: React.ComponentProps<'button'> & { active?: boolean }) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        'inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs text-muted-foreground transition-colors',
+        'hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none',
+        active && 'text-ink hover:text-ink',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 /**
  * 單則留言元件
- *
- * 顯示使用者頭像、暱稱、時間、Markdown 內容。
- * 提供按讚、倒讚、回覆按鈕。
- * 回覆列表預設摺疊，點擊可展開，支援遞迴渲染。
  *
  * @param props - 留言元件屬性
  * @returns 留言元件
@@ -103,167 +132,170 @@ function safeWebsite(website?: string): string | undefined {
 export function CommentItem({
   comment,
   onLike,
-  onDislike,
   onReply,
   depth = 0,
   isAuthenticated = false,
+  currentUserId,
   userName,
   userImage,
 }: CommentItemProps) {
-  const [showReplies, setShowReplies] = useState(false)
+  const [showReplies, setShowReplies] = useState(
+    () => comment.replies.length <= AUTO_EXPAND_REPLIES
+  )
   const [showReplyForm, setShowReplyForm] = useState(false)
 
   const hasReplies = comment.replies.length > 0
   const websiteHref = safeWebsite(comment.website)
+  const isMine = !!currentUserId && comment.userId === currentUserId
+  const isReply = depth > 0
+  // 只有頂層的自己留言靠右；回覆串裡一律靠左，彎折線才接得上
+  const alignRight = isMine && !isReply
+  const created = dayjs(comment.createdAt)
 
   /** 處理回覆送出 */
   const handleReply = useCallback(
     async (data: CommentFormValues, guard: CommentGuardFields) => {
       const ok = await onReply(comment.id, data, guard)
-      // 失敗時保留回覆框與內容
-      if (ok) setShowReplyForm(false)
+      // 失敗時保留回覆框與內容，成功則展開回覆串讓人看到自己剛送出的回覆
+      if (ok) {
+        setShowReplyForm(false)
+        setShowReplies(true)
+      }
       return ok
     },
     [comment.id, onReply]
   )
 
-  return (
-    <div
-      className={cn(
-        'group/comment',
-        depth > 0 && 'ml-6 border-l-2 border-border/50 pl-4 sm:ml-8 sm:pl-6'
-      )}
-    >
-      <div className="flex gap-3 py-3">
-        {/* 使用者頭像 */}
-        <Avatar size="default" className="shrink-0">
-            <AvatarImage src={comment.image || ''} alt={`${comment.displayUsername} 的頭像`} />
-          <AvatarFallback
-            style={{ backgroundColor: getAvatarColor(comment.displayUsername) }}
-            className="text-white font-semibold"
-          >
-            {getInitial(comment.displayUsername)}
-          </AvatarFallback>
-        </Avatar>
+  // 摺疊時顯示的頭像堆疊（不重複，最多三位）
+  const replierStack = [
+    ...new Map(comment.replies.map((r) => [r.displayUsername, r])).values(),
+  ].slice(0, 3)
 
-        {/* 留言主體 */}
-        <div className="min-w-0 flex-1 space-y-1.5">
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+    >
+      <div className={cn('flex items-start gap-3', alignRight && 'flex-row-reverse')}>
+        {/* 頭像下方的直線，往下接到回覆串的彎折線 */}
+        <div className="flex flex-col items-center self-stretch">
+          <CommentAvatar comment={comment} small={isReply} />
+          {showReplies && hasReplies && !alignRight && (
+            <span aria-hidden className="comment-rail mt-1 flex-1" />
+          )}
+        </div>
+
+        <div
+          className={cn(
+            'flex min-w-0 max-w-[min(100%,40rem)] flex-1 flex-col',
+            alignRight ? 'items-end' : 'items-start'
+          )}
+        >
           {/* 使用者資訊列 */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold text-foreground">
-              {comment.displayUsername}
-            </span>
+          <div
+            className={cn(
+              'mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 px-1 text-xs text-muted-foreground',
+              alignRight && 'flex-row-reverse'
+            )}
+          >
+            <span className="text-sm font-medium text-foreground">{comment.displayUsername}</span>
+
+            {isMine && (
+              <span className="rounded-full bg-ink-soft px-1.5 py-px text-[0.65rem] text-ink">
+                {m.comment_you()}
+              </span>
+            )}
 
             {websiteHref && (
               <a
                 href={websiteHref}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                className="text-muted-foreground hover:text-primary"
+                className="hover:text-ink"
                 aria-label={m.comment_website_aria({ name: comment.displayUsername })}
               >
                 <ExternalLinkIcon className="size-3" />
               </a>
             )}
 
-            {comment.parentId && (
-              <Badge variant="secondary" className="text-xs">{m.comment_reply()}</Badge>
-            )}
-
             {comment.pending && (
-              <Badge variant="outline" className="border-amber-500/40 text-xs text-amber-600 dark:text-amber-400">
+              <span className="rounded-full border border-dashed border-amber-500/50 px-1.5 py-px text-[0.65rem] text-amber-600 dark:text-amber-400">
                 {m.comment_pending_badge()}
-              </Badge>
+              </span>
             )}
 
-            <span className="text-xs text-muted-foreground">
-              {dayjs(comment.createdAt).locale(dayjsLocale()).fromNow()}
-            </span>
+            <time dateTime={comment.createdAt} title={created.format('YYYY-MM-DD HH:mm')}>
+              {created.locale(dayjsLocale()).fromNow()}
+            </time>
 
             {comment.location && (
-              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-0.5">
                 <MapPinIcon className="size-3" />
                 {comment.location}
               </span>
             )}
           </div>
 
-          {/* 留言內容 */}
-          <CommentMarkdownRenderer content={comment.content} />
+          {/* 氣泡本體 */}
+          <div
+            data-side={alignRight ? 'right' : 'left'}
+            data-mine={isMine || undefined}
+            className={cn(
+              'comment-bubble max-w-full px-4 pt-3 pb-4',
+              comment.pending && 'opacity-75',
+              isReply && 'px-3.5 pt-2.5 pb-3.5'
+            )}
+          >
+            {comment.pin && (
+              <span
+                className={cn(
+                  'comment-seal comment-seal-sm absolute -top-2.5 bg-background',
+                  alignRight ? '-left-2' : '-right-2'
+                )}
+              >
+                {m.comment_pinned()}
+              </span>
+            )}
+            <CommentMarkdownRenderer content={comment.content} />
+          </div>
 
-          {/* 操作按鈕列 */}
-          <div className="flex items-center gap-1 pt-1">
-            {/* 按讚：active 狀態由 comment.liked 決定 */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
+          {/* 操作膠囊：貼在氣泡下緣 */}
+          <div
+            className={cn(
+              'relative z-10 -mt-3 flex items-center gap-0.5 rounded-full border border-border bg-background p-0.5 shadow-sm',
+              alignRight ? 'mr-3' : 'ml-3'
+            )}
+          >
+            <PillButton
+              active={comment.liked}
               onClick={() => onLike(comment.id)}
-              className={cn(
-                'gap-1 text-muted-foreground',
-                comment.liked && 'text-primary'  // ✅ 改用 comment.liked
-              )}
               aria-label={m.comment_like()}
+              aria-pressed={comment.liked}
             >
-              <ThumbsUpIcon className="size-3.5" />
-              {comment.likes > 0 && (
-                <span className="text-xs">{comment.likes}</span>
-              )}
-            </Button>
-
-            {/* 倒讚：API 目前無 disliked 欄位，不顯示 active 狀態 */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              onClick={() => onDislike(comment.id)}
-              className="gap-1 text-muted-foreground"
-              aria-label={m.comment_dislike()}
-            >
-              <ThumbsDownIcon className="size-3.5" />
-              {comment.dislikes > 0 && (
-                <span className="text-xs">{comment.dislikes}</span>
-              )}
-            </Button>
+              <HeartIcon
+                key={String(comment.liked)}
+                className={cn('size-3.5', comment.liked && 'comment-like-pop fill-current')}
+              />
+              {comment.likes > 0 && <span className="tabular-nums">{comment.likes}</span>}
+            </PillButton>
 
             {/* 回覆按鈕（需登入且限制巢狀深度） */}
             {isAuthenticated && depth < MAX_DEPTH && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
+              <PillButton
+                active={showReplyForm}
                 onClick={() => setShowReplyForm((prev) => !prev)}
-                className="gap-1 text-muted-foreground"
-                aria-label={m.comment_reply()}
+                aria-expanded={showReplyForm}
               >
-                <MessageSquareIcon className="size-3.5" />
-                <span className="text-xs">{m.comment_reply()}</span>
-              </Button>
-            )}
-
-            {/* 展開/收合回覆 */}
-            {hasReplies && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
-                onClick={() => setShowReplies((prev) => !prev)}
-                className="gap-1 text-muted-foreground ml-auto"
-              >
-                {showReplies ? (
-                  <ChevronDownIcon className="size-3.5" />
-                ) : (
-                  <ChevronRightIcon className="size-3.5" />
-                )}
-                <span className="text-xs">
-                  {m.comment_reply_count({ count: String(comment.replies.length) })}
-                </span>
-              </Button>
+                <ReplyIcon className="size-3.5" />
+                {m.comment_reply()}
+              </PillButton>
             )}
           </div>
 
           {/* 回覆表單 */}
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {showReplyForm && (
               <motion.div
                 key="reply-form"
@@ -271,9 +303,10 @@ export function CommentItem({
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="overflow-hidden"
+                // 往外撐一點再 overflow-hidden，展開動畫時才不會切到氣泡的框線與陰影
+                className="-mx-2 w-[calc(100%+1rem)] overflow-hidden px-2"
               >
-                <div className="pt-2">
+                <div className="pt-3 pb-2">
                   <CommentForm
                     parentId={comment.id}
                     compact
@@ -287,37 +320,72 @@ export function CommentItem({
             )}
           </AnimatePresence>
 
-          {/* 回覆列表（預設摺疊） */}
-          <AnimatePresence>
-            {showReplies && hasReplies && (
-              <motion.div
-                key="replies"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="pt-1">
-                  {comment.replies.map((reply) => (
-                    <CommentItem
-                      key={reply.id}
-                      comment={reply}
-                      onLike={onLike}
-                      onDislike={onDislike}
-                      onReply={onReply}
-                      depth={depth + 1}
-                      isAuthenticated={isAuthenticated}
-                      userName={userName}
-                      userImage={userImage}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* 摺疊中的回覆：頭像堆疊 + 數量 */}
+          {hasReplies && !showReplies && (
+            <button
+              type="button"
+              onClick={() => setShowReplies(true)}
+              className="mt-2.5 ml-1 inline-flex items-center gap-2 rounded-full py-0.5 pr-2.5 pl-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <span className="flex -space-x-1.5">
+                {replierStack.map((r) => (
+                  <span key={r.id} className="rounded-full ring-2 ring-background">
+                    <CommentAvatar comment={r} small />
+                  </span>
+                ))}
+              </span>
+              {m.comment_show_replies({ count: String(comment.replies.length) })}
+            </button>
+          )}
         </div>
       </div>
-    </div>
+
+      {/* 回覆串 */}
+      <AnimatePresence initial={false}>
+        {showReplies && hasReplies && (
+          <motion.div
+            key="replies"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="-mx-2 -mb-2 overflow-hidden px-2 pb-2"
+          >
+            <ol
+              data-depth={isReply ? 'nested' : 'root'}
+              className={cn('comment-thread space-y-5 pt-5', isReply ? 'ml-8' : 'ml-9')}
+            >
+              {comment.replies.map((reply) => (
+                <li key={reply.id} className="comment-thread-item">
+                  <CommentItem
+                    comment={reply}
+                    onLike={onLike}
+                    onReply={onReply}
+                    depth={depth + 1}
+                    isAuthenticated={isAuthenticated}
+                    currentUserId={currentUserId}
+                    userName={userName}
+                    userImage={userImage}
+                  />
+                </li>
+              ))}
+            </ol>
+            {comment.replies.length > AUTO_EXPAND_REPLIES && (
+              <button
+                type="button"
+                onClick={() => setShowReplies(false)}
+                className={cn(
+                  'mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground',
+                  isReply ? 'ml-8' : 'ml-9'
+                )}
+              >
+                <ChevronUpIcon className="size-3.5" />
+                {m.comment_hide_replies()}
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.article>
   )
 }
