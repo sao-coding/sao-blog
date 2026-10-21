@@ -18,6 +18,13 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "tan-blog", "run", "dev"],
       "port": 3004
+    },
+    {
+      "name": "tan-blog-prod",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["apps/tan-blog/.output/server/index.mjs"],
+      "env": { "PORT": "3014", "REVALIDATE_SECRET": "local-prod-preview-secret" },
+      "port": 3014
     }
   ]
 }

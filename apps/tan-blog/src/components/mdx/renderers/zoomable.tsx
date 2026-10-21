@@ -95,7 +95,8 @@ export function Zoomable({
   const html = useMemo(() => (source ? snapshot(source) : null), [source])
   // 相簿裡每張的說明不同，讀各自 img 上的 data-lightbox-label（MdxImage 已排除檔名 alt）
   const itemLabel = gallery ? source?.dataset.lightboxLabel || undefined : label
-  const imageSrc = source instanceof HTMLImageElement ? source.currentSrc || source.src : undefined
+  // 先判斷 source：SSR 時它是 null，server 上沒有 HTMLImageElement，直接 instanceof 會丟 ReferenceError
+  const imageSrc = source && source instanceof HTMLImageElement ? source.currentSrc || source.src : undefined
 
   // 燈箱開著時藏起原圖（切換到別張時換藏那一張）；關閉或元件卸載（例如換頁）時還原
   useEffect(() => {

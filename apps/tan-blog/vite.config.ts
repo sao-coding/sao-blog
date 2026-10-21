@@ -19,7 +19,10 @@ export default defineConfig({
       strategy: ['url', 'baseLocale'],
     }),
     nitro({
-      rollupConfig: { external: [/^@sentry\//] },
+      // @excalidraw 只在瀏覽器端 useEffect 內動態 import。打包進 server 時，Nitro 會把它與
+      // Radix Dialog 共用的依賴（react-remove-scroll 等）合進同一個 chunk，SSR 一載入就執行到
+      // 頂層的 `window` 而丟 ReferenceError，所以不打包進 server。
+      rollupConfig: { external: [/^@sentry\//, /^@excalidraw\//] },
       // /admin 代理到獨立部署的後台（等同舊 mdx-blog next.config 的 rewrites，網址不變）。
       // admin 的 router basepath / vite base 皆為 /admin，所以目的地保留 /admin 前綴。
       routeRules: {
