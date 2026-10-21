@@ -13,6 +13,7 @@ import {
 } from '@sao-blog/mdx/types'
 
 import { ErrorComponent } from '@/components/index'
+import { m } from '#/paraglide/messages'
 import {
   defaultMDXComponents,
   mergeMDXComponents,
@@ -69,5 +70,13 @@ export function CompiledMdx({ compiled, components }: CompiledMdxProps) {
   if (!content) {
     return <ErrorComponent error="內容格式版本不相容，請重新編譯。" />
   }
-  return <div className="mdx-wrapper text-lg">{content}</div>
+  // --mdx-figure-label：圖說編號前綴（圖／Fig.／図），CSS counter 的 content 用得到，所以以帶引號的字串傳進去
+  return (
+    <div
+      className="mdx-wrapper text-lg"
+      style={{ '--mdx-figure-label': JSON.stringify(m.mdx_figure_label()) } as React.CSSProperties}
+    >
+      {content}
+    </div>
+  )
 }

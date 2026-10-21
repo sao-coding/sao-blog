@@ -134,5 +134,17 @@
   "comment_sent_pending": "コメントを送信しました",
   "comment_sent_pending_description": "承認されると公開されます。それまではあなたにだけ表示されます。",
   "comment_send_failed": "送信に失敗しました。しばらくしてからもう一度お試しください。",
-  "login_too_many_attempts": "試行回数が多すぎます。しばらくしてからもう一度お試しください。"
+  "login_too_many_attempts": "試行回数が多すぎます。しばらくしてからもう一度お試しください。",
+  "image_alt_fallback": "画像",
+  "image_load_failed": "画像を読み込めませんでした",
+  "lightbox_title": "拡大表示",
+  "lightbox_open_with_label": "拡大表示：{label}",
+  "lightbox_zoom_out": "縮小",
+  "lightbox_zoom_in": "拡大",
+  "lightbox_reset": "リセット",
+  "lightbox_fit": "画面に合わせる",
+  "lightbox_close": "閉じる",
+  "mdx_figure_label": "図",
+  "lightbox_prev": "前の画像",
+  "lightbox_next": "次の画像"
 }
