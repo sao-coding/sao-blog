@@ -61,7 +61,7 @@ jobs:
               export PATH=$PATH:/usr/local/bin &&
               cd /volume1/docker/blog-server &&
               docker load -i sao-blog-server.tar &&
-              docker compose up -d --no-build &&
+              docker compose --env-file apps/server/.env up -d --no-build &&
               rm -f sao-blog-server.tar &&
               docker image prune -f
             '
