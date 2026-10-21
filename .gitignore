@@ -43,6 +43,9 @@ lerna-debug.log*
 coverage
 .nyc_output
 
+# Typesense 資料（docker-compose.yml 的 volume）
+/typesense-data
+
 # Misc
 *.tgz
 .cache

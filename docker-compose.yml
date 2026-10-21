@@ -1,6 +1,9 @@
+# 部署：docker compose --env-file apps/server/.env up -d --build
+# --env-file 讓 typesense 的 --api-key 與 server 的 TYPESENSE_ADMIN_API_KEY 用同一個值
 services:
   app:
     image: sao-blog-server:latest
+    container_name: sao-blog-server
     build:
       context: .
       dockerfile: apps/server/Dockerfile
@@ -10,7 +13,32 @@ services:
     restart: unless-stopped
     networks:
       - pg-network
-      
+      - sao-blog-network
+    # 只保證啟動順序；搜尋是選用功能，Typesense 異常時 server 照常運作
+    depends_on:
+      - typesense
+
+  # 全文搜尋。不對外開 port，只給 server 經 sao-blog-network 連線（前台走 API proxy）
+  typesense:
+    image: typesense/typesense:30.2
+    container_name: sao-blog-typesense
+    restart: unless-stopped
+    volumes:
+      - ./typesense-data:/data
+    command: ["--data-dir", "/data", "--api-key", "${TYPESENSE_ADMIN_API_KEY:?TYPESENSE_ADMIN_API_KEY is required}"]
+    healthcheck:
+      # 映像檔不保證有 curl，用 bash 的 /dev/tcp 打 /health；載入資料時會回 {"ok":false}
+      test: ["CMD", "bash", "-c", 'exec 3<>/dev/tcp/127.0.0.1/8108 && printf "GET /health HTTP/1.0\r\n\r\n" >&3 && grep -q "\"ok\":true" <&3']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - sao-blog-network
+
 networks:
   pg-network:
     external: true
+  sao-blog-network:
+    name: sao-blog-network
+    driver: bridge
