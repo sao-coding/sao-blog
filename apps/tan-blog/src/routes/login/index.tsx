@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 import { getServerSession } from '@/lib/get-session'
+import { safeRedirect } from '@/lib/safe-redirect'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { LoginForm } from './-components/login-form'
@@ -16,7 +17,8 @@ export const Route = createFileRoute('/login/')({
   beforeLoad: async ({ search }) => {
     const session = await getServerSession()
     if (session) {
-      throw redirect({ href: search.redirect || '/' })
+      // 只允許導回本站，見 lib/safe-redirect.ts
+      throw redirect({ href: safeRedirect(search.redirect) })
     }
   },
   head: () => pageHead({

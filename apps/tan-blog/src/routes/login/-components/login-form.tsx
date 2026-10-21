@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { Turnstile, turnstileSiteKey, type TurnstileHandle } from '@/components/turnstile'
+import { safeRedirect } from '@/lib/safe-redirect'
 import { useSearch } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { Button } from '@sao-blog/ui/components/button'
@@ -33,6 +34,9 @@ export function LoginForm({
   // login 路由自己有 validateSearch({ redirect: z.string().optional() })，
   // 這裡用 strict:false 讓元件不用綁死在單一路由型別上。
   const search = useSearch({ strict: false }) as { redirect?: string }
+  // 只允許導回本站（防 open redirect），見 lib/safe-redirect.ts
+  const redirectTo = safeRedirect(search.redirect, '/admin')
+  const socialCallback = safeRedirect(search.redirect, '/')
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -53,9 +57,8 @@ export function LoginForm({
       })
     } else {
       toast.add({ title: m.login_success(), type: 'success' })
-      // redirect 目標可能是本站路徑，也可能是 admin app 的完整網址（跨 origin），
-      // 用 window.location 而非 router navigate 才能涵蓋兩種情況。
-      window.location.href = search.redirect ?? '/admin'
+      // /admin 由本站代理到獨立部署的後台，不是 tan-blog 的路由，所以用整頁導覽而非 router navigate
+      window.location.href = redirectTo
     }
     setLoading(false)
   }
@@ -115,7 +118,7 @@ export function LoginForm({
                 onClick={() =>
                   authClient.signIn.social({
                     provider: 'github',
-                    callbackURL: search.redirect ?? '/',
+                    callbackURL: socialCallback,
                   })
                 }
               >
@@ -128,7 +131,7 @@ export function LoginForm({
                 onClick={() =>
                   authClient.signIn.social({
                     provider: 'google',
-                    callbackURL: search.redirect ?? '/',
+                    callbackURL: socialCallback,
                   })
                 }
               >
