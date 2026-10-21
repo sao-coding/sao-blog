@@ -57,5 +57,7 @@
     }
   body {
     @apply bg-background text-foreground;
+    /* iOS Safari：Drawer 的遮罩是 absolute，body 要有定位，頁面捲動後才蓋得滿 */
+    position: relative;
   }
 }
