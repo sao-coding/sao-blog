@@ -61,8 +61,12 @@ export const componentRegistry = {
     translatableProps: ['title'],
   }),
   Accordion: define({
-    description: '折疊面板容器，子元素為 AccordionItem',
-    props: { multiple: z.boolean().optional() },
+    description:
+      '折疊面板容器，子元素為 AccordionItem。variant="faq" 時每項標上「問／答」印章，適合常見問題',
+    props: {
+      multiple: z.boolean().optional(),
+      variant: z.enum(['default', 'faq']).optional(),
+    },
     children: true,
   }),
   AccordionItem: define({

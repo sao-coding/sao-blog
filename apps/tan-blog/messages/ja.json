@@ -200,5 +200,10 @@
   "tweet_video": "X で動画を再生",
   "footnote_back": "脚注 {ref} の参照箇所に戻る",
   "footnotes_label": "脚注",
-  "footnote_back_nth": "脚注 {ref} の {nth} 番目の参照箇所に戻る"
+  "footnote_back_nth": "脚注 {ref} の {nth} 番目の参照箇所に戻る",
+  "accordion_count": "全 {count} 項目",
+  "accordion_expand_all": "すべて開く",
+  "accordion_collapse_all": "すべて閉じる",
+  "faq_q": "問",
+  "faq_a": "答"
 }

@@ -200,5 +200,10 @@
   "tweet_video": "在 X 上播放影片",
   "footnote_back": "回到註腳 {ref} 的引用處",
   "footnotes_label": "註腳",
-  "footnote_back_nth": "回到註腳 {ref} 的第 {nth} 處引用"
+  "footnote_back_nth": "回到註腳 {ref} 的第 {nth} 處引用",
+  "accordion_count": "共 {count} 項",
+  "accordion_expand_all": "全部展開",
+  "accordion_collapse_all": "全部收合",
+  "faq_q": "問",
+  "faq_a": "答"
 }

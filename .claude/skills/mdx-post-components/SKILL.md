@@ -47,7 +47,8 @@ description: Reference for the JSX block components available when writing artic
 </Accordion>
 ```
 
-- `Accordion.multiple`: 是否允許同時展開多項，預設 `false`（單選）
+- `Accordion.multiple`: 是否允許同時展開多項，預設 `false`（單選）；讀者也能用上方的「全部展開」一次打開
+- `Accordion.variant`: `default`(預設，左側編號 01、02) / `faq`（每項標上「問／答」印章，適合常見問題）
 - `AccordionItem.title`: 必填，折疊標題
 - `AccordionItem.open`: 選填，預設是否展開
 

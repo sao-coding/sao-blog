@@ -200,5 +200,10 @@
   "tweet_video": "Play video on X",
   "footnote_back": "Back to reference {ref}",
   "footnotes_label": "Footnotes",
-  "footnote_back_nth": "Back to reference {ref} (occurrence {nth})"
+  "footnote_back_nth": "Back to reference {ref} (occurrence {nth})",
+  "accordion_count": "{count} items",
+  "accordion_expand_all": "Expand all",
+  "accordion_collapse_all": "Collapse all",
+  "faq_q": "Q",
+  "faq_a": "A"
 }

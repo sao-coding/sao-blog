@@ -26,6 +26,11 @@ export const COMPONENT_SNIPPETS: Snippet[] = [
     body: '<Accordion>\n  <AccordionItem title="標題">\n    $0\n  </AccordionItem>\n</Accordion>',
   },
   {
+    label: 'Accordion 問答（FAQ）',
+    description: '每項標上「問／答」印章',
+    body: '<Accordion variant="faq">\n  <AccordionItem title="$0問題一？">\n  答案。\n  </AccordionItem>\n  <AccordionItem title="問題二？">\n  答案。\n  </AccordionItem>\n</Accordion>',
+  },
+  {
     label: 'Tabs 分頁',
     description: '多個分頁切換',
     body: '<Tabs>\n  <Tab label="分頁一">\n    $0\n  </Tab>\n  <Tab label="分頁二">\n  </Tab>\n</Tabs>',

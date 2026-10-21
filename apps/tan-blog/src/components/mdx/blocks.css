@@ -465,12 +465,39 @@
   content: none;
 }
 
-/* ── 折疊（accordion.tsx）──────────────────────────────────────────────────── */
+/* ── 折疊（accordion.tsx）──────────────────────────────────────────────────────
+ * 題簽（共幾項＋全部展開）→ 一列列索引籤：左側編號 01、02，打開的那項編號染朱、
+ * 左側一道朱線、底色微深；右側的 + 轉 45° 變 ×。faq 版編號換成「問」印、內文前一枚「答」。 */
 .mdx-accordion {
   background: var(--card);
 }
+.mdx-accordion > .mdx-block-head {
+  background: var(--block-surface);
+}
+.mdx-accordion-item {
+  position: relative;
+  transition: background-color 200ms ease-out;
+}
 .mdx-accordion-item + .mdx-accordion-item {
   border-top: 1px solid var(--block-rule);
+}
+/* 打開的那一項：左側朱線＋微深的底，一眼看出現在開的是哪一項 */
+.mdx-accordion-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--ink);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.mdx-accordion-item[data-open] {
+  background: var(--block-surface);
+}
+.mdx-accordion-item[data-open]::before {
+  opacity: 1;
 }
 /* Accordion.Header 是 <h3>（保留標題語意），但不要 prose 的標題字級與外距 */
 .mdx-accordion-header {
@@ -480,35 +507,49 @@
   line-height: inherit;
 }
 .mdx-accordion-trigger {
-  display: flex;
+  display: grid;
   width: 100%;
-  align-items: flex-start;
-  gap: 0.625rem;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 0.625rem;
   padding: 0.875rem 1.125rem;
   text-align: left;
   font-weight: 600;
   color: var(--foreground);
-  transition: background-color 150ms ease-out;
 }
-.mdx-accordion-trigger:hover {
-  background: var(--block-surface);
+.mdx-accordion-trigger:hover .mdx-accordion-title {
+  color: var(--ink);
 }
 .mdx-accordion-trigger:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: -2px;
 }
-.mdx-accordion-trigger svg {
-  flex: none;
-  width: 1rem;
-  height: 1rem;
-  margin-top: 0.35em;
+.mdx-accordion-index {
+  padding-top: 0.15em;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+  transition: color 200ms ease-out;
+}
+.mdx-accordion-item[data-open] .mdx-accordion-index {
+  color: var(--ink);
+}
+.mdx-accordion-title {
+  transition: color 150ms ease-out;
+}
+.mdx-accordion-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.2em;
   color: var(--muted-foreground);
   transition:
-    rotate 200ms ease-out,
+    rotate 250ms ease-out,
     color 150ms ease-out;
 }
-.mdx-accordion-trigger[data-panel-open] svg {
-  rotate: 90deg;
+.mdx-accordion-trigger[data-panel-open] .mdx-accordion-icon {
+  rotate: 45deg;
   color: var(--ink);
 }
 .mdx-accordion-panel {
@@ -520,15 +561,54 @@
 .mdx-accordion-panel[data-ending-style] {
   height: 0;
 }
-/* 內文對齊標題文字（避開左側箭頭） */
+/* 內文對齊標題文字（避開左側編號欄）；faq 版「答」印放在編號欄的位置 */
 .mdx-accordion-content {
-  padding: 0 1.125rem 1rem 2.75rem;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: 0.625rem;
+  padding: 0 1.125rem 1rem;
 }
-.mdx-accordion-content > :first-child {
+.mdx-accordion-body {
+  grid-column: 2;
+  min-width: 0;
+}
+.mdx-accordion-body > :first-child {
   margin-top: 0;
 }
-.mdx-accordion-content > :last-child {
+.mdx-accordion-body > :last-child {
   margin-bottom: 0;
+}
+/* 問／答印章：朱色方框文楷字，微斜；「答」淡一點 */
+.mdx-faq-seal {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  font-family: var(--font-wenkai);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  rotate: -4deg;
+}
+.mdx-faq-seal[data-answer] {
+  margin-top: 0.15em;
+  border-color: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
+  color: var(--muted-foreground);
+  rotate: 3deg;
+}
+@media (max-width: 480px) {
+  .mdx-accordion-trigger,
+  .mdx-accordion-content {
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    column-gap: 0.5rem;
+    padding-inline: 0.875rem;
+  }
+  .mdx-accordion-content {
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+  }
 }
 
 /* ── 分頁（tabs.tsx）：題簽列就是分頁列，朱色指示線滑到選中的分頁 ───────── */
