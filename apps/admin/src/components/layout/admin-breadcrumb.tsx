@@ -8,41 +8,41 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@sao-blog/ui/components/breadcrumb'
-import { BREADCRUMB_LABELS } from '@/config/breadcrumb'
+import { SEGMENT_LABELS } from '@/config/navigation'
 import { Link, useLocation } from '@tanstack/react-router'
 import React from 'react'
 
+// 編輯器網址最後一段是 uuid（/posts/editor/01a1…），顯示成「編輯」而不是一串亂碼
+const looksLikeId = (s: string) => /^[0-9a-f]{8}-[0-9a-f-]{20,}$/i.test(s) || /^\d+$/.test(s)
+
 export function AdminBreadcrumb() {
-  const location = useLocation()
-  const pathname = location.pathname
-  const segments = pathname.split('/').filter(Boolean)
-  // 加上 根路徑的處理 /admin 會被分割成 ['admin']，但我們希望它顯示為 '後台'
-  segments.unshift('') // 在開頭添加一個空字符串，代表根路徑
+  const { pathname } = useLocation()
+  const segments = pathname.replace(/^\/admin/, '').split('/').filter(Boolean)
+  const crumbs = [
+    { href: '/', label: '後台' },
+    ...segments.map((segment, i) => ({
+      href: `/${segments.slice(0, i + 1).join('/')}`,
+      label: looksLikeId(segment) ? '編輯' : (SEGMENT_LABELS[segment] ?? decodeURIComponent(segment)),
+    })),
+  ]
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        {segments.map((segment, index) => {
-          // 去掉 /admin 前綴，因為 Link 組件會自動處理路徑
-          const href = segments.slice(0, index + 1).join('/')
-          const isLast = index === segments.length - 1
-          const label = BREADCRUMB_LABELS[segment] || segment
-
+    <Breadcrumb className="min-w-0">
+      <BreadcrumbList className="flex-nowrap">
+        {crumbs.map((crumb, index) => {
+          const isLast = index === crumbs.length - 1
+          // 窄畫面只留最後兩層，避免擠成好幾行
+          const hideOnMobile = index < crumbs.length - 2
           return (
-            <React.Fragment key={href}>
-              <BreadcrumbItem>
+            <React.Fragment key={crumb.href}>
+              <BreadcrumbItem className={hideOnMobile ? 'hidden whitespace-nowrap lg:inline-flex' : 'min-w-0 whitespace-nowrap'}>
                 {isLast ? (
-                  <BreadcrumbPage>{label}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate">{crumb.label}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink render={
-                    <Link to={href}>
-                      {label}
-                    </Link>
-                  }
-                  />
+                  <BreadcrumbLink render={<Link to={crumb.href}>{crumb.label}</Link>} />
                 )}
               </BreadcrumbItem>
-              {!isLast && <BreadcrumbSeparator />}
+              {!isLast && <BreadcrumbSeparator className={hideOnMobile ? 'hidden lg:block' : undefined} />}
             </React.Fragment>
           )
         })}

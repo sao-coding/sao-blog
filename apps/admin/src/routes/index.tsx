@@ -1,4 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useRouteContext } from '@tanstack/react-router'
+import { Button } from '@sao-blog/ui/components/button'
+import { MessageCircleHeartIcon, NotebookPenIcon, SquarePenIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import AdminShell from '@/components/layout/admin-shell'
 import { StatCards } from '@/components/dashboard/stat-cards'
@@ -16,14 +18,34 @@ function App() {
     orpc.admin.dashboard.getOverview.queryOptions()
   )
 
+  const context = useRouteContext({ from: '__root__' })
+  const name = context && 'session' in context ? context.session.user.name : ''
   const isLoading = status === 'pending'
   const overview = data?.data
 
   return (
-    <AdminShell title="儀表板">
+    <AdminShell
+      title={name ? `${greeting()}，${name}` : greeting()}
+      description="網站的內容與互動概況。"
+      actions={
+        <>
+          <Button variant="outline" render={<Link to="/thinking/editor" />} nativeButton={false} className="max-sm:hidden">
+            <MessageCircleHeartIcon />
+            想法
+          </Button>
+          <Button variant="outline" render={<Link to="/notes/editor" />} nativeButton={false}>
+            <NotebookPenIcon />
+            寫日記
+          </Button>
+          <Button render={<Link to="/posts/editor" />} nativeButton={false}>
+            <SquarePenIcon />
+            寫文章
+          </Button>
+        </>
+      }
+    >
       <div className="space-y-6">
-        <StatCards counts={overview?.counts} isLoading={isLoading} />
-        <SearchIndexCard />
+        <StatCards counts={overview?.counts} growth={overview?.growth} isLoading={isLoading} />
         <CommentTrendChart
           data={overview?.commentTrend}
           isLoading={isLoading}
@@ -61,7 +83,17 @@ function App() {
             isLoading={isLoading}
           />
         </div>
+        <SearchIndexCard />
       </div>
     </AdminShell>
   )
+}
+
+function greeting() {
+  const h = new Date().getHours()
+  if (h < 5) return '夜深了'
+  if (h < 11) return '早安'
+  if (h < 14) return '午安'
+  if (h < 18) return '午後好'
+  return '晚安'
 }

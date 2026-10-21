@@ -415,8 +415,8 @@ export function PostEditor({ postId }: PostEditorProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:px-6 lg:px-8">
+      <header className="sticky top-14 z-20 -mx-4 -mt-4 border-b bg-background/80 backdrop-blur-md md:-mx-6 md:-mt-6">
+        <div className="flex h-14 items-center justify-between gap-3 px-4 md:px-6">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
@@ -435,7 +435,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                 {statusLabel}
               </Badge>
             )}
-            <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:inline-flex">
+            <span className="hidden items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground xl:inline-flex">
               <span className={isDirty ? 'size-1.5 rounded-full bg-primary' : 'size-1.5 rounded-full bg-emerald-500'} />
               {isSaving ? '儲存中…' : isDirty ? '未儲存的修改' : '已儲存'}
             </span>
@@ -479,7 +479,7 @@ export function PostEditor({ postId }: PostEditorProps) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 lg:px-8">
+      <div className="pt-6">
         {isEditMode && (
           <div className="mb-6">
             <LanguageTabs
@@ -527,7 +527,7 @@ export function PostEditor({ postId }: PostEditorProps) {
                       value={field.value}
                       onChange={(v) => field.onChange(v ?? '')}
                       language="markdown"
-                      height={isMobile ? 'max(360px, calc(100dvh - 240px))' : 'max(480px, calc(100vh - 260px))'}
+                      height={isMobile ? 'max(360px, calc(100dvh - 290px))' : 'max(480px, calc(100vh - 310px))'}
                       onSave={submitHandler('draft')}
                       onImageUpload={uploadFile}
                       onScrollRatioChange={setScrollRatio}
@@ -550,7 +550,7 @@ export function PostEditor({ postId }: PostEditorProps) {
             </div>
 
             {isDesktop && panelOpen && (
-              <aside className="sticky top-20 max-h-[calc(100vh-6rem)] self-start overflow-y-auto rounded-xl border bg-card/70 p-4 shadow-sm backdrop-blur-sm">
+              <aside className="sticky top-32 max-h-[calc(100vh-9rem)] self-start overflow-y-auto rounded-xl border bg-card/70 p-4 shadow-sm backdrop-blur-sm">
                 {settingsFields}
               </aside>
             )}

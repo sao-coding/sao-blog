@@ -33,6 +33,7 @@ function RouteComponent() {
   return (
     <AdminShell
       title="標籤"
+      description="跨分類的主題標記，一篇文章可以有多個標籤。"
       actions={
         <Button onClick={openCreateTagDialog} className="gap-2">
           <PlusIcon className="size-4" />
@@ -41,17 +42,12 @@ function RouteComponent() {
       }
     >
       <div>
-        {status === 'pending' ? (
-          <div className="flex h-64 items-center justify-center">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <DataTableContainer
+        <DataTableContainer
             columns={columns}
             data={tags?.data || []}
             searchColumnId="name"
+            isLoading={status === 'pending'}
           />
-        )}
       </div>
     </AdminShell>
   )

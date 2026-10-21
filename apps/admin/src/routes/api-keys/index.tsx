@@ -33,6 +33,7 @@ function RouteComponent() {
   return (
     <AdminShell
       title="API 金鑰"
+      description="給 MCP 與自動化工具使用的金鑰，建立後只會顯示一次。"
       actions={
         <Button onClick={openCreateApiKeyDialog} className="gap-2">
           <PlusIcon className="size-4" />
@@ -41,17 +42,12 @@ function RouteComponent() {
       }
     >
       <div>
-        {status === 'pending' ? (
-          <div className="flex h-64 items-center justify-center">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <DataTableContainer
+        <DataTableContainer
             columns={columns}
             data={apiKeys || []}
             searchColumnId="name"
+            isLoading={status === 'pending'}
           />
-        )}
       </div>
     </AdminShell>
   )

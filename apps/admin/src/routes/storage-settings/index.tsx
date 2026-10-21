@@ -7,6 +7,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useOverlay } from '@/hooks/use-overlay'
 import { Button } from '@sao-blog/ui/components/button'
 import { Badge } from '@sao-blog/ui/components/badge'
+import { Skeleton } from '@sao-blog/ui/components/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@sao-blog/ui/components/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@sao-blog/ui/components/empty'
 import { CloudIcon, PlusIcon } from 'lucide-react'
@@ -37,6 +38,7 @@ function RouteComponent() {
   return (
     <AdminShell
       title="儲存設定"
+      description="S3 相容的儲存空間連線，同時只會啟用一組。"
       actions={
         <Button onClick={openCreateDialog} className="gap-2">
           <PlusIcon className="size-4" />
@@ -45,8 +47,10 @@ function RouteComponent() {
       }
     >
       {status === 'pending' ? (
-        <div className="flex h-64 items-center justify-center">
-          <span className="text-muted-foreground">載入中...</span>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <Skeleton key={i} className="h-36 rounded-xl" />
+          ))}
         </div>
       ) : configs.length === 0 ? (
         <Empty>

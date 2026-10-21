@@ -16,6 +16,7 @@ import { Route as CommentsIndexRouteImport } from './routes/comments/index'
 import { Route as FilesIndexRouteImport } from './routes/files/index'
 import { Route as NotesIndexRouteImport } from './routes/notes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as SecurityIndexRouteImport } from './routes/security/index'
 import { Route as StorageSettingsIndexRouteImport } from './routes/storage-settings/index'
 import { Route as TagsIndexRouteImport } from './routes/tags/index'
 import { Route as ThinkingIndexRouteImport } from './routes/thinking/index'
@@ -60,6 +61,11 @@ const NotesIndexRoute = NotesIndexRouteImport.update({
 const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityIndexRoute = SecurityIndexRouteImport.update({
+  id: '/security/',
+  path: '/security/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StorageSettingsIndexRoute = StorageSettingsIndexRouteImport.update({
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/files/': typeof FilesIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/security/': typeof SecurityIndexRoute
   '/storage-settings/': typeof StorageSettingsIndexRoute
   '/tags/': typeof TagsIndexRoute
   '/thinking/': typeof ThinkingIndexRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/files': typeof FilesIndexRoute
   '/notes': typeof NotesIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/security': typeof SecurityIndexRoute
   '/storage-settings': typeof StorageSettingsIndexRoute
   '/tags': typeof TagsIndexRoute
   '/thinking': typeof ThinkingIndexRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/files/': typeof FilesIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/security/': typeof SecurityIndexRoute
   '/storage-settings/': typeof StorageSettingsIndexRoute
   '/tags/': typeof TagsIndexRoute
   '/thinking/': typeof ThinkingIndexRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/files/'
     | '/notes/'
     | '/posts/'
+    | '/security/'
     | '/storage-settings/'
     | '/tags/'
     | '/thinking/'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/notes'
     | '/posts'
+    | '/security'
     | '/storage-settings'
     | '/tags'
     | '/thinking'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/files/'
     | '/notes/'
     | '/posts/'
+    | '/security/'
     | '/storage-settings/'
     | '/tags/'
     | '/thinking/'
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   FilesIndexRoute: typeof FilesIndexRoute
   NotesIndexRoute: typeof NotesIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
+  SecurityIndexRoute: typeof SecurityIndexRoute
   StorageSettingsIndexRoute: typeof StorageSettingsIndexRoute
   TagsIndexRoute: typeof TagsIndexRoute
   ThinkingIndexRoute: typeof ThinkingIndexRoute
@@ -301,6 +314,13 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/posts/'
       preLoaderRoute: typeof PostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security/': {
+      id: '/security/'
+      path: '/security'
+      fullPath: '/security/'
+      preLoaderRoute: typeof SecurityIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/storage-settings/': {
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilesIndexRoute: FilesIndexRoute,
   NotesIndexRoute: NotesIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
+  SecurityIndexRoute: SecurityIndexRoute,
   StorageSettingsIndexRoute: StorageSettingsIndexRoute,
   TagsIndexRoute: TagsIndexRoute,
   ThinkingIndexRoute: ThinkingIndexRoute,

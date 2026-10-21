@@ -17,26 +17,17 @@ function RouteComponent() {
 
   return (
     <AdminShell
-      title="日記列表"
+      title="日記"
+      description="生活紀錄，可以附上心情、天氣與地點，也能歸到專欄。"
       actions={
-        <Button
-          render={
-            <Link className="inline-flex items-center" to="/notes/editor">
-              <PlusIcon className="h-4 w-4 mr-2" />
-            新增日記
-            </Link>
-          }
-        />
+        <Button render={<Link to="/notes/editor" />} nativeButton={false}>
+          <PlusIcon />
+          新增日記
+        </Button>
       }
     >
       <div>
-        {status === 'pending' ? (
-          <div className="flex items-center justify-center h-64">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <NotesTableWithActions data={notesData?.data || []} />
-        )}
+        <NotesTableWithActions data={notesData?.data || []} isLoading={status === 'pending'} />
       </div>
     </AdminShell>
   )

@@ -35,6 +35,7 @@ function RouteComponent() {
   return (
     <AdminShell
       title="專欄"
+      description="把相關的日記整理成系列。"
       actions={
         <Button onClick={openCreateTopicDialog} className="gap-2">
           <PlusIcon className="size-4" />
@@ -43,17 +44,12 @@ function RouteComponent() {
       }
     >
       <div>
-        {status === 'pending' ? (
-          <div className="flex h-64 items-center justify-center">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <DataTableContainer
+        <DataTableContainer
             columns={columns}
             data={topics?.data || []}
             searchColumnId="name"
+            isLoading={status === 'pending'}
           />
-        )}
       </div>
     </AdminShell>
   )

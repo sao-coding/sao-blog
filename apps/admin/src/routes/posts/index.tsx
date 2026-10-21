@@ -1,6 +1,8 @@
 import AdminShell from '@/components/layout/admin-shell'
 import { PostsTableWithActions } from '@/components/posts/posts-table-with-actions'
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { Button } from '@sao-blog/ui/components/button'
+import { PlusIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { orpc } from '@/utils/orpc'
 
@@ -14,15 +16,18 @@ function RouteComponent() {
   const { data: posts, status } = useQuery(orpc.admin.post.getPosts.queryOptions())
 
   return (
-    <AdminShell title="文章列表">
+    <AdminShell
+      title="文章"
+      description="長篇文章，發佈後會出現在部落格首頁與文章列表。"
+      actions={
+        <Button render={<Link to="/posts/editor" />} nativeButton={false}>
+          <PlusIcon />
+          新增文章
+        </Button>
+      }
+    >
       <div>
-        {status === 'pending' ? (
-          <div className="flex items-center justify-center h-64">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <PostsTableWithActions data={posts?.data || []} />
-        )}
+        <PostsTableWithActions data={posts?.data || []} isLoading={status === 'pending'} />
       </div>
     </AdminShell>
   )

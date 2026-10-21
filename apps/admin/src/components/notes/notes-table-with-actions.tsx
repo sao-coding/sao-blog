@@ -24,9 +24,10 @@ type Notes = RouterOutputs['admin']['note']['getNotes']['data']
 
 interface NotesTableWithActionsProps {
   data: Notes
+  isLoading?: boolean
 }
 
-export function NotesTableWithActions({ data }: NotesTableWithActionsProps) {
+export function NotesTableWithActions({ data, isLoading }: NotesTableWithActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedNotes, setSelectedNotes] = useState<Notes>([])
 
@@ -65,6 +66,8 @@ export function NotesTableWithActions({ data }: NotesTableWithActionsProps) {
         searchColumnId="title"
         data={data}
         onBatchDelete={handleBatchDelete}
+        isLoading={isLoading}
+        emptyDescription="還沒有日記，按右上角「新增日記」寫下第一篇。"
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

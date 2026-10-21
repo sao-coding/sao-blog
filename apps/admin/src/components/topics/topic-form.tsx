@@ -172,7 +172,7 @@ export function TopicForm({ mode, topic, onSuccess, onCancel }: TopicFormProps) 
         </Field>
       </FieldGroup>
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
         <Button
           type="button"
           variant="outline"

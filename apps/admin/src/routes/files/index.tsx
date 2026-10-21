@@ -34,7 +34,7 @@ function RouteComponent() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
-    <AdminShell title="檔案管理">
+    <AdminShell title="檔案" description="上傳到儲存空間的圖片與附件，可直接拖曳上傳。">
       <div className="space-y-4">
         <FileUploadZone
           accept={activeCategoryConfig?.accept}

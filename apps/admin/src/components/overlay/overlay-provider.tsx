@@ -13,13 +13,14 @@ import {
 } from '@sao-blog/ui/components/alert-dialog'
 import { Button } from '@sao-blog/ui/components/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@sao-blog/ui/components/dialog'
+  ResponsiveDialog,
+  ResponsiveDialogBody,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from '@sao-blog/ui/components/responsive-dialog'
 import { useOverlayStore } from '@/stores/overlay-store'
 
 interface OverlayProviderProps {
@@ -111,8 +112,10 @@ function OverlayViewport() {
           )
         }
 
+        // 一般對話框（多半是表單）：桌面置中、手機從底部拉起
+        const hasFooter = !renderResult.hideCancel || !renderResult.hideConfirm
         return (
-          <Dialog
+          <ResponsiveDialog
             key={id}
             open={item.isOpen}
             onOpenChange={(isOpen) => {
@@ -121,36 +124,38 @@ function OverlayViewport() {
               }
             }}
           >
-            <DialogContent showCloseButton={!item.isPending}>
-              <DialogHeader>
-                <DialogTitle>{renderResult.title}</DialogTitle>
+            <ResponsiveDialogContent showCloseButton={!item.isPending}>
+              <ResponsiveDialogHeader>
+                <ResponsiveDialogTitle>{renderResult.title}</ResponsiveDialogTitle>
                 {renderResult.description ? (
-                  <DialogDescription>{renderResult.description}</DialogDescription>
+                  <ResponsiveDialogDescription>{renderResult.description}</ResponsiveDialogDescription>
                 ) : null}
-              </DialogHeader>
-              {renderResult.body}
-              <DialogFooter>
-                {renderResult.hideCancel ? null : (
-                  <Button
-                    variant="outline"
-                    disabled={item.isPending}
-                    onClick={handleCancel}
-                  >
-                    {renderResult.cancelLabel ?? '取消'}
-                  </Button>
-                )}
-                {renderResult.hideConfirm ? null : (
-                  <Button
-                    variant={renderResult.confirmVariant ?? 'default'}
-                    disabled={item.isPending || renderResult.confirmDisabled}
-                    onClick={handleConfirm}
-                  >
-                    {renderResult.confirmLabel ?? '確認'}
-                  </Button>
-                )}
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </ResponsiveDialogHeader>
+              <ResponsiveDialogBody>{renderResult.body}</ResponsiveDialogBody>
+              {hasFooter && (
+                <ResponsiveDialogFooter>
+                  {renderResult.hideCancel ? null : (
+                    <Button
+                      variant="outline"
+                      disabled={item.isPending}
+                      onClick={handleCancel}
+                    >
+                      {renderResult.cancelLabel ?? '取消'}
+                    </Button>
+                  )}
+                  {renderResult.hideConfirm ? null : (
+                    <Button
+                      variant={renderResult.confirmVariant ?? 'default'}
+                      disabled={item.isPending || renderResult.confirmDisabled}
+                      onClick={handleConfirm}
+                    >
+                      {renderResult.confirmLabel ?? '確認'}
+                    </Button>
+                  )}
+                </ResponsiveDialogFooter>
+              )}
+            </ResponsiveDialogContent>
+          </ResponsiveDialog>
         )
       })}
     </>

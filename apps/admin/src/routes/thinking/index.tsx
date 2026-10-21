@@ -36,30 +36,22 @@ function RouteComponent() {
   return (
     <AdminShell
       title="想法"
+      description="隨手記下的短篇想法。"
       actions={
-        <Button
-          render={
-            <Link className="inline-flex items-center gap-2" to="/thinking/editor">
-              <PlusIcon className="size-4" />
-              新增想法
-            </Link>
-          }
-        />
+        <Button render={<Link to="/thinking/editor" />} nativeButton={false}>
+          <PlusIcon />
+          新增想法
+        </Button>
       }
     >
       <div>
-        {status === 'pending' ? (
-          <div className="flex h-64 items-center justify-center">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <DataTableContainer
+        <DataTableContainer
             columns={columns}
             data={thinkings?.data || []}
             searchColumnId="content"
             onBatchDelete={handleBatchDelete}
+            isLoading={status === 'pending'}
           />
-        )}
       </div>
     </AdminShell>
   )

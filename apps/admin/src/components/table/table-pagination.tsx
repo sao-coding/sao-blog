@@ -23,14 +23,14 @@ export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-2">
-      <div className="text-muted-foreground flex-1 text-sm">
+    <div className="flex flex-col-reverse gap-3 px-1 sm:flex-row sm:items-center sm:justify-between">
+      <div className="text-muted-foreground text-xs sm:text-sm">
         已選取 {table.getFilteredSelectedRowModel().rows.length} 筆，共{" "}
         {table.getFilteredRowModel().rows.length} 筆資料。
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
+      <div className="flex items-center justify-between gap-4 sm:justify-end lg:gap-8">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">每頁顯示</p>
+          <p className="hidden whitespace-nowrap text-sm font-medium lg:block">每頁顯示</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
@@ -49,7 +49,7 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[120px] items-center justify-center text-sm font-medium">
+        <div className="flex items-center justify-center text-sm font-medium tabular-nums whitespace-nowrap">
           第 {table.getState().pagination.pageIndex + 1} 頁，共{" "}
           {table.getPageCount()} 頁
         </div>

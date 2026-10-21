@@ -39,6 +39,7 @@ function RouteComponent() {
   return (
     <AdminShell
       title="分類"
+      description="文章的大分類，每篇文章屬於一個分類。"
       actions={
         <Button onClick={openCreateCategoryDialog} className="gap-2">
           <PlusIcon className="size-4" />
@@ -47,17 +48,12 @@ function RouteComponent() {
       }
     >
       <div>
-        {status === 'pending' ? (
-          <div className="flex items-center justify-center h-64">
-            <span className="text-muted-foreground">載入中...</span>
-          </div>
-        ) : (
-          <DataTableContainer
+        <DataTableContainer
             columns={columns}
             searchColumnId="name"
             data={categories?.data || []}
+            isLoading={status === 'pending'}
           />
-        )}
       </div>
     </AdminShell>
   )

@@ -3,216 +3,97 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
+  SidebarRail,
+  useSidebar,
 } from '@sao-blog/ui/components/sidebar'
+import { PlusIcon } from 'lucide-react'
+import { Link, useLocation, useRouteContext } from '@tanstack/react-router'
+import { env } from '@sao-blog/env/admin'
 import { NavUser } from './nav-user'
-import {
-  ChartColumnBigIcon,
-  CloudIcon,
-  Command,
-  FilesIcon,
-  FolderIcon,
-  Home,
-  KeyRoundIcon,
-  LayoutDashboardIcon,
-  MessageCircleHeartIcon,
-  MessageSquareIcon,
-  NotebookPenIcon,
-  PlusIcon,
-  Square,
-  SquarePenIcon,
-  TagIcon,
-} from 'lucide-react'
-import { Link, useRouteContext } from '@tanstack/react-router'
-import { useAuth } from '@/components/auth-provider'
+import { NAV_GROUPS, isNavActive } from '@/config/navigation'
+
+const BLOG_HOST = new URL(env.VITE_BLOG_URL).host
 
 const AppSidebar = () => {
-  const { session } = useRouteContext({ from: '__root__' })
-  console.log('Session in AppSidebar:', session) // 添加日志以调试会话数据
+  // __root 的 beforeLoad 在轉去登入頁時是直接 return，型別上 context 可能沒有 session
+  const context = useRouteContext({ from: '__root__' })
+  const session = context && 'session' in context ? context.session : undefined
+  const { pathname } = useLocation()
+  const { isMobile, setOpenMobile } = useSidebar()
+  // 手機版側欄是覆蓋在畫面上的 Sheet，點完連結要收起來
+  const closeOnMobile = () => isMobile && setOpenMobile(false)
 
   return (
-    <Sidebar variant="floating" className="z-20">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" 
+            <SidebarMenuButton
+              size="lg"
+              tooltip="後台首頁"
               render={
-                <Link to="/">
-                  <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <Command className="size-4" />
+                <Link to="/" onClick={closeOnMobile}>
+                  {/* 朱印：呼應前台信箋的落款 */}
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary font-serif text-base font-bold leading-none text-primary-foreground shadow-sm">
+                    箋
                   </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">blog</span>
-                    <span className="truncate text-xs">Enterprise</span>
+                  <div className="grid flex-1 text-left leading-tight">
+                    <span className="truncate text-sm font-semibold">部落格後台</span>
+                    <span className="truncate text-xs text-muted-foreground">{BLOG_HOST}</span>
                   </div>
                 </Link>
-              } />
+              }
+            />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/">
-                  <LayoutDashboardIcon />
-                  <span>儀表板</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/posts">
-                  <SquarePenIcon />
-                  <span>文章</span>
-                </Link>
-              } />
-              <SidebarMenuAction render={
-                <Link to="/posts/editor">
-                  <PlusIcon /> <span className="sr-only">新增文章</span>
-                </Link>
-              } />
-              <SidebarMenuSub className="ml-0 border-l-0 px-1.5">
-                <SidebarMenuButton render={
-                  <Link to=".">
-                    <Home />
-                    <span>子項目</span>
-                  </Link>
-                } />
-              </SidebarMenuSub>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/categories">
-                  <FolderIcon />
-                  <span>分類</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/tags">
-                  <TagIcon />
-                  <span>標籤</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/notes">
-                  <NotebookPenIcon />
-                  <span>日記</span>
-                </Link>
-              } />
-              <SidebarMenuAction render={
-                <Link to="/notes/editor">
-                  <PlusIcon /> <span className="sr-only">新增日記</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-          {/* 專欄 */}
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/topics">
-                  <ChartColumnBigIcon />
-                  <span>專欄</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-          {/* 想法 */}
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/thinking">
-                  <MessageCircleHeartIcon />
-                  <span>想法</span>
-                </Link>
-              } />
-              <SidebarMenuAction render={
-                <Link to="/thinking/editor">
-                  <PlusIcon /> <span className="sr-only">新增想法</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        {/* 留言管理 */}
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/comments">
-                  <MessageSquareIcon />
-                  <span>留言管理</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        {/* apiKeys */}
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/api-keys">
-                  <KeyRoundIcon />
-                  <span>API 金鑰</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        {/* 檔案與儲存設定 */}
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/files">
-                  <FilesIcon />
-                  <span>檔案管理</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton render={
-                <Link to="/storage-settings">
-                  <CloudIcon />
-                  <span>儲存設定</span>
-                </Link>
-              } />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+        {NAV_GROUPS.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarMenu>
+              {group.items.map((item) => (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton
+                    isActive={isNavActive(item, pathname)}
+                    tooltip={item.title}
+                    render={
+                      <Link to={item.to} onClick={closeOnMobile}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    }
+                  />
+                  {item.create && (
+                    <SidebarMenuAction
+                      showOnHover
+                      render={
+                        <Link to={item.create.to} onClick={closeOnMobile} title={item.create.label}>
+                          <PlusIcon />
+                          <span className="sr-only">{item.create.label}</span>
+                        </Link>
+                      }
+                    />
+                  )}
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={session.user} />
+        {/* 「前往網站」只放在頂部列右上角，不在這裡重複 */}
+        {session && <NavUser user={session.user} />}
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

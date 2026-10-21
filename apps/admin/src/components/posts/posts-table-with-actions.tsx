@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { DataTableContainer } from '@/components/table/table'
 import { columns } from './posts-columns'
-// import { deletePosts } from '../../_actions/posts-actions'
 import { toast } from 'sonner'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -18,19 +17,22 @@ import {
 import { Button } from '@sao-blog/ui/components/button'
 import { Loader2 } from 'lucide-react'
 import type { InferClientOutputs } from '@orpc/client'
-import type { client } from '@/utils/orpc'
-import { env } from '@sao-blog/env/admin'
+import { orpc, queryClient, type client } from '@/utils/orpc'
 
-type RouterOutputs = InferClientOutputs<typeof client>;
+type RouterOutputs = InferClientOutputs<typeof client>
 type Posts = RouterOutputs['admin']['post']['getPosts']['data']
 interface PostsTableWithActionsProps {
   data: Posts
+  isLoading?: boolean
 }
 
-export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
+export function PostsTableWithActions({ data, isLoading }: PostsTableWithActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedPosts, setSelectedPosts] = useState<Posts>([])
-  const [isDeleting, setIsDeleting] = useState(false)
+
+  // 原本直接 fetch `${API}/api/admin/posts${id}`：少了斜線、只送第一篇、沒帶登入 cookie，
+  // 回應格式也對不上（判斷 result.success），批次刪除一直會失敗。改用 oRPC 的 deletePosts。
+  const deletePostsMutation = useMutation(orpc.admin.post.deletePosts.mutationOptions())
 
   const handleBatchDelete = (posts: Posts) => {
     setSelectedPosts(posts)
@@ -40,30 +42,19 @@ export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
   const confirmDelete = async () => {
     if (selectedPosts.length === 0) return
 
-    setIsDeleting(true)
-
     try {
-      const postIds = selectedPosts.map((post) => post.id)
-      // const result = await deletePosts(postIds)
-
-      const res = await fetch(
-        `${env.VITE_API_URL}/api/admin/posts${postIds[0]}`,
-        { method: 'DELETE' }
-      )
-      const result = await res.json()
-
-      if (result.success) {
-        toast.success(`成功刪除 ${selectedPosts.length} 篇文章`)
-        setIsDeleteDialogOpen(false)
-        setSelectedPosts([])
-      } else {
-        toast.error(result.error || '刪除失敗，請稍後再試')
+      const res = await deletePostsMutation.mutateAsync({ ids: selectedPosts.map((post) => post.id) })
+      if (res.status !== 'success') {
+        toast.error(res.message || '刪除失敗，請稍後再試')
+        return
       }
+      await queryClient.invalidateQueries({ queryKey: orpc.admin.post.key() })
+      toast.success(`成功刪除 ${selectedPosts.length} 篇文章`)
+      setIsDeleteDialogOpen(false)
+      setSelectedPosts([])
     } catch (error) {
       console.error('Delete error:', error)
       toast.error('刪除失敗，請稍後再試')
-    } finally {
-      setIsDeleting(false)
     }
   }
 
@@ -74,12 +65,11 @@ export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
         searchColumnId="title"
         data={data}
         onBatchDelete={handleBatchDelete}
+        isLoading={isLoading}
+        emptyDescription="還沒有文章，按右上角「新增文章」開始寫第一篇。"
       />
 
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>確定要刪除選中的文章嗎？</AlertDialogTitle>
@@ -89,15 +79,11 @@ export function PostsTableWithActions({ data }: PostsTableWithActionsProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>取消</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
+            <AlertDialogCancel disabled={deletePostsMutation.isPending}>取消</AlertDialogCancel>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deletePostsMutation.isPending}>
+              {deletePostsMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="animate-spin" />
                   正在刪除...
                 </>
               ) : (
