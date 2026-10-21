@@ -14,8 +14,6 @@ export interface MdxGithubCardProps {
   repo: string
   /** 手動覆寫 repo 描述 */
   description?: string
-  /** 查不到 repo（404、API 額度用完）時改顯示的內容，通常是一般連結卡片 */
-  fallback: React.ReactNode
 }
 
 // GitHub（linguist）的語言代表色：語言色是 GitHub 卡片的辨識資訊，只用在一顆小圓點上
@@ -94,20 +92,22 @@ function Activity({ weeks }: { weeks: number[] }) {
  * GitHub repo 卡片（LinkCard 遇到 github.com/owner/repo 自動切換），刻意跟一般連結卡片長得不一樣：
  * 像 GitHub 自己的 repo 卡——repo 圖示＋owner / repo＋公開徽章、右上角 owner 頭像、
  * topics、語言色點＋星星／fork／授權／更新時間，底下一排過去一年每週的 commit 長條。
- * 資料走 API 的 github.getRepo（伺服器端快取 6 小時，GITHUB_TOKEN 選填）；查不到就顯示 fallback。
+ * 資料走 API 的 github.getRepo（伺服器端快取 6 小時，GITHUB_TOKEN 選填）。
+ * 抓不到（API 額度用完、網路錯誤、私有 repo）也維持 GitHub 卡片的樣子，不退回一般連結卡片：
+ * 名稱與頭像只靠網址就有（頭像用 github.com/{owner}.png，不需要 API），只是少了描述與統計。
  */
-export function MdxGithubCard({ href, owner, repo, description, fallback }: MdxGithubCardProps) {
-  const { data, isLoading, isError } = useQuery({
+export function MdxGithubCard({ href, owner, repo, description }: MdxGithubCardProps) {
+  const { data, isLoading } = useQuery({
     ...orpc.github.getRepo.queryOptions({ input: { owner, repo } }),
     staleTime: 60 * 60 * 1000,
     retry: 1,
   })
   const [avatarFailed, setAvatarFailed] = useState(false)
 
-  if (!isLoading && (isError || !data)) return <>{fallback}</>
-
   const [ownerName, repoName] = data?.fullName.split('/') ?? [owner, repo]
-  const shownDescription = description ?? data?.description
+  // 沒有資料時描述改顯示網址，卡片高度與結構不變
+  const shownDescription = description ?? data?.description ?? `github.com/${owner}/${repo}`
+  const avatar = data?.ownerAvatar ?? `https://github.com/${owner}.png?size=104`
   const languageColor = data?.language ? LANGUAGE_COLORS[data.language] : undefined
 
   return (
@@ -147,6 +147,12 @@ export function MdxGithubCard({ href, owner, repo, description, fallback }: MdxG
         )}
 
         <span className="mdx-gh-stats">
+          {!data && !isLoading && (
+            <span className="mdx-gh-stat">
+              <SiGithub aria-hidden />
+              {m.github_view()}
+            </span>
+          )}
           {data?.language && (
             <span className="mdx-gh-stat">
               <span
@@ -183,9 +189,9 @@ export function MdxGithubCard({ href, owner, repo, description, fallback }: MdxG
       </span>
 
       <span className="mdx-gh-avatar">
-        {data?.ownerAvatar && !avatarFailed ? (
+        {!avatarFailed ? (
           <img
-            src={data.ownerAvatar}
+            src={avatar}
             alt=""
             loading="lazy"
             decoding="async"

@@ -191,5 +191,6 @@
   "github_license": "ライセンス",
   "playground_preview_label": "プレビュー",
   "playground_clear": "クリア",
-  "playground_console_empty": "実行するとコンソール出力がここに表示されます。"
+  "playground_console_empty": "実行するとコンソール出力がここに表示されます。",
+  "github_view": "GitHub で見る"
 }

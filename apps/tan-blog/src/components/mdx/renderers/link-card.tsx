@@ -89,7 +89,7 @@ function RemoteImage({ src, className, onFail }: { src: string; className?: stri
 export const MdxLinkCard = (props: MdxLinkCardProps) => {
   const repo = githubRepoOf(props.href)
   return repo ? (
-    <MdxGithubCard {...props} {...repo} fallback={<GenericLinkCard {...props} />} />
+    <MdxGithubCard {...props} {...repo} />
   ) : (
     <GenericLinkCard {...props} />
   )

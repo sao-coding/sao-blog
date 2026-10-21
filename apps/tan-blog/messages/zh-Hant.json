@@ -191,5 +191,6 @@
   "github_license": "授權",
   "playground_preview_label": "預覽",
   "playground_clear": "清除",
-  "playground_console_empty": "執行後，console 的輸出會出現在這裡。"
+  "playground_console_empty": "執行後，console 的輸出會出現在這裡。",
+  "github_view": "在 GitHub 上查看"
 }

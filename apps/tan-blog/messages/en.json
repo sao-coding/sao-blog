@@ -191,5 +191,6 @@
   "github_license": "License",
   "playground_preview_label": "Preview",
   "playground_clear": "Clear",
-  "playground_console_empty": "Console output appears here after you run the code."
+  "playground_console_empty": "Console output appears here after you run the code.",
+  "github_view": "View on GitHub"
 }
