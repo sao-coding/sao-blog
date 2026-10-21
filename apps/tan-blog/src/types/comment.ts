@@ -46,4 +46,8 @@ export interface Comment {
   parentId: string | null
   /** 自己的留言還在審核中（其他人看不到） */
   pending: boolean
+  /** 留言者 id，用來判斷是不是自己的留言（對話氣泡靠右） */
+  userId: string
+  /** 置頂留言 */
+  pin: boolean
 }

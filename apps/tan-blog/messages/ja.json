@@ -134,5 +134,13 @@
   "comment_sent_pending": "コメントを送信しました",
   "comment_sent_pending_description": "承認されると公開されます。それまではあなたにだけ表示されます。",
   "comment_send_failed": "送信に失敗しました。しばらくしてからもう一度お試しください。",
-  "login_too_many_attempts": "試行回数が多すぎます。しばらくしてからもう一度お試しください。"
+  "login_too_many_attempts": "試行回数が多すぎます。しばらくしてからもう一度お試しください。",
+  "comment_section_subtitle": "あなたの考えを聞かせてください",
+  "comment_pinned": "固定",
+  "comment_you": "自分",
+  "comment_write": "書く",
+  "comment_preview": "プレビュー",
+  "comment_shortcut_hint": "Ctrl + Enter で送信",
+  "comment_show_replies": "{count} 件の返信を表示",
+  "comment_hide_replies": "返信を閉じる"
 }

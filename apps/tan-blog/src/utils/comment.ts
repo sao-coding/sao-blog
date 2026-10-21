@@ -26,6 +26,8 @@ export function toCommentTree(flatComments: FlatComment[]): Comment[] {
       replies: [],
       parentId: item.thread,
       pending: item.status === 'pending',
+      userId: item.userId,
+      pin: item.pin,
     })
   }
 

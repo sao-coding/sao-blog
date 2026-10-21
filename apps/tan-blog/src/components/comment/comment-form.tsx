@@ -3,14 +3,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SendIcon } from 'lucide-react'
+import { EyeIcon, PencilLineIcon, SendIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { useCommentQuoteStore } from '@/store/comment-quote-store'
 import { commentSchema, type CommentFormValues } from '@/schemas/comment'
 import { Button } from '@sao-blog/ui/components/button'
 import { Textarea } from '@sao-blog/ui/components/textarea'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@sao-blog/ui/components/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
 import { FieldError } from '@sao-blog/ui/components/field'
 import { CommentMarkdownRenderer } from './comment-markdown-renderer'
@@ -46,6 +45,7 @@ export function CommentForm({
   userImage,
 }: CommentFormProps) {
   const [placeholder] = useState(() => getRandomPlaceholder())
+  const [previewing, setPreviewing] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const honeypotRef = useRef<HTMLInputElement | null>(null)
   const turnstileRef = useRef<TurnstileHandle>(null)
@@ -85,6 +85,7 @@ export function CommentForm({
       shouldValidate: true,
     })
     clearPendingQuote()
+    setPreviewing(false)
     requestAnimationFrame(() => textareaRef.current?.focus())
   }, [parentId, pendingQuote, clearPendingQuote, getValues, setValue])
 
@@ -114,18 +115,20 @@ export function CommentForm({
     })
     // Turnstile token 只能用一次，不論成功失敗都要換新的
     turnstileRef.current?.reset()
-    if (ok) reset({ content: '' })
+    if (ok) {
+      reset({ content: '' })
+      setPreviewing(false)
+    }
   }
 
   const userInitial = userName ? userName[0]?.toUpperCase() : '?'
+  const submitForm = handleSubmit(handleFormSubmit)
+  const submitDisabled = isSubmitting || waitingForTurnstile
 
   return (
     <form
-      onSubmit={handleSubmit(handleFormSubmit)}
-      className={cn(
-        'relative space-y-3 rounded-lg border border-border bg-card p-4',
-        compact && 'p-3'
-      )}
+      onSubmit={submitForm}
+      className={cn('relative flex items-start gap-3', !compact && 'flex-row-reverse')}
     >
       {/* 蜜罐：畫面與螢幕閱讀器都看不到，只有自動填表的機器人會填 */}
       <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
@@ -135,69 +138,82 @@ export function CommentForm({
         </label>
       </div>
 
-      {/* 使用者資訊列 */}
-      {userName && (
-        <div className="flex items-center gap-2">
-          <Avatar size="sm">
-            {userImage && <AvatarImage src={userImage} alt={userName} />}
-            <AvatarFallback className="text-xs">{userInitial}</AvatarFallback>
-          </Avatar>
-          <span className="text-sm font-medium text-foreground">{userName}</span>
-        </div>
-      )}
+      {/* 頂層表單：自己的頭像在右側，跟自己的留言氣泡同一邊；
+          回覆表單在回覆串裡，跟回覆一樣頭像靠左，氣泡尖角才有東西可以指 */}
+      <Avatar size={compact ? 'sm' : 'default'} className={cn('shrink-0', !compact && 'size-9')}>
+        {userImage && <AvatarImage src={userImage} alt={userName ?? ''} />}
+        <AvatarFallback>{userInitial}</AvatarFallback>
+      </Avatar>
 
-      {/* 內容區域：撰寫 / 預覽分頁 */}
-      <Tabs defaultValue={0}>
-        <TabsList>
-          <TabsTrigger value={0}>撰寫</TabsTrigger>
-          <TabsTrigger value={1}>預覽</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={0}>
-          <div className="space-y-2">
-            <Textarea
-              placeholder={placeholder}
-              className={cn('min-h-28 font-mono text-sm', compact && 'min-h-20')}
-              aria-invalid={!!errors.content}
-              ref={(el) => {
-                formContentRef(el)
-                textareaRef.current = el
-              }}
-              {...contentRegisterRest}
-            />
-            <FieldError errors={[errors.content]} />
-          </div>
-        </TabsContent>
-
-        <TabsContent value={1}>
-          <div
-            className={cn(
-              'min-h-28 rounded-lg border border-border bg-muted/30 p-3',
-              compact && 'min-h-20'
-            )}
-          >
+      <div
+        data-side={compact ? 'left' : 'right'}
+        data-mine
+        className="comment-bubble min-w-0 flex-1 p-1.5 transition-shadow focus-within:ring-2 focus-within:ring-ink/30"
+      >
+        {previewing ? (
+          <div className={cn('min-h-24 px-3 py-2', compact && 'min-h-16')}>
             {contentValue?.trim() ? (
               <CommentMarkdownRenderer content={contentValue} />
             ) : (
-              <p className="text-muted-foreground text-sm italic">{m.comment_no_preview()}</p>
+              <p className="text-sm text-muted-foreground italic">{m.comment_no_preview()}</p>
             )}
           </div>
-        </TabsContent>
-      </Tabs>
+        ) : (
+          <Textarea
+            placeholder={placeholder}
+            className={cn(
+              'min-h-24 resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent',
+              compact && 'min-h-16'
+            )}
+            aria-label={parentId ? m.comment_reply() : m.comment_submit()}
+            aria-invalid={!!errors.content}
+            ref={(el) => {
+              formContentRef(el)
+              textareaRef.current = el
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !submitDisabled) {
+                e.preventDefault()
+                void submitForm()
+              }
+            }}
+            {...contentRegisterRest}
+          />
+        )}
+        <FieldError className="px-3" errors={[errors.content]} />
 
-      <Turnstile ref={turnstileRef} action="comment" onToken={setTurnstileToken} />
+        <Turnstile ref={turnstileRef} action="comment" onToken={setTurnstileToken} />
 
-      {/* 底部操作列 */}
-      <div className="flex items-center justify-between">
-        <CommentEmojiPicker onEmojiSelect={handleEmojiSelect} />
+        {/* 底部工具列 */}
+        <div className="mt-1 flex items-center gap-1 border-t border-dashed border-rule px-1 pt-1.5">
+          <CommentEmojiPicker onEmojiSelect={handleEmojiSelect} />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={() => setPreviewing((prev) => !prev)}
+            aria-pressed={previewing}
+          >
+            {previewing ? <PencilLineIcon data-icon="inline-start" /> : <EyeIcon data-icon="inline-start" />}
+            {previewing ? m.comment_write() : m.comment_preview()}
+          </Button>
 
-        <div className="flex items-center gap-2">
+          <span className="ml-auto hidden text-[0.7rem] text-muted-foreground/80 sm:inline">
+            {m.comment_shortcut_hint()}
+          </span>
+
           {onCancel && (
-            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+            <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="ml-auto sm:ml-0">
               {m.comment_cancel()}
             </Button>
           )}
-          <Button type="submit" size="sm" disabled={isSubmitting || waitingForTurnstile}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={submitDisabled}
+            className={cn('rounded-full px-3.5', !onCancel && 'ml-auto sm:ml-0')}
+          >
             <SendIcon className="size-3.5" data-icon="inline-start" />
             {isSubmitting ? m.comment_submitting() : parentId ? m.comment_reply() : m.comment_submit()}
           </Button>

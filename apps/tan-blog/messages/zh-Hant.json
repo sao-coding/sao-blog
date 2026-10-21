@@ -134,5 +134,13 @@
   "comment_sent_pending": "留言已送出",
   "comment_sent_pending_description": "審核通過後就會公開顯示，在那之前只有你看得到。",
   "comment_send_failed": "送出失敗，請稍後再試",
-  "login_too_many_attempts": "嘗試次數過多，請稍後再試"
+  "login_too_many_attempts": "嘗試次數過多，請稍後再試",
+  "comment_section_subtitle": "說說你的想法，一起聊聊",
+  "comment_pinned": "置頂",
+  "comment_you": "我",
+  "comment_write": "撰寫",
+  "comment_preview": "預覽",
+  "comment_shortcut_hint": "Ctrl + Enter 送出",
+  "comment_show_replies": "展開 {count} 則回覆",
+  "comment_hide_replies": "收起回覆"
 }

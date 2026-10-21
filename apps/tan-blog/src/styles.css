@@ -1054,3 +1054,113 @@
   text-align: center;
   pointer-events: none;
 }
+
+/* ── 留言區：朱印與對話氣泡 ─────────────────────────────────────────────────
+ * 文章本體是信箋（.letter-paper），留言區刻意改成「茶席閒談」的對話氣泡，
+ * 避免版面跟正文一樣而審美疲勞。朱印用 --ink（晝為朱砂、夜讀為主色）。
+ */
+.comment-seal {
+  display: inline-grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: var(--font-wenkai);
+  line-height: 1;
+  box-shadow: inset 0 0 0 2px var(--background), inset 0 0 0 3px var(--ink);
+  rotate: -6deg;
+  /* 印泥不均：用遮罩做出斑駁感 */
+  mask-image: radial-gradient(circle at 30% 20%, #000 60%, oklch(0 0 0 / 0.75) 100%);
+}
+.comment-seal-sm {
+  padding: 0.1rem 0.3rem;
+  border-width: 1.5px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  box-shadow: none;
+  rotate: 8deg;
+  opacity: 0.85;
+}
+
+.comment-bubble {
+  position: relative;
+  border-radius: 1.1rem;
+  background: var(--card);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 6px 16px -10px oklch(0.3 0.02 60 / 0.35);
+}
+.dark .comment-bubble {
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 6px 16px -10px oklch(0 0 0 / 0.6);
+}
+.comment-bubble[data-side='left'] {
+  border-top-left-radius: 0.25rem;
+}
+.comment-bubble[data-side='right'] {
+  border-top-right-radius: 0.25rem;
+}
+.comment-bubble[data-side='right'],
+.comment-bubble[data-mine] {
+  background: color-mix(in oklch, var(--ink) 9%, var(--card));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--ink) 22%, transparent),
+    0 6px 16px -10px color-mix(in oklch, var(--ink) 45%, transparent);
+}
+
+/* 回覆串的連接線
+ * 線色用不透明色：半透明的線段重疊處會變深，看起來粗細不一。
+ * --rail-x = 回覆串縮排 − 上層頭像中心，讓彎折線剛好對齊頭像下方的直線。
+ */
+.comment-rail,
+.comment-thread {
+  --rail-color: color-mix(in oklch, var(--foreground) 16%, var(--background));
+  --rail-w: 2px;
+}
+.comment-rail {
+  width: var(--rail-w);
+  border-radius: 999px;
+  background: var(--rail-color);
+}
+.comment-thread[data-depth='root'] {
+  --rail-x: 1.125rem; /* ml-9 (2.25rem) − size-9 頭像中心 (1.125rem) */
+}
+.comment-thread[data-depth='nested'] {
+  --rail-x: 1.25rem; /* ml-8 (2rem) − sm 頭像中心 (0.75rem) */
+}
+.comment-thread > .comment-thread-item {
+  position: relative;
+}
+.comment-thread > .comment-thread-item::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--rail-x) - var(--rail-w) / 2);
+  top: -1.25rem; /* 接住 pt-5 / space-y-5 的間距 */
+  width: calc(var(--rail-x) - 0.35rem);
+  /* 底邊落在回覆頭像（sm）的垂直中心 0.75rem */
+  height: calc(2rem + var(--rail-w) / 2);
+  border-left: var(--rail-w) solid var(--rail-color);
+  border-bottom: var(--rail-w) solid var(--rail-color);
+  border-bottom-left-radius: 0.75rem;
+}
+.comment-thread > .comment-thread-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--rail-x) - var(--rail-w) / 2);
+  top: 0;
+  bottom: -1.25rem;
+  border-left: var(--rail-w) solid var(--rail-color);
+}
+
+@keyframes comment-like-pop {
+  0% { scale: 1; }
+  40% { scale: 1.35; }
+  100% { scale: 1; }
+}
+.comment-like-pop {
+  animation: comment-like-pop 320ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .comment-like-pop { animation: none; }
+}

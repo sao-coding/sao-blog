@@ -1,33 +1,22 @@
 'use client'
 
 import { useMemo } from 'react'
-import { ArrowUpDownIcon, ClockIcon, HistoryIcon } from 'lucide-react'
+import { MessagesSquareIcon } from 'lucide-react'
 
-import type { Comment, CommentSortOrder } from '@/types/comment'  // ✅ 移除 VoteType
+import type { Comment, CommentSortOrder } from '@/types/comment'
 import type { CommentFormValues } from '@/schemas/comment'
 import type { CommentGuardFields } from './comment-form'
-import { Button } from '@sao-blog/ui/components/button'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-} from '@sao-blog/ui/components/dropdown-menu'
+import { cn } from '@/lib/utils'
 import { CommentItem } from './comment-item'
 import { m } from '#/paraglide/messages'
 
 interface CommentListProps {
   comments: Comment[]
   sortOrder: CommentSortOrder
-  onSortChange: (order: CommentSortOrder) => void
   onLike: (commentId: string) => void
-  onDislike: (commentId: string) => void
   onReply: (parentId: string, data: CommentFormValues, guard: CommentGuardFields) => Promise<boolean>
   isAuthenticated?: boolean
+  currentUserId?: string
   userName?: string
   userImage?: string | null
 }
@@ -35,16 +24,17 @@ interface CommentListProps {
 export function CommentList({
   comments,
   sortOrder,
-  onSortChange,
   onLike,
-  onDislike,
   onReply,
   isAuthenticated = false,
+  currentUserId,
   userName,
   userImage,
 }: CommentListProps) {
+  // 置頂留言永遠排最前，其餘依時間排序
   const sortedComments = useMemo(() => {
     return [...comments].sort((a, b) => {
+      if (a.pin !== b.pin) return a.pin ? -1 : 1
       const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       return sortOrder === 'newest' ? -diff : diff
     })
@@ -52,62 +42,68 @@ export function CommentList({
 
   if (comments.length === 0) {
     return (
-      <div className="py-8 text-center text-muted-foreground text-sm">
-        {m.comment_empty()}
+      <div className="flex flex-col items-center gap-3 py-10 text-center">
+        <div className="flex size-14 items-center justify-center rounded-full bg-ink-soft text-ink">
+          <MessagesSquareIcon className="size-6" />
+        </div>
+        <p className="font-wenkai text-sm text-muted-foreground">{m.comment_empty()}</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-1">
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
-                <ArrowUpDownIcon className="size-3.5" />
-                <span className="text-xs">
-                  {sortOrder === 'newest' ? m.comment_sort_newest() : m.comment_sort_oldest()}
-                </span>
-              </Button>
-            }
-          />
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>{m.comment_sort_by()}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={sortOrder}
-                onValueChange={(value) => onSortChange(value as CommentSortOrder)}
-              >
-                <DropdownMenuRadioItem value="newest">
-                  <ClockIcon className="size-3.5" />
-                  {m.comment_sort_newest()}
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="oldest">
-                  <HistoryIcon className="size-3.5" />
-                  {m.comment_sort_oldest()}
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="divide-y divide-border">
-        {sortedComments.map((comment) => (
+    <ol className="space-y-7">
+      {sortedComments.map((comment) => (
+        <li key={comment.id}>
           <CommentItem
-            key={comment.id}
             comment={comment}
             onLike={onLike}
-            onDislike={onDislike}
             onReply={onReply}
             isAuthenticated={isAuthenticated}
+            currentUserId={currentUserId}
             userName={userName}
             userImage={userImage}
           />
-        ))}
-      </div>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+/** 最新／最舊切換：兩個選項用分段按鈕比下拉選單直覺 */
+export function CommentSortToggle({
+  value,
+  onChange,
+}: {
+  value: CommentSortOrder
+  onChange: (order: CommentSortOrder) => void
+}) {
+  const options: { value: CommentSortOrder; label: string }[] = [
+    { value: 'newest', label: m.comment_sort_newest() },
+    { value: 'oldest', label: m.comment_sort_oldest() },
+  ]
+
+  return (
+    <div
+      role="radiogroup"
+      aria-label={m.comment_sort_by()}
+      className="inline-flex rounded-full border border-border bg-muted/60 p-0.5 text-xs"
+    >
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          role="radio"
+          aria-checked={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={cn(
+            'rounded-full px-3 py-1 text-muted-foreground transition-colors hover:text-foreground',
+            value === option.value && 'bg-card text-foreground shadow-sm'
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   )
 }
