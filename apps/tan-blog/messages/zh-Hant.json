@@ -134,5 +134,17 @@
   "comment_sent_pending": "留言已送出",
   "comment_sent_pending_description": "審核通過後就會公開顯示，在那之前只有你看得到。",
   "comment_send_failed": "送出失敗，請稍後再試",
-  "login_too_many_attempts": "嘗試次數過多，請稍後再試"
+  "login_too_many_attempts": "嘗試次數過多，請稍後再試",
+  "image_alt_fallback": "圖片",
+  "image_load_failed": "圖片載入失敗",
+  "lightbox_title": "放大檢視",
+  "lightbox_open_with_label": "放大檢視：{label}",
+  "lightbox_zoom_out": "縮小",
+  "lightbox_zoom_in": "放大",
+  "lightbox_reset": "重設",
+  "lightbox_fit": "符合畫面",
+  "lightbox_close": "關閉",
+  "mdx_figure_label": "圖",
+  "lightbox_prev": "上一張",
+  "lightbox_next": "下一張"
 }
