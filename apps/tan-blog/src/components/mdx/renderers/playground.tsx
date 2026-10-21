@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { CodeXmlIcon, PlayIcon, RotateCcwIcon, SquareIcon, TerminalIcon } from 'lucide-react'
+import { BanIcon, CodeXmlIcon, PlayIcon, RotateCcwIcon, SquareIcon, TerminalIcon } from 'lucide-react'
 import type { PlaygroundLang, PlaygroundTemplate } from '@sao-blog/mdx/registry'
 import { m } from '#/paraglide/messages'
 import { useTheme } from '@/components/theme-provider'
@@ -88,6 +88,11 @@ export function MdxPlayground({
     setRunId(Math.random().toString(36).slice(2))
   }
 
+  const stop = () => {
+    setRunId(undefined)
+    setMessages([])
+  }
+
   useEffect(() => {
     if (!autoRun || !rootRef.current) return
     const observer = new IntersectionObserver(([entry]) => {
@@ -120,9 +125,14 @@ export function MdxPlayground({
   )
 
   const activeFile = visible.find((f) => f.name === active) ?? visible[0]
+  const lines = activeFile?.code.replace(/\n$/, '').split('\n') ?? []
 
   return (
-    <div ref={rootRef} className="mdx-block mdx-frame mdx-playground not-prose">
+    <div
+      ref={rootRef}
+      className="mdx-block mdx-frame mdx-playground not-prose"
+      style={{ '--pg-height': `${height}px` } as React.CSSProperties}
+    >
       <div className="mdx-block-head">
         <span className="mdx-block-label">
           <CodeXmlIcon aria-hidden />
@@ -139,7 +149,7 @@ export function MdxPlayground({
               <button
                 type="button"
                 className="mdx-tool"
-                onClick={() => setRunId(undefined)}
+                onClick={stop}
                 aria-label={m.playground_stop()}
                 title={m.playground_stop()}
               >
@@ -155,10 +165,11 @@ export function MdxPlayground({
         </span>
       </div>
 
-      {visible.length > 0 && (
-        <>
-          <div className="mdx-block-head mdx-tabs-head">
-            <div role="tablist" className="mdx-tabs-list">
+      {/* 寬的時候左程式碼、右預覽；窄的時候（看元件自己的寬度，不是螢幕寬度）上下排 */}
+      <div className="mdx-pg-panes">
+        {visible.length > 0 && (
+          <div className="mdx-pg-code">
+            <div role="tablist" className="mdx-pg-tabs">
               {visible.map((file) => (
                 <button
                   key={file.name}
@@ -167,52 +178,76 @@ export function MdxPlayground({
                   aria-selected={file === activeFile}
                   data-active={file === activeFile || undefined}
                   onClick={() => setActive(file.name)}
-                  className="mdx-tab mdx-tab-underline mdx-mono"
+                  className="mdx-pg-tab"
                 >
                   {file.name}
                 </button>
               ))}
             </div>
+            <pre className="mdx-pg-source" tabIndex={0}>
+              <code>
+                {lines.map((line, i) => (
+                  <span key={i} className="mdx-pg-line">
+                    {line}
+                    {'\n'}
+                  </span>
+                ))}
+              </code>
+            </pre>
           </div>
-          <pre className="mdx-code-plain max-h-96 overflow-auto">
-            <code>{activeFile?.code}</code>
-          </pre>
-        </>
-      )}
-
-      <div className="mdx-playground-stage" style={{ height }}>
-        {srcDoc ? (
-          <iframe
-            ref={iframeRef}
-            key={srcDoc}
-            title={title ?? m.playground_preview()}
-            sandbox="allow-scripts"
-            srcDoc={srcDoc}
-            className="size-full border-0 bg-background"
-          />
-        ) : (
-          <button type="button" onClick={run} className="mdx-playground-idle">
-            <span className="mdx-playground-idle-icon">
-              <PlayIcon className="size-5 translate-x-px" aria-hidden />
-            </span>
-            {m.playground_idle()}
-          </button>
         )}
+
+        <div className="mdx-pg-preview">
+          <div className="mdx-pg-pane-label">
+            <span className="mdx-pg-dot" data-live={runId ? '' : undefined} />
+            {m.playground_preview_label()}
+          </div>
+          <div className="mdx-pg-stage">
+            {srcDoc ? (
+              <iframe
+                ref={iframeRef}
+                key={srcDoc}
+                title={title ?? m.playground_preview()}
+                sandbox="allow-scripts"
+                srcDoc={srcDoc}
+              />
+            ) : (
+              <button type="button" onClick={run} className="mdx-playground-idle">
+                <span className="mdx-playground-idle-icon">
+                  <PlayIcon className="size-5 translate-x-px" aria-hidden />
+                </span>
+                {m.playground_idle()}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {runId && messages.length > 0 && (
-        <div className="mdx-playground-console">
-          <div className="mdx-playground-console-head">
-            <TerminalIcon aria-hidden />
-            Console
-          </div>
-          {messages.map((msg, i) => (
-            <pre key={i} className="mdx-console-line" data-tone={LEVEL_TONE[msg.level]}>
-              {msg.text}
-            </pre>
-          ))}
+      {/* 終端機在最下面、橫跨整個寬度；沒執行時只留一列標題提示 */}
+      <div className="mdx-pg-console">
+        <div className="mdx-pg-console-head">
+          <TerminalIcon aria-hidden />
+          <span>Console</span>
+          {messages.length > 0 && <span className="mdx-pg-count">{messages.length}</span>}
+          {messages.length > 0 && (
+            <button type="button" className="mdx-tool ml-auto" onClick={() => setMessages([])}>
+              <BanIcon aria-hidden />
+              {m.playground_clear()}
+            </button>
+          )}
         </div>
-      )}
+        {messages.length > 0 ? (
+          <div className="mdx-pg-console-body" role="log" aria-live="polite">
+            {messages.map((msg, i) => (
+              <pre key={i} className="mdx-console-line" data-tone={LEVEL_TONE[msg.level]}>
+                {msg.text}
+              </pre>
+            ))}
+          </div>
+        ) : (
+          <p className="mdx-pg-console-empty">{m.playground_console_empty()}</p>
+        )}
+      </div>
     </div>
   )
 }

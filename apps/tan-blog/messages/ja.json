@@ -188,5 +188,8 @@
   "github_public": "公開",
   "github_activity": "過去1年のコミット",
   "github_forks": "フォーク",
-  "github_license": "ライセンス"
+  "github_license": "ライセンス",
+  "playground_preview_label": "プレビュー",
+  "playground_clear": "クリア",
+  "playground_console_empty": "実行するとコンソール出力がここに表示されます。"
 }

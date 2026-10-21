@@ -188,5 +188,8 @@
   "github_public": "Public",
   "github_activity": "Commits in the past year",
   "github_forks": "forks",
-  "github_license": "License"
+  "github_license": "License",
+  "playground_preview_label": "Preview",
+  "playground_clear": "Clear",
+  "playground_console_empty": "Console output appears here after you run the code."
 }
