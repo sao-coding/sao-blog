@@ -999,6 +999,353 @@
   color: var(--tone);
 }
 
+/* ── 推文（tweet-card.tsx）：一張明信片 ─────────────────────────────────────
+ * 右上角貼一枚有齒孔的郵票（mask 打出一圈圓孔），內文用文楷像手寫在卡片上。 */
+.mdx-tweet {
+  position: relative;
+  padding: 1.125rem 1.25rem 0.875rem;
+  border: 1px solid var(--block-rule);
+  border-radius: var(--block-radius);
+  background: var(--card);
+}
+.mdx-tweet-stamp {
+  position: absolute;
+  top: 0.875rem;
+  right: 1rem;
+  display: grid;
+  width: 2.75rem;
+  height: 3.25rem;
+  place-items: center;
+  background: color-mix(in oklch, var(--season) 30%, var(--card));
+  color: var(--foreground);
+  rotate: 4deg;
+  /* 郵票齒孔：一層實心蓋住中間，另一層每 6px 一個圓孔的圖樣只露出外圈 3px，
+     兩層相加＝只有邊緣有孔 */
+  -webkit-mask:
+    linear-gradient(#000 0 0) center / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    radial-gradient(circle at 3px 3px, transparent 1.8px, #000 2px) -3px -3px / 6px 6px;
+  mask:
+    linear-gradient(#000 0 0) center / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    radial-gradient(circle at 3px 3px, transparent 1.8px, #000 2px) -3px -3px / 6px 6px;
+  transition: rotate 300ms ease-out;
+}
+.mdx-tweet-stamp::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 22%, transparent);
+}
+.mdx-tweet-stamp svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.mdx-tweet:hover .mdx-tweet-stamp {
+  rotate: 0deg;
+}
+.mdx-tweet-stamp:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.mdx-tweet-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-right: 3.5rem;
+}
+.mdx-tweet-avatar {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--muted);
+  box-shadow: 0 0 0 1px var(--block-rule);
+}
+.mdx-tweet-avatar img {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+}
+.mdx-tweet-who {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.35;
+}
+.mdx-tweet-name {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.mdx-tweet-name:hover {
+  color: var(--ink);
+}
+.mdx-tweet-verified {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: oklch(0.6 0.15 245);
+}
+.mdx-tweet-handle {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+.mdx-tweet-text {
+  margin: 0.875rem 0 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-wenkai);
+  font-size: 1.0625rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+  quotes: none;
+}
+.mdx-tweet-text::before,
+.mdx-tweet-text::after {
+  content: none;
+}
+.mdx-tweet-text a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.mdx-tweet-text a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* 照片：一張依原比例（限制在 4:5～16:9 之間），多張排成兩欄 */
+.mdx-tweet-media {
+  display: grid;
+  gap: 2px;
+  margin-top: 0.875rem;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--block-rule);
+}
+.mdx-tweet-media:not([data-count='1']) {
+  grid-template-columns: 1fr 1fr;
+}
+.mdx-tweet-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--muted);
+}
+.mdx-tweet-media[data-count='1'] .mdx-tweet-photo {
+  aspect-ratio: var(--ratio, 16 / 9);
+  max-height: 28rem;
+}
+.mdx-tweet-media[data-count='3'] .mdx-tweet-photo:first-child {
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+.mdx-tweet-photo img {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  transition: scale 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mdx-tweet-photo:hover img {
+  scale: 1.02;
+}
+.mdx-tweet-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+  box-shadow: 0 4px 16px oklch(0 0 0 / 0.2);
+  color: var(--ink);
+}
+.mdx-tweet-play svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  translate: 2px 0;
+  fill: currentColor;
+}
+.mdx-tweet-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  margin-top: 0.875rem;
+  padding-top: 0.625rem;
+  border-top: 1px dashed var(--block-rule);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.mdx-tweet-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+}
+.mdx-tweet-stat svg,
+.mdx-tweet-open svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.mdx-tweet-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  color: var(--ink);
+  text-decoration: none;
+}
+.mdx-tweet-open:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── 終端機（terminal.tsx）：墨色面板，晝夜都是深底 ──────────────────────────
+ * 跟程式碼區塊（貼在紙上的淺色箋）刻意區分：這是一方硯台般的墨色視窗。 */
+.mdx-term {
+  --term-bg: oklch(0.24 0.012 60);
+  --term-bar: oklch(0.28 0.012 60);
+  --term-fg: oklch(0.93 0.01 85);
+  --term-dim: oklch(0.74 0.012 80);
+  --term-faint: oklch(0.58 0.012 80);
+  --term-prompt: oklch(0.8 0.09 170);
+  overflow: hidden;
+  border-radius: var(--block-radius);
+  background: var(--term-bg);
+  box-shadow:
+    0 0 0 1px oklch(0 0 0 / 0.25),
+    0 6px 18px -8px oklch(0.25 0.03 60 / 0.35);
+  color: var(--term-fg);
+}
+.dark .mdx-term {
+  --term-bg: oklch(0.15 0.012 var(--h));
+  --term-bar: oklch(0.19 0.014 var(--h));
+  box-shadow: 0 0 0 1px oklch(1 0 0 / 0.08);
+}
+.mdx-term[data-playing] {
+  cursor: pointer;
+}
+.mdx-term-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 2.25rem;
+  padding-inline: 0.875rem 0.375rem;
+  background: var(--term-bar);
+  border-bottom: 1px solid oklch(1 0 0 / 0.06);
+}
+.mdx-term-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+.mdx-term-dots > span {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 9999px;
+  background: oklch(1 0 0 / 0.16);
+}
+.mdx-term-title {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  color: var(--term-dim);
+}
+.mdx-term-copy {
+  justify-self: end;
+  display: inline-flex;
+  width: 1.875rem;
+  height: 1.875rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--term-dim);
+  opacity: 0.7;
+  transition:
+    opacity 150ms ease-out,
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+.mdx-term:hover .mdx-term-copy,
+.mdx-term-copy:focus-visible {
+  opacity: 1;
+}
+.mdx-term-copy:hover {
+  background: oklch(1 0 0 / 0.08);
+  color: var(--term-fg);
+}
+.mdx-term-copy:focus-visible {
+  outline: 2px solid var(--term-prompt);
+  outline-offset: 1px;
+}
+.mdx-term-copy svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+.mdx-term-body {
+  margin: 0;
+  padding: 0.875rem 1.125rem 1rem;
+  overflow-x: auto;
+  background: transparent;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875rem;
+  line-height: 1.75;
+  white-space: pre;
+  color: var(--term-dim);
+  scrollbar-width: thin;
+  scrollbar-color: oklch(1 0 0 / 0.2) transparent;
+}
+.mdx-term-body:focus-visible {
+  outline: 2px solid var(--term-prompt);
+  outline-offset: -2px;
+}
+.mdx-term-line[data-kind='command'] {
+  color: var(--term-fg);
+}
+.mdx-term-line[data-kind='comment'] {
+  color: var(--term-faint);
+}
+.mdx-term-line[data-hidden] {
+  visibility: hidden;
+}
+.mdx-term-prompt {
+  color: var(--term-prompt);
+  user-select: none;
+}
+.mdx-term-cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.15em;
+  margin-left: 1px;
+  background: var(--term-fg);
+  vertical-align: text-bottom;
+}
+.mdx-term-cursor[data-blink] {
+  animation: mdx-term-blink 1.1s steps(1) infinite;
+}
+@keyframes mdx-term-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mdx-term-cursor[data-blink] {
+    animation: none;
+  }
+}
+
 /* 沒辦法顯示的區塊：虛線框，像紙上留了一塊空白 */
 .mdx-unknown {
   padding: 1rem 1.25rem;

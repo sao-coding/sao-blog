@@ -5,6 +5,8 @@ export interface Snippet {
   label: string
   description: string
   body: string
+  /** 行內元件：原地插入，不前後補空行 */
+  inline?: boolean
 }
 
 export const COMPONENT_SNIPPETS: Snippet[] = [
@@ -52,6 +54,70 @@ export const COMPONENT_SNIPPETS: Snippet[] = [
     label: 'Playground 程式示範',
     description: '可執行的 React / HTML 範例',
     body: '<Playground template="react" title="範例">\n\n```jsx App.jsx\nexport default function App() {\n  return <h1>$0Hello</h1>\n}\n```\n\n</Playground>',
+  },
+  {
+    label: 'Steps 步驟',
+    description: '教學文的第 1 步、第 2 步',
+    body: '<Steps>\n  <Step title="$0第一步">\n  </Step>\n  <Step title="第二步">\n  </Step>\n</Steps>',
+  },
+  {
+    label: 'FileTree 檔案樹',
+    description: '巢狀清單；資料夾以 / 結尾，**粗體** 標重點',
+    body: '<FileTree>\n- src/\n  - **$0index.ts** 進入點\n- package.json\n</FileTree>',
+  },
+  {
+    label: 'LinkCard 連結卡片',
+    description: 'GitHub repo、推文網址會自動換成專屬卡片',
+    body: '<LinkCard href="$0" />',
+  },
+  {
+    label: 'Tweet 推文',
+    description: '推文網址 /status/ 後面的數字',
+    body: '<Tweet id="$0" />',
+  },
+  {
+    label: 'Terminal 終端機',
+    description: '$ 開頭是指令；animate 逐行打字',
+    body: '<Terminal title="zsh">\n\n```bash\n$ $0\n```\n\n</Terminal>',
+  },
+  {
+    label: 'StickyNote 便條紙',
+    description: 'yellow / pink / blue / green',
+    body: '<StickyNote title="">\n$0\n</StickyNote>',
+  },
+  {
+    label: 'ImageCompare 前後對比',
+    description: '拖動分隔線比較兩張圖',
+    body: '<ImageCompare before="$0" after="" alt="" />',
+  },
+  {
+    label: 'Embed 影片',
+    description: 'YouTube / Bilibili，點了才載入',
+    body: '<Embed src="$0" />',
+  },
+  {
+    label: 'Mark 手繪標記（行內）',
+    inline: true,
+    description: 'highlight / underline / strike / circle / box',
+    body: '<Mark>$0</Mark>',
+  },
+  {
+    label: 'Sidenote 旁註（行內）',
+    inline: true,
+    description: '桌機顯示在段落右側',
+    body: '<Sidenote>$0</Sidenote>',
+  },
+  {
+    label: 'Kbd 按鍵（行內）',
+    inline: true,
+    description: '例如 Ctrl + K',
+    body: '<Kbd>$0</Kbd>',
+  },
+  {
+    label: 'Ruby 注音（行內）',
+    inline: true,
+    description: '振假名／注音',
+    body: '<Ruby rt="">$0</Ruby>',
   },
 ]
 

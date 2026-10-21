@@ -171,11 +171,6 @@ export const componentRegistry = {
     children: false,
     translatableProps: ['caption'],
   }),
-  Count: define({
-    description: '計數器示範元件',
-    props: {},
-    children: false,
-  }),
   Steps: define({
     description: '步驟清單容器，子元素為 Step，自動編號（教學文的「第 1 步、第 2 步」）',
     props: {},
@@ -213,6 +208,24 @@ export const componentRegistry = {
     description: '注音／振假名（行內），例如 <Ruby rt="かんじ">漢字</Ruby>',
     props: { rt: z.string().min(1) },
     children: true,
+  }),
+  Terminal: define({
+    description:
+      '終端機視窗：裡面放一個 code fence。`$ `、`❯ `、`> `、`PS …> ` 開頭的行是指令，其餘是輸出，' +
+      '`# ` 開頭是註解；複製只複製指令。animate 時捲到才逐行打出來（點一下跳到結尾）',
+    props: {
+      title: z.string().optional(),
+      animate: z.boolean().optional(),
+    },
+    children: true,
+    translatableProps: ['title'],
+  }),
+  Tweet: define({
+    description:
+      '嵌入推文（X / Twitter）：id 是推文網址 /status/ 後面的數字。由伺服器抓取並快取，' +
+      '抓不到（刪除、私人帳號）時顯示連結卡片。也可以直接寫 <LinkCard href="https://x.com/…/status/…" />',
+    props: { id: z.string().regex(/^\d{1,25}$/, '推文 id 是一串數字') },
+    children: false,
   }),
   Mark: define({
     description:

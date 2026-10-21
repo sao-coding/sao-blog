@@ -192,5 +192,10 @@
   "playground_preview_label": "プレビュー",
   "playground_clear": "クリア",
   "playground_console_empty": "実行するとコンソール出力がここに表示されます。",
-  "github_view": "GitHub で見る"
+  "github_view": "GitHub で見る",
+  "terminal_copy": "コマンドをコピー",
+  "tweet_view": "X で見る",
+  "tweet_likes": "いいね",
+  "tweet_replies": "返信",
+  "tweet_video": "X で動画を再生"
 }

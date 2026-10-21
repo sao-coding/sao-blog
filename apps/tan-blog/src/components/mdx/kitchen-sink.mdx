@@ -253,29 +253,25 @@ export async function loader() {
 
 預設外框（髮絲線＋柔影），alt 當圖說並自動編號：
 
-![預設外框的圖片](/img/avatar.jpg)
+![山谷裡的晨霧（預設外框）](https://picsum.photos/id/1018/1200/800)
 
 截圖襯底：
 
-![截圖襯底](/img/avatar.jpg "screenshot")
+![桌上的筆電（截圖襯底）](https://picsum.photos/id/0/1200/750 "screenshot")
 
-拍立得：
+拍立得（直式照片）：
 
-![拍立得的手寫圖說](/img/avatar.jpg "polaroid")
+![午睡的小狗](https://picsum.photos/id/1025/800/1000 "polaroid")
 
 裝飾圖（alt 以 `_` 開頭，不顯示圖說）：
 
-![_裝飾用](/img/avatar.jpg)
-
-載入失敗：
-
-![這張圖不存在](/img/not-found.jpg)
+![_裝飾用](https://picsum.photos/id/1060/1200/500)
 
 ## 輪播
 
 <Carousel>
-  <Slide>![第一張](/img/avatar.jpg)</Slide>
-  <Slide>![第二張](/img/avatar.jpg "screenshot")</Slide>
+  <Slide>![城市街景](https://picsum.photos/id/1043/1200/800)</Slide>
+  <Slide>![夜晚的公路](https://picsum.photos/id/1036/1200/800 "screenshot")</Slide>
   <Slide>
   第三張是文字，輪播裡也可以放任意 markdown。
   </Slide>
@@ -403,6 +399,43 @@ github.com/owner/repo 會自動變成 GitHub 卡片（星星、語言、過去�
 
 <LinkCard href="https://example.com/no-preview" title="手動指定標題" description="抓不到預覽時用 title / description 補上。" />
 
+## 終端機
+
+靜態（預設）：指令前有提示字元，複製只會複製指令。
+
+<Terminal title="zsh">
+```bash
+# 安裝相依套件
+$ pnpm install
+Lockfile is up to date, resolution step is skipped
+Packages: +1287
+Done in 4.2s
+$ pnpm --filter tan-blog dev
+  VITE v8.3.4  ready in 1830 ms
+  ➜  Local:   http://localhost:3004/
+```
+</Terminal>
+
+`animate`：捲到才逐行打出來，點一下跳到結尾。
+
+<Terminal title="PowerShell" animate>
+```powershell
+PS C:\code> git status
+On branch main
+nothing to commit, working tree clean
+PS C:\code> git log --oneline -1
+ace150b feat(tan-blog): Mark 手繪標記
+```
+</Terminal>
+
+## 推文
+
+<Tweet id="20" />
+
+網址也會自動變成推文卡片（含影片封面）：
+
+<LinkCard href="https://x.com/elonmusk/status/1585341984679469056" />
+
 ## 便條紙
 
 捲到這裡時，這個<Mark>螢光筆標記</Mark>和<Mark type="circle">圈圈</Mark>才會畫上去。
@@ -433,6 +466,3 @@ github.com/owner/repo 會自動變成 GitHub 卡片（星星、語言、過去�
 
 <Embed src="https://www.bilibili.com/video/BV1GJ411x7h7" title="Bilibili（沒有縮圖，顯示紙色底）" />
 
-## 其他
-
-<Count />

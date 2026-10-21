@@ -192,5 +192,10 @@
   "playground_preview_label": "Preview",
   "playground_clear": "Clear",
   "playground_console_empty": "Console output appears here after you run the code.",
-  "github_view": "View on GitHub"
+  "github_view": "View on GitHub",
+  "terminal_copy": "Copy commands",
+  "tweet_view": "View on X",
+  "tweet_likes": "Likes",
+  "tweet_replies": "Replies",
+  "tweet_video": "Play video on X"
 }

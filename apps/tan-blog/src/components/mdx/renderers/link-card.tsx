@@ -6,6 +6,7 @@ import { ArrowUpRightIcon } from 'lucide-react'
 import { SiGithub } from '@icons-pack/react-simple-icons'
 import { orpc } from '@/lib/orpc'
 import { MdxGithubCard } from './github-card'
+import { TweetCard } from './tweet-card'
 
 export interface MdxLinkCardProps {
   href: string
@@ -87,12 +88,23 @@ function RemoteImage({ src, className, onFail }: { src: string; className?: stri
  * ```
  */
 export const MdxLinkCard = (props: MdxLinkCardProps) => {
+  const tweetId = tweetIdOf(props.href)
+  if (tweetId) return <TweetCard id={tweetId} fallback={<GenericLinkCard {...props} />} />
   const repo = githubRepoOf(props.href)
-  return repo ? (
-    <MdxGithubCard {...props} {...repo} />
-  ) : (
-    <GenericLinkCard {...props} />
-  )
+  return repo ? <MdxGithubCard {...props} {...repo} /> : <GenericLinkCard {...props} />
+}
+
+/**
+ * 嵌入推文：`<Tweet id="20" />`。抓不到時退回指向該推文的一般連結卡片。
+ * 寫在這裡（不是 tweet-card.tsx）是為了拿得到 GenericLinkCard，又不讓兩支檔案互相 import。
+ */
+export const MdxTweet = ({ id }: { id: string }) => (
+  <TweetCard id={id} fallback={<GenericLinkCard href={`https://x.com/i/status/${id}`} />} />
+)
+
+// x.com／twitter.com 的 /{帳號}/status/{id} 是推文
+function tweetIdOf(href: string): string | null {
+  return href.match(/^https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/[^/]+\/status\/(\d+)/)?.[1] ?? null
 }
 
 // github.com/owner/repo（可帶 .git 或結尾斜線）才當成 repo；issue、PR、個人頁走一般卡片

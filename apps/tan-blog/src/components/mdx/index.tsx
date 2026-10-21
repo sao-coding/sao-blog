@@ -4,7 +4,6 @@ import type { MdxComponentName } from '@sao-blog/mdx/registry'
 import {
   Echarts,
   Mermaid,
-  Count,
   CustomQuote,
   MdxImage,
   MdxAlert,
@@ -29,6 +28,8 @@ import {
   MdxRuby,
   MdxSidenote,
   MdxMark,
+  MdxTerminal,
+  MdxTweet,
   MdxStickyNote,
   MdxImageCompare,
   MdxEmbed,
@@ -37,7 +38,7 @@ import EnhancedLink from './renderers/link'
 import { cn } from '@/lib/utils'
 
 // 匯出個別 renderers
-export { Mermaid, Echarts, Count }
+export { Mermaid, Echarts }
 
 // 把 React 節點樹（例如 Shiki 輸出的 <code><span>...</span></code>）攤平成純文字，
 // 用來算行數、複製到剪貼簿。
@@ -70,7 +71,6 @@ function codeToCopyText(code: React.ReactNode): string {
 // 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）。
 // `satisfies` 確保 @sao-blog/mdx registry 登記的每個元件在 Web 端都有實作。
 const blockComponents = {
-  Count,
   CustomQuote,
   Alert: MdxAlert,
   Accordion: MdxAccordion,
@@ -93,6 +93,8 @@ const blockComponents = {
   Ruby: MdxRuby,
   Sidenote: MdxSidenote,
   Mark: MdxMark,
+  Terminal: MdxTerminal,
+  Tweet: MdxTweet,
   StickyNote: MdxStickyNote,
   ImageCompare: MdxImageCompare,
   Embed: MdxEmbed,
