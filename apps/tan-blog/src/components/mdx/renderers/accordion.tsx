@@ -4,6 +4,7 @@ import React from 'react'
 import { Accordion } from '@base-ui/react/accordion'
 import { ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { flattenItems } from './children'
 
 export interface MdxAccordionItemProps {
   /** 折疊標題 */
@@ -58,7 +59,7 @@ export const MdxAccordion = ({
   children,
   className,
 }: MdxAccordionProps) => {
-  const items = React.Children.toArray(children).filter(isAccordionItem)
+  const items = flattenItems(children).filter(isAccordionItem)
 
   const defaultValue = items
     .map((item, index) => (item.props.open ? index : null))

@@ -1,7 +1,12 @@
 import type { Element, Root, RootContent } from 'hast'
 import { createHighlighterCore, type HighlighterCore } from 'shiki/core'
 import { createOnigurumaEngine } from 'shiki/engine/oniguruma'
-import { transformerMetaHighlight } from '@shikijs/transformers'
+import {
+  transformerMetaHighlight,
+  transformerNotationDiff,
+  transformerNotationFocus,
+  transformerNotationHighlight,
+} from '@shikijs/transformers'
 import { transformerColorizedBrackets } from '@shikijs/colorized-brackets'
 
 // 淺色用 kanagawa-lotus（取自北齋浮世繪的暖紙色系），和宣紙底比較搭
@@ -133,6 +138,10 @@ export function rehypeCodeHighlight() {
       // 交給 transformerMetaHighlight 解析成要高亮的行號範圍
       const metaRaw = (codeNode.data as { meta?: string } | undefined)?.meta ?? ''
 
+      // 程式碼內的註解標記（標記本身會從輸出拿掉）：
+      //   // [!code ++] / [!code --]    新增／刪除的行（.diff.add / .diff.remove）
+      //   // [!code focus]               聚焦，其餘行淡掉（.focused，pre 加 .has-focused）
+      //   // [!code highlight]           高亮，同 {1,3} meta（.highlighted）
       const highlighted = highlighter.codeToHast(code, {
         lang: targetLang,
         themes: SHIKI_THEMES,
@@ -140,12 +149,20 @@ export function rehypeCodeHighlight() {
         meta: { __raw: metaRaw },
         transformers: [
           transformerMetaHighlight(),
+          transformerNotationDiff(),
+          transformerNotationFocus(),
+          transformerNotationHighlight(),
           transformerColorizedBrackets(),
         ],
       })
 
       const newPre = highlighted.children[0]
       if (!isElement(newPre)) continue
+      // ```ts title="vite.config.ts"：檔名放在 pre 的 data-title，renderer 顯示在題簽
+      const title = metaRaw.match(/\btitle=(?:"([^"]*)"|'([^']*)')/)
+      if (title) {
+        newPre.properties = { ...newPre.properties, dataTitle: title[1] ?? title[2] }
+      }
       const newCode = getCodeNode(newPre)
       if (newCode) {
         newCode.properties = {

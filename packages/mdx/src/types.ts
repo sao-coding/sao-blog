@@ -69,8 +69,10 @@ export interface CompileSuccess {
   plainText: string
   /** 預估閱讀時間（分鐘） */
   readingTime: number
-  /** 原始 MDX 的 sha256（hex），用來判斷 compiled 是否過期 */
+  /** 原始 MDX 的 sha256（hex），只跟原文有關（翻譯用它判斷原文有沒有改過） */
   hash: string
+  /** 原文＋編譯管線版本的 sha256，存成 compiledHash，用來判斷 compiled 是否過期 */
+  compiledHash: string
   frontmatter: Record<string, unknown>
 }
 

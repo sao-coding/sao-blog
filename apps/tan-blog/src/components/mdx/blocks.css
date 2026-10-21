@@ -66,6 +66,56 @@
   color: var(--ink);
 }
 
+/* // [!code ++] / [!code --]：新增綠、刪除紅（語意色同提示框），行號左邊多一個 +／− */
+.shiki .line.diff {
+  position: relative;
+}
+.shiki .line.diff.add {
+  --tone: oklch(0.52 0.08 155);
+  background-color: color-mix(in oklch, var(--tone) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--tone);
+}
+.shiki .line.diff.remove {
+  --tone: oklch(0.54 0.16 28);
+  background-color: color-mix(in oklch, var(--tone) 10%, transparent);
+  box-shadow: inset 2px 0 0 var(--tone);
+}
+.dark .shiki .line.diff.add {
+  --tone: oklch(0.78 0.09 155);
+}
+.dark .shiki .line.diff.remove {
+  --tone: oklch(0.74 0.14 28);
+}
+.shiki .line.diff.remove > span {
+  opacity: 0.7;
+}
+.shiki .line.diff::after {
+  position: absolute;
+  left: 0.5rem;
+  color: var(--tone);
+  user-select: none;
+}
+.shiki .line.diff.add::after {
+  content: '+';
+}
+.shiki .line.diff.remove::after {
+  content: '−';
+}
+
+/* // [!code focus]：其餘行淡掉，滑過或聚焦程式碼時恢復 */
+.shiki.has-focused .line:not(.focused) {
+  opacity: 0.4;
+  filter: blur(0.5px);
+  transition:
+    opacity 250ms ease-out,
+    filter 250ms ease-out;
+}
+.mdx-code:hover .shiki.has-focused .line,
+.shiki.has-focused:focus-visible .line {
+  opacity: 1;
+  filter: none;
+}
+
 /* ── 共用：區塊 token、語意色、框、題簽、工具、註腳 ─────────────────────────── */
 .mdx-block {
   --block-radius: 8px;
@@ -131,6 +181,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* 程式碼題簽顯示檔名時用一般墨色，比語言名稱醒目 */
+.mdx-block-label-text[data-filename] {
+  color: var(--foreground);
 }
 .mdx-mono {
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -786,6 +840,866 @@
   border-radius: var(--block-radius);
   font-size: 0.875rem;
   color: var(--muted-foreground);
+}
+
+/* 區塊一律清掉旁註的浮動，不會被擠窄 */
+.mdx-block,
+.mdx-wrapper > :is(h2, h3, h4, hr, table, pre) {
+  clear: both;
+}
+
+/* ── 步驟（steps.tsx）：朱色圓圈編號，步驟之間一條髮絲線 ─────────────────── */
+.mdx-steps {
+  padding: 0;
+  list-style: none;
+  counter-reset: mdx-step;
+}
+.mdx-step {
+  position: relative;
+  margin: 0;
+  padding: 0 0 1.75rem 2.875rem;
+  counter-increment: mdx-step;
+}
+.mdx-step:last-child {
+  padding-bottom: 0;
+}
+.mdx-step::before {
+  content: counter(mdx-step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 1.875rem;
+  height: 1.875rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--ink) 35%, transparent);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mdx-step::after {
+  content: '';
+  position: absolute;
+  top: 2.375rem;
+  bottom: 0.5rem;
+  left: calc(0.9375rem - 0.5px);
+  width: 1px;
+  background: var(--block-rule, var(--rule));
+}
+.mdx-step:last-child::after {
+  content: none;
+}
+.mdx-step-title {
+  margin: 0;
+  padding-top: 0.125rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+.mdx-step-body {
+  margin-top: 0.5rem;
+}
+.mdx-step-body > :first-child {
+  margin-top: 0;
+}
+.mdx-step-body > :last-child {
+  margin-bottom: 0;
+}
+.mdx-step-body > .mdx-block {
+  margin-block: 1rem;
+}
+
+/* ── 檔案樹（file-tree.tsx）─────────────────────────────────────────────── */
+.mdx-filetree {
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875rem;
+  line-height: 1.85;
+}
+.mdx-tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* 子層縮排，左側一條縮排導線對齊上層的圖示 */
+.mdx-tree .mdx-tree {
+  margin-left: 0.4375rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--block-rule);
+}
+.mdx-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: var(--foreground);
+}
+summary.mdx-tree-row {
+  cursor: pointer;
+  list-style: none;
+  border-radius: 4px;
+}
+summary.mdx-tree-row::-webkit-details-marker {
+  display: none;
+}
+summary.mdx-tree-row:hover .mdx-tree-name {
+  color: var(--ink);
+}
+summary.mdx-tree-row:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.mdx-tree-icon {
+  flex: none;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  color: var(--muted-foreground);
+}
+summary .mdx-tree-icon {
+  color: color-mix(in oklch, var(--ink) 70%, var(--muted-foreground));
+}
+details[open] > summary .mdx-tree-closed,
+details:not([open]) > summary .mdx-tree-open {
+  display: none;
+}
+.mdx-tree-name {
+  white-space: nowrap;
+}
+.mdx-tree-slash {
+  color: var(--muted-foreground);
+}
+.mdx-tree-name[data-highlight] {
+  font-weight: 600;
+  color: var(--ink);
+}
+.mdx-tree-name[data-highlight]::after {
+  content: '';
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-left: 0.4375rem;
+  border-radius: 9999px;
+  background: var(--ink);
+  vertical-align: middle;
+}
+.mdx-tree-note {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-wenkai);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mdx-tree-note::before {
+  content: '— ';
+  opacity: 0.5;
+}
+
+/* ── 連結卡片（link-card.tsx）：一張票根 ──────────────────────────────────────
+ * 左主聯、右存根，中間虛線撕線；撕線上下兩端用 mask 挖出半圓缺口。
+ * mask 會把外框以外的 outline 一起裁掉，所以鍵盤焦點改用內側 box-shadow。 */
+.mdx-linkcard {
+  --stub: clamp(6rem, 28%, 11.5rem);
+  --notch: 0.5rem;
+  --notch-mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0, #0000 97%, #000) top / 100% 51%
+      no-repeat,
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%, #0000 97%, #000) bottom /
+      100% 51% no-repeat;
+  display: flex;
+  min-height: 7.75rem;
+  overflow: hidden;
+  border: 1px solid var(--block-rule);
+  border-radius: var(--block-radius);
+  background: var(--card);
+  color: var(--foreground);
+  text-decoration: none;
+  -webkit-mask: var(--notch-mask);
+  mask: var(--notch-mask);
+  transition: border-color 150ms ease-out;
+}
+/* 有預覽圖時存根加寬：og 圖多半是 1.91:1，窄存根會把圖上的字裁掉 */
+.mdx-linkcard[data-has-image] {
+  --stub: clamp(8rem, 36%, 15rem);
+}
+.mdx-linkcard:hover {
+  border-color: color-mix(in oklch, var(--ink) 40%, transparent);
+}
+.mdx-linkcard:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ring);
+}
+
+/* 主聯 */
+.mdx-linkcard-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3125rem;
+  padding: 0.875rem 1.25rem 0.8125rem;
+}
+.mdx-linkcard-site {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+}
+.mdx-linkcard-site .mdx-linkcard-favicon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 3px;
+  object-fit: contain;
+}
+.mdx-linkcard-initial {
+  display: grid;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border-radius: 3px;
+  background: var(--ink-soft);
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.mdx-linkcard-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-family: var(--font-wenkai);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.45;
+  transition: color 150ms ease-out;
+}
+.mdx-linkcard:hover .mdx-linkcard-title {
+  color: var(--ink);
+}
+.mdx-linkcard-desc {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+.mdx-linkcard-path {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: auto;
+  padding-top: 0.375rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  color: color-mix(in oklch, var(--muted-foreground) 85%, transparent);
+}
+.mdx-linkcard-sep {
+  margin-inline: 0.25rem;
+  opacity: 0.45;
+}
+.mdx-linkcard-arrow {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-left: auto;
+  color: var(--ink);
+  opacity: 0.5;
+  transition:
+    opacity 150ms ease-out,
+    translate 150ms ease-out;
+}
+.mdx-linkcard:hover .mdx-linkcard-arrow {
+  opacity: 1;
+  translate: 2px -2px;
+}
+
+/* 存根：虛線撕線＋淡淡的季節色底 */
+.mdx-linkcard-stub {
+  position: relative;
+  display: grid;
+  flex: none;
+  width: var(--stub);
+  place-items: center;
+  overflow: hidden;
+  border-left: 1.5px dashed color-mix(in oklch, var(--foreground) 22%, transparent);
+  background: color-mix(in oklch, var(--season) 12%, var(--block-surface));
+}
+/* 預覽圖完整顯示（contain，不裁切 og 圖上的字）；空出來的上下或左右
+   由同一張圖放大模糊墊底，看起來是刻意的，不是留白 */
+.mdx-linkcard-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: contain;
+  transition: scale 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mdx-linkcard-backdrop {
+  position: absolute;
+  inset: -1.5rem;
+  width: calc(100% + 3rem);
+  height: calc(100% + 3rem);
+  margin: 0;
+  object-fit: cover;
+  filter: blur(18px) saturate(1.2);
+  opacity: 0.55;
+}
+.mdx-linkcard:hover .mdx-linkcard-image {
+  scale: 1.03;
+}
+/* 沒有預覽圖：蓋一枚印，滑過時擺正 */
+.mdx-linkcard-seal {
+  display: grid;
+  place-items: center;
+  rotate: -6deg;
+  transition: rotate 300ms ease-out;
+}
+.mdx-linkcard:hover .mdx-linkcard-seal {
+  rotate: 0deg;
+}
+.mdx-linkcard-seal .mdx-linkcard-favicon {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.375rem;
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow:
+    inset 0 0 0 1px var(--block-rule),
+    0 2px 6px oklch(0.35 0.04 60 / 0.12);
+  object-fit: contain;
+  color: var(--foreground);
+}
+/* 夜讀：很多網站圖示是黑色的（GitHub…），墊一塊淺色紙底才看得到，像一張小郵票 */
+.dark .mdx-linkcard-site .mdx-linkcard-favicon {
+  padding: 1px;
+  background: oklch(0.94 0.012 85);
+}
+.dark .mdx-linkcard-seal .mdx-linkcard-favicon {
+  background: oklch(0.94 0.012 85);
+  color: oklch(0.27 0.015 60);
+}
+/* 朱色方印：外框＋一道內框，字用文楷 */
+.mdx-linkcard-seal-letter {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 2px var(--card),
+    inset 0 0 0 3px color-mix(in oklch, var(--ink) 55%, transparent);
+  font-family: var(--font-wenkai);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+@media (max-width: 480px) {
+  .mdx-linkcard {
+    --stub: 5.25rem;
+  }
+  /* 手機有預覽圖：存根改成上方整條橫幅（1.91:1 完整顯示），撕線跟著轉成橫的 */
+  .mdx-linkcard[data-has-image] {
+    flex-direction: column-reverse;
+    -webkit-mask: none;
+    mask: none;
+  }
+  .mdx-linkcard[data-has-image] .mdx-linkcard-stub {
+    width: 100%;
+    aspect-ratio: 1.91;
+    border-bottom: 1.5px dashed color-mix(in oklch, var(--foreground) 22%, transparent);
+    border-left: 0;
+  }
+  .mdx-linkcard-main {
+    padding-inline: 1rem;
+  }
+}
+/* ── GitHub repo 卡片（link-card.tsx 的 GithubRepoCard）：同一張票根，存根印星星數 ── */
+.mdx-github {
+  --stub: clamp(6.5rem, 22%, 8.5rem);
+}
+.mdx-github-name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.mdx-github-avatar {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 1px var(--block-rule);
+}
+.mdx-github-owner {
+  color: var(--muted-foreground);
+}
+.mdx-github-repo {
+  font-weight: 700;
+  transition: color 150ms ease-out;
+}
+.mdx-github:hover .mdx-github-repo {
+  color: var(--ink);
+}
+.mdx-github-badge {
+  flex: none;
+  padding: 0 0.375rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 25%, transparent);
+  border-radius: 9999px;
+  font-family: var(--font-sans, inherit);
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+.mdx-github-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3125rem;
+  margin-top: 0.125rem;
+}
+.mdx-github-topic {
+  padding: 0 0.5rem;
+  border-radius: 9999px;
+  background: var(--ink-soft);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: color-mix(in oklch, var(--ink) 80%, var(--foreground));
+}
+.mdx-github-meta {
+  flex-wrap: wrap;
+  column-gap: 0.875rem;
+  row-gap: 0.125rem;
+}
+.mdx-github-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  white-space: nowrap;
+}
+.mdx-github-stat svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+.mdx-github-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--ink);
+}
+.mdx-github-updated {
+  font-family: var(--font-sans, inherit);
+}
+/* 存根：上方小 GitHub 標、中間一顆星＋大大的星星數（像票號），底下小字 */
+.mdx-github-stub {
+  align-content: center;
+  gap: 0.125rem;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+.mdx-github-mark {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+.mdx-github-star {
+  justify-self: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--ink);
+  fill: var(--ink);
+  transition: rotate 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mdx-github:hover .mdx-github-star {
+  rotate: 72deg;
+}
+.mdx-github-stars {
+  font-family: var(--font-wenkai);
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+.mdx-github-stars-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+.mdx-skeleton {
+  display: block;
+  height: 0.75em;
+  margin-block: 0.3em;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── 鍵盤按鍵（inline.tsx，也套用到直接寫的 <kbd>）──────────────────────── */
+.mdx-kbd,
+.mdx-wrapper kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0.0625em 0.4em;
+  border: 1px solid color-mix(in oklch, var(--foreground) 22%, transparent);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--card);
+  box-shadow: none;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8em;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--foreground);
+  vertical-align: 0.08em;
+}
+
+/* ── 注音／振假名（inline.tsx）─────────────────────────────────────────── */
+.mdx-ruby rt {
+  font-size: 0.55em;
+  letter-spacing: 0.04em;
+  color: color-mix(in oklch, var(--ink) 75%, var(--muted-foreground));
+}
+
+/* ── 旁註（sidenote.tsx）：文中朱色上標編號；桌機浮在段落右側，手機點了才展開 ── */
+.mdx-sidenote {
+  counter-increment: mdx-sidenote;
+}
+.mdx-sidenote-mark {
+  display: inline-flex;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  margin-inline: 0.125rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--ink-soft);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  vertical-align: super;
+  transition: background-color 150ms ease-out;
+}
+.mdx-sidenote-mark::before {
+  content: counter(mdx-sidenote);
+}
+.mdx-sidenote-mark:hover,
+.mdx-sidenote[data-open] .mdx-sidenote-mark {
+  background: color-mix(in oklch, var(--ink) 22%, transparent);
+}
+.mdx-sidenote-mark:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.mdx-sidenote-body {
+  display: none;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--muted-foreground);
+}
+.mdx-sidenote-body::before {
+  content: counter(mdx-sidenote) '.';
+  margin-right: 0.375rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mdx-sidenote[data-open] .mdx-sidenote-body {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.875rem;
+  border-left: 2px solid var(--ink);
+  border-radius: 0 6px 6px 0;
+  background: var(--ink-soft);
+}
+@media (min-width: 768px) {
+  .mdx-sidenote-mark {
+    pointer-events: none;
+  }
+  .mdx-sidenote-body,
+  .mdx-sidenote[data-open] .mdx-sidenote-body {
+    display: block;
+    float: right;
+    clear: right;
+    width: min(36%, 15rem);
+    margin: 0.3rem 0 0.75rem 1.5rem;
+    padding: 0 0 0 0.875rem;
+    border-left: 1px solid color-mix(in oklch, var(--ink) 45%, transparent);
+    border-radius: 0;
+    background: transparent;
+  }
+}
+
+/* ── 便條紙（sticky-note.tsx）：沿用想法頁的 .sticky-note／.washi-tape ──────── */
+.mdx-sticky {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.75rem;
+}
+.mdx-sticky[data-paper='yellow'] { --paper: oklch(0.86 0.06 92); }
+.mdx-sticky[data-paper='pink'] { --paper: oklch(0.86 0.045 15); }
+.mdx-sticky[data-paper='blue'] { --paper: oklch(0.86 0.035 235); }
+.mdx-sticky[data-paper='green'] { --paper: oklch(0.87 0.045 145); }
+.mdx-sticky-tilt {
+  width: min(100%, 26rem);
+  rotate: -1deg;
+  transform-origin: top center;
+  transition:
+    rotate 300ms ease-out,
+    translate 300ms ease-out;
+}
+.mdx-sticky:hover .mdx-sticky-tilt {
+  rotate: 0deg;
+  translate: 0 -2px;
+}
+/* .sticky-note 自己有預設 --paper，而且寫在 styles.css 比這裡晚，提高權重才蓋得過 */
+.mdx-sticky .mdx-sticky-paper {
+  --paper: inherit;
+}
+.mdx-sticky-paper {
+  /* 便條紙晝夜都是淺色紙，內文顏色固定成深墨，不跟 prose-invert 走 */
+  --tw-prose-body: var(--note-ink);
+  --tw-prose-headings: var(--note-ink);
+  --tw-prose-bold: var(--note-ink);
+  --tw-prose-links: var(--note-ink);
+  --tw-prose-bullets: var(--note-ink);
+  --tw-prose-counters: var(--note-ink);
+  --tw-prose-quotes: var(--note-ink);
+  --tw-prose-code: var(--note-ink);
+  padding: 2.25rem 1.5rem 1.375rem;
+  font-family: var(--font-wenkai);
+  font-size: 1.0625em;
+  line-height: 1.75;
+}
+.mdx-sticky-title {
+  margin: 0 0 0.375rem;
+  font-weight: 700;
+  font-size: 1.125em;
+}
+.mdx-sticky-body > :first-child {
+  margin-top: 0;
+}
+.mdx-sticky-body > :last-child {
+  margin-bottom: 0;
+}
+.mdx-sticky-body .mdx-inline-code {
+  background: rgb(0 0 0 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1);
+  color: inherit;
+}
+
+/* ── 前後對比（image-compare.tsx）─────────────────────────────────────────── */
+.mdx-compare-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--block-radius);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  background: var(--muted);
+  user-select: none;
+}
+.mdx-compare-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+}
+.mdx-compare-before {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-fit: cover;
+  clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+}
+.mdx-compare-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--pos);
+  width: 2px;
+  translate: -1px 0;
+  background: var(--card);
+  box-shadow: 0 0 0 1px oklch(0 0 0 / 0.12);
+  pointer-events: none;
+}
+.mdx-compare-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: var(--card);
+  box-shadow:
+    inset 0 0 0 1px var(--rule),
+    0 2px 8px oklch(0 0 0 / 0.15);
+  color: var(--ink);
+}
+.mdx-compare-handle svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.mdx-compare-label {
+  position: absolute;
+  top: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--card) 85%, transparent);
+  backdrop-filter: blur(4px);
+  font-family: var(--font-wenkai);
+  font-size: 0.8125rem;
+  color: var(--foreground);
+  pointer-events: none;
+}
+.mdx-compare-label[data-side='before'] {
+  left: 0.75rem;
+}
+.mdx-compare-label[data-side='after'] {
+  right: 0.75rem;
+}
+/* 透明的 range 蓋滿整張圖：點哪裡分隔線就到哪裡，拖曳、鍵盤都由瀏覽器處理 */
+.mdx-compare-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
+  appearance: none;
+}
+.mdx-compare-range::-webkit-slider-thumb {
+  width: 2.5rem;
+  height: 100vh;
+  appearance: none;
+}
+.mdx-compare-range::-moz-range-thumb {
+  width: 2.5rem;
+  height: 100vh;
+  border: 0;
+}
+.mdx-compare-stage:has(.mdx-compare-range:focus-visible) .mdx-compare-handle {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── 影片嵌入（embed.tsx）：先顯示縮圖＋播放鈕，點了才換成 iframe ─────────── */
+.mdx-embed-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--block-radius);
+  background: var(--block-surface, var(--muted));
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.mdx-embed[data-vertical] .mdx-embed-frame {
+  max-width: 22rem;
+  margin-inline: auto;
+  aspect-ratio: 9 / 16;
+}
+.mdx-embed-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.mdx-embed-facade {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  width: 100%;
+  place-items: center;
+  cursor: pointer;
+}
+.mdx-embed-facade img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  transition: scale 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mdx-embed-facade:hover img {
+  scale: 1.02;
+}
+.mdx-embed-watermark {
+  position: absolute;
+  width: 38%;
+  height: 38%;
+  color: var(--foreground);
+  opacity: 0.06;
+}
+.mdx-embed-facade:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.mdx-embed-play {
+  position: relative;
+  display: grid;
+  width: 3.75rem;
+  height: 3.75rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+  box-shadow: 0 4px 16px oklch(0 0 0 / 0.2);
+  color: var(--ink);
+  backdrop-filter: blur(6px);
+  transition: scale 200ms ease-out;
+}
+.mdx-embed-play svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  translate: 2px 0;
+  fill: currentColor;
+}
+.mdx-embed-facade:hover .mdx-embed-play {
+  scale: 1.08;
+}
+.mdx-embed-provider {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--card) 85%, transparent);
+  backdrop-filter: blur(4px);
+  font-size: 0.75rem;
+  color: var(--foreground);
+}
+.mdx-embed-provider svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

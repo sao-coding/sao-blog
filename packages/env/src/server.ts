@@ -43,6 +43,10 @@ export const env = createEnv({
     // ── Cloudflare Turnstile ─────────────────────────────────────────────
     // 有設定才會驗證登入與留言；前台另外要設 VITE_TURNSTILE_SITE_KEY
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+    // ── GitHub API（文章的 GitHub 卡片）────────────────────────────────────
+    // 選填。沒設定用匿名額度（每個 IP 每小時 60 次，有快取通常夠用）；
+    // 設一個不勾任何權限的 personal access token，額度變每小時 5000 次
+    GITHUB_TOKEN: z.string().min(1).optional(),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   },
   runtimeEnv: process.env,

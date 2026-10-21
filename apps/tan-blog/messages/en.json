@@ -176,5 +176,13 @@
   "playground_stop": "Stop",
   "playground_idle": "Click to run in an isolated sandbox",
   "playground_preview": "Playground preview",
-  "mdx_unknown_block": "This block ({name}) can't be displayed right now."
+  "mdx_unknown_block": "This block ({name}) can't be displayed right now.",
+  "sidenote_label": "Side note",
+  "compare_before": "Before",
+  "compare_after": "After",
+  "compare_slider": "Drag to compare before and after",
+  "embed_play": "Play video: {title}",
+  "github_updated": "Updated {time}",
+  "github_archived": "Archived",
+  "github_stars": "stars"
 }

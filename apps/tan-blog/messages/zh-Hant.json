@@ -176,5 +176,13 @@
   "playground_stop": "停止",
   "playground_idle": "點一下，在隔離的沙盒裡執行",
   "playground_preview": "Playground 預覽",
-  "mdx_unknown_block": "此區塊（{name}）目前無法顯示。"
+  "mdx_unknown_block": "此區塊（{name}）目前無法顯示。",
+  "sidenote_label": "旁註",
+  "compare_before": "之前",
+  "compare_after": "之後",
+  "compare_slider": "拖動分隔線比較前後",
+  "embed_play": "播放影片：{title}",
+  "github_updated": "更新於{time}",
+  "github_archived": "已封存",
+  "github_stars": "顆星"
 }

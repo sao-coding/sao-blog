@@ -21,6 +21,16 @@ import {
   MdxPlayground,
   MdxPlaygroundFile,
   MdxExcalidraw,
+  MdxSteps,
+  MdxStep,
+  MdxFileTree,
+  MdxLinkCard,
+  MdxKbd,
+  MdxRuby,
+  MdxSidenote,
+  MdxStickyNote,
+  MdxImageCompare,
+  MdxEmbed,
 } from './renderers'
 import EnhancedLink from './renderers/link'
 import { cn } from '@/lib/utils'
@@ -38,6 +48,22 @@ function nodeToText(node: React.ReactNode): string {
     return nodeToText(node.props.children)
   }
   return ''
+}
+
+// 複製用的文字：逐行取 Shiki 的 <span class="line">，跳過 [!code --] 標記的刪除行，
+// 讀者貼上的就是「改完之後」的程式碼
+function codeToCopyText(code: React.ReactNode): string {
+  if (!React.isValidElement<{ children?: React.ReactNode }>(code)) return nodeToText(code)
+  const lines = React.Children.toArray(code.props.children).filter(
+    (child): child is React.ReactElement<{ className?: string; children?: React.ReactNode }> =>
+      React.isValidElement<{ className?: string }>(child) &&
+      !!child.props.className?.split(' ').includes('line')
+  )
+  if (lines.length === 0) return nodeToText(code)
+  return lines
+    .filter((line) => !line.props.className?.split(' ').includes('remove'))
+    .map(nodeToText)
+    .join('\n')
 }
 
 // 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）。
@@ -58,6 +84,16 @@ const blockComponents = {
   Playground: MdxPlayground,
   PlaygroundFile: MdxPlaygroundFile,
   Excalidraw: MdxExcalidraw,
+  Steps: MdxSteps,
+  Step: MdxStep,
+  FileTree: MdxFileTree,
+  LinkCard: MdxLinkCard,
+  Kbd: MdxKbd,
+  Ruby: MdxRuby,
+  Sidenote: MdxSidenote,
+  StickyNote: MdxStickyNote,
+  ImageCompare: MdxImageCompare,
+  Embed: MdxEmbed,
 } satisfies Record<MdxComponentName, React.ComponentType<never>>
 
 // 預設 MDX components 配置
@@ -129,11 +165,19 @@ export const defaultMDXComponents: MDXComponents = {
     const lang = childClassName?.startsWith('language-')
       ? childClassName.slice('language-'.length)
       : undefined
-    const codeText = nodeToText(children)
+    // ```ts title="vite.config.ts" 的檔名（highlight.ts 放在 data-title）
+    const { 'data-title': title, ...preProps } = props as typeof props & {
+      'data-title'?: string
+    }
 
     return (
-      <CodeBlockHeader lang={lang} codeText={codeText}>
-        <pre className={className} {...props}>
+      <CodeBlockHeader
+        lang={lang}
+        title={title}
+        codeText={nodeToText(children)}
+        copyText={codeToCopyText(children)}
+      >
+        <pre className={className} {...preProps}>
           {children}
         </pre>
       </CodeBlockHeader>

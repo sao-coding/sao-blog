@@ -15,6 +15,11 @@
 外部連結 [TanStack Start](https://tanstack.com/start/latest)、[GitHub 連結](https://github.com/sao-coding)，
 還有站內連結 [回到文章列表](/posts)。註腳也要能用[^1]。
 
+按 <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd> 開啟搜尋（小寫 <kbd>Esc</kbd> 也是同樣樣式）。
+日文的<Ruby rt="かんじ">漢字</Ruby>可以標振假名，冷僻字也能標注音：<Ruby rt="ㄒㄧㄣ">馨</Ruby>。
+這句話後面有一則旁註<Sidenote>桌機顯示在段落右側；手機點編號才展開。</Sidenote>，
+再來一則<Sidenote>旁註整篇連號，支援 **markdown** 與 `code`。</Sidenote>看編號有沒有接著算。
+
 [^1]: 這是一個註腳。
 
 ### 清單
@@ -125,6 +130,33 @@ example.com { reverse_proxy localhost:3000 }
 
 ```
 沒有標記語言的程式碼（顯示「純文字」）
+```
+
+檔名標題 `title="..."`：
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite'
+
+export default defineConfig({ server: { port: 3004 } })
+```
+
+差異標記 `// [!code ++]`、`// [!code --]`（複製時不含刪除行）：
+
+```ts title="server.ts"
+const app = new Elysia()
+  .use(cors()) // [!code --]
+  .use(cors({ origin: 'https://sao.blog' })) // [!code ++]
+  .listen(3000)
+```
+
+聚焦 `// [!code focus]`（其餘行淡掉，滑過恢復）與 `// [!code highlight]`：
+
+```ts
+export async function loader() {
+  const post = await getPost() // [!code focus]
+  if (!post) throw notFound() // [!code highlight]
+  return post
+}
 ```
 
 ## 提示
@@ -320,6 +352,76 @@ export default function App() {
 }
 ```
 </Playground>
+
+## 步驟
+
+<Steps>
+  <Step title="安裝 Docker">
+  ```bash
+  curl -fsSL https://get.docker.com | sh
+  ```
+  </Step>
+  <Step title="寫好 compose 檔">
+  建一個 `compose.yaml`，內容支援任意 **markdown**。
+  </Step>
+  <Step title="啟動服務">執行 `docker compose up -d`，打開 <Kbd>http://localhost:3000</Kbd>。</Step>
+</Steps>
+
+## 檔案樹
+
+<FileTree>
+- apps/
+  - tan-blog/
+    - src/
+      - components/
+        - mdx/
+          - **blocks.css** 文章區塊的共用樣式
+          - DESIGN.md 設計原則
+          - renderers/
+            - …
+      - styles.css
+    - vite.config.ts 建置設定
+- packages/
+  - mdx/
+- package.json
+- README.md
+</FileTree>
+
+## 連結卡片
+
+<LinkCard href="https://tanstack.com/start/latest" />
+
+<LinkCard href="https://github.com/TanStack/router" />
+
+<LinkCard href="https://example.com/no-preview" title="手動指定標題" description="抓不到預覽時用 title / description 補上。" />
+
+## 便條紙
+
+<StickyNote title="給未來的自己">
+記得每年換一次備份硬碟，**不要等到它壞掉**。
+</StickyNote>
+
+<StickyNote color="pink">粉色便條，沒有標題。</StickyNote>
+
+<StickyNote color="blue">藍色便條，裡面也能放 `code`。</StickyNote>
+
+<StickyNote color="green">綠色便條。</StickyNote>
+
+## 前後對比
+
+<ImageCompare
+  before="https://picsum.photos/id/1015/1200/675?grayscale"
+  after="https://picsum.photos/id/1015/1200/675"
+  beforeLabel="黑白"
+  afterLabel="彩色"
+  alt="拖動分隔線比較黑白與彩色"
+/>
+
+## 影片
+
+<Embed src="https://www.youtube.com/watch?v=jNQXAC9IVRw" title="YouTube：點了才載入播放器" />
+
+<Embed src="https://www.bilibili.com/video/BV1GJ411x7h7" title="Bilibili（沒有縮圖，顯示紙色底）" />
 
 ## 其他
 

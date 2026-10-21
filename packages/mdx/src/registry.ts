@@ -16,6 +16,15 @@ import { z } from 'zod'
 
 const color = z.enum(['blue', 'green', 'amber', 'red', 'purple', 'pink'])
 
+/** 圖片等資源：http(s) 網址或站內路徑（/ 開頭），擋掉 javascript: / data: 之類 */
+const assetUrl = z
+  .string()
+  .regex(/^(https?:\/\/|\/(?!\/))/, '只接受 http(s) 網址或以 / 開頭的站內路徑')
+
+/** <Embed> 支援的影片網址：YouTube（watch / shorts / youtu.be）與 Bilibili（BV 號） */
+export const EMBED_URL_PATTERN =
+  /^https:\/\/(?:(?:www\.|m\.)?youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)[\w-]{11}|youtu\.be\/[\w-]{11}|(?:www\.|m\.)?bilibili\.com\/video\/BV\w{10})/
+
 export const PLAYGROUND_TEMPLATES = ['react', 'html', 'vanilla'] as const
 export type PlaygroundTemplate = (typeof PLAYGROUND_TEMPLATES)[number]
 /** Playground 內 code fence 可用的語言（瀏覽器端不做 bundling，只支援這幾種） */
@@ -166,6 +175,81 @@ export const componentRegistry = {
     description: '計數器示範元件',
     props: {},
     children: false,
+  }),
+  Steps: define({
+    description: '步驟清單容器，子元素為 Step，自動編號（教學文的「第 1 步、第 2 步」）',
+    props: {},
+    children: true,
+  }),
+  Step: define({
+    description: '單一步驟，需放在 <Steps> 內；內容支援 markdown（含程式碼）',
+    props: { title: z.string() },
+    children: true,
+    translatableProps: ['title'],
+  }),
+  FileTree: define({
+    description:
+      '檔案樹。子內容寫成 markdown 巢狀清單：名稱以 / 結尾或底下還有清單的是資料夾；' +
+      '用 **粗體** 標示重點檔案；名稱後面接的文字當註解（例如 `- vite.config.ts 建置設定`）',
+    props: {},
+    children: true,
+  }),
+  LinkCard: define({
+    description: '連結卡片：抓網頁的標題、描述與預覽圖顯示成卡片；title / description 可手動覆寫',
+    props: {
+      href: z.string().url(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+    },
+    children: false,
+    translatableProps: ['title', 'description'],
+  }),
+  Kbd: define({
+    description: '鍵盤按鍵（行內），例如 <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>',
+    props: {},
+    children: true,
+  }),
+  Ruby: define({
+    description: '注音／振假名（行內），例如 <Ruby rt="かんじ">漢字</Ruby>',
+    props: { rt: z.string().min(1) },
+    children: true,
+  }),
+  Sidenote: define({
+    description: '旁註（行內）：寫在句子裡，桌機顯示在段落右側，手機收成可點開的小標記',
+    props: {},
+    children: true,
+  }),
+  StickyNote: define({
+    description: '便條紙：貼在文章裡的一張便條（文楷、紙膠帶），適合日記與隨筆；color 換紙色',
+    props: {
+      title: z.string().optional(),
+      color: z.enum(['yellow', 'pink', 'blue', 'green']).optional(),
+    },
+    children: true,
+    translatableProps: ['title'],
+  }),
+  ImageCompare: define({
+    description: '前後對比：兩張同尺寸的圖疊在一起，拖動分隔線比較（例如介面改版前後）',
+    props: {
+      before: assetUrl,
+      after: assetUrl,
+      beforeLabel: z.string().optional(),
+      afterLabel: z.string().optional(),
+      /** 圖片的替代文字／圖說 */
+      alt: z.string().optional(),
+    },
+    children: false,
+    translatableProps: ['beforeLabel', 'afterLabel', 'alt'],
+  }),
+  Embed: define({
+    description:
+      '影片嵌入（YouTube / Bilibili）：先顯示縮圖，點擊才載入播放器（不拖慢頁面、不先送出追蹤請求）',
+    props: {
+      src: z.string().regex(EMBED_URL_PATTERN, '只支援 YouTube 或 Bilibili 的影片網址'),
+      title: z.string().optional(),
+    },
+    children: false,
+    translatableProps: ['title'],
   }),
 } satisfies Record<string, ComponentSpec>
 

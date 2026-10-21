@@ -56,6 +56,20 @@ export async function hashSource(source: string): Promise<string> {
   ).join('')
 }
 
+/**
+ * 編譯管線版本。同一份原文會編出不同結果的改動（Shiki transformer、remark / rehype 外掛、
+ * registry 的節點轉換）都要遞增：已存的 compiled 會因 compiledHash 對不上而在下次讀取時重編。
+ * 跟 COMPILED_VERSION 不同——那個是「產物格式」不相容時才遞增，renderer 會拒絕舊格式。
+ *
+ * 2：程式碼區塊支援 title="…" 與 // [!code ++] / [!code --] / [!code focus] / [!code highlight]
+ */
+export const COMPILE_PIPELINE_VERSION = 2
+
+/** 存成 compiledHash 的值：原文＋管線版本。原文沒改但管線升版時也會變 */
+export function compiledHashOf(source: string): Promise<string> {
+  return hashSource(`pipeline:${COMPILE_PIPELINE_VERSION}\n${source}`)
+}
+
 /** 中日文以字計、其他語言以詞計，分別用 400 字/分、200 詞/分估算 */
 export function estimateReadingTime(text: string): number {
   const cjk = text.match(/[぀-ヿ㐀-鿿豈-﫿]/g)?.length ?? 0
@@ -182,7 +196,7 @@ export async function compileMdx(
   source: string,
   { profile = 'post' }: { profile?: CompileProfile } = {}
 ): Promise<CompileResult> {
-  const hash = await hashSource(source)
+  const [hash, compiledHash] = await Promise.all([hashSource(source), compiledHashOf(source)])
   const file = new VFile({ value: source })
 
   try {
@@ -224,6 +238,7 @@ export async function compileMdx(
     plainText,
     readingTime: estimateReadingTime(plainText),
     hash,
+    compiledHash,
     frontmatter: data.matter ?? {},
   }
 }

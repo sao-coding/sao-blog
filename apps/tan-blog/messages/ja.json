@@ -176,5 +176,13 @@
   "playground_stop": "停止",
   "playground_idle": "クリックして隔離されたサンドボックスで実行",
   "playground_preview": "Playground プレビュー",
-  "mdx_unknown_block": "このブロック（{name}）は現在表示できません。"
+  "mdx_unknown_block": "このブロック（{name}）は現在表示できません。",
+  "sidenote_label": "傍注",
+  "compare_before": "変更前",
+  "compare_after": "変更後",
+  "compare_slider": "ドラッグして前後を比較",
+  "embed_play": "動画を再生：{title}",
+  "github_updated": "{time}に更新",
+  "github_archived": "アーカイブ済み",
+  "github_stars": "スター"
 }

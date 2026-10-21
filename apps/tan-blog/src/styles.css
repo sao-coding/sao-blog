@@ -1087,7 +1087,7 @@
  * 圖說：自動編號「圖 N」（前綴由 CompiledMdx 依語系帶入 --mdx-figure-label），上方一條髮絲線。
  * 載入中顯示流光骨架，載完由模糊轉清晰淡入；滑過時圖片微微放大提示可點開。 */
 .mdx-wrapper {
-  counter-reset: mdx-figure;
+  counter-reset: mdx-figure mdx-sidenote;
 }
 .mdx-figure {
   --hairline: oklch(0.3 0.03 60 / 0.14);
