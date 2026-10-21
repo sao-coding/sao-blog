@@ -8,31 +8,28 @@ export interface CustomQuoteProps {
   variant?: 'default' | 'warning' | 'info' | 'success'
 }
 
+// 對應 blocks.css 的 [data-tone]；default 不給值，沿用朱色
+const variantTone: Record<NonNullable<CustomQuoteProps['variant']>, string | undefined> = {
+  default: undefined,
+  warning: 'amber',
+  info: 'blue',
+  success: 'green',
+}
+
+/**
+ * 引言：左側一道細線、淡淡的大引號，內文用文楷（CJK 不用斜體），署名靠右。
+ *
+ * ```mdx
+ * <CustomQuote author="魯迅">其實地上本沒有路，走的人多了，也便成了路。</CustomQuote>
+ * ```
+ */
 export const CustomQuote = ({
   children,
   author,
   variant = 'default',
-}: CustomQuoteProps) => {
-  const variantClasses = {
-    default: 'border-l-blue-500 bg-blue-50 dark:bg-blue-950/20',
-    warning: 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20',
-    info: 'border-l-cyan-500 bg-cyan-50 dark:bg-cyan-950/20',
-    success: 'border-l-green-500 bg-green-50 dark:bg-green-950/20',
-  }
-
-  return (
-    <blockquote
-      className={`
-        my-6 border-l-4 pl-6 py-4 rounded-r-lg
-        ${variantClasses[variant]}
-      `}
-    >
-      <div className="text-base italic leading-relaxed">{children}</div>
-      {author && (
-        <footer className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">
-          — {author}
-        </footer>
-      )}
-    </blockquote>
-  )
-}
+}: CustomQuoteProps) => (
+  <figure className="mdx-block mdx-quote" data-tone={variantTone[variant] ?? ''}>
+    <blockquote>{children}</blockquote>
+    {author && <figcaption>—— {author}</figcaption>}
+  </figure>
+)

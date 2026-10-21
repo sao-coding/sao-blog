@@ -1,0 +1,798 @@
+/* ── 文章區塊（components/mdx/renderers/*）────────────────────────────────────
+ * 設計原則見同目錄 DESIGN.md「紙上之物」：
+ * 只用主題 token、髮絲線分層、同一副骨架（題簽／內容／註腳）、工具退後、動作要輕。
+ * 由 src/styles.css 匯入。 */
+
+/* Shiki 雙主題（light/dark）以 CSS variables 切換，對應 rehype 設定的
+   themes: { light: 'kanagawa-lotus', dark: 'github-dark' } + defaultColor: false。
+   background-color 只放在 .shiki 本身——如果連 span 也套用背景色，每個文字
+   token 都會有自己的不透明背景，蓋住 .line.highlighted 的行高亮背景。
+   底色不用主題自帶的（米黃／GitHub 灰），晝夜都取紙色再壓一點墨，像紙上另貼的一方箋。 */
+.shiki {
+  color: var(--shiki-light);
+  background-color: color-mix(in oklch, var(--foreground) 4%, var(--card));
+}
+.shiki span {
+  color: var(--shiki-light);
+}
+.dark .shiki {
+  color: var(--shiki-dark);
+}
+.dark .shiki span {
+  color: var(--shiki-dark);
+}
+
+/* 行號：純 CSS counter，不需要額外 JS，也不會被複製到剪貼簿 */
+.shiki code {
+  counter-reset: line;
+}
+
+/* 水平內距放在每一行的 .line 本身，而不是外層 <pre>，這樣 .line.highlighted
+   的背景才能直接吃滿整行寬度。左側多留行號的位置，行號再用負 margin 拉進去：
+   開啟自動換行時，折下來的行會對齊程式碼而不是對齊行號（懸掛縮排）。 */
+.shiki .line {
+  display: inline-block;
+  width: 100%;
+  padding-inline: 1rem;
+  padding-left: 3.75rem;
+}
+.shiki .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-left: -3rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
+  user-select: none;
+}
+
+/* 只有一行（常見於一行指令）就不顯示行號 */
+.shiki code:has(> .line:only-of-type) .line {
+  padding-left: 1rem;
+}
+.shiki code:has(> .line:only-of-type) .line::before {
+  content: none;
+}
+
+/* 部分行數高亮，對應 fenced code block 的 {1,3-5} meta 語法
+   （由 transformerMetaHighlight 加上 .highlighted class）：朱色淡底＋左側一道朱線 */
+.shiki .line.highlighted {
+  background-color: var(--ink-soft);
+  box-shadow: inset 2px 0 0 var(--ink);
+}
+.shiki .line.highlighted::before {
+  color: var(--ink);
+}
+
+/* ── 共用：區塊 token、語意色、框、題簽、工具、註腳 ─────────────────────────── */
+.mdx-block {
+  --block-radius: 8px;
+  --block-rule: var(--rule);
+  --block-surface: color-mix(in oklch, var(--foreground) 3.5%, var(--card));
+  --block-raised: color-mix(in oklch, var(--foreground) 7%, var(--card));
+  margin-block: 2rem;
+}
+
+/* 語意色：一個低彩度的 --tone，底色、邊線、圖示都由它調出來（晝夜各一組）。
+   沒指定就是朱（--ink），站上唯一的強調色。 */
+[data-tone] {
+  --tone: var(--ink);
+}
+[data-tone='neutral'] { --tone: oklch(0.5 0.015 60); }
+[data-tone='blue'] { --tone: oklch(0.52 0.09 240); }
+[data-tone='green'] { --tone: oklch(0.52 0.08 155); }
+[data-tone='amber'] { --tone: oklch(0.62 0.12 72); }
+[data-tone='red'] { --tone: oklch(0.54 0.16 28); }
+[data-tone='purple'] { --tone: oklch(0.52 0.1 305); }
+[data-tone='pink'] { --tone: oklch(0.62 0.12 0); }
+.dark [data-tone='neutral'] { --tone: oklch(0.76 0.02 var(--h)); }
+.dark [data-tone='blue'] { --tone: oklch(0.78 0.08 240); }
+.dark [data-tone='green'] { --tone: oklch(0.78 0.09 155); }
+.dark [data-tone='amber'] { --tone: oklch(0.82 0.11 80); }
+.dark [data-tone='red'] { --tone: oklch(0.74 0.14 28); }
+.dark [data-tone='purple'] { --tone: oklch(0.76 0.09 305); }
+.dark [data-tone='pink'] { --tone: oklch(0.8 0.08 0); }
+
+/* 框：紙上另貼一方，1px 髮絲線，不加陰影 */
+.mdx-frame {
+  overflow: hidden;
+  border: 1px solid var(--block-rule);
+  border-radius: var(--block-radius);
+  background: var(--block-surface);
+}
+
+/* 題簽：左標籤、右工具；小字、muted */
+.mdx-block-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.375rem 0.25rem 1rem;
+  border-bottom: 1px solid var(--block-rule);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.mdx-block-label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: auto;
+}
+.mdx-block-label > svg {
+  flex: none;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  opacity: 0.75;
+}
+.mdx-block-label-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mdx-mono {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+}
+.mdx-chip {
+  flex: none;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 4px;
+  background: var(--block-raised);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+}
+
+/* 工具：平時淡、滑過區塊或鍵盤聚焦時才清楚；觸控裝置（沒有 hover）一律清楚 */
+.mdx-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.125rem;
+  opacity: 0.65;
+  transition: opacity 150ms ease-out;
+}
+.mdx-block:hover .mdx-tools,
+.mdx-tools:focus-within {
+  opacity: 1;
+}
+@media (hover: none) {
+  .mdx-tools {
+    opacity: 1;
+  }
+}
+.mdx-tool {
+  display: inline-flex;
+  height: 1.875rem;
+  min-width: 1.875rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding-inline: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  transition:
+    color 150ms ease-out,
+    background-color 150ms ease-out;
+}
+.mdx-tool:hover {
+  color: var(--foreground);
+  background: var(--block-raised);
+}
+.mdx-tool:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.mdx-tool[aria-pressed='true'],
+.mdx-tool[data-done],
+.mdx-tool[data-accent] {
+  color: var(--ink);
+}
+.mdx-tool svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+/* 註腳：展開／收合這類操作，整條可點 */
+.mdx-block-foot {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.25rem;
+  border-top: 1px solid var(--block-rule);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  transition:
+    color 150ms ease-out,
+    background-color 150ms ease-out;
+}
+.mdx-block-foot:hover {
+  color: var(--foreground);
+  background: var(--block-raised);
+}
+.mdx-block-foot:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.mdx-block-foot svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  transition: rotate 300ms ease-out;
+}
+.mdx-block-foot[aria-expanded='true'] svg {
+  rotate: 180deg;
+}
+
+/* 分頁這類容器裡只放一段程式碼時，去掉內層外框，不出現框中框；
+   外層題簽已經說明是什麼了，內層題簽收掉，只把工具浮在右上角 */
+.mdx-slot > .mdx-code:only-child {
+  position: relative;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.mdx-slot > .mdx-code:only-child > .mdx-block-head {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  z-index: 1;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+.mdx-slot > .mdx-code:only-child > .mdx-block-head .mdx-block-label {
+  display: none;
+}
+.mdx-slot > .mdx-code:only-child .mdx-tools {
+  border-radius: 6px;
+  background: var(--block-surface);
+}
+
+/* ── 程式碼（code-block.tsx）──────────────────────────────────────────────── */
+.mdx-code pre.shiki,
+.mdx-code-plain {
+  margin: 0;
+  padding-block: 0.875rem;
+  overflow-x: auto;
+  background: transparent;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  tab-size: 2;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent) transparent;
+}
+.mdx-code-plain {
+  padding-inline: 1rem;
+  white-space: pre;
+}
+.mdx-code pre.shiki:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.mdx-code[data-wrap] pre.shiki {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* 收合：高度過渡＋底部淡出，暗示下面還有 */
+.mdx-code-body[data-collapsible] {
+  overflow: hidden;
+  transition: max-height 300ms ease-out;
+}
+.mdx-code-body[data-collapsed] {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 4.5rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 4.5rem), transparent);
+}
+
+/* 行內程式碼：紙上一小塊淡墨底＋髮絲線；拿掉 typography 外掛自動加的反引號 */
+.mdx-inline-code {
+  padding: 0.125em 0.375em;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+  font-weight: 500;
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+}
+.mdx-inline-code::before,
+.mdx-inline-code::after {
+  content: none;
+}
+
+/* ── 提示（alert.tsx）：眉批——四角圓、語意色髮絲線、極淡的底 ──────────────
+ * 左側的語意色是框內一道圓頭短線（::before），不是 border-left：
+ * border-left 配圓角會讓左緣變成直角或彎月形，跟其他區塊的圓角不一致。 */
+.mdx-alert {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.625rem;
+  padding: 0.875rem 1.125rem 0.875rem 1.375rem;
+  border: 1px solid color-mix(in oklch, var(--tone) 20%, transparent);
+  border-radius: var(--block-radius);
+  background: color-mix(in oklch, var(--tone) 7%, var(--card));
+  font-size: 0.9375em;
+}
+.mdx-alert::before {
+  content: '';
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  left: 0.5rem;
+  width: 3px;
+  border-radius: 9999px;
+  background: var(--tone);
+}
+.mdx-alert-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.3em;
+  color: var(--tone);
+}
+.mdx-alert-title {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-wenkai);
+  font-weight: 700;
+  color: color-mix(in oklch, var(--tone) 72%, var(--foreground));
+}
+.mdx-alert-body > :first-child {
+  margin-top: 0;
+}
+.mdx-alert-body > :last-child {
+  margin-bottom: 0;
+}
+.mdx-alert-body > .mdx-block {
+  margin-block: 0.75rem;
+}
+
+/* ── 引言（custom-quote.tsx）與一般 markdown 引言 ────────────────────────────
+ * CJK 不用斜體；左側一道細線，大引號淡淡壓在左上角，署名靠右用文楷 */
+.mdx-quote {
+  position: relative;
+  padding: 0.25rem 0 0.25rem 1.5rem;
+  border-left: 2px solid color-mix(in oklch, var(--tone) 55%, transparent);
+}
+.mdx-quote::before {
+  content: '\201C';
+  position: absolute;
+  top: -0.875rem;
+  left: 0.5rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: color-mix(in oklch, var(--tone) 22%, transparent);
+  pointer-events: none;
+}
+.mdx-quote blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-wenkai);
+  font-size: 1.0625em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--foreground);
+  quotes: none;
+}
+.mdx-quote blockquote > :first-child {
+  margin-top: 0;
+}
+.mdx-quote blockquote > :last-child {
+  margin-bottom: 0;
+}
+.mdx-quote figcaption {
+  margin-top: 0.625rem;
+  text-align: right;
+  font-family: var(--font-wenkai);
+  font-size: 0.875em;
+  color: var(--muted-foreground);
+}
+.mdx-wrapper > blockquote {
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--rule);
+  font-style: normal;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  quotes: none;
+}
+.mdx-quote blockquote p::before,
+.mdx-quote blockquote p::after,
+.mdx-wrapper > blockquote p::before,
+.mdx-wrapper > blockquote p::after {
+  content: none;
+}
+
+/* ── 折疊（accordion.tsx）──────────────────────────────────────────────────── */
+.mdx-accordion {
+  background: var(--card);
+}
+.mdx-accordion-item + .mdx-accordion-item {
+  border-top: 1px solid var(--block-rule);
+}
+/* Accordion.Header 是 <h3>（保留標題語意），但不要 prose 的標題字級與外距 */
+.mdx-accordion-header {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+.mdx-accordion-trigger {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.875rem 1.125rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--foreground);
+  transition: background-color 150ms ease-out;
+}
+.mdx-accordion-trigger:hover {
+  background: var(--block-surface);
+}
+.mdx-accordion-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.mdx-accordion-trigger svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.35em;
+  color: var(--muted-foreground);
+  transition:
+    rotate 200ms ease-out,
+    color 150ms ease-out;
+}
+.mdx-accordion-trigger[data-panel-open] svg {
+  rotate: 90deg;
+  color: var(--ink);
+}
+.mdx-accordion-panel {
+  height: var(--accordion-panel-height);
+  overflow: hidden;
+  transition: height 200ms ease-out;
+}
+.mdx-accordion-panel[data-starting-style],
+.mdx-accordion-panel[data-ending-style] {
+  height: 0;
+}
+/* 內文對齊標題文字（避開左側箭頭） */
+.mdx-accordion-content {
+  padding: 0 1.125rem 1rem 2.75rem;
+}
+.mdx-accordion-content > :first-child {
+  margin-top: 0;
+}
+.mdx-accordion-content > :last-child {
+  margin-bottom: 0;
+}
+
+/* ── 分頁（tabs.tsx）：題簽列就是分頁列，朱色指示線滑到選中的分頁 ───────── */
+.mdx-tabs-head {
+  padding: 0 0.375rem 0 0.375rem;
+}
+.mdx-tabs-list {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  gap: 0.125rem;
+  margin-bottom: -1px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mdx-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+.mdx-tab {
+  flex: none;
+  height: 2.5rem;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  transition: color 150ms ease-out;
+}
+.mdx-tab:hover,
+.mdx-tab[data-active] {
+  color: var(--foreground);
+}
+.mdx-tab:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -5px;
+  border-radius: 8px;
+}
+.mdx-tabs-indicator {
+  position: absolute;
+  bottom: 0;
+  left: var(--active-tab-left);
+  width: var(--active-tab-width);
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--ink);
+  transition:
+    left 250ms ease-out,
+    width 250ms ease-out;
+}
+.mdx-tabs-panel {
+  padding: 1rem 1.25rem;
+  background: var(--card);
+}
+.mdx-tabs-panel:has(> .mdx-code:only-child) {
+  padding: 0;
+  background: transparent;
+}
+.mdx-tabs-panel:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.mdx-tabs-panel > :first-child {
+  margin-top: 0;
+}
+.mdx-tabs-panel > :last-child {
+  margin-bottom: 0;
+}
+
+/* ── 輪播（carousel.tsx）：箭頭疊在圖上、底下一排點＋頁碼 ─────────────────── */
+.mdx-carousel-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--card) 82%, transparent);
+  box-shadow:
+    inset 0 0 0 1px var(--rule),
+    0 2px 8px oklch(0 0 0 / 0.08);
+  color: var(--foreground);
+  translate: 0 -50%;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition:
+    opacity 150ms ease-out,
+    background-color 150ms ease-out;
+}
+.mdx-carousel-nav svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.mdx-carousel:hover .mdx-carousel-nav:not(:disabled),
+.mdx-carousel-nav:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .mdx-carousel-nav:not(:disabled) {
+    opacity: 1;
+  }
+}
+.mdx-carousel-nav:hover {
+  background: var(--card);
+}
+.mdx-carousel-nav:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.mdx-carousel-nav[data-dir='prev'] {
+  left: 0.75rem;
+}
+.mdx-carousel-nav[data-dir='next'] {
+  right: 0.75rem;
+}
+.mdx-carousel-slide > :first-child,
+.mdx-carousel-slide img {
+  margin-block: 0;
+}
+.mdx-carousel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  margin-top: 0.875rem;
+}
+.mdx-carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+/* 點本身很小，用透明的 ::after 把可點範圍撐到 24px */
+.mdx-carousel-dot {
+  position: relative;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--foreground) 22%, transparent);
+  transition:
+    width 250ms ease-out,
+    background-color 250ms ease-out;
+}
+.mdx-carousel-dot::after {
+  content: '';
+  position: absolute;
+  inset: -0.5625rem -0.25rem;
+}
+.mdx-carousel-dot[aria-current='true'] {
+  width: 1.25rem;
+  background: var(--ink);
+}
+.mdx-carousel-dot:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.mdx-carousel-count {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+/* ── 進度條與效能比較（progress.tsx／benchmark.tsx）─────────────────────────── */
+/* 連續好幾條進度條排在一起時收緊間距，讀起來是一組 */
+.mdx-block.mdx-meter + .mdx-block.mdx-meter {
+  margin-top: -0.75rem;
+}
+.mdx-meter-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.9375rem;
+}
+.mdx-meter-label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.mdx-meter-value {
+  flex: none;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.mdx-meter-ratio {
+  margin-left: 0.5rem;
+  color: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+}
+.mdx-meter-track {
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--tone) 13%, transparent);
+}
+.mdx-meter-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tone);
+}
+.mdx-benchmark-list {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.25rem 1.125rem;
+  background: var(--card);
+}
+.mdx-benchmark-list .mdx-meter-row {
+  margin-bottom: 0.3125rem;
+}
+/* 最佳：一枚朱色小印 */
+.mdx-seal {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.3125rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--font-wenkai);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+/* ── Playground（playground.tsx）────────────────────────────────────────────── */
+.mdx-playground-files {
+  border-bottom: 1px solid var(--block-rule);
+}
+.mdx-playground-stage {
+  border-top: 1px solid var(--block-rule);
+  background: var(--card);
+}
+.mdx-playground-idle {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  transition: color 150ms ease-out;
+}
+.mdx-playground-idle:hover {
+  color: var(--foreground);
+}
+.mdx-playground-idle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -4px;
+}
+.mdx-playground-idle-icon {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--ink-soft);
+  color: var(--ink);
+  transition: scale 200ms ease-out;
+}
+.mdx-playground-idle:hover .mdx-playground-idle-icon {
+  scale: 1.06;
+}
+.mdx-playground-console {
+  max-height: 10rem;
+  overflow: auto;
+  padding: 0.5rem 1rem 0.75rem;
+  border-top: 1px solid var(--block-rule);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+}
+.mdx-playground-console-head {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.mdx-playground-console-head svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.mdx-console-line {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--foreground);
+}
+.mdx-console-line[data-tone] {
+  color: var(--tone);
+}
+/* 沒有 base-ui 指示線的簡易分頁（Playground 檔案列）：選中的分頁底下一道朱線 */
+.mdx-tab-underline[data-active] {
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+
+/* 沒辦法顯示的區塊：虛線框，像紙上留了一塊空白 */
+.mdx-unknown {
+  padding: 1rem 1.25rem;
+  border: 1px dashed var(--block-rule);
+  border-radius: var(--block-radius);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mdx-block,
+  .mdx-block *,
+  .mdx-block *::before,
+  .mdx-block *::after {
+    transition-duration: 0ms !important;
+  }
+}

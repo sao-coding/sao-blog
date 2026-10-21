@@ -1,12 +1,8 @@
 'use client'
 
 import React from 'react'
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@sao-blog/ui/components/accordion'
+import { Accordion } from '@base-ui/react/accordion'
+import { ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface MdxAccordionItemProps {
@@ -43,6 +39,8 @@ const isAccordionItem = (child: React.ReactNode): child is ItemElement =>
 
 /**
  * 文章用的折疊面板（對應 Hexo 的 folding/tabs）。
+ * 一個框、髮絲線分隔各項；箭頭在標題左側，展開時轉向並染朱，內文對齊標題文字。
+ * 收起的內容用 hidden="until-found" 留在 DOM：SSR 輸出就有全文，瀏覽器的頁內搜尋也找得到。
  *
  * ```mdx
  * <Accordion>
@@ -67,24 +65,25 @@ export const MdxAccordion = ({
     .filter((v): v is number => v !== null)
 
   return (
-    <Accordion
+    <Accordion.Root
       multiple={multiple}
       defaultValue={defaultValue}
-      className={cn(
-        'my-6 rounded-lg border bg-card px-4 divide-y',
-        className
-      )}
+      hiddenUntilFound
+      className={cn('mdx-block mdx-frame mdx-accordion', className)}
     >
       {items.map((item, index) => (
-        <AccordionItem key={index} value={index} className="border-b-0">
-          <AccordionTrigger>{item.props.title}</AccordionTrigger>
-          <AccordionContent>
-            <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">
-              {item.props.children}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        <Accordion.Item key={index} value={index} className="mdx-accordion-item">
+          <Accordion.Header className="mdx-accordion-header">
+            <Accordion.Trigger className="mdx-accordion-trigger">
+              <ChevronRightIcon aria-hidden />
+              <span className="min-w-0">{item.props.title}</span>
+            </Accordion.Trigger>
+          </Accordion.Header>
+          <Accordion.Panel className="mdx-accordion-panel">
+            <div className="mdx-accordion-content">{item.props.children}</div>
+          </Accordion.Panel>
+        </Accordion.Item>
       ))}
-    </Accordion>
+    </Accordion.Root>
   )
 }

@@ -106,7 +106,7 @@ tan-blog/
 
 ### 新增 MDX block 元件
 
-1. **在 `src/components/mdx/renderers/` 新增 React 元件**
+1. **在 `src/components/mdx/renderers/` 新增 React 元件**（视觉遵循 `src/components/mdx/DESIGN.md`「纸上之物」原则，共用样式在同目录 `blocks.css`）
    ```tsx
    export function Alert({ 
      type, 

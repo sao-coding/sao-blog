@@ -1,12 +1,7 @@
 'use client'
 
 import React from 'react'
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from '@sao-blog/ui/components/tabs'
+import { Tabs } from '@base-ui/react/tabs'
 import { cn } from '@/lib/utils'
 
 export interface MdxTabProps {
@@ -39,6 +34,8 @@ const isTab = (child: React.ReactNode): child is TabElement =>
 
 /**
  * 文章用的分頁元件（對應 Hexo 的 tabs tag）。
+ * 題簽列就是分頁列，朱色指示線滑到選中的分頁；分頁裡只放一段程式碼時，
+ * 程式碼直接貼齊框（.mdx-slot），不會框中框。所有分頁都留在 DOM（keepMounted），SSR 就有全文。
  *
  * ```mdx
  * <Tabs defaultIndex={0}>
@@ -65,26 +62,30 @@ export const MdxTabs = ({
   if (tabs.length === 0) return null
 
   return (
-    <Tabs
-      defaultValue={String(defaultIndex)}
-      className={cn('my-6', className)}
+    <Tabs.Root
+      defaultValue={Math.min(Math.max(defaultIndex, 0), tabs.length - 1)}
+      className={cn('mdx-block mdx-frame mdx-tabs', className)}
     >
-      <TabsList className="flex-wrap">
-        {tabs.map((tab, index) => (
-          <TabsTrigger key={index} value={String(index)}>
-            {tab.props.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <div className="mdx-block-head mdx-tabs-head">
+        <Tabs.List className="mdx-tabs-list">
+          {tabs.map((tab, index) => (
+            <Tabs.Tab key={index} value={index} className="mdx-tab">
+              {tab.props.label}
+            </Tabs.Tab>
+          ))}
+          <Tabs.Indicator className="mdx-tabs-indicator" />
+        </Tabs.List>
+      </div>
       {tabs.map((tab, index) => (
-        <TabsContent
+        <Tabs.Panel
           key={index}
-          value={String(index)}
-          className="rounded-lg border bg-card p-4 [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+          value={index}
+          keepMounted
+          className="mdx-tabs-panel mdx-slot"
         >
           {tab.props.children}
-        </TabsContent>
+        </Tabs.Panel>
       ))}
-    </Tabs>
+    </Tabs.Root>
   )
 }
