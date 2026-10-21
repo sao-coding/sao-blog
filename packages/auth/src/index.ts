@@ -7,6 +7,8 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { apiKey } from "@better-auth/api-key"
 import { openAPI, admin, username, mcp, captcha } from "better-auth/plugins";
 import { getSecuritySettings } from "@sao-blog/db/settings";
+import { APIError, createAuthMiddleware } from "better-auth/api";
+import { isAllowedMcpRedirect } from "./mcp-redirect";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -20,6 +22,21 @@ export const auth = betterAuth({
       ? ["exp://", "exp://**", "exp://192.168.*.*:*/**", "http://localhost:8081"]
       : []),
   ],
+  hooks: {
+    // MCP 動態註冊只接受白名單內的 redirect_uri，原因見 mcp-redirect.ts
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/mcp/register") return;
+      const uris: unknown = (ctx.body as { redirect_uris?: unknown } | undefined)?.redirect_uris;
+      if (!Array.isArray(uris)) return; // 交給 plugin 自己的驗證回錯誤
+      const rejected = uris.filter((u) => typeof u !== "string" || !isAllowedMcpRedirect(u));
+      if (rejected.length > 0) {
+        throw new APIError("BAD_REQUEST", {
+          error: "invalid_redirect_uri",
+          error_description: `redirect_uri is not allowed: ${rejected.map(String).join(", ")}`,
+        });
+      }
+    }),
+  },
   emailAndPassword: {
     enabled: true,
     // 前台沒有註冊表單，但 /sign-up/email 端點原本仍開著，任何人都能直接打 API 註冊。

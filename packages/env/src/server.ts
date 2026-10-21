@@ -43,6 +43,12 @@ export const env = createEnv({
     // ── Cloudflare Turnstile ─────────────────────────────────────────────
     // 有設定才會驗證登入與留言；前台另外要設 VITE_TURNSTILE_SITE_KEY
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+    // ── MCP ──────────────────────────────────────────────────────────────
+    // /mcp/register 只接受這些主機的 https redirect_uri（逗號分隔，完全比對）；本機 loopback 一律允許
+    MCP_ALLOWED_REDIRECT_HOSTS: z
+      .string()
+      .default("claude.ai,claude.com,chatgpt.com")
+      .transform((v) => v.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   },
   runtimeEnv: process.env,
