@@ -147,8 +147,12 @@ const LANG_ICONS: Record<string, IconComponent> = {
 export interface CodeBlockHeaderProps {
   /** fenced code block 的語言（例如 ts、python），沒有標記語言時顯示「純文字」 */
   lang?: string
-  /** 純文字程式碼內容，用來複製到剪貼簿與計算行數 */
+  /** ```ts title="vite.config.ts" 的檔名，有的話題簽顯示檔名、語言改當 tooltip */
+  title?: string
+  /** 畫面上的純文字程式碼（含 [!code --] 刪除行），用來計算行數 */
   codeText: string
+  /** 複製到剪貼簿的內容（不含刪除行），省略時同 codeText */
+  copyText?: string
   /** 已高亮的 <pre><code> 內容 */
   children: React.ReactNode
 }
@@ -161,7 +165,9 @@ type CopyState = 'idle' | 'done' | 'failed'
  */
 export function CodeBlockHeader({
   lang,
+  title,
   codeText,
+  copyText = codeText,
   children,
 }: CodeBlockHeaderProps) {
   const [copy, setCopy] = useState<CopyState>('idle')
@@ -192,7 +198,7 @@ export function CodeBlockHeader({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(codeText)
+      await navigator.clipboard.writeText(copyText)
       setCopy('done')
     } catch {
       setCopy('failed')
@@ -231,9 +237,11 @@ export function CodeBlockHeader({
       data-wrap={wrap || undefined}
     >
       <figcaption className="mdx-block-head">
-        <span className="mdx-block-label">
+        <span className="mdx-block-label" title={title ? label : undefined}>
           <LangIcon aria-hidden />
-          <span className="mdx-block-label-text mdx-mono">{label}</span>
+          <span className="mdx-block-label-text mdx-mono" data-filename={title ? '' : undefined}>
+            {title ?? label}
+          </span>
         </span>
         <span className="mdx-tools">
           <button

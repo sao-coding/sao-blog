@@ -4,6 +4,7 @@ import React from 'react'
 import { Gauge } from 'lucide-react'
 import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
+import { flattenItems } from './children'
 import { MeterFill, type ProgressColor } from './progress'
 
 export interface MdxBenchmarkItemProps {
@@ -62,7 +63,7 @@ export const MdxBenchmark = ({
   children,
   className,
 }: MdxBenchmarkProps) => {
-  const items = React.Children.toArray(children).filter(isBenchmarkItem)
+  const items = flattenItems(children).filter(isBenchmarkItem)
 
   if (items.length === 0) return null
 

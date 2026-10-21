@@ -63,7 +63,7 @@ export async function checkMdxForSave(
         toc: result.toc,
         plainText: result.plainText,
         readingTime: result.readingTime,
-        compiledHash: result.hash,
+        compiledHash: result.compiledHash,
         hash: result.hash,
       },
     };

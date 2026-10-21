@@ -1,4 +1,11 @@
-export { compileMdx, hashSource, hastToPlainText, estimateReadingTime } from './compile'
+export {
+  compileMdx,
+  hashSource,
+  compiledHashOf,
+  COMPILE_PIPELINE_VERSION,
+  hastToPlainText,
+  estimateReadingTime,
+} from './compile'
 export {
   componentRegistry,
   isRegisteredComponent,

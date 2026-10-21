@@ -3,6 +3,7 @@
 import React from 'react'
 import { Tabs } from '@base-ui/react/tabs'
 import { cn } from '@/lib/utils'
+import { flattenItems } from './children'
 
 export interface MdxTabProps {
   /** 分頁標籤文字 */
@@ -57,7 +58,7 @@ export const MdxTabs = ({
   children,
   className,
 }: MdxTabsProps) => {
-  const tabs = React.Children.toArray(children).filter(isTab)
+  const tabs = flattenItems(children).filter(isTab)
 
   if (tabs.length === 0) return null
 

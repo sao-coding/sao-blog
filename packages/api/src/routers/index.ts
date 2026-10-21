@@ -19,6 +19,8 @@ import adminStorageConfigRouter from "./admin/storage-config";
 import adminFileRouter from "./admin/file";
 import adminContentRouter from "./admin/content";
 import linkPreviewRouter from "./link-preview";
+import githubRouter from "./github";
+import tweetRouter from "./tweet";
 import topicRouter from "./topic";
 import menuRouter from "./menu";
 import contentRouter from "./content";
@@ -42,6 +44,8 @@ export const appRouter = {
   thinking: thinkingRouter,
   home: homeRouter,
   linkPreview: linkPreviewRouter,
+  github: githubRouter,
+  tweet: tweetRouter,
   topic: topicRouter,
   menu: menuRouter,
   content: contentRouter,

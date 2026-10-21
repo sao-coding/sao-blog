@@ -13,9 +13,19 @@
 
 一般段落裡會有**粗體**、*斜體*（中文不建議用）、~~刪除線~~、行內程式碼 `useEffect` 與 `pnpm run dev`、
 外部連結 [TanStack Start](https://tanstack.com/start/latest)、[GitHub 連結](https://github.com/sao-coding)，
-還有站內連結 [回到文章列表](/posts)。註腳也要能用[^1]。
+還有站內連結 [回到文章列表](/posts)。註腳也要能用[^1]，同一個註腳可以引用兩次[^1]，再來一個[^long]。
 
-[^1]: 這是一個註腳。
+按 <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd> 開啟搜尋（小寫 <kbd>Esc</kbd> 也是同樣樣式）。
+日文的<Ruby rt="かんじ">漢字</Ruby>可以標振假名，冷僻字也能標注音：<Ruby rt="ㄒㄧㄣ">馨</Ruby>。
+這句話後面有一則旁註<Sidenote>桌機顯示在段落右側；手機點編號才展開。</Sidenote>，
+再來一則<Sidenote>旁註整篇連號，支援 **markdown** 與 `code`。</Sidenote>看編號有沒有接著算。
+
+用螢光筆<Mark>畫重點</Mark>，用朱筆<Mark type="underline">劃底線</Mark>、<Mark type="strike">刪掉這句</Mark>、
+把<Mark type="circle">關鍵字</Mark>圈起來或<Mark type="box">框起來</Mark>；也能<Mark color="pink">換顏色</Mark>、<Mark type="underline" color="blue">換筆色</Mark>。
+跨行也可以：<Mark>這是一段比較長、在窄螢幕上會折成兩行以上的螢光筆標記，每一行都會各自畫上一筆，不會只畫在第一行</Mark>。
+
+[^1]: 這是一個註腳，文末的返回圖示會帶你回到引用的地方。
+[^long]: 第二個註腳，內容可以比較長，也能放 **markdown** 與 `code`。
 
 ### 清單
 
@@ -127,6 +137,33 @@ example.com { reverse_proxy localhost:3000 }
 沒有標記語言的程式碼（顯示「純文字」）
 ```
 
+檔名標題 `title="..."`：
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite'
+
+export default defineConfig({ server: { port: 3004 } })
+```
+
+差異標記 `// [!code ++]`、`// [!code --]`（複製時不含刪除行）：
+
+```ts title="server.ts"
+const app = new Elysia()
+  .use(cors()) // [!code --]
+  .use(cors({ origin: 'https://sao.blog' })) // [!code ++]
+  .listen(3000)
+```
+
+聚焦 `// [!code focus]`（其餘行淡掉，滑過恢復）與 `// [!code highlight]`：
+
+```ts
+export async function loader() {
+  const post = await getPost() // [!code focus]
+  if (!post) throw notFound() // [!code highlight]
+  return post
+}
+```
+
 ## 提示
 
 <Alert type="note">沒有標題時顯示類型名稱。</Alert>
@@ -183,6 +220,16 @@ example.com { reverse_proxy localhost:3000 }
   <AccordionItem title="第二項" open>第二項內容</AccordionItem>
 </Accordion>
 
+問答模式 `variant="faq"`：
+
+<Accordion variant="faq">
+  <AccordionItem title="文章可以轉載嗎？" open>
+  可以，註明出處並附上原文連結即可。
+  </AccordionItem>
+  <AccordionItem title="怎麼訂閱新文章？">用 RSS：網址是 `/rss.xml`。</AccordionItem>
+  <AccordionItem title="留言會被審核嗎？">第一次留言會，之後就不用了。</AccordionItem>
+</Accordion>
+
 ## 分頁
 
 只放一段程式碼時，程式碼貼齊外框、工具浮在右上角：
@@ -217,29 +264,25 @@ example.com { reverse_proxy localhost:3000 }
 
 預設外框（髮絲線＋柔影），alt 當圖說並自動編號：
 
-![預設外框的圖片](/img/avatar.jpg)
+![山谷裡的晨霧（預設外框）](https://picsum.photos/id/1018/1200/800)
 
 截圖襯底：
 
-![截圖襯底](/img/avatar.jpg "screenshot")
+![桌上的筆電（截圖襯底）](https://picsum.photos/id/0/1200/750 "screenshot")
 
-拍立得：
+拍立得（直式照片）：
 
-![拍立得的手寫圖說](/img/avatar.jpg "polaroid")
+![午睡的小狗](https://picsum.photos/id/1025/800/1000 "polaroid")
 
 裝飾圖（alt 以 `_` 開頭，不顯示圖說）：
 
-![_裝飾用](/img/avatar.jpg)
-
-載入失敗：
-
-![這張圖不存在](/img/not-found.jpg)
+![_裝飾用](https://picsum.photos/id/1060/1200/500)
 
 ## 輪播
 
 <Carousel>
-  <Slide>![第一張](/img/avatar.jpg)</Slide>
-  <Slide>![第二張](/img/avatar.jpg "screenshot")</Slide>
+  <Slide>![城市街景](https://picsum.photos/id/1043/1200/800)</Slide>
+  <Slide>![夜晚的公路](https://picsum.photos/id/1036/1200/800 "screenshot")</Slide>
   <Slide>
   第三張是文字，輪播裡也可以放任意 markdown。
   </Slide>
@@ -321,6 +364,116 @@ export default function App() {
 ```
 </Playground>
 
-## 其他
+## 步驟
 
-<Count />
+<Steps>
+  <Step title="安裝 Docker">
+  ```bash
+  curl -fsSL https://get.docker.com | sh
+  ```
+  </Step>
+  <Step title="寫好 compose 檔">
+  建一個 `compose.yaml`，內容支援任意 **markdown**。
+  </Step>
+  <Step title="啟動服務">執行 `docker compose up -d`，打開 <Kbd>http://localhost:3000</Kbd>。</Step>
+</Steps>
+
+## 檔案樹
+
+<FileTree>
+- apps/
+  - tan-blog/
+    - src/
+      - components/
+        - mdx/
+          - **blocks.css** 文章區塊的共用樣式
+          - DESIGN.md 設計原則
+          - renderers/
+            - …
+      - styles.css
+    - vite.config.ts 建置設定
+- packages/
+  - mdx/
+- package.json
+- README.md
+</FileTree>
+
+## 連結卡片
+
+<LinkCard href="https://tanstack.com/start/latest" />
+
+<LinkCard href="https://bun.sh" />
+
+github.com/owner/repo 會自動變成 GitHub 卡片（星星、語言、過去一年的 commit）：
+
+<LinkCard href="https://github.com/TanStack/router" />
+
+<LinkCard href="https://example.com/no-preview" title="手動指定標題" description="抓不到預覽時用 title / description 補上。" />
+
+## 終端機
+
+靜態（預設）：指令前有提示字元，複製只會複製指令。
+
+<Terminal title="zsh">
+```bash
+# 安裝相依套件
+$ pnpm install
+Lockfile is up to date, resolution step is skipped
+Packages: +1287
+Done in 4.2s
+$ pnpm --filter tan-blog dev
+  VITE v8.3.4  ready in 1830 ms
+  ➜  Local:   http://localhost:3004/
+```
+</Terminal>
+
+`animate`：捲到才逐行打出來，點一下跳到結尾。
+
+<Terminal title="PowerShell" animate>
+```powershell
+PS C:\code> git status
+On branch main
+nothing to commit, working tree clean
+PS C:\code> git log --oneline -1
+ace150b feat(tan-blog): Mark 手繪標記
+```
+</Terminal>
+
+## 推文
+
+<Tweet id="20" />
+
+網址也會自動變成推文卡片（含影片封面）：
+
+<LinkCard href="https://x.com/elonmusk/status/1585341984679469056" />
+
+## 便條紙
+
+捲到這裡時，這個<Mark>螢光筆標記</Mark>和<Mark type="circle">圈圈</Mark>才會畫上去。
+
+<StickyNote title="給未來的自己">
+記得每年換一次備份硬碟，**不要等到它壞掉**。
+</StickyNote>
+
+<StickyNote color="pink">粉色便條，沒有標題。</StickyNote>
+
+<StickyNote color="blue">藍色便條，裡面也能放 `code`。</StickyNote>
+
+<StickyNote color="green">綠色便條。</StickyNote>
+
+## 前後對比
+
+<ImageCompare
+  before="https://picsum.photos/id/1015/1200/675?grayscale"
+  after="https://picsum.photos/id/1015/1200/675"
+  beforeLabel="黑白"
+  afterLabel="彩色"
+  alt="拖動分隔線比較黑白與彩色"
+/>
+
+## 影片
+
+<Embed src="https://www.youtube.com/watch?v=jNQXAC9IVRw" title="YouTube：點了才載入播放器" />
+
+<Embed src="https://www.bilibili.com/video/BV1GJ411x7h7" title="Bilibili（沒有縮圖，顯示紙色底）" />
+

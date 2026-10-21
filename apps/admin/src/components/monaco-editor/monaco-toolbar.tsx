@@ -32,7 +32,7 @@ import {
 } from 'lucide-react'
 import { ACTIONS, HEADING_ACTIONS, formatShortcut, type EditorAction } from './editor-actions'
 import { COMPONENT_SNIPPETS, DIAGRAM_SNIPPETS } from './snippets'
-import { insertBlock, uploadImages } from './markdown-commands'
+import { insertBlock, insertInline, uploadImages } from './markdown-commands'
 import type { ViewMode } from './types'
 
 type Editor = editor.IStandaloneCodeEditor
@@ -202,7 +202,7 @@ export function MonacoToolbar({
           <DropdownMenuGroup>
             <DropdownMenuLabel>MDX 元件</DropdownMenuLabel>
             {COMPONENT_SNIPPETS.map((s) => (
-              <DropdownMenuItem key={s.label} onClick={() => editor && insertBlock(editor, s.body)} className="flex-col items-start gap-0">
+              <DropdownMenuItem key={s.label} onClick={() => editor && (s.inline ? insertInline : insertBlock)(editor, s.body)} className="flex-col items-start gap-0">
                 <span>{s.label}</span>
                 <span className="text-xs text-muted-foreground">{s.description}</span>
               </DropdownMenuItem>
@@ -212,7 +212,7 @@ export function MonacoToolbar({
           <DropdownMenuGroup>
             <DropdownMenuLabel>圖表與公式</DropdownMenuLabel>
             {DIAGRAM_SNIPPETS.map((s) => (
-              <DropdownMenuItem key={s.label} onClick={() => editor && insertBlock(editor, s.body)} className="flex-col items-start gap-0">
+              <DropdownMenuItem key={s.label} onClick={() => editor && (s.inline ? insertInline : insertBlock)(editor, s.body)} className="flex-col items-start gap-0">
                 <span>{s.label}</span>
                 <span className="text-xs text-muted-foreground">{s.description}</span>
               </DropdownMenuItem>

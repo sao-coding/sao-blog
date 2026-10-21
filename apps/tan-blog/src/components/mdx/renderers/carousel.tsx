@@ -10,6 +10,7 @@ import {
 } from '@sao-blog/ui/components/carousel'
 import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
+import { flattenItems } from './children'
 
 export interface MdxSlideProps {
   children: React.ReactNode
@@ -53,7 +54,7 @@ export const MdxCarousel = ({
   children,
   className,
 }: MdxCarouselProps) => {
-  const slides = React.Children.toArray(children).filter(isSlide)
+  const slides = flattenItems(children).filter(isSlide)
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [canPrev, setCanPrev] = useState(false)

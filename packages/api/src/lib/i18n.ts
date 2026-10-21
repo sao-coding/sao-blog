@@ -4,7 +4,7 @@ import {
   noteTranslations,
   postTranslations,
 } from "@sao-blog/db/schema/index";
-import { compileMdx, hashSource, type CompileProfile, type CompiledContent, type TocItem } from "@sao-blog/mdx";
+import { compileMdx, compiledHashOf, type CompileProfile, type CompiledContent, type TocItem } from "@sao-blog/mdx";
 import { and, eq, inArray, or } from "drizzle-orm";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "../schema/i18n";
 
@@ -183,7 +183,7 @@ export async function localizedCategories(
 }
 
 /**
- * 取得某個語言版本的編譯結果；compiled 為空或與目前內容不符（compiledHash ≠ 內容 hash）時
+ * 取得某個語言版本的編譯結果；compiled 為空或已過期（compiledHash ≠ 原文＋編譯管線版本的 hash）時
  * 重新編譯並回寫（lazy 重編：涵蓋遷移前的舊資料與編譯管線升版）。編譯失敗回傳 null，
  * 前端可自行退回編譯原文。
  */
@@ -202,7 +202,7 @@ export async function ensureCompiled(type: "post" | "note", translationId: strin
     .limit(1);
   if (!row) return null;
 
-  const hash = await hashSource(row.content);
+  const hash = await compiledHashOf(row.content);
   if (row.compiled && row.compiledHash === hash) {
     return { compiled: row.compiled as CompiledContent, toc: row.toc as TocItem[] | null, readingTime: row.readingTime };
   }
@@ -218,7 +218,7 @@ export async function ensureCompiled(type: "post" | "note", translationId: strin
       toc: result.toc,
       plainText: result.plainText,
       readingTime: result.readingTime,
-      compiledHash: result.hash,
+      compiledHash: result.compiledHash,
     })
     .where(eq(table.id, translationId));
 

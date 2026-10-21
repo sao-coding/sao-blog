@@ -4,7 +4,6 @@ import type { MdxComponentName } from '@sao-blog/mdx/registry'
 import {
   Echarts,
   Mermaid,
-  Count,
   CustomQuote,
   MdxImage,
   MdxAlert,
@@ -21,12 +20,27 @@ import {
   MdxPlayground,
   MdxPlaygroundFile,
   MdxExcalidraw,
+  MdxSteps,
+  MdxStep,
+  MdxFileTree,
+  MdxLinkCard,
+  MdxKbd,
+  MdxRuby,
+  MdxSidenote,
+  MdxMark,
+  MdxTerminal,
+  MdxTweet,
+  MdxStickyNote,
+  MdxImageCompare,
+  MdxEmbed,
 } from './renderers'
 import EnhancedLink from './renderers/link'
+import { FootnoteBackref, isFootnoteBackref } from './renderers/footnote'
+import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
 
 // 匯出個別 renderers
-export { Mermaid, Echarts, Count }
+export { Mermaid, Echarts }
 
 // 把 React 節點樹（例如 Shiki 輸出的 <code><span>...</span></code>）攤平成純文字，
 // 用來算行數、複製到剪貼簿。
@@ -40,10 +54,25 @@ function nodeToText(node: React.ReactNode): string {
   return ''
 }
 
+// 複製用的文字：逐行取 Shiki 的 <span class="line">，跳過 [!code --] 標記的刪除行，
+// 讀者貼上的就是「改完之後」的程式碼
+function codeToCopyText(code: React.ReactNode): string {
+  if (!React.isValidElement<{ children?: React.ReactNode }>(code)) return nodeToText(code)
+  const lines = React.Children.toArray(code.props.children).filter(
+    (child): child is React.ReactElement<{ className?: string; children?: React.ReactNode }> =>
+      React.isValidElement<{ className?: string }>(child) &&
+      !!child.props.className?.split(' ').includes('line')
+  )
+  if (lines.length === 0) return nodeToText(code)
+  return lines
+    .filter((line) => !line.props.className?.split(' ').includes('remove'))
+    .map(nodeToText)
+    .join('\n')
+}
+
 // 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）。
 // `satisfies` 確保 @sao-blog/mdx registry 登記的每個元件在 Web 端都有實作。
 const blockComponents = {
-  Count,
   CustomQuote,
   Alert: MdxAlert,
   Accordion: MdxAccordion,
@@ -58,6 +87,19 @@ const blockComponents = {
   Playground: MdxPlayground,
   PlaygroundFile: MdxPlaygroundFile,
   Excalidraw: MdxExcalidraw,
+  Steps: MdxSteps,
+  Step: MdxStep,
+  FileTree: MdxFileTree,
+  LinkCard: MdxLinkCard,
+  Kbd: MdxKbd,
+  Ruby: MdxRuby,
+  Sidenote: MdxSidenote,
+  Mark: MdxMark,
+  Terminal: MdxTerminal,
+  Tweet: MdxTweet,
+  StickyNote: MdxStickyNote,
+  ImageCompare: MdxImageCompare,
+  Embed: MdxEmbed,
 } satisfies Record<MdxComponentName, React.ComponentType<never>>
 
 // 預設 MDX components 配置
@@ -71,9 +113,15 @@ export const defaultMDXComponents: MDXComponents = {
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h1 className="scroll-mt-20" {...props} />
   ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 className="scroll-mt-20" {...props} />
-  ),
+  // 註腳區的標題是 remark-gfm 產生的英文 "Footnotes"（id="footnote-label"），換成三語
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) =>
+    props.id === 'footnote-label' ? (
+      <h2 className="scroll-mt-20" {...props}>
+        {m.footnotes_label()}
+      </h2>
+    ) : (
+      <h2 className="scroll-mt-20" {...props} />
+    ),
   h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h3 className="scroll-mt-20" {...props} />
   ),
@@ -87,6 +135,7 @@ export const defaultMDXComponents: MDXComponents = {
     <h6 className="scroll-mt-20" {...props} />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    if (isFootnoteBackref(props)) return <FootnoteBackref {...props} />
     const href = props.href ?? ''
     if (/^https?:\/\//.test(href)) {
       return <EnhancedLink href={href} {...props} />
@@ -129,11 +178,19 @@ export const defaultMDXComponents: MDXComponents = {
     const lang = childClassName?.startsWith('language-')
       ? childClassName.slice('language-'.length)
       : undefined
-    const codeText = nodeToText(children)
+    // ```ts title="vite.config.ts" 的檔名（highlight.ts 放在 data-title）
+    const { 'data-title': title, ...preProps } = props as typeof props & {
+      'data-title'?: string
+    }
 
     return (
-      <CodeBlockHeader lang={lang} codeText={codeText}>
-        <pre className={className} {...props}>
+      <CodeBlockHeader
+        lang={lang}
+        title={title}
+        codeText={nodeToText(children)}
+        copyText={codeToCopyText(children)}
+      >
+        <pre className={className} {...preProps}>
           {children}
         </pre>
       </CodeBlockHeader>
