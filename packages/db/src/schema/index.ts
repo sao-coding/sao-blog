@@ -392,6 +392,10 @@ export const thinkings = pgTable(
 
 export const commentRefTypeEnum = pgEnum('comment_ref_type', ['post', 'note', 'page', 'recently'])
 export const commentSourceEnum = pgEnum('comment_source', ['google', 'github', 'credential'])
+// 審核狀態：待審 / 已通過 / 垃圾（過濾器或管理員判定）/ 已拒絕。公開頁面只顯示 approved
+export const commentStatusEnum = pgEnum('comment_status', ['pending', 'approved', 'spam', 'rejected'])
+// 封鎖清單類型：IP、Email、關鍵字（命中的留言直接標成垃圾）
+export const commentBlockTypeEnum = pgEnum('comment_block_type', ['ip', 'email', 'keyword'])
 
 export const comments = pgTable(
   'comments',
@@ -416,6 +420,12 @@ export const comments = pgTable(
     ip: varchar('ip', { length: 45 }), // 支援 IPv6
     agent: varchar('agent', { length: 512 }),
     location: varchar('location', { length: 256 }), // 根據 IP 解析出的地理位置
+    // 既有留言視為已通過，所以 default 是 approved；新留言由 API 依信任規則決定
+    status: commentStatusEnum('status').default('approved').notNull(),
+    // 自動判定的原因（link / keyword / duplicate / honeypot / blocked / new-user…），方便後台說明
+    flagReason: varchar('flag_reason', { length: 64 }),
+    moderatedAt: timestamp('moderated_at', { withTimezone: true }),
+    moderatedBy: uuid('moderated_by').references(() => user.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .$defaultFn(() => new Date())
       .notNull(),
@@ -424,6 +434,7 @@ export const comments = pgTable(
       .notNull(),
   },
   (table) => [
+    index('comments_status_idx').on(table.status),
     index('comments_ref_id_idx').on(table.refId),
     index('comments_thread_idx').on(table.thread),
     index('comments_created_at_idx').on(table.createdAt),
@@ -432,6 +443,33 @@ export const comments = pgTable(
     index('comments_source_idx').on(table.source),
   ]
 )
+
+export const commentBlocklist = pgTable(
+  'comment_blocklist',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    type: commentBlockTypeEnum('type').notNull(),
+    // ip / email 存正規化（小寫、去空白）後的值；keyword 比對時不分大小寫
+    value: varchar('value', { length: 512 }).notNull(),
+    note: varchar('note', { length: 256 }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [uniqueIndex('comment_blocklist_type_value_idx').on(table.type, table.value)]
+)
+
+// 後台可調整的設定（key → JSON）。目前只有 'security'：留言審核、內容過濾與限流規則，
+// 讀取與預設值見 packages/db/src/settings.ts
+export const appSettings = pgTable('app_settings', {
+  key: varchar('key', { length: 64 }).primaryKey(),
+  value: jsonb('value').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .$defaultFn(() => new Date())
+    .notNull(),
+})
 
 export const commentLikes = pgTable(
   'comment_likes',

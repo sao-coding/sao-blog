@@ -16,10 +16,18 @@ import { FieldError } from '@sao-blog/ui/components/field'
 import { CommentMarkdownRenderer } from './comment-markdown-renderer'
 import { CommentEmojiPicker } from './comment-emoji-picker'
 import { getRandomPlaceholder } from './constants'
+import { Turnstile, turnstileSiteKey, type TurnstileHandle } from '@/components/turnstile'
 import { m } from '#/paraglide/messages'
 
+/** 送出時一起帶的防機器人欄位 */
+export interface CommentGuardFields {
+  hp?: string
+  turnstileToken?: string
+}
+
 interface CommentFormProps {
-  onSubmit: (data: CommentFormValues) => void
+  /** 回傳 true 代表送出成功，表單才會清空（失敗時保留內容，不用重打） */
+  onSubmit: (data: CommentFormValues, guard: CommentGuardFields) => Promise<boolean> | boolean
   parentId?: string | null
   compact?: boolean
   onCancel?: () => void
@@ -39,6 +47,10 @@ export function CommentForm({
 }: CommentFormProps) {
   const [placeholder] = useState(() => getRandomPlaceholder())
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const honeypotRef = useRef<HTMLInputElement | null>(null)
+  const turnstileRef = useRef<TurnstileHandle>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const waitingForTurnstile = Boolean(turnstileSiteKey) && !turnstileToken
 
   const {
     register,
@@ -95,9 +107,14 @@ export function CommentForm({
     [getValues, setValue]
   )
 
-  const handleFormSubmit = (data: CommentFormValues) => {
-    onSubmit(data)
-    reset({ content: '' })
+  const handleFormSubmit = async (data: CommentFormValues) => {
+    const ok = await onSubmit(data, {
+      hp: honeypotRef.current?.value || undefined,
+      turnstileToken: turnstileToken ?? undefined,
+    })
+    // Turnstile token 只能用一次，不論成功失敗都要換新的
+    turnstileRef.current?.reset()
+    if (ok) reset({ content: '' })
   }
 
   const userInitial = userName ? userName[0]?.toUpperCase() : '?'
@@ -106,10 +123,18 @@ export function CommentForm({
     <form
       onSubmit={handleSubmit(handleFormSubmit)}
       className={cn(
-        'space-y-3 rounded-lg border border-border bg-card p-4',
+        'relative space-y-3 rounded-lg border border-border bg-card p-4',
         compact && 'p-3'
       )}
     >
+      {/* 蜜罐：畫面與螢幕閱讀器都看不到，只有自動填表的機器人會填 */}
+      <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label>
+          Website
+          <input ref={honeypotRef} type="text" name="website" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </label>
+      </div>
+
       {/* 使用者資訊列 */}
       {userName && (
         <div className="flex items-center gap-2">
@@ -160,6 +185,8 @@ export function CommentForm({
         </TabsContent>
       </Tabs>
 
+      <Turnstile ref={turnstileRef} action="comment" onToken={setTurnstileToken} />
+
       {/* 底部操作列 */}
       <div className="flex items-center justify-between">
         <CommentEmojiPicker onEmojiSelect={handleEmojiSelect} />
@@ -170,7 +197,7 @@ export function CommentForm({
               {m.comment_cancel()}
             </Button>
           )}
-          <Button type="submit" size="sm" disabled={isSubmitting}>
+          <Button type="submit" size="sm" disabled={isSubmitting || waitingForTurnstile}>
             <SendIcon className="size-3.5" data-icon="inline-start" />
             {isSubmitting ? m.comment_submitting() : parentId ? m.comment_reply() : m.comment_submit()}
           </Button>

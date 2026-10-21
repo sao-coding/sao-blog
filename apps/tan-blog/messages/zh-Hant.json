@@ -128,5 +128,11 @@
   "search_empty": "找不到相關內容",
   "search_error": "搜尋服務暫時無法使用",
   "search_disabled": "搜尋功能尚未啟用",
-  "search_all_locales": "搜尋所有語言"
+  "search_all_locales": "搜尋所有語言",
+  "comment_pending_badge": "審核中",
+  "comment_sent": "留言已送出！",
+  "comment_sent_pending": "留言已送出",
+  "comment_sent_pending_description": "審核通過後就會公開顯示，在那之前只有你看得到。",
+  "comment_send_failed": "送出失敗，請稍後再試",
+  "login_too_many_attempts": "嘗試次數過多，請稍後再試"
 }

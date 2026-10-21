@@ -11,6 +11,7 @@ import { oAuthDiscoveryMetadata, oAuthProtectedResourceMetadata } from "better-a
 import { env } from "@sao-blog/env/server";
 import { devicesRoutes } from "./devices";
 import { mcpRoutes } from "./mcp";
+import { initGeoIp } from "@sao-blog/api/lib/geoip";
 import { Elysia } from "elysia";
 
 const rpcHandler = new RPCHandler(appRouter, {
@@ -106,4 +107,6 @@ new Elysia()
   .get("/", () => "OK")
   .listen(3000, () => {
     console.log(`Server is running at ${env.SERVER_URL}`);
+    // 背景載入 / 下載 GeoLite2（沒設定 MaxMind 金鑰時什麼都不做）
+    initGeoIp();
   });

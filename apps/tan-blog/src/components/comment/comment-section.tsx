@@ -13,7 +13,7 @@ import { authClient } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
 import { Button } from '@sao-blog/ui/components/button'
 import { countCommentsAndReplies } from './constants'
-import { CommentForm } from './comment-form'
+import { CommentForm, type CommentGuardFields } from './comment-form'
 import { CommentList } from './comment-list'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { resolveRefType, toCommentTree } from '@/utils/comment'
@@ -67,40 +67,43 @@ function CommentSectionContent({ postId }: { postId: string }) {
 
   const { commentsCount, repliesCount } = countCommentsAndReplies(comments)
 
-  const createCommentMutation = useMutation(
-    orpc.comment.createComment.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey })
-        toast.add({ title: '留言已送出！', type: 'success' })
-      },
-      onError: () => toast.add({ title: '送出失敗，請稍後再試', type: 'error' }),
-    })
-  )
+  const createCommentMutation = useMutation(orpc.comment.createComment.mutationOptions())
 
-  const handleSubmitComment = async (data: CommentFormValues) => {
+  /**
+   * 送出留言 / 回覆。API 用 status: "error" 回報限流、驗證失敗、文章關閉留言等狀況（不會 throw），
+   * 原本不管結果都顯示「已送出」；現在依回應顯示訊息，回傳 true 時表單才清空。
+   */
+  const submit = async (data: CommentFormValues, guard: CommentGuardFields, thread?: string) => {
     try {
-      await createCommentMutation.mutateAsync({
+      const res = await createCommentMutation.mutateAsync({
         type: refType,
         refId: postId,
         content: data.content,
+        thread,
+        hp: guard.hp,
+        turnstileToken: guard.turnstileToken,
       })
+      if (res.status !== 'success') {
+        toast.add({ title: res.message || m.comment_send_failed(), type: 'error' })
+        return false
+      }
+      await queryClient.invalidateQueries({ queryKey })
+      const pending = 'data' in res && res.data?.status === 'pending'
+      toast.add({
+        title: pending ? m.comment_sent_pending() : m.comment_sent(),
+        description: pending ? m.comment_sent_pending_description() : undefined,
+        type: 'success',
+      })
+      return true
     } catch {
-      // Toast is handled in mutation onError.
+      toast.add({ title: m.comment_send_failed(), type: 'error' })
+      return false
     }
   }
 
-  const handleReply = async (parentId: string, data: CommentFormValues) => {
-    try {
-      await createCommentMutation.mutateAsync({
-        type: refType,
-        refId: postId,
-        content: data.content,
-        thread: parentId,
-      })
-    } catch {
-      // Toast is handled in mutation onError.
-    }
-  }
+  const handleSubmitComment = (data: CommentFormValues, guard: CommentGuardFields) => submit(data, guard)
+  const handleReply = (parentId: string, data: CommentFormValues, guard: CommentGuardFields) =>
+    submit(data, guard, parentId)
 
   const likeCommentMutation = useMutation({
     ...orpc.comment.likeComment.mutationOptions(),

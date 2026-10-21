@@ -128,5 +128,11 @@
   "search_empty": "No results found",
   "search_error": "Search is temporarily unavailable",
   "search_disabled": "Search is not enabled",
-  "search_all_locales": "Search all languages"
+  "search_all_locales": "Search all languages",
+  "comment_pending_badge": "Pending review",
+  "comment_sent": "Comment posted!",
+  "comment_sent_pending": "Comment submitted",
+  "comment_sent_pending_description": "It will be visible to everyone once approved. Until then, only you can see it.",
+  "comment_send_failed": "Failed to post. Please try again later.",
+  "login_too_many_attempts": "Too many attempts. Please try again later."
 }

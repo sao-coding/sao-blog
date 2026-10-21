@@ -31,7 +31,7 @@ import { Button } from '@sao-blog/ui/components/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
 import { Badge } from '@sao-blog/ui/components/badge'
 import { CommentMarkdownRenderer } from './comment-markdown-renderer'
-import { CommentForm } from './comment-form'
+import { CommentForm, type CommentGuardFields } from './comment-form'
 import { dayjsLocale } from '@/lib/date-locale'
 import { m } from '#/paraglide/messages'
 
@@ -41,7 +41,7 @@ interface CommentItemProps {
   comment: Comment
   onLike: (commentId: string) => void
   onDislike: (commentId: string) => void
-  onReply: (parentId: string, data: CommentFormValues) => void
+  onReply: (parentId: string, data: CommentFormValues, guard: CommentGuardFields) => Promise<boolean>
   depth?: number
   isAuthenticated?: boolean
   userName?: string
@@ -118,9 +118,11 @@ export function CommentItem({
 
   /** 處理回覆送出 */
   const handleReply = useCallback(
-    (data: CommentFormValues) => {
-      onReply(comment.id, data)
-      setShowReplyForm(false)
+    async (data: CommentFormValues, guard: CommentGuardFields) => {
+      const ok = await onReply(comment.id, data, guard)
+      // 失敗時保留回覆框與內容
+      if (ok) setShowReplyForm(false)
+      return ok
     },
     [comment.id, onReply]
   )
@@ -166,6 +168,12 @@ export function CommentItem({
 
             {comment.parentId && (
               <Badge variant="secondary" className="text-xs">{m.comment_reply()}</Badge>
+            )}
+
+            {comment.pending && (
+              <Badge variant="outline" className="border-amber-500/40 text-xs text-amber-600 dark:text-amber-400">
+                {m.comment_pending_badge()}
+              </Badge>
             )}
 
             <span className="text-xs text-muted-foreground">

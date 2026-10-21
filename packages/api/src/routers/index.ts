@@ -23,6 +23,7 @@ import topicRouter from "./topic";
 import menuRouter from "./menu";
 import contentRouter from "./content";
 import adminSearchRouter from "./admin/search";
+import adminSecurityRouter from "./admin/security";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -57,6 +58,7 @@ export const appRouter = {
     file: adminFileRouter,
     content: adminContentRouter,
     search: adminSearchRouter,
+    security: adminSecurityRouter,
   })
 };
 export type AppRouter = typeof appRouter;

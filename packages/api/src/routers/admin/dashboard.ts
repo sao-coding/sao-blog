@@ -13,6 +13,31 @@ import {
 } from "@sao-blog/db/schema/index";
 
 const TREND_DAYS = 14;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * 某張表的新增量：本週（近 7 天）vs 上週（再往前 7 天），以及今天 vs 昨天。
+ * 用 count(*) filter 一次掃完，不用打四次查詢。
+ */
+async function growthOf(table: typeof posts | typeof notes | typeof comments | typeof user) {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfYesterday = new Date(startOfToday.getTime() - DAY_MS);
+    const weekAgo = new Date(Date.now() - 7 * DAY_MS);
+    const twoWeeksAgo = new Date(Date.now() - 14 * DAY_MS);
+    const c = table.createdAt;
+
+    const [row] = await db
+        .select({
+            thisWeek: sql<number>`count(*) filter (where ${c} >= ${weekAgo})`.mapWith(Number),
+            lastWeek: sql<number>`count(*) filter (where ${c} >= ${twoWeeksAgo} and ${c} < ${weekAgo})`.mapWith(Number),
+            today: sql<number>`count(*) filter (where ${c} >= ${startOfToday})`.mapWith(Number),
+            yesterday: sql<number>`count(*) filter (where ${c} >= ${startOfYesterday} and ${c} < ${startOfToday})`.mapWith(Number),
+        })
+        .from(table);
+
+    return row ?? { thisWeek: 0, lastWeek: 0, today: 0, yesterday: 0 };
+}
 
 // 後台儀表板總覽：各項統計數量 + 近兩週留言趨勢 + 分布圖表 + 最新留言 + 使用者上線時間
 const getOverview = protectedProcedure
@@ -26,6 +51,13 @@ const getOverview = protectedProcedure
             categoryCount,
             tagCount,
             uncategorizedPostCount,
+            userCount,
+            pendingCommentCount,
+            viewTotals,
+            postGrowth,
+            noteGrowth,
+            commentGrowth,
+            userGrowth,
         ] = await Promise.all([
             db.$count(posts),
             db.$count(notes),
@@ -34,6 +66,18 @@ const getOverview = protectedProcedure
             db.$count(categories),
             db.$count(tags),
             db.$count(posts, isNull(posts.categoryId)),
+            db.$count(user),
+            db.$count(comments, eq(comments.status, "pending")),
+            db
+                .select({
+                    views: sql<number>`coalesce(sum(${posts.viewCount}), 0)`.mapWith(Number),
+                    likes: sql<number>`coalesce(sum(${posts.likeCount}), 0)`.mapWith(Number),
+                })
+                .from(posts),
+            growthOf(posts),
+            growthOf(notes),
+            growthOf(comments),
+            growthOf(user),
         ]);
 
         const since = new Date();
@@ -158,6 +202,17 @@ const getOverview = protectedProcedure
                     categories: categoryCount,
                     tags: tagCount,
                     uncategorizedPosts: uncategorizedPostCount,
+                    users: userCount,
+                    pendingComments: pendingCommentCount,
+                    postViews: viewTotals[0]?.views ?? 0,
+                    postLikes: viewTotals[0]?.likes ?? 0,
+                },
+                // 新增量：本週 vs 上週、今天 vs 昨天（瀏覽數沒有歷史紀錄，所以只有總數）
+                growth: {
+                    posts: postGrowth,
+                    notes: noteGrowth,
+                    comments: commentGrowth,
+                    users: userGrowth,
                 },
                 commentTrend,
                 categoryPostCounts,

@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { Turnstile, turnstileSiteKey, type TurnstileHandle } from '@/components/turnstile'
 import { useSearch } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { Button } from '@sao-blog/ui/components/button'
@@ -25,6 +26,10 @@ export function LoginForm({
     password: '',
   })
   const [loading, setLoading] = useState(false)
+  // 帳密登入的 Turnstile（後端 better-auth captcha plugin 驗證 x-captcha-response）
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileHandle>(null)
+  const waitingForCaptcha = Boolean(turnstileSiteKey) && !captchaToken
   // login 路由自己有 validateSearch({ redirect: z.string().optional() })，
   // 這裡用 strict:false 讓元件不用綁死在單一路由型別上。
   const search = useSearch({ strict: false }) as { redirect?: string }
@@ -32,12 +37,20 @@ export function LoginForm({
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const { error } = await authClient.signIn.username({
-      username: loginData.username,
-      password: loginData.password,
-    })
+    const { error } = await authClient.signIn.username(
+      {
+        username: loginData.username,
+        password: loginData.password,
+      },
+      captchaToken ? { headers: { 'x-captcha-response': captchaToken } } : undefined
+    )
     if (error) {
-      toast.add({ title: error.message || m.login_failed(), type: 'error' })
+      // token 只能用一次，失敗後換一個新的
+      turnstileRef.current?.reset()
+      toast.add({
+        title: error.status === 429 ? m.login_too_many_attempts() : error.message || m.login_failed(),
+        type: 'error',
+      })
     } else {
       toast.add({ title: m.login_success(), type: 'success' })
       // redirect 目標可能是本站路徑，也可能是 admin app 的完整網址（跨 origin），
@@ -82,7 +95,8 @@ export function LoginForm({
                   }
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Turnstile ref={turnstileRef} action="login" onToken={setCaptchaToken} />
+              <Button type="submit" className="w-full" disabled={loading || waitingForCaptcha}>
                 {loading ? (
                   <>
                     <Loader2Icon className="animate-spin" />

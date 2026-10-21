@@ -26,7 +26,6 @@
     "drizzle-orm": "^0.45.4",
     "elysia": "catalog:",
     "file-type": "^21.3.4",
-    "ip2region-ts": "^2.0.1",
     "pg": "^8.23.1",
     "zod": "catalog:"
   },

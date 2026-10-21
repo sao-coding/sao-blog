@@ -5,6 +5,7 @@ import { ArrowUpDownIcon, ClockIcon, HistoryIcon } from 'lucide-react'
 
 import type { Comment, CommentSortOrder } from '@/types/comment'  // ✅ 移除 VoteType
 import type { CommentFormValues } from '@/schemas/comment'
+import type { CommentGuardFields } from './comment-form'
 import { Button } from '@sao-blog/ui/components/button'
 import {
   DropdownMenu,
@@ -25,7 +26,7 @@ interface CommentListProps {
   onSortChange: (order: CommentSortOrder) => void
   onLike: (commentId: string) => void
   onDislike: (commentId: string) => void
-  onReply: (parentId: string, data: CommentFormValues) => void
+  onReply: (parentId: string, data: CommentFormValues, guard: CommentGuardFields) => Promise<boolean>
   isAuthenticated?: boolean
   userName?: string
   userImage?: string | null

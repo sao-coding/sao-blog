@@ -128,5 +128,11 @@
   "search_empty": "該当する内容が見つかりません",
   "search_error": "検索サービスは一時的に利用できません",
   "search_disabled": "検索機能は有効になっていません",
-  "search_all_locales": "すべての言語で検索"
+  "search_all_locales": "すべての言語で検索",
+  "comment_pending_badge": "承認待ち",
+  "comment_sent": "コメントを投稿しました！",
+  "comment_sent_pending": "コメントを送信しました",
+  "comment_sent_pending_description": "承認されると公開されます。それまではあなたにだけ表示されます。",
+  "comment_send_failed": "送信に失敗しました。しばらくしてからもう一度お試しください。",
+  "login_too_many_attempts": "試行回数が多すぎます。しばらくしてからもう一度お試しください。"
 }

@@ -36,6 +36,13 @@
       "when": 1792425108658,
       "tag": "0003_content_translations",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792554738984,
+      "tag": "0004_comment_moderation",
+      "breakpoints": true
     }
   ]
 }

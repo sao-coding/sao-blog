@@ -20,6 +20,7 @@ export const commentSchema = z.object({
     ip: z.string().nullable(), // 留言者的 IP 地址（可選）
     agent: z.string().nullable(), // 留言者的 User Agent（可選）
     location: z.string().nullable(), // 留言者的地理位置（可選）
+    status: z.enum(["pending", "approved", "rejected"]), // 公開介面只會看到這三種（垃圾對留言者顯示為 pending）
     createdAt: z.date(), // 留言創建時間
     updatedAt: z.date(), // 留言更新時間
 });

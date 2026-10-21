@@ -24,6 +24,8 @@ export interface FlatComment {
   ip: string | null
   agent: string | null
   location: string | null
+  /** 公開 API 只會給 approved；自己還在審核中的留言是 pending */
+  status: 'pending' | 'approved' | 'rejected'
   createdAt: string
   updatedAt: string
 }
@@ -42,4 +44,6 @@ export interface Comment {
   location: string | null  // 留言者歸屬地（由 IP 解析，不對外暴露 IP 本身）
   replies: Comment[]
   parentId: string | null
+  /** 自己的留言還在審核中（其他人看不到） */
+  pending: boolean
 }
