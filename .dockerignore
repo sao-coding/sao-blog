@@ -11,6 +11,7 @@
 docs
 broke.md
 README.md
+typesense-data
 
 node_modules
 **/node_modules
