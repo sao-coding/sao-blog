@@ -1,0 +1,326 @@
+{/*
+  元件設計測試（kitchen sink）
+  ─────────────────────────────
+  把文章裡會出現的每一種區塊、每一種變體都放一次，改元件或樣式（blocks.css、DESIGN.md）時拿來一頁看完。
+  後台有一篇同內容的草稿「元件設計測試」：打開編輯器，右側預覽走的就是正式頁面的編譯管線。
+  新增元件或變體時，請在這裡補一段示範，並同步更新那篇草稿。
+  檢查清單：晝／夜讀、四季（頁尾可預覽）、手機寬度、鍵盤操作（Tab／Enter／方向鍵）。
+*/}
+
+這篇文章不是給讀者看的，是給元件看的：每一種區塊都在這裡出現一次，改樣式時一頁看完晝、夜讀與手機寬度。
+
+## 文字與行內元素
+
+一般段落裡會有**粗體**、*斜體*（中文不建議用）、~~刪除線~~、行內程式碼 `useEffect` 與 `pnpm run dev`、
+外部連結 [TanStack Start](https://tanstack.com/start/latest)、[GitHub 連結](https://github.com/sao-coding)，
+還有站內連結 [回到文章列表](/posts)。註腳也要能用[^1]。
+
+[^1]: 這是一個註腳。
+
+### 清單
+
+- 無序清單第一項
+- 第二項，裡面有 `code`
+  - 巢狀項目
+- 第三項
+
+1. 有序清單
+2. 第二步
+3. 第三步
+
+- [x] 已完成的待辦
+- [ ] 還沒做的待辦
+
+### 表格
+
+| 元件 | 用途 | 狀態 |
+| --- | --- | :---: |
+| `Alert` | 提示、警告 | ✅ |
+| `Tabs` | 多語言程式碼切換 | ✅ |
+| `Benchmark` | 效能比較 | ✅ |
+
+### 數學
+
+行內公式 $E = mc^2$，區塊公式：
+
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+
+---
+
+## 程式碼
+
+單行指令（不顯示行號）：
+
+```bash
+pnpm --filter tan-blog dev
+```
+
+高亮行 `{2,4-5}`，第 4 行很長（測試自動換行與橫向捲動）：
+
+```ts {2,4-5}
+import { createServerFn } from '@tanstack/react-start'
+const greet = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const message = 'hello from the server, this line is intentionally rather long so we can test wrapping behaviour on narrow screens'
+    return { message }
+  })
+```
+
+超過 15 行（預設收合、底部淡出、展開／收合後捲回區塊開頭）：
+
+```python
+def fib(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+
+def main():
+    for i in range(10):
+        print(i, fib(i))
+
+
+if __name__ == "__main__":
+    main()
+
+# 下面多寫幾行讓它超過 15 行
+x = 1
+y = 2
+z = x + y
+print(z)
+```
+
+各語言圖示：
+
+```tsx
+export const Hello = () => <p>Hello</p>
+```
+
+```json
+{ "name": "sao-blog", "private": true }
+```
+
+```rust
+fn main() { println!("hello"); }
+```
+
+```go
+package main
+```
+
+```dockerfile
+FROM node:22-alpine
+```
+
+```powershell
+Get-ChildItem -Recurse
+```
+
+```caddyfile
+example.com { reverse_proxy localhost:3000 }
+```
+
+```
+沒有標記語言的程式碼（顯示「純文字」）
+```
+
+## 提示
+
+<Alert type="note">沒有標題時顯示類型名稱。</Alert>
+
+<Alert type="info" title="小提醒">這裡可以寫 **markdown**，也可以放 `code` 與[連結](/posts)。</Alert>
+
+<Alert type="success">建置完成。</Alert>
+
+<Alert type="warning" title="注意">
+這個 API 在下一版會移除。
+
+內文可以有好幾段，也可以放清單：
+
+- 第一點
+- 第二點
+</Alert>
+
+<Alert type="danger">不要在正式環境執行 `rm -rf /`。</Alert>
+
+## 引言
+
+<CustomQuote author="魯迅">其實地上本沒有路，走的人多了，也便成了路。</CustomQuote>
+
+<CustomQuote variant="info">沒有署名、info 語意色的引言。</CustomQuote>
+
+<CustomQuote variant="warning">warning 語意色的引言。</CustomQuote>
+
+<CustomQuote variant="success">success 語意色的引言。</CustomQuote>
+
+> 一般的 markdown 引言，不用斜體。
+>
+> 第二段。
+
+## 折疊
+
+<Accordion>
+  <AccordionItem title="為什麼要遵循設計原則？" open>
+  一致的規則讓每個新元件都「長得像這個站」，不用每次重新決定顏色和邊框。
+  </AccordionItem>
+  <AccordionItem title="收起的內容找得到嗎？">
+  找得到：收起的內容用 `hidden="until-found"` 留在頁面裡，用瀏覽器的頁內搜尋找這段文字會自動展開。
+  </AccordionItem>
+  <AccordionItem title="可以放程式碼嗎？">
+  ```js
+  console.log('accordion')
+  ```
+  </AccordionItem>
+</Accordion>
+
+可同時展開多項：
+
+<Accordion multiple>
+  <AccordionItem title="第一項" open>第一項內容</AccordionItem>
+  <AccordionItem title="第二項" open>第二項內容</AccordionItem>
+</Accordion>
+
+## 分頁
+
+只放一段程式碼時，程式碼貼齊外框、工具浮在右上角：
+
+<Tabs>
+  <Tab label="JavaScript">
+  ```js
+  console.log('hi')
+  ```
+  </Tab>
+  <Tab label="Python">
+  ```python
+  print('hi')
+  ```
+  </Tab>
+  <Tab label="說明">
+  分頁裡放一般文字時，會有內距和紙色底。
+  </Tab>
+</Tabs>
+
+預設選第二個分頁、分頁很多（窄螢幕橫向捲動）：
+
+<Tabs defaultIndex={1}>
+  <Tab label="npm">npm install sao-blog</Tab>
+  <Tab label="pnpm">pnpm add sao-blog</Tab>
+  <Tab label="yarn">yarn add sao-blog</Tab>
+  <Tab label="bun">bun add sao-blog</Tab>
+  <Tab label="deno">deno add npm:sao-blog</Tab>
+</Tabs>
+
+## 圖片
+
+預設外框（髮絲線＋柔影），alt 當圖說並自動編號：
+
+![預設外框的圖片](/img/avatar.jpg)
+
+截圖襯底：
+
+![截圖襯底](/img/avatar.jpg "screenshot")
+
+拍立得：
+
+![拍立得的手寫圖說](/img/avatar.jpg "polaroid")
+
+裝飾圖（alt 以 `_` 開頭，不顯示圖說）：
+
+![_裝飾用](/img/avatar.jpg)
+
+載入失敗：
+
+![這張圖不存在](/img/not-found.jpg)
+
+## 輪播
+
+<Carousel>
+  <Slide>![第一張](/img/avatar.jpg)</Slide>
+  <Slide>![第二張](/img/avatar.jpg "screenshot")</Slide>
+  <Slide>
+  第三張是文字，輪播裡也可以放任意 markdown。
+  </Slide>
+</Carousel>
+
+## 圖表
+
+```mermaid
+flowchart LR
+  A[撰寫 MDX] --> B{編譯}
+  B -- 成功 --> C[hast JSON]
+  B -- 失敗 --> D[回傳行號]
+  C --> E[前台渲染]
+```
+
+```echarts
+{
+  "xAxis": { "type": "category", "data": ["一", "二", "三", "四", "五"] },
+  "yAxis": { "type": "value" },
+  "series": [{ "type": "bar", "data": [12, 20, 15, 8, 17] }]
+}
+```
+
+## 進度條
+
+<Progress value={90} label="HTML" color="amber" />
+<Progress value={70} label="TypeScript" color="blue" />
+<Progress value={60} label="Go" color="green" />
+<Progress value={50} label="Elixir" color="purple" />
+<Progress value={40} label="CSS" color="pink" />
+<Progress value={30} label="C" color="red" />
+<Progress value={55} label="沒指定顏色（朱）" />
+<Progress value={80} label="不顯示數值" showValue={false} />
+
+## 效能比較
+
+越低越好（自動找出最佳、其餘標倍數）：
+
+<Benchmark unit="ms">
+  <BenchmarkItem label="Webpack" value={4200} />
+  <BenchmarkItem label="esbuild" value={180} />
+  <BenchmarkItem label="Vite" value={620} />
+</Benchmark>
+
+越高越好、手動標記：
+
+<Benchmark lowerIsBetter={false} unit="req/s">
+  <BenchmarkItem label="Express" value={15000} />
+  <BenchmarkItem label="Elysia" value={255000} highlight />
+  <BenchmarkItem label="Hono" value={190000} color="blue" />
+</Benchmark>
+
+## Playground
+
+<Playground template="html" title="按鈕示範" height={160}>
+```html index.html
+<button id="b">Click</button>
+```
+```css style.css
+button { font: inherit; padding: .5rem 1rem; }
+```
+```js main.js
+document.getElementById('b').onclick = () => {
+  console.log('clicked')
+  console.warn('warn')
+  console.error('error')
+}
+```
+</Playground>
+
+<Playground template="react" title="React 計數器" height={140}>
+```jsx App.jsx
+import { useState } from 'react'
+
+export default function App() {
+  const [n, setN] = useState(0)
+  return <button onClick={() => setN(n + 1)}>clicked {n} times</button>
+}
+```
+</Playground>
+
+## 其他
+
+<Count />
