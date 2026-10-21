@@ -35,6 +35,8 @@ import {
   MdxEmbed,
 } from './renderers'
 import EnhancedLink from './renderers/link'
+import { FootnoteBackref, isFootnoteBackref } from './renderers/footnote'
+import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
 
 // 匯出個別 renderers
@@ -111,9 +113,15 @@ export const defaultMDXComponents: MDXComponents = {
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h1 className="scroll-mt-20" {...props} />
   ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 className="scroll-mt-20" {...props} />
-  ),
+  // 註腳區的標題是 remark-gfm 產生的英文 "Footnotes"（id="footnote-label"），換成三語
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) =>
+    props.id === 'footnote-label' ? (
+      <h2 className="scroll-mt-20" {...props}>
+        {m.footnotes_label()}
+      </h2>
+    ) : (
+      <h2 className="scroll-mt-20" {...props} />
+    ),
   h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h3 className="scroll-mt-20" {...props} />
   ),
@@ -127,6 +135,7 @@ export const defaultMDXComponents: MDXComponents = {
     <h6 className="scroll-mt-20" {...props} />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    if (isFootnoteBackref(props)) return <FootnoteBackref {...props} />
     const href = props.href ?? ''
     if (/^https?:\/\//.test(href)) {
       return <EnhancedLink href={href} {...props} />

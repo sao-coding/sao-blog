@@ -2097,6 +2097,116 @@ details:not([open]) > summary .mdx-tree-open {
   transition: none;
 }
 
+/* ── 註腳（remark-gfm 產生；返回連結見 footnote.tsx）──────────────────────────
+ * 文中編號是朱色小字 [1]；文末註腳區上方一道髮絲線、一個文楷小標題，字小一號。
+ * 點編號跳過去時，被指到的那則註腳／那個編號淡淡標朱，讀者知道停在哪。 */
+.mdx-wrapper sup:has(> a[data-footnote-ref]) {
+  line-height: 0;
+}
+.mdx-wrapper a[data-footnote-ref] {
+  margin-inline: 0.0625em;
+  padding: 0 0.125em;
+  border-radius: 3px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  /* <sup> 本身已經縮小一級，這裡不再疊太多 */
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  scroll-margin-top: 6rem;
+}
+.mdx-wrapper a[data-footnote-ref]::before {
+  content: '[';
+  opacity: 0.5;
+}
+.mdx-wrapper a[data-footnote-ref]::after {
+  content: ']';
+  opacity: 0.5;
+}
+.mdx-wrapper a[data-footnote-ref]:hover {
+  background: var(--ink-soft);
+}
+.mdx-wrapper a[data-footnote-ref]:target {
+  background: var(--ink-soft);
+}
+.mdx-wrapper section.footnotes {
+  clear: both;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.875em;
+  color: var(--muted-foreground);
+}
+/* remark-gfm 把標題設成 sr-only，這裡讓它看得到，當成註腳區的題簽 */
+.mdx-wrapper section.footnotes > #footnote-label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  font-family: var(--font-wenkai);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+.mdx-wrapper section.footnotes ol {
+  margin: 0;
+  padding-left: 1.5em;
+}
+.mdx-wrapper section.footnotes li {
+  margin: 0.25rem 0;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  scroll-margin-top: 6rem;
+  transition: background-color 300ms ease-out;
+}
+.mdx-wrapper section.footnotes li::marker {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+  color: var(--ink);
+}
+.mdx-wrapper section.footnotes li:target {
+  background: var(--ink-soft);
+}
+.mdx-wrapper section.footnotes li p {
+  margin: 0;
+}
+.mdx-fn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.0625em;
+  margin-left: 0.375em;
+  padding: 0 0.125em;
+  border-radius: 3px;
+  color: var(--ink);
+  text-decoration: none;
+  vertical-align: -0.1em;
+  opacity: 0.75;
+  transition:
+    opacity 150ms ease-out,
+    background-color 150ms ease-out;
+}
+.mdx-fn-back:hover {
+  background: var(--ink-soft);
+  opacity: 1;
+}
+.mdx-fn-back:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.mdx-fn-back svg {
+  width: 1em;
+  height: 1em;
+}
+.mdx-fn-back sup {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.7em;
+}
+
 /* ── 注音／振假名（inline.tsx）─────────────────────────────────────────── */
 .mdx-ruby rt {
   font-size: 0.55em;

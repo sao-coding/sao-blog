@@ -197,5 +197,8 @@
   "tweet_view": "在 X 上查看",
   "tweet_likes": "喜歡",
   "tweet_replies": "回覆",
-  "tweet_video": "在 X 上播放影片"
+  "tweet_video": "在 X 上播放影片",
+  "footnote_back": "回到註腳 {ref} 的引用處",
+  "footnotes_label": "註腳",
+  "footnote_back_nth": "回到註腳 {ref} 的第 {nth} 處引用"
 }

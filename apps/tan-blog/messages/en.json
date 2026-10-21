@@ -197,5 +197,8 @@
   "tweet_view": "View on X",
   "tweet_likes": "Likes",
   "tweet_replies": "Replies",
-  "tweet_video": "Play video on X"
+  "tweet_video": "Play video on X",
+  "footnote_back": "Back to reference {ref}",
+  "footnotes_label": "Footnotes",
+  "footnote_back_nth": "Back to reference {ref} (occurrence {nth})"
 }

@@ -197,5 +197,8 @@
   "tweet_view": "X で見る",
   "tweet_likes": "いいね",
   "tweet_replies": "返信",
-  "tweet_video": "X で動画を再生"
+  "tweet_video": "X で動画を再生",
+  "footnote_back": "脚注 {ref} の参照箇所に戻る",
+  "footnotes_label": "脚注",
+  "footnote_back_nth": "脚注 {ref} の {nth} 番目の参照箇所に戻る"
 }
