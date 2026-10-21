@@ -142,5 +142,17 @@
   "comment_preview": "プレビュー",
   "comment_shortcut_hint": "Ctrl + Enter で送信",
   "comment_show_replies": "{count} 件の返信を表示",
-  "comment_hide_replies": "返信を閉じる"
+  "comment_hide_replies": "返信を閉じる",
+  "image_alt_fallback": "画像",
+  "image_load_failed": "画像を読み込めませんでした",
+  "lightbox_title": "拡大表示",
+  "lightbox_open_with_label": "拡大表示：{label}",
+  "lightbox_zoom_out": "縮小",
+  "lightbox_zoom_in": "拡大",
+  "lightbox_reset": "リセット",
+  "lightbox_fit": "画面に合わせる",
+  "lightbox_close": "閉じる",
+  "mdx_figure_label": "図",
+  "lightbox_prev": "前の画像",
+  "lightbox_next": "次の画像"
 }

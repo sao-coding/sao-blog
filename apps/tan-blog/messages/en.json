@@ -142,5 +142,17 @@
   "comment_preview": "Preview",
   "comment_shortcut_hint": "Ctrl + Enter to send",
   "comment_show_replies": "Show {count} replies",
-  "comment_hide_replies": "Hide replies"
+  "comment_hide_replies": "Hide replies",
+  "image_alt_fallback": "Image",
+  "image_load_failed": "Failed to load image",
+  "lightbox_title": "Enlarged view",
+  "lightbox_open_with_label": "Enlarge: {label}",
+  "lightbox_zoom_out": "Zoom out",
+  "lightbox_zoom_in": "Zoom in",
+  "lightbox_reset": "Reset",
+  "lightbox_fit": "Fit to screen",
+  "lightbox_close": "Close",
+  "mdx_figure_label": "Fig.",
+  "lightbox_prev": "Previous image",
+  "lightbox_next": "Next image"
 }
