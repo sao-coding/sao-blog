@@ -111,7 +111,7 @@ export const defaultMDXComponents: MDXComponents = {
       childClassName === 'language-echarts'
     ) {
       return (
-        <div className={cn('not-prose my-4', className)} {...props}>
+        <div className={cn('mdx-block not-prose', className)} {...props}>
           {children}
         </div>
       )
@@ -133,13 +133,7 @@ export const defaultMDXComponents: MDXComponents = {
 
     return (
       <CodeBlockHeader lang={lang} codeText={codeText}>
-        <pre
-          className={cn(
-            'overflow-x-auto py-4 text-sm leading-relaxed',
-            className
-          )}
-          {...props}
-        >
+        <pre className={className} {...props}>
           {children}
         </pre>
       </CodeBlockHeader>
@@ -161,11 +155,7 @@ export const defaultMDXComponents: MDXComponents = {
     }
     // 沒有語言標記的行內程式碼（例如 `foo`）
     if (!className) {
-      return (
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em] text-foreground">
-          {children}
-        </code>
-      )
+      return <code className="mdx-inline-code">{children}</code>
     }
     return <code className={className}>{children}</code>
   },

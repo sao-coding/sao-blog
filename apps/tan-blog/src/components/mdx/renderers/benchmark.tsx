@@ -1,10 +1,10 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'motion/react'
-import { Zap } from 'lucide-react'
+import { Gauge } from 'lucide-react'
+import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
-import type { ProgressColor } from './progress'
+import { MeterFill, type ProgressColor } from './progress'
 
 export interface MdxBenchmarkItemProps {
   /** 顯示名稱，例如「優化前」、「Webpack」 */
@@ -13,7 +13,7 @@ export interface MdxBenchmarkItemProps {
   value: number
   /** 數值單位，例如 ms、MB、req/s，未設定時沿用 <Benchmark unit> */
   unit?: string
-  /** 手動指定顏色，未設定時由 <Benchmark> 依 lowerIsBetter 自動判斷最佳項目 */
+  /** 手動指定顏色，未設定時最佳項目用朱色、其餘用墨灰 */
   color?: ProgressColor
   /** 手動標記是否為最佳結果；只要有任一 item 設定此 prop，整組改為手動模式 */
   highlight?: boolean
@@ -40,18 +40,14 @@ const isBenchmarkItem = (child: React.ReactNode): child is ItemElement =>
   React.isValidElement(child) &&
   typeof (child.props as MdxBenchmarkItemProps).value !== 'undefined'
 
-const colorMap: Record<ProgressColor, string> = {
-  blue: 'bg-blue-500',
-  green: 'bg-green-500',
-  amber: 'bg-amber-500',
-  red: 'bg-red-500',
-  purple: 'bg-purple-500',
-  pink: 'bg-pink-500',
-}
+const formatRatio = (ratio: number) =>
+  ratio >= 10 ? Math.round(ratio).toLocaleString() : ratio.toFixed(1)
 
 /**
  * 文章用的效能比較長條圖，常用於優化前後 / 多方案速度對比。
  * 各長條寬度依「所有項目中的最大值」等比例縮放，而非各自獨立的 0–100%。
+ * 題簽寫明「越低／越高越好」；最佳項目用朱色長條＋一枚「最佳」小印，
+ * 其餘項目是墨灰長條，數值旁註明是最佳的幾倍。
  *
  * ```mdx
  * <Benchmark unit="ms">
@@ -78,52 +74,62 @@ export const MdxBenchmark = ({
   )
 
   return (
-    <div className={cn('my-4 space-y-3', className)}>
-      {items.map((item, index) => {
-        const { label, value, unit: itemUnit, color } = item.props
-        const width = value === 0 ? 0 : Math.max((value / maxValue) * 100, 2)
-        const isBest = hasManualHighlight
-          ? !!item.props.highlight
-          : value === bestValue
-        const barColor = color ?? (isBest ? 'green' : 'blue')
-        const displayUnit = itemUnit ?? unit ?? ''
+    <figure className={cn('mdx-block mdx-frame not-prose', className)}>
+      <figcaption className="mdx-block-head">
+        <span className="mdx-block-label">
+          <Gauge aria-hidden />
+          <span className="mdx-block-label-text">
+            {lowerIsBetter ? m.benchmark_lower_better() : m.benchmark_higher_better()}
+          </span>
+        </span>
+      </figcaption>
+      <div className="mdx-benchmark-list">
+        {items.map((item, index) => {
+          const { label, value, unit: itemUnit, color } = item.props
+          const width =
+            value === 0 || maxValue === 0 ? 0 : Math.max((value / maxValue) * 100, 2)
+          const isBest = hasManualHighlight
+            ? !!item.props.highlight
+            : value === bestValue
+          const tone = color ?? (isBest ? '' : 'neutral')
+          const displayUnit = itemUnit ?? unit ?? ''
+          // 自動模式才標倍數（手動模式的「最佳」不一定是數值上的最佳）
+          const ratio =
+            !hasManualHighlight && !isBest && bestValue > 0 && value > 0
+              ? lowerIsBetter
+                ? value / bestValue
+                : bestValue / value
+              : undefined
 
-        return (
-          <div key={index}>
-            <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="inline-flex items-center gap-1 font-medium">
-                {label}
-                {isBest && (
-                  <Zap
-                    className="size-3.5 text-green-600 dark:text-green-400"
-                    aria-label="最佳結果"
-                  />
-                )}
-              </span>
-              <span className="tabular-nums text-muted-foreground">
-                {value.toLocaleString()}
-                {displayUnit}
-              </span>
+          return (
+            <div key={index} className="mdx-meter" data-tone={tone}>
+              <div className="mdx-meter-row">
+                <span className="mdx-meter-label">
+                  {label}
+                  {isBest && <span className="mdx-seal">{m.benchmark_best()}</span>}
+                </span>
+                <span className="mdx-meter-value">
+                  {value.toLocaleString()}
+                  {displayUnit && ` ${displayUnit}`}
+                  {ratio !== undefined && (
+                    <span className="mdx-meter-ratio">×{formatRatio(ratio)}</span>
+                  )}
+                </span>
+              </div>
+              <div
+                role="progressbar"
+                aria-valuenow={Math.round(width)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={typeof label === 'string' ? label : undefined}
+                className="mdx-meter-track"
+              >
+                <MeterFill width={width} />
+              </div>
             </div>
-            <div
-              role="progressbar"
-              aria-valuenow={Math.round(width)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={typeof label === 'string' ? label : undefined}
-              className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
-            >
-              <motion.div
-                className={cn('h-full rounded-full', colorMap[barColor])}
-                initial={{ width: 0 }}
-                whileInView={{ width: `${width}%` }}
-                viewport={{ once: true, amount: 0.6 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
-        )
-      })}
-    </div>
+          )
+        })}
+      </div>
+    </figure>
   )
 }

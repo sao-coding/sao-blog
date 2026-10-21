@@ -1,11 +1,10 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { PlayIcon, RotateCcwIcon, SquareIcon, TerminalIcon } from 'lucide-react'
+import { CodeXmlIcon, PlayIcon, RotateCcwIcon, SquareIcon, TerminalIcon } from 'lucide-react'
 import type { PlaygroundLang, PlaygroundTemplate } from '@sao-blog/mdx/registry'
-import { Button } from '@sao-blog/ui/components/button'
+import { m } from '#/paraglide/messages'
 import { useTheme } from '@/components/theme-provider'
-import { cn } from '@/lib/utils'
 import {
   buildPlaygroundDocument,
   type PlaygroundFileData,
@@ -25,7 +24,7 @@ export interface MdxPlaygroundFileProps {
  * 萬一單獨出現（理論上編譯器不會產生）就顯示原始碼。
  */
 export const MdxPlaygroundFile = ({ name, children }: MdxPlaygroundFileProps) => (
-  <pre className="my-4 overflow-x-auto rounded-lg border p-4 text-sm" title={name}>
+  <pre className="mdx-block mdx-frame mdx-code-plain" title={name}>
     <code>{children}</code>
   </pre>
 )
@@ -54,11 +53,12 @@ function collectFiles(children: React.ReactNode): PlaygroundFileData[] {
   })
 }
 
-const LEVEL_CLASS: Record<PlaygroundMessage['level'], string> = {
-  log: 'text-foreground',
-  info: 'text-sky-600 dark:text-sky-400',
-  warn: 'text-amber-600 dark:text-amber-400',
-  error: 'text-red-600 dark:text-red-400',
+// 對應 blocks.css 的 [data-tone]；log 用一般墨色
+const LEVEL_TONE: Record<PlaygroundMessage['level'], string | undefined> = {
+  log: undefined,
+  info: 'blue',
+  warn: 'amber',
+  error: 'red',
 }
 
 /**
@@ -106,7 +106,7 @@ export function MdxPlayground({
       const data = event.data as { __playground?: string } & Partial<PlaygroundMessage>
       if (event.source !== iframeRef.current?.contentWindow) return
       if (data?.__playground !== runId || typeof data.text !== 'string') return
-      const level = data.level && data.level in LEVEL_CLASS ? data.level : 'log'
+      const level = data.level && data.level in LEVEL_TONE ? data.level : 'log'
       setMessages((prev) => [...prev.slice(-199), { level, text: data.text! }])
     }
     window.addEventListener('message', onMessage)
@@ -122,100 +122,92 @@ export function MdxPlayground({
   const activeFile = visible.find((f) => f.name === active) ?? visible[0]
 
   return (
-    <div
-      ref={rootRef}
-      className="not-prose my-6 overflow-hidden rounded-lg border border-border"
-    >
-      <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/50 px-3 py-1.5">
-        <div className="flex min-w-0 items-center gap-2 text-sm">
-          {title && <span className="truncate font-medium">{title}</span>}
-          <span className="rounded bg-background px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-            {template}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
+    <div ref={rootRef} className="mdx-block mdx-frame mdx-playground not-prose">
+      <div className="mdx-block-head">
+        <span className="mdx-block-label">
+          <CodeXmlIcon aria-hidden />
+          {title && <span className="mdx-block-label-text font-medium text-foreground">{title}</span>}
+          <span className="mdx-chip">{template}</span>
+        </span>
+        <span className="flex flex-none items-center gap-0.5">
           {runId ? (
             <>
-              <Button type="button" variant="ghost" size="xs" onClick={run}>
-                <RotateCcwIcon className="size-3.5" />
-                重新執行
-              </Button>
-              <Button
+              <button type="button" className="mdx-tool" data-accent onClick={run}>
+                <RotateCcwIcon aria-hidden />
+                {m.playground_rerun()}
+              </button>
+              <button
                 type="button"
-                variant="ghost"
-                size="icon-xs"
+                className="mdx-tool"
                 onClick={() => setRunId(undefined)}
-                aria-label="停止"
+                aria-label={m.playground_stop()}
+                title={m.playground_stop()}
               >
-                <SquareIcon className="size-3.5" />
-              </Button>
+                <SquareIcon aria-hidden />
+              </button>
             </>
           ) : (
-            <Button type="button" variant="ghost" size="xs" onClick={run}>
-              <PlayIcon className="size-3.5" />
-              執行
-            </Button>
+            <button type="button" className="mdx-tool" data-accent onClick={run}>
+              <PlayIcon aria-hidden />
+              {m.playground_run()}
+            </button>
           )}
-        </div>
+        </span>
       </div>
 
       {visible.length > 0 && (
         <>
-          <div role="tablist" className="flex overflow-x-auto border-b border-border bg-muted/30">
-            {visible.map((file) => (
-              <button
-                key={file.name}
-                type="button"
-                role="tab"
-                aria-selected={file === activeFile}
-                onClick={() => setActive(file.name)}
-                className={cn(
-                  '-mb-px border-b-2 px-3 py-1.5 font-mono text-xs transition-colors',
-                  file === activeFile
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {file.name}
-              </button>
-            ))}
+          <div className="mdx-block-head mdx-tabs-head">
+            <div role="tablist" className="mdx-tabs-list">
+              {visible.map((file) => (
+                <button
+                  key={file.name}
+                  type="button"
+                  role="tab"
+                  aria-selected={file === activeFile}
+                  data-active={file === activeFile || undefined}
+                  onClick={() => setActive(file.name)}
+                  className="mdx-tab mdx-tab-underline mdx-mono"
+                >
+                  {file.name}
+                </button>
+              ))}
+            </div>
           </div>
-          <pre className="max-h-96 overflow-auto bg-background p-4 text-sm leading-relaxed">
-            <code className="font-mono">{activeFile?.code}</code>
+          <pre className="mdx-code-plain max-h-96 overflow-auto">
+            <code>{activeFile?.code}</code>
           </pre>
         </>
       )}
 
-      <div className="border-t border-border" style={{ height }}>
+      <div className="mdx-playground-stage" style={{ height }}>
         {srcDoc ? (
           <iframe
             ref={iframeRef}
             key={srcDoc}
-            title={title ?? 'Playground 預覽'}
+            title={title ?? m.playground_preview()}
             sandbox="allow-scripts"
             srcDoc={srcDoc}
             className="size-full border-0 bg-background"
           />
         ) : (
-          <button
-            type="button"
-            onClick={run}
-            className="flex size-full flex-col items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
-          >
-            <PlayIcon className="size-6" />
-            點擊執行（於隔離的沙盒中）
+          <button type="button" onClick={run} className="mdx-playground-idle">
+            <span className="mdx-playground-idle-icon">
+              <PlayIcon className="size-5 translate-x-px" aria-hidden />
+            </span>
+            {m.playground_idle()}
           </button>
         )}
       </div>
 
       {runId && messages.length > 0 && (
-        <div className="max-h-40 overflow-auto border-t border-border bg-muted/30 px-3 py-2 font-mono text-xs">
-          <div className="mb-1 flex items-center gap-1 text-muted-foreground">
-            <TerminalIcon className="size-3.5" />
+        <div className="mdx-playground-console">
+          <div className="mdx-playground-console-head">
+            <TerminalIcon aria-hidden />
             Console
           </div>
           {messages.map((msg, i) => (
-            <pre key={i} className={cn('whitespace-pre-wrap break-all', LEVEL_CLASS[msg.level])}>
+            <pre key={i} className="mdx-console-line" data-tone={LEVEL_TONE[msg.level]}>
               {msg.text}
             </pre>
           ))}

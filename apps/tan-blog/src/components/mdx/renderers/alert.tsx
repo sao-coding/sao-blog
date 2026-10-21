@@ -5,10 +5,11 @@ import {
   Info,
   CheckCircle2,
   AlertTriangle,
-  XCircle,
+  OctagonAlert,
   Lightbulb,
   type LucideIcon,
 } from 'lucide-react'
+import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
 
 export type AlertType =
@@ -19,57 +20,29 @@ export type AlertType =
   | 'danger'
 
 export interface MdxAlertProps {
-  /** 提示類型，決定顏色與圖示 */
+  /** 提示類型，決定語意色與圖示 */
   type?: AlertType
-  /** 標題（可選），省略則只顯示內文 */
+  /** 標題（可選），省略時顯示類型名稱（附註／提示／完成／注意／警告） */
   title?: React.ReactNode
   children: React.ReactNode
   className?: string
 }
 
+// tone 對應 blocks.css 的 [data-tone]：低彩度、晝夜各一組，不用 Tailwind 原色
 const typeConfig: Record<
   AlertType,
-  { icon: LucideIcon; wrapper: string; iconColor: string; title: string }
+  { icon: LucideIcon; tone: string; label: () => string }
 > = {
-  note: {
-    icon: Lightbulb,
-    wrapper:
-      'border-l-gray-400 bg-gray-50 dark:border-l-gray-500 dark:bg-gray-900/40',
-    iconColor: 'text-gray-500 dark:text-gray-400',
-    title: 'text-gray-800 dark:text-gray-200',
-  },
-  info: {
-    icon: Info,
-    wrapper:
-      'border-l-blue-500 bg-blue-50 dark:border-l-blue-400 dark:bg-blue-950/30',
-    iconColor: 'text-blue-500 dark:text-blue-400',
-    title: 'text-blue-800 dark:text-blue-200',
-  },
-  success: {
-    icon: CheckCircle2,
-    wrapper:
-      'border-l-green-500 bg-green-50 dark:border-l-green-400 dark:bg-green-950/30',
-    iconColor: 'text-green-600 dark:text-green-400',
-    title: 'text-green-800 dark:text-green-200',
-  },
-  warning: {
-    icon: AlertTriangle,
-    wrapper:
-      'border-l-amber-500 bg-amber-50 dark:border-l-amber-400 dark:bg-amber-950/30',
-    iconColor: 'text-amber-600 dark:text-amber-400',
-    title: 'text-amber-800 dark:text-amber-200',
-  },
-  danger: {
-    icon: XCircle,
-    wrapper:
-      'border-l-red-500 bg-red-50 dark:border-l-red-400 dark:bg-red-950/30',
-    iconColor: 'text-red-600 dark:text-red-400',
-    title: 'text-red-800 dark:text-red-200',
-  },
+  note: { icon: Lightbulb, tone: 'neutral', label: m.alert_note },
+  info: { icon: Info, tone: 'blue', label: m.alert_info },
+  success: { icon: CheckCircle2, tone: 'green', label: m.alert_success },
+  warning: { icon: AlertTriangle, tone: 'amber', label: m.alert_warning },
+  danger: { icon: OctagonAlert, tone: 'red', label: m.alert_danger },
 }
 
 /**
- * 文章用的提示框（對應 Hexo butterfly 的 note tag）。
+ * 文章用的提示框（對應 Hexo butterfly 的 note tag），樣式是「眉批」：
+ * 四角圓、框內左側一道圓頭語意色短線、極淡的底，標題用文楷。
  *
  * ```mdx
  * <Alert type="warning" title="注意">
@@ -89,21 +62,13 @@ export const MdxAlert = ({
   return (
     <div
       role="note"
-      className={cn(
-        'my-6 flex gap-3 rounded-r-lg border-l-4 px-4 py-3 text-base',
-        config.wrapper,
-        className
-      )}
+      data-tone={config.tone}
+      className={cn('mdx-block mdx-alert', className)}
     >
-      <Icon
-        className={cn('mt-1 size-5 shrink-0', config.iconColor)}
-        aria-hidden
-      />
-      <div className="min-w-0 flex-1 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
-        {title && (
-          <p className={cn('mb-1 font-semibold', config.title)}>{title}</p>
-        )}
-        {children}
+      <Icon className="mdx-alert-icon" aria-hidden />
+      <div className="min-w-0">
+        <p className="mdx-alert-title">{title ?? config.label()}</p>
+        <div className="mdx-alert-body">{children}</div>
       </div>
     </div>
   )

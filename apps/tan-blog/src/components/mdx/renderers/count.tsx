@@ -1,19 +1,26 @@
 'use client'
 
 import { useState } from 'react'
+import { PlusIcon } from 'lucide-react'
 
+// 互動元件的示範：一個框、題簽放計數，按鈕走站上的工具樣式
 export const Count = () => {
   const [count, setCount] = useState(0)
 
   return (
-    <div className="my-4 p-4 border rounded bg-blue-50">
-      <p className="mb-2">Count: {count}</p>
-      <button
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        onClick={() => setCount(count + 1)}
-      >
-        Increment
-      </button>
+    <div className="mdx-block mdx-frame not-prose">
+      <div className="mdx-block-head">
+        <span className="mdx-block-label mdx-mono">Count: {count}</span>
+        <button
+          type="button"
+          className="mdx-tool"
+          data-accent
+          onClick={() => setCount(count + 1)}
+        >
+          <PlusIcon aria-hidden />
+          Increment
+        </button>
+      </div>
     </div>
   )
 }
