@@ -205,12 +205,18 @@ function toPlaygroundFiles(
   return files
 }
 
+// 改過名的元件：舊文章仍用舊名稱，編譯時換成新名稱（資料庫裡的原文不用改）
+const COMPONENT_ALIASES: Record<string, string> = {
+  CustomQuote: 'Quote',
+}
+
 function processJsx(node: JsxNode, file: VFile) {
   const errors = getErrors(file)
   const at = node.position?.start
   const report = (message: string) =>
     errors.push({ line: at?.line, column: at?.column, message })
 
+  if (node.name && COMPONENT_ALIASES[node.name]) node.name = COMPONENT_ALIASES[node.name]!
   const name = node.name
   if (!name) {
     report('不支援 JSX Fragment（<>…</>）')

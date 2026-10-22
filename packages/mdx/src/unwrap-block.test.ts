@@ -30,3 +30,10 @@ describe('單行區塊元件', () => {
     expect(el.tagName).toBe('p')
   })
 })
+
+test('舊名稱 <CustomQuote> 仍可編譯，視為 <Quote>', async () => {
+  const result = await compileMdx('<CustomQuote author="魯迅">其實地上本沒有路。</CustomQuote>')
+  expect(result.ok).toBe(true)
+  if (!result.ok) return
+  expect(JSON.stringify(result.compiled.tree)).toContain('"tagName":"Quote"')
+})
