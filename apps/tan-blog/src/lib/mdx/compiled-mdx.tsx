@@ -67,6 +67,8 @@ export function CompiledMdx({ compiled, components }: CompiledMdxProps) {
     })
   }, [compiled, components])
 
+  // 還沒有內容（例如預覽頁第一次編譯回來前）不是錯誤，只有版本對不上才顯示
+  if (!compiled) return null
   if (!content) {
     return <ErrorComponent error="內容格式版本不相容，請重新編譯。" />
   }
