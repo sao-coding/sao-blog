@@ -105,12 +105,13 @@ export async function hashSource(source: string): Promise<string> {
  * registry 的節點轉換）都要遞增：已存的 compiled 會因 compiledHash 對不上而在下次讀取時重編。
  * 跟 COMPILED_VERSION 不同——那個是「產物格式」不相容時才遞增，renderer 會拒絕舊格式。
  *
+ * 6：重編一次：版本 5 在正式站存檔時 sharp 載入失敗（單一執行檔），存下的結果沒有圖片尺寸
  * 5：圖片補上實際 width / height 與模糊預覽（只有傳入 imageMeta 時，見 image-meta.ts）
  * 4：mermaid 圖表在編譯時轉成 SVG（code 節點的 dataSvg）
  * 3：單行的區塊元件不再被 <p> 包住
  * 2：程式碼區塊支援 title="…" 與 // [!code ++] / [!code --] / [!code focus] / [!code highlight]
  */
-export const COMPILE_PIPELINE_VERSION = 5
+export const COMPILE_PIPELINE_VERSION = 6
 
 /** 存成 compiledHash 的值：原文＋管線版本。原文沒改但管線升版時也會變 */
 export function compiledHashOf(source: string): Promise<string> {
