@@ -12,12 +12,14 @@ import { orpc, queryClient } from '@/utils/orpc'
 
 import {
   Field,
+  FieldContent,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from '@sao-blog/ui/components/field'
 import { Input } from '@sao-blog/ui/components/input'
-import { Checkbox } from '@sao-blog/ui/components/checkbox'
+import { Switch } from '@sao-blog/ui/components/switch'
 import type { InferClientOutputs } from '@orpc/client'
 import type { client } from '@/utils/orpc'
 
@@ -123,7 +125,11 @@ export function StorageConfigForm({ mode, config, onSuccess, onCancel }: Storage
             placeholder="https://s3.example.com"
             aria-invalid={!!errors.endpoint}
           />
-          <FieldError errors={errors.endpoint ? [errors.endpoint] : []} />
+          {errors.endpoint ? (
+            <FieldError errors={[errors.endpoint]} />
+          ) : (
+            <FieldDescription>S3 API 位址，含 http(s)://，例如 http://rustfs:9000。</FieldDescription>
+          )}
         </Field>
 
         <div className="grid grid-cols-2 gap-4">
@@ -167,7 +173,13 @@ export function StorageConfigForm({ mode, config, onSuccess, onCancel }: Storage
             placeholder={isEditMode ? '留空表示不變更' : undefined}
             aria-invalid={!!errors.secretAccessKey}
           />
-          <FieldError errors={errors.secretAccessKey ? [errors.secretAccessKey] : []} />
+          {errors.secretAccessKey ? (
+            <FieldError errors={[errors.secretAccessKey]} />
+          ) : (
+            <FieldDescription>
+              {isEditMode ? '目前的金鑰不會顯示；留空表示沿用原本的。' : '儲存後不會再顯示。'}
+            </FieldDescription>
+          )}
         </Field>
 
         <Field data-invalid={!!errors.publicUrl}>
@@ -181,17 +193,17 @@ export function StorageConfigForm({ mode, config, onSuccess, onCancel }: Storage
         </Field>
 
         <Field orientation="horizontal">
+          <FieldContent>
+            <FieldLabel htmlFor="storage-force-path-style">Path-style 存取</FieldLabel>
+            <FieldDescription>RustFS / MinIO 等自架服務建議開啟；AWS S3 通常關閉。</FieldDescription>
+          </FieldContent>
           <Controller
             name="forcePathStyle"
             control={control}
             render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Switch id="storage-force-path-style" checked={field.value} onCheckedChange={field.onChange} />
             )}
           />
-          <FieldLabel className="font-normal">使用 Path-style 存取（RustFS / MinIO 建議開啟）</FieldLabel>
         </Field>
       </FieldGroup>
 

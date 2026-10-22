@@ -1,14 +1,12 @@
 import { StorageConfigForm } from '@/components/storage/storage-config-form'
-import { StorageConfigRowActions } from '@/components/storage/storage-config-row-actions'
+import { StorageConfigCard } from '@/components/storage/storage-config-card'
 import AdminShell from '@/components/layout/admin-shell'
 import { orpc } from '@/utils/orpc'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useOverlay } from '@/hooks/use-overlay'
 import { Button } from '@sao-blog/ui/components/button'
-import { Badge } from '@sao-blog/ui/components/badge'
 import { Skeleton } from '@sao-blog/ui/components/skeleton'
-import { Card, CardContent, CardHeader, CardTitle } from '@sao-blog/ui/components/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@sao-blog/ui/components/empty'
 import { CloudIcon, PlusIcon } from 'lucide-react'
 
@@ -33,12 +31,15 @@ function RouteComponent() {
     })
   }
 
-  const configs = data?.data ?? []
+  // 啟用中的排最前面（新上傳都往它去），其餘照名稱排
+  const configs = [...(data?.data ?? [])].sort(
+    (a, b) => Number(b.isActive) - Number(a.isActive) || a.name.localeCompare(b.name),
+  )
 
   return (
     <AdminShell
       title="儲存設定"
-      description="S3 相容的儲存空間連線，同時只會啟用一組。"
+      description="S3 相容的儲存空間連線，同時只會啟用一組，新上傳的檔案都會存到啟用中的那一組。"
       actions={
         <Button onClick={openCreateDialog} className="gap-2">
           <PlusIcon className="size-4" />
@@ -47,9 +48,9 @@ function RouteComponent() {
       }
     >
       {status === 'pending' ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }, (_, i) => (
-            <Skeleton key={i} className="h-36 rounded-xl" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {Array.from({ length: 2 }, (_, i) => (
+            <Skeleton key={i} className="h-44 rounded-xl" />
           ))}
         </div>
       ) : configs.length === 0 ? (
@@ -65,24 +66,11 @@ function RouteComponent() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 lg:grid-cols-2">
           {configs.map((config) => (
-            <Card key={config.id}>
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  {config.name}
-                  {config.isActive && <Badge>啟用中</Badge>}
-                </CardTitle>
-                <StorageConfigRowActions config={config} />
-              </CardHeader>
-              <CardContent className="space-y-1 text-sm text-muted-foreground">
-                <div className="truncate">Endpoint：{config.endpoint}</div>
-                <div>Bucket：{config.bucket}</div>
-                <div>Region：{config.region}</div>
-              </CardContent>
-            </Card>
+            <StorageConfigCard key={config.id} config={config} />
           ))}
-        </div>
+        </ul>
       )}
     </AdminShell>
   )
