@@ -745,8 +745,9 @@
 .mdx-carousel-dot {
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  /* 用 px：站內根字級較小，1.5rem 只有 21px */
+  width: 24px;
+  height: 24px;
   border-radius: 9999px;
 }
 .mdx-carousel-dot::before {
@@ -1537,7 +1538,7 @@
 }
 summary.mdx-tree-row {
   /* 可點的資料夾列至少 24px 高（觸控目標最小尺寸） */
-  min-height: 1.5rem;
+  min-height: 24px;
   cursor: pointer;
   list-style: none;
   border-radius: 4px;
