@@ -123,7 +123,7 @@ graph TB
 |---|---|
 | 全部 remark/rehype plugins | `remark-gfm`、`remark-breaks`、`remark-math`、`remark-flexible-toc`、`rehype-katex`、`rehype-slug` — unified 生態與框架無關 |
 | 自製 Shiki pipeline | `src/components/mdx/parsers.ts`（fine-grained bundle、34 語言、github-light/dark、colorized-brackets、meta-highlight、mermaid/echarts fence 跳過）— 純 unified plugin，直接搬 |
-| MDX 元件庫 | `src/components/mdx/renderers/*`（Alert、Accordion、Tabs、Carousel、Progress、Benchmark、CustomQuote、Mermaid、Echarts、Count…）— 純 React，僅 `image.tsx`（next/image）與 `link.tsx`（next/link）需改 |
+| MDX 元件庫 | `src/components/mdx/renderers/*`（Alert、Accordion、Tabs、Carousel、Progress、Benchmark、Quote、Mermaid、Echarts、Count…）— 純 React，僅 `image.tsx`（next/image）與 `link.tsx`（next/link）需改 |
 | 40 個 shadcn/ui 元件 | `src/components/ui/*` — Radix + Tailwind，框架無關 |
 | zustand stores ×7、hooks ×6、config | `src/store/*`、`src/hooks/*`、`src/config/*` |
 | TanStack Query | 已是 v5，Start 與 Query 官方整合（`@tanstack/react-router-ssr-query` 已在 tan-blog 腳手架）✅ |

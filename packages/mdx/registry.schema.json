@@ -228,7 +228,7 @@
         "additionalProperties": false
       }
     },
-    "CustomQuote": {
+    "Quote": {
       "description": "引言",
       "children": true,
       "translatableProps": [],

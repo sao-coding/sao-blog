@@ -127,7 +127,7 @@ export const componentRegistry = {
     children: false,
     translatableProps: ['label'],
   }),
-  CustomQuote: define({
+  Quote: define({
     description: '引言',
     props: {
       author: z.string().optional(),

@@ -1,6 +1,6 @@
 export * from './mermaid'
 export * from './echarts'
-export * from './custom-quote'
+export * from './quote'
 export * from './image'
 export * from './alert'
 export * from './accordion'

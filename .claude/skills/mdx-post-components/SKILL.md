@@ -1,6 +1,6 @@
 ---
 name: mdx-post-components
-description: Reference for the JSX block components available when writing article content (Alert, Accordion, Tabs, Carousel, Steps, FileTree, LinkCard, Tweet, Terminal, StickyNote, ImageCompare, Embed, Progress, Benchmark, CustomQuote, Playground, Excalidraw, inline Mark/Kbd/Ruby/Sidenote, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
+description: Reference for the JSX block components available when writing article content (Alert, Accordion, Tabs, Carousel, Steps, FileTree, LinkCard, Tweet, Terminal, StickyNote, ImageCompare, Embed, Progress, Benchmark, Quote, Playground, Excalidraw, inline Mark/Kbd/Ruby/Sidenote, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
 ---
 
 # mdx-blog 文章區塊元件
@@ -127,12 +127,12 @@ description: Reference for the JSX block components available when writing artic
 - `BenchmarkItem.color`: 選填，`blue` / `green` / `amber` / `red` / `purple` / `pink`，未設定時最佳為朱色、其餘為墨灰
 - `BenchmarkItem.highlight`: 選填，手動標記最佳結果；只要任一 item 設定此 prop，整組就改用手動模式（不再依數值自動判斷）
 
-### CustomQuote（自訂引言）
+### Quote（自訂引言）
 
 ```mdx
-<CustomQuote author="某某人" variant="info">
+<Quote author="某某人" variant="info">
 這是一段引言內容。
-</CustomQuote>
+</Quote>
 ```
 
 - `author`: 選填，顯示在引言下方

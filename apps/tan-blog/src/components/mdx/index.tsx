@@ -4,7 +4,7 @@ import type { MdxComponentName } from '@sao-blog/mdx/registry'
 import {
   Echarts,
   Mermaid,
-  CustomQuote,
+  Quote,
   MdxImage,
   MdxAlert,
   MdxAccordion,
@@ -73,7 +73,7 @@ function codeToCopyText(code: React.ReactNode): string {
 // 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）。
 // `satisfies` 確保 @sao-blog/mdx registry 登記的每個元件在 Web 端都有實作。
 const blockComponents = {
-  CustomQuote,
+  Quote,
   Alert: MdxAlert,
   Accordion: MdxAccordion,
   AccordionItem: MdxAccordionItem,

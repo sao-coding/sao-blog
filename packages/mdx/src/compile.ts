@@ -1,4 +1,10 @@
 import type { Element, Root as HastRoot, RootContent } from 'hast'
+import type {
+  Parent as MdastParent,
+  Root as MdastRoot,
+  RootContent as MdastContent,
+} from 'mdast'
+import type {} from 'mdast-util-mdx'
 import rehypeKatex from 'rehype-katex'
 import rehypeSlug from 'rehype-slug'
 import remarkBreaks from 'remark-breaks'
@@ -23,6 +29,41 @@ import {
   type TocItem,
 } from './types'
 
+/** registry 中可出現在段落內的行內元件；其餘元件都是區塊元件 */
+const INLINE_COMPONENTS = new Set(['Kbd', 'Ruby', 'Mark', 'Sidenote'])
+
+/**
+ * 單行寫法 `<Quote>…</Quote>` 會被 remark 當成行內 JSX 包進 <p>，
+ * 渲染出 <p><figure> 之類不合法的巢狀。區塊元件若是段落唯一的子節點，就拆掉外層段落。
+ */
+function remarkUnwrapBlockComponents() {
+  const walk = (parent: MdastParent) => {
+    parent.children.forEach((node, i) => {
+      if (node.type === 'paragraph') {
+        const kids = node.children.filter(
+          (c) => !(c.type === 'text' && c.value.trim() === '')
+        )
+        const only = kids[0]
+        if (
+          kids.length === 1 &&
+          only?.type === 'mdxJsxTextElement' &&
+          only.name &&
+          isRegisteredComponent(only.name) &&
+          !INLINE_COMPONENTS.has(only.name)
+        ) {
+          parent.children[i] = {
+            ...only,
+            type: 'mdxJsxFlowElement',
+          } as unknown as MdastContent
+          return
+        }
+      }
+      if ('children' in node) walk(node as MdastParent)
+    })
+  }
+  return (tree: MdastRoot) => walk(tree)
+}
+
 type HastProcessor = Processor<any, any, HastRoot, HastRoot, undefined>
 
 const processors = new Map<CompileProfile, HastProcessor>()
@@ -36,6 +77,7 @@ function getProcessor(profile: CompileProfile): HastProcessor {
     .use(remarkParse)
     .use(remarkMdx)
     .use(remarkSafeMdx)
+    .use(remarkUnwrapBlockComponents)
     .use(remarkGfm)
     .use(remarkBreaks)
   if (profile === 'post') base.use(remarkMath)
@@ -61,9 +103,10 @@ export async function hashSource(source: string): Promise<string> {
  * registry 的節點轉換）都要遞增：已存的 compiled 會因 compiledHash 對不上而在下次讀取時重編。
  * 跟 COMPILED_VERSION 不同——那個是「產物格式」不相容時才遞增，renderer 會拒絕舊格式。
  *
+ * 3：單行的區塊元件不再被 <p> 包住
  * 2：程式碼區塊支援 title="…" 與 // [!code ++] / [!code --] / [!code focus] / [!code highlight]
  */
-export const COMPILE_PIPELINE_VERSION = 2
+export const COMPILE_PIPELINE_VERSION = 3
 
 /** 存成 compiledHash 的值：原文＋管線版本。原文沒改但管線升版時也會變 */
 export function compiledHashOf(source: string): Promise<string> {

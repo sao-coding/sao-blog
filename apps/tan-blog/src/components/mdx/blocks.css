@@ -407,7 +407,7 @@
   margin-block: 0.75rem;
 }
 
-/* ── 引言（custom-quote.tsx）與一般 markdown 引言 ────────────────────────────
+/* ── 引言（quote.tsx）與一般 markdown 引言 ────────────────────────────
  * CJK 不用斜體；左側一道細線，大引號淡淡壓在左上角，署名靠右用文楷 */
 .mdx-quote {
   position: relative;

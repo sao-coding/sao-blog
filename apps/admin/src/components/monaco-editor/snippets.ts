@@ -16,9 +16,9 @@ export const COMPONENT_SNIPPETS: Snippet[] = [
     body: '<Alert type="info" title="提示">\n$0\n</Alert>',
   },
   {
-    label: 'CustomQuote 引言',
+    label: 'Quote 引言',
     description: '帶作者的引言',
-    body: '<CustomQuote author="">\n$0\n</CustomQuote>',
+    body: '<Quote author="">\n$0\n</Quote>',
   },
   {
     label: 'Accordion 折疊面板',
