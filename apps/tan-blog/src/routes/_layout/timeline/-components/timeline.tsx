@@ -7,6 +7,7 @@ import type z from 'zod'
 
 import { openArticlePreview } from '@/components/preview/preview-url'
 import { MONTH_NAMES, TermMark } from '@/components/written-season'
+import { siteTime } from '@/lib/site-time'
 
 const EASE = [0.25, 0.1, 0.25, 1] as const
 
@@ -30,7 +31,7 @@ function groupByMonth(articles: Article[]): MonthGroup[] {
   let globalIdx = 0
 
   for (const article of articles) {
-    const month = new Date(article.createdAt).getMonth()
+    const month = siteTime(article.createdAt).month()
     const last = groups.at(-1)
 
     if (last?.month === month) {
@@ -148,7 +149,7 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
             {items.map((article, i) => {
               const idx = startIndex + i
               const date = new Date(article.createdAt)
-              const day = String(date.getDate()).padStart(2, '0')
+              const day = siteTime(article.createdAt).format('DD')
               const to = article.type === 'note' ? '/notes/$id' : '/posts/$slug'
               const goTo =
                 article.type === 'note' ? `notes/${article.slug}` : `posts/${article.slug}`

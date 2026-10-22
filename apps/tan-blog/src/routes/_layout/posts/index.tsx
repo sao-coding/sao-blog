@@ -11,6 +11,7 @@ import { PostItem, type PostListItem } from './-components/post-item'
 import { PostsSidebar, type TagStat } from './-components/posts-sidebar'
 import { currentContentLocale } from '@/lib/content-locale'
 import { runSearch } from '@/components/search/search-api'
+import { siteTime } from '@/lib/site-time'
 
 const SORTS = ['newest', 'oldest', 'updated'] as const
 type Sort = (typeof SORTS)[number]
@@ -59,7 +60,7 @@ function sortPosts(posts: PostListItem[], sort: Sort) {
 function groupByYear(posts: PostListItem[], dateKey: 'createdAt' | 'updatedAt') {
   const groups: { year: number; posts: PostListItem[] }[] = []
   for (const post of posts) {
-    const year = new Date(post[dateKey]).getFullYear()
+    const year = siteTime(post[dateKey]).year()
     const last = groups.at(-1)
     if (last?.year === year) last.posts.push(post)
     else groups.push({ year, posts: [post] })

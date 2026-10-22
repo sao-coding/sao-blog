@@ -54,6 +54,7 @@ import { CommentMarkdownRenderer } from './comment-markdown-renderer'
 import { CommentForm, type CommentGuardFields } from './comment-form'
 import { dayjsLocale } from '@/lib/date-locale'
 import { m } from '#/paraglide/messages'
+import { siteTime } from '@/lib/site-time'
 
 dayjs.extend(relativeTime)
 
@@ -179,7 +180,7 @@ export function CommentItem({
   const isReply = depth > 0
   // 只有頂層的自己留言靠右；回覆串裡一律靠左，彎折線才接得上
   const alignRight = isMine && !isReply
-  const created = dayjs(comment.createdAt)
+  const created = siteTime(comment.createdAt)
   // 站長可管理所有留言；一般人只能刪自己還沒刪掉的留言
   const canManage = isAdmin || (isMine && !comment.deleted)
   const canInteract = !comment.deleted

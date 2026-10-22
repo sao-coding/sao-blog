@@ -2,6 +2,7 @@
 import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { HeartIcon } from 'lucide-react'
+import { siteTime } from '@/lib/site-time'
 
 interface HomeFooterProps {
   totalLetters: number
@@ -24,7 +25,7 @@ const SEASONAL_GREETING: Record<number, string> = {
 }
 
 export function HomeFooter({ totalLetters }: HomeFooterProps) {
-  const greeting = SEASONAL_GREETING[new Date().getMonth() + 1] ?? '四時流轉'
+  const greeting = SEASONAL_GREETING[siteTime(new Date()).month() + 1] ?? '四時流轉'
 
   return (
     <motion.section

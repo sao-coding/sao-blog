@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { TermMark } from '@/components/written-season'
+import { siteTime } from '@/lib/site-time'
 
 interface Article {
   id: string
@@ -53,7 +54,7 @@ export function CategoriesTimeline({ articles }: CategoriesTimelineProps) {
       >
         {articles.map((article, index) => {
           const date = new Date(article.createdAt)
-          const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+          const formattedDate = siteTime(date).format('YYYY-MM-DD')
 
           return (
             <li

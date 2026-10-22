@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router"
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import type z from "zod"
 import { MONTH_NAMES, TermMark } from "@/components/written-season"
+import { siteTime } from '@/lib/site-time'
 
 type NoteItem = z.infer<typeof NoteInTopicSchema>
 
@@ -105,7 +106,7 @@ function YearSection({
 
             {items.map((note, i) => {
               const idx = startIndex + i
-              const day = String(new Date(note.createdAt).getDate()).padStart(2, '0')
+              const day = siteTime(note.createdAt).format('DD')
 
               return (
                 <motion.li
