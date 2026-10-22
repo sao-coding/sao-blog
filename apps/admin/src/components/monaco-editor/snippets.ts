@@ -133,11 +133,6 @@ export const DIAGRAM_SNIPPETS: Snippet[] = [
     body: '```mermaid\nflowchart LR\n  A[$0開始] --> B[結束]\n```',
   },
   {
-    label: 'ECharts 圖表',
-    description: '```echarts 圍欄（JSON option）',
-    body: '```echarts\n{\n  "xAxis": { "type": "category", "data": ["一", "二", "三"] },\n  "yAxis": { "type": "value" },\n  "series": [{ "type": "bar", "data": [$03, 5, 2] }]\n}\n```',
-  },
-  {
     label: '數學公式',
     description: '$$ 區塊公式（KaTeX）',
     body: '$$\n$0\n$$',

@@ -18,6 +18,7 @@ import { unified, type Processor } from 'unified'
 import { VFile } from 'vfile'
 import { matter } from 'vfile-matter'
 import { DIAGRAM_LANGS, getLanguage, rehypeCodeHighlight } from './highlight'
+import { rehypeMermaid } from './mermaid'
 import { componentRegistry, isRegisteredComponent } from './registry'
 import { getMdxErrors, remarkSafeMdx } from './remark-safe-mdx'
 import {
@@ -83,7 +84,7 @@ function getProcessor(profile: CompileProfile): HastProcessor {
   if (profile === 'post') base.use(remarkMath)
   base.use(remarkFlexibleToc).use(remarkRehype)
   if (profile === 'post') base.use(rehypeKatex)
-  base.use(rehypeSlug).use(rehypeCodeHighlight)
+  base.use(rehypeSlug).use(rehypeCodeHighlight).use(rehypeMermaid)
 
   processor = base.freeze() as unknown as HastProcessor
   processors.set(profile, processor)
@@ -103,10 +104,11 @@ export async function hashSource(source: string): Promise<string> {
  * registry 的節點轉換）都要遞增：已存的 compiled 會因 compiledHash 對不上而在下次讀取時重編。
  * 跟 COMPILED_VERSION 不同——那個是「產物格式」不相容時才遞增，renderer 會拒絕舊格式。
  *
+ * 4：mermaid 圖表在編譯時轉成 SVG（code 節點的 dataSvg）
  * 3：單行的區塊元件不再被 <p> 包住
  * 2：程式碼區塊支援 title="…" 與 // [!code ++] / [!code --] / [!code focus] / [!code highlight]
  */
-export const COMPILE_PIPELINE_VERSION = 3
+export const COMPILE_PIPELINE_VERSION = 4
 
 /** 存成 compiledHash 的值：原文＋管線版本。原文沒改但管線升版時也會變 */
 export function compiledHashOf(source: string): Promise<string> {

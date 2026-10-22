@@ -1,6 +1,6 @@
 ---
 name: mdx-post-components
-description: Reference for the JSX block components available when writing article content (Alert, Accordion, Tabs, Carousel, Steps, FileTree, LinkCard, Tweet, Terminal, StickyNote, ImageCompare, Embed, Progress, Benchmark, Quote, Playground, Excalidraw, inline Mark/Kbd/Ruby/Sidenote, mermaid/echarts). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
+description: Reference for the JSX block components available when writing article content (Alert, Accordion, Tabs, Carousel, Steps, FileTree, LinkCard, Tweet, Terminal, StickyNote, ImageCompare, Embed, Progress, Benchmark, Quote, Playground, Excalidraw, inline Mark/Kbd/Ruby/Sidenote, mermaid). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
 ---
 
 # mdx-blog 文章區塊元件
@@ -12,7 +12,7 @@ description: Reference for the JSX block components available when writing artic
 ## 核心規則
 
 區塊元件一律用 **JSX 標籤**書寫（`<Alert>...</Alert>`），**不要**用：
-- ` ```fence ` 圍欄（除了 `mermaid` / `echarts`，見下方例外）
+- ` ```fence ` 圍欄（除了 `mermaid`，見下方例外）
 - `<!-- -->` HTML 註解（會被 MDX 剝除）
 - Hexo 的 `{% tag %}` 語法（此專案沒有對應的 remark plugin）
 
@@ -327,9 +327,9 @@ const app = new Elysia()
 - `// [!code focus]`：聚焦這行，其餘淡掉
 - 標記註解本身不會顯示；其他語言用該語言的註解符號（例如 `# [!code ++]`）
 
-## 例外：mermaid / echarts 仍用 fence
+## 例外：mermaid 仍用 fence
 
-因為內容本身是程式碼/資料，這兩個**不要**改成 JSX 標籤：
+因為內容本身是圖表原始碼，**不要**改成 JSX 標籤：
 
 ````mdx
 ```mermaid
@@ -337,14 +337,6 @@ graph TD
   A --> B
 ```
 ````
-
-````mdx
-```echarts
-{ "title": { "text": "範例圖表" }, "xAxis": {}, "yAxis": {}, "series": [] }
-```
-````
-
-`echarts` 圍欄內必須是合法 JSON（會被 `JSON.parse`），不是 JS 物件字面量。
 
 ## 其他自動處理（不需手動加標籤）
 
@@ -356,4 +348,3 @@ graph TD
 
 - **元件沒有渲染，直接印出標籤文字**：通常是把子元件（`AccordionItem`/`Tab`/`Slide`/`BenchmarkItem`/`Step`）放在容器外，或忘記容器包起來。
 - **Accordion/Tabs/Benchmark 內容消失**：`AccordionItem` 需要 `title`、`Tab` 需要 `label`、`BenchmarkItem` 需要 `value`，缺少必填 prop 會被過濾掉（`isAccordionItem`/`isTab`/`isBenchmarkItem` 判斷失敗）。
-- **echarts 圖表顯示「JSON 格式錯誤」**：圍欄內容不是合法 JSON（例如用了單引號或尾逗號）。

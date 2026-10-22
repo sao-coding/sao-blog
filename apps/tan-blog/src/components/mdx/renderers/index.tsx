@@ -1,5 +1,4 @@
 export * from './mermaid'
-export * from './echarts'
 export * from './quote'
 export * from './image'
 export * from './alert'

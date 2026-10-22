@@ -57,9 +57,9 @@ const loadLangs = () => [
   import('@shikijs/langs/ruby'),
 ]
 
-// `mermaid`/`echarts` fenced blocks 是圖表原始碼，不是要高亮的程式碼，
+// `mermaid` fenced blocks 是圖表原始碼，不是要高亮的程式碼，
 // 保留原始 <pre><code> 交給各端 renderer 渲染成圖表。
-export const DIAGRAM_LANGS = new Set(['mermaid', 'echarts'])
+export const DIAGRAM_LANGS = new Set(['mermaid'])
 
 // fine-grained bundle 需要自己維護 singleton，避免每次編譯都重新載入語言/主題。
 let highlighterPromise: Promise<HighlighterCore> | undefined
@@ -100,7 +100,7 @@ export function getLanguage(codeNode: Element): string | undefined {
 }
 
 // 自己寫 rehype plugin（而不是用 @shikijs/rehype 這個現成套件）的原因：
-// 我們需要在「拿到語言」的那一刻就決定要不要跳過，讓 mermaid/echarts 完全
+// 我們需要在「拿到語言」的那一刻就決定要不要跳過，讓 mermaid 完全
 // 不經過 shiki；@shikijs/rehype 沒有這種依語言排除單一節點的 hook。
 export function rehypeCodeHighlight() {
   return async (tree: Root) => {

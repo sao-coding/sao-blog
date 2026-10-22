@@ -37,7 +37,7 @@ tan-blog/
 │   │   ├── mdx/
 │   │   │   ├── index.tsx    ← 元件对照表（`blockComponents` 以 satisfies 对齐 registry）
 │   │   │   ├── renderers/unknown.tsx ← 未知元件降级显示
-│   │   │   └── renderers/   ← Alert/Tabs/Carousel/Mermaid/ECharts 等
+│   │   │   └── renderers/   ← Alert/Tabs/Carousel/Mermaid 等
 │   │   ├── layout/          ← Header/Footer/FAB
 │   │   ├── animation/       ← Motion 动画
 │   │   └── theme-provider.tsx ← ScriptOnce dark mode

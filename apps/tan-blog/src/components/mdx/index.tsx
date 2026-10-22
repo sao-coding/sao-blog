@@ -2,7 +2,6 @@ import React from 'react'
 import type { MDXComponents } from 'mdx/types'
 import type { MdxComponentName } from '@sao-blog/mdx/registry'
 import {
-  Echarts,
   Mermaid,
   Quote,
   MdxImage,
@@ -40,7 +39,7 @@ import { m } from '#/paraglide/messages'
 import { cn } from '@/lib/utils'
 
 // 匯出個別 renderers
-export { Mermaid, Echarts }
+export { Mermaid }
 
 // 把 React 節點樹（例如 Shiki 輸出的 <code><span>...</span></code>）攤平成純文字，
 // 用來算行數、複製到剪貼簿。
@@ -149,16 +148,13 @@ export const defaultMDXComponents: MDXComponents = {
     children,
     ...props
   }: React.HTMLAttributes<HTMLElement>) => {
-    // mermaid/echarts 的 code 元件回傳的是 <div>（Mermaid/Echarts），
+    // mermaid 的 code 元件回傳的是區塊元素（Mermaid），
     // <pre> 的內容模型只允許 phrasing content，塞入 <div> 屬於不合法的 HTML
     // 巢狀，會在 hydration 時炸掉，因此改用 <div> 包裹。
     const childClassName = React.isValidElement<{ className?: string }>(children)
       ? children.props.className
       : undefined
-    if (
-      childClassName === 'language-mermaid' ||
-      childClassName === 'language-echarts'
-    ) {
+    if (childClassName === 'language-mermaid') {
       return (
         <div className={cn('mdx-block not-prose', className)} {...props}>
           {children}
@@ -199,16 +195,16 @@ export const defaultMDXComponents: MDXComponents = {
   code: ({
     className,
     children,
+    'data-svg': svg,
   }: {
     className?: string
     children: React.ReactNode
+    // 編譯時預先算好的 mermaid SVG（見 @sao-blog/mdx 的 rehypeMermaid）
+    'data-svg'?: string
   }) => {
     const text = String(children ?? '').trim()
     if (className === 'language-mermaid') {
-      return <Mermaid>{text}</Mermaid>
-    }
-    if (className === 'language-echarts') {
-      return <Echarts>{text}</Echarts>
+      return <Mermaid svg={svg}>{text}</Mermaid>
     }
     // 沒有語言標記的行內程式碼（例如 `foo`）
     if (!className) {

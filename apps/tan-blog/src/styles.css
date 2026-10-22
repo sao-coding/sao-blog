@@ -166,9 +166,8 @@
   }
 }
 
-/* classname prose 裡面 的 pre 裡面 的 div 若是 mermaid 或 echarts 的話，則pre 無背景 */
-.prose pre:has(.mermaid),
-.prose pre:has(> div.echarts) {
+/* classname prose 裡面 的 pre 裡面若是 mermaid 的話，則pre 無背景 */
+.prose pre:has(.mermaid) {
   background-color: transparent;
 }
 
@@ -197,11 +196,6 @@
   border-radius: 0.5rem;
   background: color-mix(in oklch, var(--foreground) 5%, transparent);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.prose div.echarts {
-  overflow: hidden;
-  border-radius: 0.5rem;
 }
 
 @layer base {

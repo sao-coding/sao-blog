@@ -86,7 +86,7 @@ REVALIDATE_SECRET=your-secret-key
 
 ### MDX 文章
 - 文章存於 `apps/server` 資料庫，經 oRPC 取得 MDX 字串
-- 支援的 block 元件：`<Alert />`、`<Accordion />`、`<Tabs />`、`<Carousel />`、`<Progress />`、`<Mermaid />`、`<ECharts />`
+- 支援的 block 元件：`<Alert />`、`<Accordion />`、`<Tabs />`、`<Carousel />`、`<Progress />`、`<Mermaid />`
 - 代碼高亮由 Shiki 處理（34 語言、自動主題適配）
 - KaTeX 數學、表格、腳註均支援
 

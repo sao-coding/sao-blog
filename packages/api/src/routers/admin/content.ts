@@ -55,7 +55,7 @@ const getComponents = protectedProcedure
         summary:
             "列出文章 / 日記 MDX 可用的區塊元件與各自的 props JSON Schema（children：是否可包子內容；" +
             "translatableProps：翻譯時需要翻的字串 props）。寫法為 JSX 標籤，例如 " +
-            '<Alert type="warning" title="注意">內文</Alert>；mermaid / echarts 圖表用 ```mermaid / ```echarts 圍欄。',
+            '<Alert type="warning" title="注意">內文</Alert>；mermaid 圖表用 ```mermaid 圍欄。',
     })
     .handler(() => ({
         status: "success",
