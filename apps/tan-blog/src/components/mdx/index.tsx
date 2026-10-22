@@ -213,6 +213,13 @@ export const defaultMDXComponents: MDXComponents = {
     return <code className={className}>{children}</code>
   },
   img: MdxImage,
+  // GFM 待辦清單（- [x]）的勾選框沒有 label，補上可讀名稱
+  input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+    props.type === 'checkbox' ? (
+      <input {...props} aria-label={props.checked ? m.task_done() : m.task_todo()} />
+    ) : (
+      <input {...props} />
+    ),
   ...blockComponents,
 }
 

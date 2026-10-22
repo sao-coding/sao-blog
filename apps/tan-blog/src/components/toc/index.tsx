@@ -7,6 +7,9 @@ import useScrollspy from '@/hooks/use-scrollspy'
 import { domAnimation, LazyMotion, LayoutGroup } from 'motion/react'
 import { ScrollProgressIndicator } from '../scroll-progress-indicator'
 
+// 放在元件外：每次 render 都給新物件的話，useScrollspy 的 effect 會一直重建 IntersectionObserver
+const SCROLLSPY_OPTIONS: IntersectionObserverInit = { rootMargin: '0% 0% -85% 0%' }
+
 const getMinDepth = (items: TocItem[]): number => {
   let min = Infinity
   for (const item of items) {
@@ -64,9 +67,7 @@ const TableOfContent = ({
     return minDepth === Infinity ? 1 : minDepth
   }, [toc])
 
-  const activeId = useScrollspy(ids, {
-    rootMargin: '0% 0% -85% 0%',
-  })
+  const activeId = useScrollspy(ids, SCROLLSPY_OPTIONS)
 
   useEffect(() => {
     const setMaxWidth = () => {

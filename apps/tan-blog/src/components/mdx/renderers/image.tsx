@@ -76,7 +76,8 @@ export const MdxImage = ({ src, alt, title: rawTitle, className, ...props }: Mdx
                 {...props}
               />
             </span>
-            {polaroid && showCaption && <span className="mdx-polaroid-caption">{text}</span>}
+            {/* 圖說與 alt 同一句：對螢幕閱讀器藏起來，避免連唸兩次 */}
+            {polaroid && showCaption && <span className="mdx-polaroid-caption" aria-hidden>{text}</span>}
           </span>
         </Zoomable>
       )}

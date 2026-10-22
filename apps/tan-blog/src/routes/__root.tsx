@@ -78,6 +78,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 // Umami 分析（對應 mdx-blog 的 umami-analytics.tsx）。只在 production build 載入，
 // 避免本機開發的瀏覽紀錄灌進正式站的統計。
+// fetchpriority=low：統計不影響畫面，不跟 CSS、字體、首屏圖片搶頻寬
 const UMAMI_ORIGIN = 'https://umami.sao-x.com'
 const UMAMI_WEBSITE_ID = '4253ebc1-faea-4497-9376-bd2263a78bb9'
 
@@ -86,6 +87,7 @@ function umamiScripts() {
   return ['script.js', 'recorder.js'].map((file) => ({
     src: `${UMAMI_ORIGIN}/${file}`,
     defer: true,
+    fetchPriority: 'low' as const,
     'data-website-id': UMAMI_WEBSITE_ID,
   }))
 }

@@ -1162,6 +1162,9 @@
 .mdx-image-frame .mdx-image {
   display: block;
   margin: 0;
+  /* 載入前先以 16:9 預留空間，載入後改用圖片本身的比例（auto）：避免捲動途中圖片陸續撐高版面、
+   * 把 TOC 跳轉的目標往下推，也降低 CLS */
+  aspect-ratio: auto 16 / 9;
   transition:
     opacity 500ms ease,
     filter 700ms ease,

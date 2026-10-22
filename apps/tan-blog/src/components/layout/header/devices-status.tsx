@@ -160,8 +160,9 @@ function useAssets() {
     const fetchAssets = async () => {
       try {
         const [iconsRes, descRes] = await Promise.all([
-          fetch(`${CDN_DOMAIN}/app-icon.json`),
-          fetch(`${CDN_DOMAIN}/app-desc.json`),
+          // 圖示與說明不影響首屏，用低優先度抓，不跟 CSS、字體搶頻寬
+          fetch(`${CDN_DOMAIN}/app-icon.json`, { priority: 'low' }),
+          fetch(`${CDN_DOMAIN}/app-desc.json`, { priority: 'low' }),
         ])
 
         if (!mounted) return

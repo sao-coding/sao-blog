@@ -222,5 +222,7 @@
   "comment_delete_forever_description": "留言會從資料庫永久移除，底下的回覆也會一起消失，無法復原。",
   "comment_deleted": "此留言已刪除",
   "comment_action_done": "已更新",
-  "comment_action_failed": "操作失敗，請稍後再試"
+  "comment_action_failed": "操作失敗，請稍後再試",
+  "task_done": "已完成",
+  "task_todo": "未完成"
 }

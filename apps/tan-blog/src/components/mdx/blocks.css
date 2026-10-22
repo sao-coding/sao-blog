@@ -740,11 +740,17 @@
 .mdx-carousel-dots {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
 }
-/* 點本身很小，用透明的 ::after 把可點範圍撐到 24px */
+/* 按鈕本身撐到 24px（觸控目標的最小尺寸；偽元素撐大的範圍不算），點用 ::before 畫在中間 */
 .mdx-carousel-dot {
-  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+}
+.mdx-carousel-dot::before {
+  content: '';
   width: 0.375rem;
   height: 0.375rem;
   border-radius: 9999px;
@@ -753,12 +759,7 @@
     width 250ms ease-out,
     background-color 250ms ease-out;
 }
-.mdx-carousel-dot::after {
-  content: '';
-  position: absolute;
-  inset: -0.5625rem -0.25rem;
-}
-.mdx-carousel-dot[aria-current='true'] {
+.mdx-carousel-dot[aria-current='true']::before {
   width: 1.25rem;
   background: var(--ink);
 }
@@ -1081,6 +1082,10 @@
 
 /* ── 推文（tweet-card.tsx）：一張明信片 ─────────────────────────────────────
  * 右上角貼一枚有齒孔的郵票（mask 打出一圈圓孔），內文用文楷像手寫在卡片上。 */
+/* 抓資料前先撐到一張純文字推文卡片的高度，載入後不會把下方內容大幅往下推 */
+.mdx-tweet[data-loading] {
+  min-height: 190px;
+}
 .mdx-tweet {
   position: relative;
   padding: 1.125rem 1.25rem 0.875rem;
@@ -1531,6 +1536,8 @@
   color: var(--foreground);
 }
 summary.mdx-tree-row {
+  /* 可點的資料夾列至少 24px 高（觸控目標最小尺寸） */
+  min-height: 1.5rem;
   cursor: pointer;
   list-style: none;
   border-radius: 4px;
@@ -2439,6 +2446,8 @@ details:not([open]) > summary .mdx-tree-open {
   display: block;
   width: 100%;
   height: auto;
+  /* 載入前高度是 0，先以 16:9 預留，載入後改用圖片比例 */
+  aspect-ratio: auto 16 / 9;
   margin: 0;
 }
 .mdx-compare-before {

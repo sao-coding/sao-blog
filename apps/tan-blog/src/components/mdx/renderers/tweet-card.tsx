@@ -37,7 +37,7 @@ export function TweetCard({ id, fallback }: TweetCardProps) {
   if (!isLoading && (isError || !data)) return <>{fallback}</>
 
   return (
-    <figure className="mdx-block mdx-tweet not-prose">
+    <figure className="mdx-block mdx-tweet not-prose" data-loading={isLoading || undefined}>
       <a
         href={data?.url ?? `https://x.com/i/status/${id}`}
         target="_blank"

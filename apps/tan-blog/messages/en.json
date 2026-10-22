@@ -222,5 +222,7 @@
   "comment_delete_forever_description": "The comment and its replies will be permanently removed from the database. This can't be undone.",
   "comment_deleted": "This comment was deleted",
   "comment_action_done": "Updated",
-  "comment_action_failed": "Something went wrong. Please try again later."
+  "comment_action_failed": "Something went wrong. Please try again later.",
+  "task_done": "Done",
+  "task_todo": "Not done"
 }
