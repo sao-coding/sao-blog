@@ -5,6 +5,8 @@ import type { postSchema } from '@sao-blog/api/schema/post'
 import { cn } from '@/lib/utils'
 import { m } from '#/paraglide/messages'
 import { TermMark } from '@/components/written-season'
+import type { SearchHit } from '@sao-blog/api/lib/search/query'
+import { Highlighted, SearchSnippet } from '@/components/search/search-hit'
 
 export type PostListItem = z.infer<typeof postSchema>
 
@@ -18,10 +20,13 @@ export function PostItem({
   post,
   dateKey = 'createdAt',
   pinned = false,
+  hit,
 }: {
   post: PostListItem
   dateKey?: 'createdAt' | 'updatedAt'
   pinned?: boolean
+  /** 搜尋中：標題高亮、摘要換成內文命中的片段（與 ⌘K 同一套 Highlighted） */
+  hit?: SearchHit
 }) {
   const date = dayjs(post[dateKey])
   const extraTags = post.tags.length - MAX_VISIBLE_TAGS
@@ -52,11 +57,13 @@ export function PostItem({
               "after:absolute after:inset-0 after:content-['']",
             )}
           >
-            {post.title}
+            {hit?.titleHighlight ? <Highlighted text={hit.titleHighlight} /> : post.title}
           </Link>
         </h2>
 
-        {post.summary && (
+        {hit?.snippet ? (
+          <SearchSnippet hit={hit} className="mt-1.5 line-clamp-3 sm:line-clamp-2" />
+        ) : post.summary && (
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:line-clamp-1">
             {post.summary}
           </p>

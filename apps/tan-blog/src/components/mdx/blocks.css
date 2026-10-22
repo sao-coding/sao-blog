@@ -2051,6 +2051,8 @@ details:not([open]) > summary .mdx-tree-open {
 .mdx-kbd,
 .mdx-wrapper kbd {
   display: inline-block;
+  /* 共用 Kbd 預設固定 h-5，文章裡改成跟著文字大小 */
+  height: auto;
   min-width: 1.6em;
   padding: 0.0625em 0.4em;
   border: 1px solid color-mix(in oklch, var(--foreground) 22%, transparent);

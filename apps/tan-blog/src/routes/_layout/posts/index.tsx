@@ -10,6 +10,7 @@ import { PageWithSidebar } from '@/components/layout/page-shell'
 import { PostItem, type PostListItem } from './-components/post-item'
 import { PostsSidebar, type TagStat } from './-components/posts-sidebar'
 import { currentContentLocale } from '@/lib/content-locale'
+import { runSearch } from '@/components/search/search-api'
 
 const SORTS = ['newest', 'oldest', 'updated'] as const
 type Sort = (typeof SORTS)[number]
@@ -85,15 +86,33 @@ function PostsIndexPage() {
   )
   const posts = data?.status === 'success' ? data.data : undefined
   const dateKey = sort === 'updated' ? 'updatedAt' : 'createdAt'
+  const keyword = q?.trim()
+  const locale = currentContentLocale()
+
+  // 有關鍵字時用 Typesense 全文搜尋（和 ⌘K 同一個後端，內文也找得到），結果用來篩選下面的列表。
+  // API proxy 一次最多 50 筆；文章數超過時只會篩出最相關的 50 篇
+  const search = useQuery({
+    queryKey: ['content-search', keyword, locale, 'post'],
+    queryFn: () => runSearch({ q: keyword!, type: 'post', perPage: 50 }, locale),
+    enabled: Boolean(keyword),
+    staleTime: 30_000,
+  })
+  // 搜尋未啟用、出錯或還沒回來時，先用標題／摘要／分類／標籤的本地比對頂著
+  const hits = useMemo(
+    () => (keyword && search.data?.enabled ? new Map(search.data.hits.map((h) => [h.slug, h])) : undefined),
+    [keyword, search.data],
+  )
 
   const view = useMemo(() => {
     if (!posts) return null
-    const keyword = q?.trim().toLowerCase()
+    const lowered = keyword?.toLowerCase()
     const isFiltering = Boolean(tag || keyword)
 
     const filtered = posts.filter((post) => {
       if (tag && !post.tags.some((t) => t.slug === tag)) return false
-      if (keyword) {
+      if (hits) return hits.has(post.slug)
+      if (lowered) {
+        const keyword = lowered
         const haystack = [post.title, post.summary ?? '', post.category.name, ...post.tags.map((t) => t.name)]
           .join(' ')
           .toLowerCase()
@@ -113,7 +132,7 @@ function PostsIndexPage() {
       tags: collectTags(posts),
       isFiltering,
     }
-  }, [posts, sort, tag, q, dateKey])
+  }, [posts, sort, tag, keyword, hits, dateKey])
 
   const activeTagName = tag ? (view?.tags.find((t) => t.slug === tag)?.name ?? tag) : undefined
 
@@ -208,7 +227,7 @@ function PostsIndexPage() {
                 <ul>
                   {group.posts.map((post) => (
                     <li key={post.id}>
-                      <PostItem post={post} dateKey={dateKey} />
+                      <PostItem post={post} dateKey={dateKey} hit={hits?.get(post.slug)} />
                     </li>
                   ))}
                 </ul>

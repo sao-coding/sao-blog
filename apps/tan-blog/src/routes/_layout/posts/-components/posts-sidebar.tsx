@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowUpIcon, SearchIcon } from 'lucide-react'
+import { ArrowUpIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SearchField } from '@/components/search/search-field'
 import { m } from '#/paraglide/messages'
 
 export interface TagStat {
@@ -50,19 +51,15 @@ export function PostsSidebar({
         !inline && 'sticky top-28 rounded-xl border border-rule bg-card/40 p-5 backdrop-blur-sm',
       )}
     >
-      <label className="block">
-        <span className="font-wenkai text-xs text-muted-foreground">{m.posts_search_label()}</span>
-        <span className="mt-1 flex items-center gap-2 border-b border-dashed border-rule pb-1.5 focus-within:border-solid focus-within:border-ink/60">
-          <SearchIcon className="size-3.5 shrink-0 text-muted-foreground" />
-          <input
-            type="search"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={m.posts_search_placeholder()}
-            className="w-full bg-transparent font-wenkai outline-none placeholder:text-muted-foreground/60"
-          />
-        </span>
-      </label>
+      <SearchField label={m.posts_search_label()}>
+        <input
+          type="search"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={m.posts_search_placeholder()}
+          className="search-field-input"
+        />
+      </SearchField>
 
       {tags.length > 0 && (
         <section>
