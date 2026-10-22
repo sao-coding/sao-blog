@@ -6,9 +6,9 @@ import { LockIcon, MessageCircleIcon } from 'lucide-react'
 import { toast } from '@sao-blog/ui/components/toast'
 import { useLocation } from '@tanstack/react-router'
 
-import type { CommentSortOrder, FlatComment } from '@/types/comment'
+import type { CommentAction, CommentSortOrder, FlatComment } from '@/types/comment'
 import type { CommentFormValues } from '@/schemas/comment'
-import { orpc } from '@/lib/orpc'
+import { client, orpc } from '@/lib/orpc'
 import { authClient } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
 import { Button } from '@sao-blog/ui/components/button'
@@ -132,7 +132,7 @@ function CommentSectionContent({ postId }: { postId: string }) {
       if (context?.previousData !== undefined) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
-      toast.add({ title: '操作失敗，請稍後再試', type: 'error' })
+      toast.add({ title: m.comment_action_failed(), type: 'error' })
     },
 
     onSettled: () => {
@@ -148,6 +148,34 @@ function CommentSectionContent({ postId }: { postId: string }) {
   const userName = session?.user.name ?? undefined
   const userImage = session?.user.image ?? null
   const currentUserId = session?.user.id
+  // tan-blog 的 auth client 沒裝 admin plugin，role 不在型別裡，但 session 有回傳
+  const role = (session?.user as { role?: string | null } | undefined)?.role
+  const isAdmin = Boolean(role) && role !== 'user'
+
+  /**
+   * 留言的管理操作。站長走後台 API（置頂、隱藏、永久刪除）；
+   * 一般使用者只能刪自己的留言（公開 API 的軟刪除）。審核相關（通過／垃圾／封鎖）留在後台。
+   */
+  const handleAction = async (commentId: string, action: CommentAction) => {
+    try {
+      const res =
+        action.type === 'pin'
+          ? await client.admin.comment.setCommentPin({ id: commentId, pin: action.value })
+          : action.type === 'hide'
+            ? await client.admin.comment.setCommentDeleted({ id: commentId, deleted: action.value })
+            : isAdmin
+              ? await client.admin.comment.deleteComment({ id: commentId })
+              : await client.comment.deleteComment({ id: commentId })
+      if (res.status !== 'success') {
+        toast.add({ title: res.message || m.comment_action_failed(), type: 'error' })
+        return
+      }
+      toast.add({ title: res.message || m.comment_action_done(), type: 'success' })
+      await queryClient.invalidateQueries({ queryKey })
+    } catch {
+      toast.add({ title: m.comment_action_failed(), type: 'error' })
+    }
+  }
 
   return (
     <section className="mt-16 space-y-8" aria-labelledby="comment-section-title">
@@ -191,6 +219,8 @@ function CommentSectionContent({ postId }: { postId: string }) {
         onReply={handleReply}
         isAuthenticated={isAuthenticated}
         currentUserId={currentUserId}
+        isAdmin={isAdmin}
+        onAction={handleAction}
         userName={userName}
         userImage={userImage}
       />

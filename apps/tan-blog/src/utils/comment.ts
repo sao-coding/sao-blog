@@ -28,6 +28,8 @@ export function toCommentTree(flatComments: FlatComment[]): Comment[] {
       pending: item.status === 'pending',
       userId: item.userId,
       pin: item.pin,
+      deleted: item.deleted,
+      isAuthor: item.isAuthor,
     })
   }
 
@@ -47,5 +49,26 @@ export function toCommentTree(flatComments: FlatComment[]): Comment[] {
     roots.push(comment)
   }
 
+  sortReplies(roots)
   return roots
+}
+
+/** 自己或底下任何一則回覆被置頂 */
+export function hasPinned(comment: Comment): boolean {
+  return comment.pin || comment.replies.some(hasPinned)
+}
+
+/**
+ * 回覆串一律由舊到新（像對話一樣往下讀），置頂的回覆排在該串最前面。
+ * API 回傳是新到舊，所以這裡要重排。
+ */
+function sortReplies(comments: Comment[]) {
+  for (const comment of comments) {
+    comment.replies.sort((a, b) => {
+      const pa = hasPinned(a)
+      if (pa !== hasPinned(b)) return pa ? -1 : 1
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    })
+    sortReplies(comment.replies)
+  }
 }

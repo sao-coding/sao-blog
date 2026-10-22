@@ -54,6 +54,7 @@ const getComments = publicProcedure
                 refId: comments.refId,
                 displayUsername: comments.displayUsername,
                 image: user.image,
+                authorRole: user.role,
                 website: comments.website,
                 content: comments.content,
                 thread: comments.thread,
@@ -90,8 +91,10 @@ const getComments = publicProcedure
             likeRecords.forEach(r => likedMap.set(r.commentId, r.like));
         }
 
-        const processedComments = commentsList.map(comment => ({
+        const processedComments = commentsList.map(({ authorRole, ...comment }) => ({
             ...comment,
+            // 只回傳「是不是站長」，不外洩實際角色名稱
+            isAuthor: Boolean(authorRole) && authorRole !== "user",
             content: comment.deleted ? "[此評論已被刪除]" : comment.content,
             // 對留言者本人來說，垃圾跟待審看起來一樣
             status: comment.status === "spam" ? ("pending" as const) : comment.status,

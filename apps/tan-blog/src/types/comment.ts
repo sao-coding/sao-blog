@@ -2,6 +2,12 @@ export type VoteType = 'like' | 'dislike' | null
 
 export type CommentSortOrder = 'newest' | 'oldest'
 
+/** 前台留言的管理操作（審核類留在後台） */
+export type CommentAction =
+  | { type: 'pin'; value: boolean }
+  | { type: 'hide'; value: boolean }
+  | { type: 'delete' }
+
 export type CommentRefType = 'post' | 'note' | 'page' | 'recently'
 
 export interface FlatComment {
@@ -19,6 +25,8 @@ export interface FlatComment {
   dislikes: number
   deleted: boolean
   pin: boolean
+  /** 留言者是站長 */
+  isAuthor: boolean
   source: string
   userId: string
   ip: string | null
@@ -50,4 +58,8 @@ export interface Comment {
   userId: string
   /** 置頂留言 */
   pin: boolean
+  /** 已被隱藏（軟刪除）：API 會把內容換成佔位文字 */
+  deleted: boolean
+  /** 留言者是站長 */
+  isAuthor: boolean
 }

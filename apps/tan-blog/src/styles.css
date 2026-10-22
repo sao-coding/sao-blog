@@ -1303,6 +1303,14 @@
   opacity: 0.85;
 }
 
+/* 名字旁的「作者」小印：不旋轉，跟文字對齊 */
+.comment-seal-flat {
+  rotate: none;
+  padding: 0.05rem 0.25rem;
+  font-size: 0.65rem;
+  opacity: 1;
+}
+
 .comment-bubble {
   position: relative;
   border-radius: 1.1rem;

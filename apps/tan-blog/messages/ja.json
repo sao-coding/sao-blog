@@ -208,5 +208,19 @@
   "accordion_expand_all": "すべて開く",
   "accordion_collapse_all": "すべて閉じる",
   "faq_q": "問",
-  "faq_a": "答"
+  "faq_a": "答",
+  "comment_author": "作者",
+  "comment_more_actions": "その他の操作",
+  "comment_pin": "固定",
+  "comment_unpin": "固定を解除",
+  "comment_hide": "非表示",
+  "comment_restore": "復元",
+  "comment_delete": "削除",
+  "comment_delete_forever": "完全に削除",
+  "comment_delete_confirm_title": "このコメントを削除しますか？",
+  "comment_delete_confirm_description": "他の人には「このコメントは削除されました」と表示されます。元に戻せません。",
+  "comment_delete_forever_description": "コメントと返信はデータベースから完全に削除されます。元に戻せません。",
+  "comment_deleted": "このコメントは削除されました",
+  "comment_action_done": "更新しました",
+  "comment_action_failed": "操作に失敗しました。しばらくしてからお試しください。"
 }

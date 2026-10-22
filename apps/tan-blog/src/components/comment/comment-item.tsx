@@ -17,15 +17,39 @@ import {
   ChevronUpIcon,
   ExternalLinkIcon,
   MapPinIcon,
+  EllipsisIcon,
+  PinIcon,
+  PinOffIcon,
+  EyeOffIcon,
+  EyeIcon,
+  Trash2Icon,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 import { cn } from '@/lib/utils'
-import type { Comment } from '@/types/comment'
+import type { Comment, CommentAction } from '@/types/comment'
+import { hasPinned } from '@/utils/comment'
 import type { CommentFormValues } from '@/schemas/comment'
 import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@sao-blog/ui/components/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@sao-blog/ui/components/alert-dialog'
 import { CommentMarkdownRenderer } from './comment-markdown-renderer'
 import { CommentForm, type CommentGuardFields } from './comment-form'
 import { dayjsLocale } from '@/lib/date-locale'
@@ -40,6 +64,8 @@ interface CommentItemProps {
   depth?: number
   isAuthenticated?: boolean
   currentUserId?: string
+  isAdmin?: boolean
+  onAction: (commentId: string, action: CommentAction) => Promise<void>
   userName?: string
   userImage?: string | null
 }
@@ -136,11 +162,14 @@ export function CommentItem({
   depth = 0,
   isAuthenticated = false,
   currentUserId,
+  isAdmin = false,
+  onAction,
   userName,
   userImage,
 }: CommentItemProps) {
   const [showReplies, setShowReplies] = useState(
-    () => comment.replies.length <= AUTO_EXPAND_REPLIES
+    // 串裡有置頂回覆時也直接展開，不然置頂等於沒作用
+    () => comment.replies.length <= AUTO_EXPAND_REPLIES || comment.replies.some(hasPinned)
   )
   const [showReplyForm, setShowReplyForm] = useState(false)
 
@@ -151,6 +180,9 @@ export function CommentItem({
   // 只有頂層的自己留言靠右；回覆串裡一律靠左，彎折線才接得上
   const alignRight = isMine && !isReply
   const created = dayjs(comment.createdAt)
+  // 站長可管理所有留言；一般人只能刪自己還沒刪掉的留言
+  const canManage = isAdmin || (isMine && !comment.deleted)
+  const canInteract = !comment.deleted
 
   /** 處理回覆送出 */
   const handleReply = useCallback(
@@ -202,6 +234,10 @@ export function CommentItem({
           >
             <span className="text-sm font-medium text-foreground">{comment.displayUsername}</span>
 
+            {comment.isAuthor && (
+              <span className="comment-seal comment-seal-sm comment-seal-flat">{m.comment_author()}</span>
+            )}
+
             {isMine && (
               <span className="rounded-full bg-ink-soft px-1.5 py-px text-[0.65rem] text-ink">
                 {m.comment_you()}
@@ -245,6 +281,8 @@ export function CommentItem({
             className={cn(
               'comment-bubble max-w-full px-4 pt-3 pb-4',
               comment.pending && 'opacity-75',
+              // 置頂印章壓在氣泡右上角，往下讓出空間才不會蓋到上面的名字和時間
+              comment.pin && 'mt-2.5',
               isReply && 'px-3.5 pt-2.5 pb-3.5'
             )}
           >
@@ -258,41 +296,57 @@ export function CommentItem({
                 {m.comment_pinned()}
               </span>
             )}
-            <CommentMarkdownRenderer content={comment.content} />
+            {comment.deleted ? (
+              <p className="text-sm text-muted-foreground italic">{m.comment_deleted()}</p>
+            ) : (
+              <CommentMarkdownRenderer content={comment.content} />
+            )}
           </div>
 
           {/* 操作膠囊：貼在氣泡下緣 */}
-          <div
-            className={cn(
-              'relative z-10 -mt-3 flex items-center gap-0.5 rounded-full border border-border bg-background p-0.5 shadow-sm',
-              alignRight ? 'mr-3' : 'ml-3'
-            )}
-          >
-            <PillButton
-              active={comment.liked}
-              onClick={() => onLike(comment.id)}
-              aria-label={m.comment_like()}
-              aria-pressed={comment.liked}
+          {(canInteract || canManage) && (
+            <div
+              className={cn(
+                'relative z-10 -mt-3 flex items-center gap-0.5 rounded-full border border-border bg-background p-0.5 shadow-sm',
+                alignRight ? 'mr-3' : 'ml-3'
+              )}
             >
-              <HeartIcon
-                key={String(comment.liked)}
-                className={cn('size-3.5', comment.liked && 'comment-like-pop fill-current')}
-              />
-              {comment.likes > 0 && <span className="tabular-nums">{comment.likes}</span>}
-            </PillButton>
+              {canInteract && (
+                <PillButton
+                  active={comment.liked}
+                  onClick={() => onLike(comment.id)}
+                  aria-label={m.comment_like()}
+                  aria-pressed={comment.liked}
+                >
+                  <HeartIcon
+                    key={String(comment.liked)}
+                    className={cn('size-3.5', comment.liked && 'comment-like-pop fill-current')}
+                  />
+                  {comment.likes > 0 && <span className="tabular-nums">{comment.likes}</span>}
+                </PillButton>
+              )}
 
-            {/* 回覆按鈕（需登入且限制巢狀深度） */}
-            {isAuthenticated && depth < MAX_DEPTH && (
-              <PillButton
-                active={showReplyForm}
-                onClick={() => setShowReplyForm((prev) => !prev)}
-                aria-expanded={showReplyForm}
-              >
-                <ReplyIcon className="size-3.5" />
-                {m.comment_reply()}
-              </PillButton>
-            )}
-          </div>
+              {/* 回覆按鈕（需登入且限制巢狀深度） */}
+              {canInteract && isAuthenticated && depth < MAX_DEPTH && (
+                <PillButton
+                  active={showReplyForm}
+                  onClick={() => setShowReplyForm((prev) => !prev)}
+                  aria-expanded={showReplyForm}
+                >
+                  <ReplyIcon className="size-3.5" />
+                  {m.comment_reply()}
+                </PillButton>
+              )}
+
+              {canManage && (
+                <CommentActionsMenu
+                  comment={comment}
+                  isAdmin={isAdmin}
+                  onAction={(action) => onAction(comment.id, action)}
+                />
+              )}
+            </div>
+          )}
 
           {/* 回覆表單 */}
           <AnimatePresence initial={false}>
@@ -364,6 +418,8 @@ export function CommentItem({
                     depth={depth + 1}
                     isAuthenticated={isAuthenticated}
                     currentUserId={currentUserId}
+                    isAdmin={isAdmin}
+                    onAction={onAction}
                     userName={userName}
                     userImage={userImage}
                   />
@@ -387,5 +443,86 @@ export function CommentItem({
         )}
       </AnimatePresence>
     </motion.article>
+  )
+}
+
+/**
+ * 「⋯」管理選單：站長可置頂／隱藏／永久刪除，一般人只能刪自己的留言。
+ * 刪除一律先跳確認框。
+ */
+function CommentActionsMenu({
+  comment,
+  isAdmin,
+  onAction,
+}: {
+  comment: Comment
+  isAdmin: boolean
+  onAction: (action: CommentAction) => Promise<void>
+}) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  const run = async (action: CommentAction) => {
+    setBusy(true)
+    try {
+      await onAction(action)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={<PillButton aria-label={m.comment_more_actions()} disabled={busy} />}
+        >
+          <EllipsisIcon className="size-3.5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-36">
+          {isAdmin && (
+            <>
+              <DropdownMenuItem onClick={() => run({ type: 'pin', value: !comment.pin })}>
+                {comment.pin ? <PinOffIcon /> : <PinIcon />}
+                {comment.pin ? m.comment_unpin() : m.comment_pin()}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => run({ type: 'hide', value: !comment.deleted })}>
+                {comment.deleted ? <EyeIcon /> : <EyeOffIcon />}
+                {comment.deleted ? m.comment_restore() : m.comment_hide()}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
+            <Trash2Icon />
+            {isAdmin ? m.comment_delete_forever() : m.comment_delete()}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{m.comment_delete_confirm_title()}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isAdmin ? m.comment_delete_forever_description() : m.comment_delete_confirm_description()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{m.comment_cancel()}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={busy}
+              onClick={async () => {
+                await run({ type: 'delete' })
+                setConfirmOpen(false)
+              }}
+            >
+              {isAdmin ? m.comment_delete_forever() : m.comment_delete()}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

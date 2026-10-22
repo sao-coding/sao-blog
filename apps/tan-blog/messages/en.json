@@ -208,5 +208,19 @@
   "accordion_expand_all": "Expand all",
   "accordion_collapse_all": "Collapse all",
   "faq_q": "Q",
-  "faq_a": "A"
+  "faq_a": "A",
+  "comment_author": "Author",
+  "comment_more_actions": "More actions",
+  "comment_pin": "Pin",
+  "comment_unpin": "Unpin",
+  "comment_hide": "Hide",
+  "comment_restore": "Restore",
+  "comment_delete": "Delete",
+  "comment_delete_forever": "Delete permanently",
+  "comment_delete_confirm_title": "Delete this comment?",
+  "comment_delete_confirm_description": "Others will see \"This comment was deleted\". This can't be undone.",
+  "comment_delete_forever_description": "The comment and its replies will be permanently removed from the database. This can't be undone.",
+  "comment_deleted": "This comment was deleted",
+  "comment_action_done": "Updated",
+  "comment_action_failed": "Something went wrong. Please try again later."
 }

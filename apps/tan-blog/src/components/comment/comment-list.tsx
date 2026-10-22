@@ -3,10 +3,11 @@
 import { useMemo } from 'react'
 import { MessagesSquareIcon } from 'lucide-react'
 
-import type { Comment, CommentSortOrder } from '@/types/comment'
+import type { Comment, CommentAction, CommentSortOrder } from '@/types/comment'
 import type { CommentFormValues } from '@/schemas/comment'
 import type { CommentGuardFields } from './comment-form'
 import { cn } from '@/lib/utils'
+import { hasPinned } from '@/utils/comment'
 import { CommentItem } from './comment-item'
 import { m } from '#/paraglide/messages'
 
@@ -17,6 +18,8 @@ interface CommentListProps {
   onReply: (parentId: string, data: CommentFormValues, guard: CommentGuardFields) => Promise<boolean>
   isAuthenticated?: boolean
   currentUserId?: string
+  isAdmin?: boolean
+  onAction: (commentId: string, action: CommentAction) => Promise<void>
   userName?: string
   userImage?: string | null
 }
@@ -28,13 +31,16 @@ export function CommentList({
   onReply,
   isAuthenticated = false,
   currentUserId,
+  isAdmin = false,
+  onAction,
   userName,
   userImage,
 }: CommentListProps) {
-  // 置頂留言永遠排最前，其餘依時間排序
+  // 置頂留言（或串裡有置頂回覆的留言）永遠排最前，其餘依時間排序
   const sortedComments = useMemo(() => {
     return [...comments].sort((a, b) => {
-      if (a.pin !== b.pin) return a.pin ? -1 : 1
+      const pa = hasPinned(a)
+      if (pa !== hasPinned(b)) return pa ? -1 : 1
       const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       return sortOrder === 'newest' ? -diff : diff
     })
@@ -61,6 +67,8 @@ export function CommentList({
             onReply={onReply}
             isAuthenticated={isAuthenticated}
             currentUserId={currentUserId}
+            isAdmin={isAdmin}
+            onAction={onAction}
             userName={userName}
             userImage={userImage}
           />

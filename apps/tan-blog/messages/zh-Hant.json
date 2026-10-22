@@ -208,5 +208,19 @@
   "accordion_expand_all": "全部展開",
   "accordion_collapse_all": "全部收合",
   "faq_q": "問",
-  "faq_a": "答"
+  "faq_a": "答",
+  "comment_author": "作者",
+  "comment_more_actions": "更多操作",
+  "comment_pin": "置頂",
+  "comment_unpin": "取消置頂",
+  "comment_hide": "隱藏",
+  "comment_restore": "還原",
+  "comment_delete": "刪除",
+  "comment_delete_forever": "永久刪除",
+  "comment_delete_confirm_title": "刪除這則留言？",
+  "comment_delete_confirm_description": "刪除後其他人會看到「此留言已刪除」，無法復原。",
+  "comment_delete_forever_description": "留言會從資料庫永久移除，底下的回覆也會一起消失，無法復原。",
+  "comment_deleted": "此留言已刪除",
+  "comment_action_done": "已更新",
+  "comment_action_failed": "操作失敗，請稍後再試"
 }
