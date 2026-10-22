@@ -178,8 +178,6 @@ export function CommentItem({
   const websiteHref = safeWebsite(comment.website)
   const isMine = !!currentUserId && comment.userId === currentUserId
   const isReply = depth > 0
-  // 只有頂層的自己留言靠右；回覆串裡一律靠左，彎折線才接得上
-  const alignRight = isMine && !isReply
   const created = siteTime(comment.createdAt)
   // 站長可管理所有留言；一般人只能刪自己還沒刪掉的留言
   const canManage = isAdmin || (isMine && !comment.deleted)
@@ -211,27 +209,21 @@ export function CommentItem({
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
     >
-      <div className={cn('flex items-start gap-3', alignRight && 'flex-row-reverse')}>
+      <div className="flex items-start gap-3">
         {/* 頭像下方的直線，往下接到回覆串的彎折線 */}
         <div className="flex flex-col items-center self-stretch">
           <CommentAvatar comment={comment} small={isReply} />
-          {showReplies && hasReplies && !alignRight && (
+          {showReplies && hasReplies && (
             <span aria-hidden className="comment-rail mt-1 flex-1" />
           )}
         </div>
 
         <div
-          className={cn(
-            'flex min-w-0 max-w-[min(100%,40rem)] flex-1 flex-col',
-            alignRight ? 'items-end' : 'items-start'
-          )}
+          className="flex min-w-0 max-w-[min(100%,40rem)] flex-1 flex-col items-start"
         >
           {/* 使用者資訊列 */}
           <div
-            className={cn(
-              'mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 px-1 text-xs text-muted-foreground',
-              alignRight && 'flex-row-reverse'
-            )}
+            className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 px-1 text-xs text-muted-foreground"
           >
             <span className="text-sm font-medium text-foreground">{comment.displayUsername}</span>
 
@@ -277,7 +269,7 @@ export function CommentItem({
 
           {/* 氣泡本體 */}
           <div
-            data-side={alignRight ? 'right' : 'left'}
+            data-side="left"
             data-mine={isMine || undefined}
             className={cn(
               'comment-bubble max-w-full px-4 pt-3 pb-4',
@@ -289,10 +281,7 @@ export function CommentItem({
           >
             {comment.pin && (
               <span
-                className={cn(
-                  'comment-seal comment-seal-sm absolute -top-2.5 bg-background',
-                  alignRight ? '-left-2' : '-right-2'
-                )}
+                className="comment-seal comment-seal-sm absolute -top-2.5 -right-2 bg-background"
               >
                 {m.comment_pinned()}
               </span>
@@ -307,10 +296,7 @@ export function CommentItem({
           {/* 操作膠囊：貼在氣泡下緣 */}
           {(canInteract || canManage) && (
             <div
-              className={cn(
-                'relative z-10 -mt-3 flex items-center gap-0.5 rounded-full border border-border bg-background p-0.5 shadow-sm',
-                alignRight ? 'mr-3' : 'ml-3'
-              )}
+              className="relative z-10 -mt-3 ml-3 flex items-center gap-0.5 rounded-full border border-border bg-background p-0.5 shadow-sm"
             >
               {canInteract && (
                 <PillButton

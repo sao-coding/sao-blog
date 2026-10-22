@@ -146,7 +146,7 @@ export function CommentForm({
       </Avatar>
 
       <div
-        data-side={compact ? 'left' : 'right'}
+        data-side="left"
         data-mine
         className="comment-bubble min-w-0 flex-1 p-1.5 transition-shadow focus-within:ring-2 focus-within:ring-ink/30"
       >

@@ -1343,10 +1343,6 @@
 .comment-bubble[data-side='left'] {
   border-top-left-radius: 0.25rem;
 }
-.comment-bubble[data-side='right'] {
-  border-top-right-radius: 0.25rem;
-}
-.comment-bubble[data-side='right'],
 .comment-bubble[data-mine] {
   background: color-mix(in oklch, var(--ink) 9%, var(--card));
   box-shadow:

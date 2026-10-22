@@ -244,7 +244,7 @@ function CommentLoginOverlay({ pathname }: { pathname: string }) {
       </div>
 
       <div
-        data-side="right"
+        data-mine
         className="comment-bubble flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="space-y-1">
