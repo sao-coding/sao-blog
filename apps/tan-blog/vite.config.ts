@@ -19,6 +19,8 @@ export default defineConfig({
       strategy: ['url', 'baseLocale'],
     }),
     nitro({
+      // 靜態資源預先產生 .gz / .br，node 部署（與本機跑正式 build 量 Lighthouse）時直接送壓縮檔；Vercel 本身就會壓縮
+      compressPublicAssets: true,
       // @excalidraw 只在瀏覽器端 useEffect 內動態 import。打包進 server 時，Nitro 會把它與
       // Radix Dialog 共用的依賴（react-remove-scroll 等）合進同一個 chunk，SSR 一載入就執行到
       // 頂層的 `window` 而丟 ReferenceError，所以不打包進 server。

@@ -47,7 +47,7 @@ const Welcome = () => {
                   animate={{ opacity: 1, y: [20, -15, 0] }}
                   transition={{ delay: 3 + index * 0.2, duration: 0.6 }}
                 >
-                  <a href={social.link} target="_blank" rel="noopener noreferrer">
+                  <a href={social.link} target="_blank" rel="noopener noreferrer" aria-label={social.name}>
                     <social.icon
                       className={cx(
                         'h-9 w-9 rounded-full stroke-2 p-1',
@@ -65,10 +65,13 @@ const Welcome = () => {
           <div className="moon-avatar">
             <img
               className="size-44 rounded-full lg:size-60"
-              src="/img/avatar.jpg"
+              src="/img/avatar.webp"
+              width={480}
+              height={480}
               alt=""
-              loading="lazy"
-              decoding="async"
+              // 首屏最大的元素（LCP），要一開始就以高優先度下載，不能 lazy
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
         </div>

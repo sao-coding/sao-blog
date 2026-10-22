@@ -28,6 +28,6 @@ export const MORE_LINKS: MegaMenuLink[] = [
 export const SITE_OWNER = {
   name: '唯一',
   status: '在線',
-  avatar: '/img/avatar.jpg',
+  avatar: '/img/avatar-96.webp',
   fallback: '唯',
 } as const

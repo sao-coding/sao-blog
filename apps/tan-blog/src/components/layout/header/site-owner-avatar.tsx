@@ -5,7 +5,7 @@ const SiteOwnerAvatar = () => {
   return (
     <Link to="/" aria-label="回到首頁">
       <Avatar className="size-10">
-        <AvatarImage src="/img/avatar.jpg" />
+        <AvatarImage src="/img/avatar-96.webp" />
         <AvatarFallback>唯</AvatarFallback>
       </Avatar>
     </Link>

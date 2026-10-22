@@ -733,6 +733,11 @@
     0 0 40px 6px color-mix(in oklch, var(--pri) 30%, transparent);
 }
 
+/* 載入完、主執行緒空下來才動（InkLandscape 加上 .is-live），不跟首屏渲染搶 CPU */
+.ink-landscape:not(.is-live) :is(.ink-star-twinkle, .ink-mist, .ink-lantern) {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ink-star-twinkle,
   .ink-mist,

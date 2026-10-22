@@ -116,6 +116,8 @@ export function getNavLinks(): NavLinks {
 // 社交link
 
 type SocialLinks = {
+  // 只有圖示的連結需要可讀名稱（螢幕閱讀器、Lighthouse link-name）
+  name: string
   icon: Icon
   link: string
   color: string
@@ -123,31 +125,37 @@ type SocialLinks = {
 
 export const SOCIAL_LINKS: SocialLinks = [
   {
+    name: 'GitHub',
     icon: IconBrandGithub,
     link: 'https://github.com/sao-coding',
     color: 'bg-gray-900',
   },
   {
+    name: 'Facebook',
     icon: IconBrandFacebook,
     link: 'https://www.facebook.com/Black.HANK.X',
     color: 'bg-blue-700',
   },
   {
+    name: 'LINE',
     icon: IconBrandLine,
     link: 'https://line.me/ti/p/t7Fr6CQFLi',
     color: 'bg-green-700',
   },
   {
+    name: 'Instagram',
     icon: IconBrandInstagram,
     link: 'https://www.instagram.com/_xox._.xox._.xox._.xox._.xox_',
     color: 'bg-pink-700',
   },
   {
+    name: 'Threads',
     icon: IconBrandThreads,
     link: 'https://www.threads.net/@_xox._.xox._.xox._.xox._.xox_',
     color: 'bg-black',
   },
   {
+    name: 'X',
     icon: IconBrandX,
     link: 'https://twitter.com/sao_coding',
     color: 'bg-gray-800',

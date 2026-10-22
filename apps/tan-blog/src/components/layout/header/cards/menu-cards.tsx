@@ -133,6 +133,7 @@ const HomeCard = ({
               href={social.link}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label={social.name}
               className="text-muted-foreground transition-colors hover:text-ink"
             >
               <social.icon size={18} />

@@ -19,6 +19,7 @@ import { SITE_OWNER } from '@/config/mega-menu'
 import { IconBrandGithub, IconBrandGoogle, IconUserBolt } from '@tabler/icons-react'
 import { authClient } from "@/lib/auth-client"
 import { useLocation } from "@tanstack/react-router"
+import { m } from '#/paraglide/messages'
 
 
 const UserButton = () => {
@@ -70,7 +71,7 @@ const UserButton = () => {
       ) : (
         <>
           <DialogTrigger render={
-            <Button variant="outline" size="icon-lg" className="rounded-full size-10">
+            <Button variant="outline" size="icon-lg" className="rounded-full size-10" aria-label={m.reader_login()}>
               <IconUserBolt className='size-6 cursor-pointer' />
             </Button>
           } />
@@ -85,10 +86,10 @@ const UserButton = () => {
           <div className="gap-4 flex flex-col items-center">
             登入到 唯一のBlog
             <div className="flex gap-4">
-              <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("github")}>
+              <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("github")} aria-label={m.login_github()}>
                 <IconBrandGithub className='size-6' />
               </Button>
-              <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("google")}>
+              <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("google")} aria-label={m.login_google()}>
                 <IconBrandGoogle className='size-6' />
               </Button>
             </div>

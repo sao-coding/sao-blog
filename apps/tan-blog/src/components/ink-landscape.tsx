@@ -1,4 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
+import { afterLoadIdle } from '@/lib/after-load'
 import { SeasonParticles } from '@/components/season-particles'
 
 // 首頁主視覺：夢州夜色的水墨山水。
@@ -82,6 +83,13 @@ const LANTERNS = (() => {
 
 export function InkLandscape() {
   const rootRef = useRef<HTMLDivElement>(null)
+
+  // 燈籠、霧、星星的 CSS 動畫先暫停，頁面載入完、主執行緒空下來才開始（見 styles.css 的 .is-live）
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    return afterLoadIdle(() => root.classList.add('is-live'))
+  }, [])
 
   // 捲動視差：只更新 CSS 變數，各層自己用 calc 算位移
   useEffect(() => {
