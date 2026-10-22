@@ -7,6 +7,7 @@ import {
   type TocItem,
 } from "@sao-blog/mdx";
 import { mdxToExcerpt } from "./mdx-to-text";
+import { resolveImageMeta } from "./image-meta";
 
 export const formatMdxErrors = (errors: CompileError[]) =>
   errors
@@ -51,7 +52,8 @@ export async function checkMdxForSave(
     summary,
   }: { profile: CompileProfile; publish: boolean; summary?: string | null },
 ): Promise<MdxCheck> {
-  const result = await compileMdx(content, { profile });
+  // 存檔的編譯結果帶圖片尺寸與模糊預覽（前台用來佔位）
+  const result = await compileMdx(content, { profile, imageMeta: resolveImageMeta });
   const hasSummary = !!summary && summary.trim() !== "";
 
   if (result.ok) {

@@ -19,6 +19,7 @@ import { VFile } from 'vfile'
 import { matter } from 'vfile-matter'
 import { DIAGRAM_LANGS, getLanguage, rehypeCodeHighlight } from './highlight'
 import { rehypeMermaid } from './mermaid'
+import { applyImageMeta, type ImageMetaResolver } from './image-meta'
 import { componentRegistry, isRegisteredComponent } from './registry'
 import { getMdxErrors, remarkSafeMdx } from './remark-safe-mdx'
 import {
@@ -104,11 +105,12 @@ export async function hashSource(source: string): Promise<string> {
  * registry 的節點轉換）都要遞增：已存的 compiled 會因 compiledHash 對不上而在下次讀取時重編。
  * 跟 COMPILED_VERSION 不同——那個是「產物格式」不相容時才遞增，renderer 會拒絕舊格式。
  *
+ * 5：圖片補上實際 width / height 與模糊預覽（只有傳入 imageMeta 時，見 image-meta.ts）
  * 4：mermaid 圖表在編譯時轉成 SVG（code 節點的 dataSvg）
  * 3：單行的區塊元件不再被 <p> 包住
  * 2：程式碼區塊支援 title="…" 與 // [!code ++] / [!code --] / [!code focus] / [!code highlight]
  */
-export const COMPILE_PIPELINE_VERSION = 4
+export const COMPILE_PIPELINE_VERSION = 5
 
 /** 存成 compiledHash 的值：原文＋管線版本。原文沒改但管線升版時也會變 */
 export function compiledHashOf(source: string): Promise<string> {
@@ -239,7 +241,14 @@ function toCompileError(err: unknown): CompileError {
  */
 export async function compileMdx(
   source: string,
-  { profile = 'post' }: { profile?: CompileProfile } = {}
+  {
+    profile = 'post',
+    imageMeta,
+  }: {
+    profile?: CompileProfile
+    /** 傳入時替圖片補上實際尺寸與模糊預覽；只有存檔（API）會傳，前台的備援編譯與編輯器預覽不傳 */
+    imageMeta?: ImageMetaResolver
+  } = {}
 ): Promise<CompileResult> {
   const [hash, compiledHash] = await Promise.all([hashSource(source), compiledHashOf(source)])
   const file = new VFile({ value: source })
@@ -264,6 +273,7 @@ export async function compileMdx(
     return { ok: false, errors }
   }
 
+  if (imageMeta) await applyImageMeta(tree, imageMeta)
   cleanTree(tree)
   const plainText = hastToPlainText(tree)
   const data = file.data as {

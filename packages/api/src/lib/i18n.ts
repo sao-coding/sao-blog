@@ -7,6 +7,7 @@ import {
 import { compileMdx, compiledHashOf, type CompileProfile, type CompiledContent, type TocItem } from "@sao-blog/mdx";
 import { and, eq, inArray, or } from "drizzle-orm";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "../schema/i18n";
+import { resolveImageMeta } from "./image-meta";
 
 // 公開 API 的多語言讀取：沿用各 router 既有的查詢（主表），再把選中的語言版本疊上去。
 //
@@ -208,7 +209,7 @@ export async function ensureCompiled(type: "post" | "note", translationId: strin
   }
 
   const profile: CompileProfile = type;
-  const result = await compileMdx(row.content, { profile });
+  const result = await compileMdx(row.content, { profile, imageMeta: resolveImageMeta });
   if (!result.ok) return null;
 
   await db

@@ -15,3 +15,4 @@ export {
   type MdxComponentName,
 } from './registry'
 export * from './types'
+export type { ImageMeta, ImageMetaResolver } from './image-meta'

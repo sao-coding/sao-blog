@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils'
 import { m } from '#/paraglide/messages'
 import { Zoomable } from './zoomable'
 
-export type MdxImageProps = React.ImgHTMLAttributes<HTMLImageElement>
+// width / height / data-blur 由存檔時的編譯填入（@sao-blog/mdx 的 image-meta）：實際尺寸與 16px 模糊預覽
+export type MdxImageProps = React.ImgHTMLAttributes<HTMLImageElement> & { 'data-blur'?: string }
 
 type Status = 'loading' | 'loaded' | 'error'
 
@@ -33,7 +34,16 @@ const parseTitle = (title?: string): { variant: FrameVariant; title?: string } =
   return FRAME_VARIANTS.includes(v as never) ? { variant: v as FrameVariant } : { variant: 'plain', title }
 }
 
-export const MdxImage = ({ src, alt, title: rawTitle, className, ...props }: MdxImageProps) => {
+export const MdxImage = ({
+  src,
+  alt,
+  title: rawTitle,
+  className,
+  width,
+  height,
+  'data-blur': blur,
+  ...props
+}: MdxImageProps) => {
   const ref = useRef<HTMLImageElement>(null)
   const [status, setStatus] = useState<Status>('loading')
   const { text, label, showCaption } = parseAlt(alt)
@@ -61,7 +71,13 @@ export const MdxImage = ({ src, alt, title: rawTitle, className, ...props }: Mdx
       ) : (
         <Zoomable label={label} gallery>
           <span className="mdx-photo" data-variant={variant}>
-            <span className="mdx-image-frame" data-status={status}>
+            <span
+              className="mdx-image-frame"
+              data-status={status}
+              // 載入前墊模糊預覽；載完後由 CSS 拿掉背景
+              style={blur ? { backgroundImage: `url(${blur})` } : undefined}
+              data-blur={blur ? '' : undefined}
+            >
               <img
                 ref={ref}
                 src={src as string}
@@ -70,6 +86,10 @@ export const MdxImage = ({ src, alt, title: rawTitle, className, ...props }: Mdx
                 data-lightbox-label={label}
                 loading="lazy"
                 decoding="async"
+                width={width}
+                height={height}
+                // 有實際尺寸就照比例佔位（取代 CSS 預設的 16:9）
+                style={width && height ? { aspectRatio: `${width} / ${height}` } : undefined}
                 className={cn('mdx-image h-auto w-full', className)}
                 onLoad={() => setStatus('loaded')}
                 onError={() => setStatus('error')}
