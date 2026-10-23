@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { getSolarTerm, type Season } from '@/lib/season'
 import { ganzhiYear } from '@/lib/ganzhi'
-import { SITE_NAME } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { TERM_THEMES } from '@/lib/term-themes'
 
@@ -33,8 +32,8 @@ export function LetterPaper({
   )
 }
 
-// 署名與印文：取站名裡的漢字（「唯一のBlog」→「唯一」）
-const SIGNATURE = [...SITE_NAME].filter((ch) => /\p{Script=Han}/u.test(ch)).join('')
+// 署名與印文：作者名，不隨站名變動
+const SIGNATURE = '唯一'
 
 // 落款：「丙午年 寒露　唯一 書」＋ 朱印
 export function LetterSignature({ date, className }: { date: Date | string; className?: string }) {

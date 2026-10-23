@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/seo'
+import { siteDescription, siteName } from '@/lib/seo'
 import { ogImageResponse } from '@/lib/og/render-og-image'
 import { ogAvatarUrl } from '@/lib/og/og-url'
 
@@ -10,13 +10,13 @@ export const Route = createFileRoute('/og/')({
     handlers: {
       GET: ({ request }) => {
         const search = new URL(request.url).searchParams
-        const title = search.get('title')?.slice(0, 80) || SITE_NAME
-        const description = search.get('description')?.slice(0, 120) || SITE_DESCRIPTION
+        const title = search.get('title')?.slice(0, 80) || siteName()
+        const description = search.get('description')?.slice(0, 120) || siteDescription()
 
         return ogImageResponse({
           title,
           description,
-          eyebrow: title === SITE_NAME ? undefined : SITE_NAME,
+          eyebrow: undefined,
           avatarUrl: ogAvatarUrl(request),
         })
       },

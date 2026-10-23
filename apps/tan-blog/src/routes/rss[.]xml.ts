@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from '@sao-blog/env/tan-blog'
 import { client } from '@/lib/orpc'
-import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/seo'
+import { siteDescription, siteName } from '@/lib/seo'
+import { postOgImagePath } from '@/lib/og/og-url'
 
 const RSS_ITEM_LIMIT = 20
 
@@ -34,10 +35,12 @@ export const Route = createFileRoute('/rss.xml')({
         const body = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeXml(SITE_NAME)}</title>
+    <title>${escapeXml(siteName())}</title>
     <link>${siteUrl}</link>
-    <description>${escapeXml(SITE_DESCRIPTION)}</description>
+    <description>${escapeXml(siteDescription())}</description>
     <language>zh-TW</language>
+    <lastBuildDate>${(items[0]?.updatedAt ?? new Date()).toUTCString()}</lastBuildDate>
+    <generator>sao-blog (TanStack Start)</generator>
     <atom:link href="${toAbsolute('/rss.xml')}" rel="self" type="application/rss+xml" />
     ${items
       .map((post) => {
@@ -50,6 +53,8 @@ export const Route = createFileRoute('/rss.xml')({
       <pubDate>${post.createdAt.toUTCString()}</pubDate>
       <description>${escapeXml(post.summary ?? '')}</description>
       <category>${escapeXml(post.category.name)}</category>
+${post.tags.map((tag) => `      <category>${escapeXml(tag.name)}</category>
+`).join('')}      <enclosure url="${toAbsolute(postOgImagePath(post.slug))}" type="image/png" length="0" />
     </item>`
       })
       .join('')}

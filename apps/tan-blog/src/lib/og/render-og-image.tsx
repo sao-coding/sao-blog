@@ -1,6 +1,6 @@
 import { render } from 'takumi-js'
 import { Renderer } from 'takumi-js/node'
-import { SITE_NAME } from '@/lib/seo'
+import { siteName } from '@/lib/seo'
 
 // 動態 OG 圖（1200×630 PNG）：takumi（Rust 原生渲染器）把 JSX 直接繪成 PNG。
 // 只在 server route（src/routes/og/*）裡呼叫，不會進 client bundle。
@@ -24,7 +24,7 @@ export interface OgImageInput {
 // 字形子集（通常幾十 KB），並以「字重 + 文字」為 key 做記憶體快取。
 // 不帶瀏覽器 UA 請求時 Google 會回 truetype。
 const fontCache = new Map<string, Promise<ArrayBuffer>>()
-const FONT_FAMILY = 'Noto Sans TC'
+const FONT_FAMILY = 'LXGW WenKai TC'
 
 async function fetchFont(weight: number, text: string): Promise<ArrayBuffer> {
   const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(FONT_FAMILY)}:wght@${weight}&text=${encodeURIComponent(text)}`
@@ -62,7 +62,14 @@ function clamp(text: string, max: number) {
 }
 
 // ── 版面 ────────────────────────────────────────────────────────────────────
+// 「宣紙 + 朱印」：與站內預設的淺色宣紙主題、文楷字體一致。
 // 版面一律用明確的 flex 排版（與 next/og 寫法相容）。
+const PAPER = '#f3ede0'
+const INK = '#221d17'
+const INK_SOFT = '#6f665a'
+const ZHU = '#b8372e' // 朱砂
+const SEAL_CHAR = '影'
+
 function OgCard({ title, description, eyebrow, meta, avatarUrl }: OgImageInput) {
   return (
     <div
@@ -70,70 +77,105 @@ function OgCard({ title, description, eyebrow, meta, avatarUrl }: OgImageInput) 
         width: '100%',
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        padding: '72px 80px',
-        color: '#f4f4f5',
-        backgroundColor: '#09090b',
+        padding: 28,
+        backgroundColor: PAPER,
+        // 右上一輪淡日、左下一抹遠山的暈染
         backgroundImage:
-          'radial-gradient(circle at 85% 15%, rgba(79,184,178,0.35), transparent 45%), radial-gradient(circle at 10% 95%, rgba(99,102,241,0.28), transparent 50%)',
+          'radial-gradient(circle at 88% 18%, rgba(184,55,46,0.16), transparent 30%), radial-gradient(ellipse at 8% 108%, rgba(34,29,23,0.14), transparent 48%)',
         fontFamily: FONT_FAMILY,
+        color: INK,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {eyebrow ? (
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '44px 56px 40px',
+          border: `2px solid ${INK}`,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 56,
+                height: 56,
+                borderRadius: 6,
+                backgroundColor: ZHU,
+                color: PAPER,
+                fontSize: 36,
+                fontWeight: 700,
+              }}
+            >
+              {SEAL_CHAR}
+            </div>
+            <div style={{ display: 'flex', fontSize: 30, fontWeight: 700 }}>{siteName()}</div>
+          </div>
+          {eyebrow ? (
+            <div
+              style={{
+                display: 'flex',
+                padding: '6px 20px',
+                fontSize: 24,
+                color: ZHU,
+                border: `2px solid ${ZHU}`,
+                borderRadius: 9999,
+              }}
+            >
+              {eyebrow}
+            </div>
+          ) : null}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <div
             style={{
               display: 'flex',
-              fontSize: 28,
-              fontWeight: 400,
-              color: '#4fb8b2',
-              letterSpacing: 2,
+              fontSize: title.length > 24 ? 62 : 76,
+              fontWeight: 700,
+              lineHeight: 1.25,
             }}
           >
-            {eyebrow}
+            {title}
           </div>
-        ) : null}
+          {description ? (
+            <div
+              style={{
+                display: 'flex',
+                fontSize: 30,
+                lineHeight: 1.55,
+                color: INK_SOFT,
+              }}
+            >
+              {description}
+            </div>
+          ) : null}
+        </div>
+
         <div
           style={{
             display: 'flex',
-            fontSize: title.length > 24 ? 60 : 72,
-            fontWeight: 700,
-            lineHeight: 1.25,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: 20,
+            borderTop: `1px solid rgba(34,29,23,0.25)`,
           }}
         >
-          {title}
-        </div>
-        {description ? (
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 30,
-              fontWeight: 400,
-              lineHeight: 1.5,
-              color: '#a1a1aa',
-            }}
-          >
-            {description}
+          <div style={{ display: 'flex', fontSize: 25, color: INK_SOFT }}>
+            {meta && meta.length > 0 ? meta.join('  ·  ') : ''}
           </div>
-        ) : null}
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <img
             src={avatarUrl}
-            width={64}
-            height={64}
-            style={{ borderRadius: 9999, border: '2px solid rgba(255,255,255,0.2)' }}
+            width={52}
+            height={52}
+            style={{ borderRadius: 9999, border: `2px solid ${INK}` }}
           />
-          <div style={{ display: 'flex', fontSize: 30, fontWeight: 700 }}>{SITE_NAME}</div>
         </div>
-        {meta && meta.length > 0 ? (
-          <div style={{ display: 'flex', fontSize: 24, fontWeight: 400, color: '#a1a1aa' }}>
-            {meta.join('  ·  ')}
-          </div>
-        ) : null}
       </div>
     </div>
   )
@@ -154,7 +196,7 @@ export async function renderOgImage(input: OgImageInput): Promise<Uint8Array> {
     ...(normalized.meta ?? []),
     '·…',
   ].join('')
-  const boldText = `${normalized.title}${SITE_NAME}`
+  const boldText = `${normalized.title}${siteName()}${SEAL_CHAR}`
 
   const [regular, bold] = await Promise.all([loadFont(400, regularText), loadFont(700, boldText)])
 

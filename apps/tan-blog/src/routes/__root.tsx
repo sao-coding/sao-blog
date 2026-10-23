@@ -17,7 +17,8 @@ import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
 
 import appCss from '../styles.css?url'
-import { SITE_DESCRIPTION, SITE_NAME } from '../lib/seo'
+import { RouteError } from '../components/route-error'
+import { siteDescription, siteName } from '../lib/seo'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -38,15 +39,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: SITE_NAME,
+        title: siteName(),
       },
       {
         name: 'description',
-        content: SITE_DESCRIPTION,
+        content: siteDescription(),
       },
       {
         property: 'og:site_name',
-        content: SITE_NAME,
+        content: siteName(),
       },
     ],
     links: [
@@ -66,13 +67,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'alternate',
         type: 'application/rss+xml',
-        title: SITE_NAME,
+        title: siteName(),
         href: '/rss.xml',
       },
     ],
     scripts: umamiScripts(),
   }),
   notFoundComponent: NotFound,
+  errorComponent: RouteError,
   shellComponent: RootDocument,
 })
 
