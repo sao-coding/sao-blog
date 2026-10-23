@@ -50,7 +50,7 @@ const Welcome = () => {
                   <a href={social.link} target="_blank" rel="noopener noreferrer" aria-label={social.name}>
                     <social.icon
                       className={cx(
-                        'h-9 w-9 rounded-full stroke-2 p-1',
+                        'h-9 w-9 rounded-full stroke-2 p-1 text-white',
                         social.color
                       )}
                     />
