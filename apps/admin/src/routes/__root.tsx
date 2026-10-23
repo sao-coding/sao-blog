@@ -31,13 +31,14 @@ export const Route = createRootRoute({
       )}`
 
       window.location.href = redirect
-      return
+      // 整頁即將跳轉：讓 beforeLoad 一直處於 pending，router 不會把後台畫面畫出來
+      return new Promise<never>(() => {})
     }
 
     // 已登入但權限不足或被封鎖 → 回首頁
     if (session.user.role === "user" || session.user.banned) {
       window.location.href = env.VITE_BLOG_URL
-      return
+      return new Promise<never>(() => {})
     }
 
     return { session }

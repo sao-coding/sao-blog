@@ -34,6 +34,11 @@ export const env = createEnv({
       .string()
       .optional()
       .transform((v) => (v ? v.split(",").map((s) => s.trim()).filter(Boolean) : [])),
+    // 不計入文章閱讀數的 IP（逗號分隔），例如站長家裡的固定 IP。已登入的管理員一律不計，不必列在這裡
+    VIEW_IGNORE_IPS: z
+      .string()
+      .optional()
+      .transform((v) => (v ? v.split(",").map((s) => s.trim()).filter(Boolean) : [])),
     // ── GeoLite2（IP 歸屬地）─────────────────────────────────────────────
     // https://www.maxmind.com 免費帳號 → Manage License Keys。沒設定時歸屬地一律空白
     MAXMIND_ACCOUNT_ID: z.string().min(1).optional(),

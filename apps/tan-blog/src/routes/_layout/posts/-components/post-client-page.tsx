@@ -9,6 +9,7 @@ import { CommentSection } from '@/components/comment'
 import { useAdminShortcutStore } from '@/store/admin-shortcut-store'
 import { WrittenOn } from '@/components/written-season'
 import { LetterPaper, LetterSignature } from '@/components/letter-paper'
+import { client } from '@/lib/orpc'
 
 type PostClientPageProps = {
   children: ReactNode
@@ -52,6 +53,28 @@ export function PostClientPage({
     return () => setOverridePath(null)
   }, [postId, setOverridePath])
 
+  // 閱讀數：捲到留言區才算「真的讀完」。詳情頁是 ISR 快取，不能在 loader 裡加，所以由 client 呼叫；
+  // 同一分頁同一篇只算一次。是否排除站長自己，由後端判斷（管理員登入狀態、VIEW_IGNORE_IPS）
+  const viewSentinelRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const el = viewSentinelRef.current
+    if (!el) return
+    const key = `viewed:${postId}`
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return
+      observer.disconnect()
+      try {
+        if (sessionStorage.getItem(key)) return
+        sessionStorage.setItem(key, '1')
+      } catch {
+        // 無痕模式等拿不到 sessionStorage：照算，頂多重複計
+      }
+      client.post.addView({ id: postId }).catch(() => {})
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [postId])
+
   return (
     // 比照 innei.in 文章頁：文章 920px ＋ 間距 16px ＋ 目錄 200px，整組 1136px 置中；lg 以下只留文章
     <div className="mx-auto mt-[120px] w-full max-w-[1136px] px-4 xl:px-0">
@@ -70,6 +93,7 @@ export function PostClientPage({
             </article>
             <LetterSignature date={writtenAt} />
           </LetterPaper>
+          <div ref={viewSentinelRef} aria-hidden />
           <CommentSection postId={postId} lazyLoad />
         </div>
         <div className="relative hidden lg:block">

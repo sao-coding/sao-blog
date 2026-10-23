@@ -6,6 +6,7 @@ import z from "zod";
 import { CommentsResponseSchema } from "@sao-blog/api/schema/comment";
 import { resolveIpLocation } from "@sao-blog/api/lib/geoip";
 import { guardComment, guardLike } from "@sao-blog/api/lib/comment-guard";
+import { syncPostCommentCounts } from "@sao-blog/api/lib/post-counters";
 
 /** 留言內容長度上限，避免儲存型 DoS */
 const MAX_COMMENT_LENGTH = 2000;
@@ -197,6 +198,7 @@ const createComment = protectedProcedure
         }).returning({ id: comments.id });
 
         const published = verdict.status === "approved";
+        if (published && type === "post") await syncPostCommentCounts([refId]);
         return {
             status: "success",
             message: published ? "留言已送出！" : "留言已送出，審核通過後就會顯示",
@@ -217,9 +219,12 @@ const deleteComment = publicProcedure
             return { status: "error", message: "未登入" }
         }
 
-        await db.update(comments)
+        const removed = await db.update(comments)
             .set({ deleted: true })
-            .where(and(eq(comments.id, input.id), eq(comments.userId, userId)));
+            .where(and(eq(comments.id, input.id), eq(comments.userId, userId)))
+            .returning({ refId: comments.refId, refType: comments.refType });
+        const gone = removed.filter((r) => r.refType === "post").map((r) => r.refId);
+        await syncPostCommentCounts(gone);
 
         return { status: "success", message: "留言刪除成功" }
     });

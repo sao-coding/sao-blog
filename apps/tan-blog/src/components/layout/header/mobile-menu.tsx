@@ -10,7 +10,7 @@ import {
 } from '@sao-blog/ui/components/drawer'
 import { getNavLinks } from '@/config/menu'
 import { orpc } from '@/lib/orpc'
-import { SITE_NAME } from '@/lib/seo'
+import { siteName } from '@/lib/seo'
 import { ChevronDownIcon, ChevronUpIcon, MenuIcon, SearchIcon, X } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { VisuallyHidden } from 'radix-ui'
@@ -66,7 +66,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                         className="text-base text-foreground/80"
                         style={{ fontFamily: "'Noto Serif JP', serif", letterSpacing: '0.18em' }}
                     >
-                        {SITE_NAME}
+                        {siteName()}
                     </span>
                     <div className="flex items-center gap-1">
                         {/* 手機版搜尋入口：先關閉選單再開啟搜尋對話框 */}

@@ -4,6 +4,7 @@ import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 import { commentBlocklist, comments } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { resolveIpLocation } from "@sao-blog/api/lib/geoip";
+import { syncPostCommentCountByComments, syncPostCommentCounts } from "@sao-blog/api/lib/post-counters";
 
 const STATUS = z.enum(["pending", "approved", "spam", "rejected"]);
 
@@ -82,6 +83,7 @@ const setCommentStatus = protectedProcedure
             })
             .where(inArray(comments.id, input.ids))
             .returning({ id: comments.id });
+        await syncPostCommentCountByComments(input.ids);
 
         const label = { pending: "退回待審", approved: "通過", spam: "標為垃圾", rejected: "拒絕" }[input.status];
         return { status: "success", message: `已${label} ${rows.length} 則留言`, data: { count: rows.length } };
@@ -123,6 +125,7 @@ const replyComment = protectedProcedure
             moderatedAt: new Date(),
             moderatedBy: me.id,
         }).returning();
+        await syncPostCommentCountByComments([parent.id]);
 
         return { status: "success", message: "已回覆", data: row };
     });
@@ -153,6 +156,7 @@ const blockFromComment = protectedProcedure
         await db.update(comments)
             .set({ status: "spam", flagReason: "blocked", moderatedAt: new Date(), moderatedBy: context.session.user.id })
             .where(eq(comments.id, comment.id));
+        await syncPostCommentCountByComments([comment.id, ...flagged.map((f) => f.id)]);
 
         return {
             status: "success",
@@ -176,6 +180,7 @@ const deleteComment = protectedProcedure
         if (!deleted) {
             return { status: "error", message: "留言不存在或刪除失敗", data: null }
         }
+        if (deleted.refType === "post") await syncPostCommentCounts([deleted.refId]);
         return { status: "success", message: "留言刪除成功", data: null }
     });
 
@@ -196,6 +201,7 @@ const setCommentDeleted = protectedProcedure
         if (!row) {
             return { status: "error", message: "留言不存在", data: null }
         }
+        await syncPostCommentCountByComments([row.id]);
         return { status: "success", message: input.deleted ? "留言已隱藏" : "留言已還原", data: row }
     });
 

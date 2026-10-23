@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { siteName } from "@/lib/seo"
 import {
   Dialog,
   DialogContent,
@@ -84,7 +85,7 @@ const UserButton = () => {
             <AvatarFallback>{SITE_OWNER.fallback}</AvatarFallback>
           </Avatar>
           <div className="gap-4 flex flex-col items-center">
-            登入到 唯一のBlog
+            登入到 {siteName()}
             <div className="flex gap-4">
               <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("github")} aria-label={m.login_github()}>
                 <IconBrandGithub className='size-6' />

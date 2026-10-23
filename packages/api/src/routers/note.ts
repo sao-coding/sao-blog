@@ -199,7 +199,7 @@ const getNoteIds = publicProcedure
     .route({ method: "GET", path: "/notes/ids" })
     .handler(async () => {
         const rows = await db
-            .select({ id: notes.id })
+            .select({ id: notes.id, updatedAt: notes.updatedAt })
             .from(notes)
             .where(eq(notes.status, true));
 

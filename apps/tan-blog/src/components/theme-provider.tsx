@@ -3,10 +3,10 @@ import { createContext, useContext, useEffect, useState } from 'react'
 export type Theme = 'light' | 'dark'
 
 const THEME_STORAGE_KEY = 'theme'
-// 預設「晝」（宣紙淺色），深色為「夜讀」模式
-const DEFAULT_THEME: Theme = 'light'
+// 預設「夜讀」（深色），訪客手動切到「晝」（宣紙淺色）後才記住
+const DEFAULT_THEME: Theme = 'dark'
 
-export const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('${THEME_STORAGE_KEY}');var theme=stored==='dark'?'dark':'${DEFAULT_THEME}';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(theme);root.style.colorScheme=theme;}catch(e){}})();`
+export const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('${THEME_STORAGE_KEY}');var theme=stored==='light'?'light':'${DEFAULT_THEME}';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(theme);root.style.colorScheme=theme;}catch(e){}})();`
 
 interface ThemeProviderState {
   theme: Theme
@@ -21,7 +21,7 @@ const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return DEFAULT_THEME
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
-  return stored === 'dark' ? 'dark' : DEFAULT_THEME
+  return stored === 'light' ? 'light' : DEFAULT_THEME
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

@@ -2,8 +2,26 @@ import { env } from '@sao-blog/env/tan-blog'
 import { deLocalizeHref, getLocale, locales, localizeHref, type Locale } from '#/paraglide/runtime'
 import { pageOgImagePath } from '@/lib/og/og-url'
 
-export const SITE_NAME = '唯一のBlog'
-export const SITE_DESCRIPTION = '這雖然是遊戲，但可不是鬧著玩的'
+// 站名 / 敘述依 UI 語系輸出（中日同名「影の書庫」，英文 Shadow Archive Online）。
+// 非請求情境（無 locale 可取）用 SITE_NAME / SITE_DESCRIPTION 的 zh-Hant 預設。
+const SITE_NAMES: Record<Locale, string> = {
+  'zh-Hant': '影の書庫',
+  ja: '影の書庫',
+  en: 'Shadow Archive Online',
+}
+const SITE_DESCRIPTIONS: Record<Locale, string> = {
+  'zh-Hant': '潛伏於陰影中的書庫，收藏著程式、技術與日常的筆記。',
+  en: 'A quiet archive hidden in the shadows — notes on code, tech, and everyday life.',
+  ja: '影に潜む書庫。コード、技術、そして日々の記録。',
+}
+export const SITE_NAME = SITE_NAMES['zh-Hant']
+export const SITE_DESCRIPTION = SITE_DESCRIPTIONS['zh-Hant']
+export const siteName = () => SITE_NAMES[getLocale()] ?? SITE_NAME
+export const siteDescription = () => SITE_DESCRIPTIONS[getLocale()] ?? SITE_DESCRIPTION
+// 首頁 <title>：「影の書庫 · Shadow Archive Online」；其他頁「頁面標題 | 站名」
+export const HOME_TITLE = `${SITE_NAMES['zh-Hant']} · ${SITE_NAMES.en}`
+export const titleWithSite = (title: string) =>
+  title === siteName() || title === HOME_TITLE ? title : `${title} | ${siteName()}`
 export const SITE_LOCALE = 'zh_TW'
 const OG_LOCALE: Record<string, string> = { 'zh-Hant': 'zh_TW', en: 'en_US', ja: 'ja_JP' }
 // pageHead() 未指定 image 時改用動態 OG 圖（src/routes/og/*）；這張大頭貼只剩
@@ -60,7 +78,7 @@ function localeAlternateLinks(path: string, only: readonly Locale[] = locales) {
 
 export function pageHead({
   title,
-  description = SITE_DESCRIPTION,
+  description = siteDescription(),
   path,
   type = 'website',
   image,
@@ -84,17 +102,17 @@ export function pageHead({
   const imageUrl = absoluteUrl(image ?? pageOgImagePath(title, description))
 
   const meta = [
-    { title },
+    { title: titleWithSite(title) },
     { name: 'description', content: description },
-    { property: 'og:site_name', content: SITE_NAME },
+    { property: 'og:site_name', content: siteName() },
     { property: 'og:type', content: type },
-    { property: 'og:title', content: title },
+    { property: 'og:title', content: titleWithSite(title) },
     { property: 'og:description', content: description },
     { property: 'og:url', content: url },
     { property: 'og:image', content: imageUrl },
     { property: 'og:locale', content: OG_LOCALE[current] ?? SITE_LOCALE },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: title },
+    { name: 'twitter:title', content: titleWithSite(title) },
     { name: 'twitter:description', content: description },
     { name: 'twitter:image', content: imageUrl },
   ]
@@ -175,7 +193,7 @@ export function blogPostingJsonLd({
     author: authorName ? { '@type': 'Person', name: authorName } : undefined,
     publisher: {
       '@type': 'Organization',
-      name: SITE_NAME,
+      name: siteName(),
     },
   })
 }
@@ -184,7 +202,7 @@ export function websiteJsonLd() {
   return jsonLdScript({
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: SITE_NAME,
+    name: siteName(),
     url: absoluteUrl('/'),
     potentialAction: {
       '@type': 'SearchAction',

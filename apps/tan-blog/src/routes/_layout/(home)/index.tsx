@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { orpc } from '@/lib/orpc'
-import { pageHead, websiteJsonLd } from '@/lib/seo'
-import { m } from '#/paraglide/messages'
+import { HOME_TITLE, pageHead, websiteJsonLd } from '@/lib/seo'
 import Welcome from './-components/welcome'
 import { InkLandscape } from '@/components/ink-landscape'
 import { HomeEditorial } from './-components/home-editorial'
@@ -19,7 +18,7 @@ export const Route = createFileRoute('/_layout/(home)/')({
     return res
   },
   head: () => ({
-    ...pageHead({ title: m.page_home_title(), path: '/' }),
+    ...pageHead({ title: HOME_TITLE, path: '/' }),
     scripts: [websiteJsonLd()],
   }),
   headers: () => ({

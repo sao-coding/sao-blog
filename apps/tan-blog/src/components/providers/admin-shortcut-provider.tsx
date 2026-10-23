@@ -38,7 +38,14 @@ export function AdminShortcutProvider({ children }: { children: ReactNode }) {
         return
       }
       if (e.key === '.') {
-        navigate({ to: '/login', search: { redirect: redirectPath ?? undefined } })
+        // /admin 是代理到後台的另一個 app，不在本站 router 內：
+        // 已登入時 /login 會 redirect 到 /admin/...，若走 client 導覽會被本站 router 判成 404，
+        // 所以整頁重載，交給伺服器端 redirect 與代理處理
+        navigate({
+          to: '/login',
+          search: { redirect: redirectPath ?? undefined },
+          reloadDocument: true,
+        })
       }
     }
 

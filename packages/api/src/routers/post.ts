@@ -3,9 +3,10 @@ import { db } from "@sao-blog/db";
 import { posts, categories, postTags, tags, user } from "@sao-blog/db/schema/index";
 import { type TagModel } from "@sao-blog/db/schema/index";
 import { PostResponseSchema, PostsResponseSchema } from "../schema/post";
-import { eq, inArray, desc, and } from "drizzle-orm";
+import { eq, inArray, desc, and, sql } from "drizzle-orm";
 import z from "zod";
 import { mdxToExcerpt } from "../lib/mdx-to-text";
+import { env } from "@sao-blog/env/server";
 import { ensureCompiled, localizedCategories, localizePosts } from "../lib/i18n";
 import { localeInput } from "../schema/i18n";
 
@@ -144,7 +145,26 @@ const getPost = publicProcedure
         };
     });
 
+// 閱讀數 +1。詳情頁有 ISR 快取，getPost 不一定每次都打到後端，所以由前端另外呼叫這支。
+// 原子遞增，且只算已發布的文章。
+const addView = publicProcedure
+    .route({ method: "POST", path: "/posts/{id}/view" })
+    .input(z.object({ id: z.uuid() }))
+    .handler(async ({ input, context }) => {
+        // 站長自己的瀏覽不算：已登入的管理員，或來自 VIEW_IGNORE_IPS（例如家裡 IP）
+        const role = context.session?.user.role;
+        if (role && role !== "user") return { status: "success", message: "ignored" };
+        if (context.ip && env.VIEW_IGNORE_IPS.includes(context.ip)) return { status: "success", message: "ignored" };
+
+        await db
+            .update(posts)
+            .set({ viewCount: sql`${posts.viewCount} + 1` })
+            .where(and(eq(posts.id, input.id), eq(posts.status, "published")));
+        return { status: "success", message: "ok" };
+    });
+
 export default {
     getPosts,
-    getPost
+    getPost,
+    addView,
 };
