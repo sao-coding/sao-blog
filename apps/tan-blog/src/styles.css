@@ -94,6 +94,11 @@
     color: var(--foreground);
     background-color: var(--background);
   }
+  /* 信箋底紙、裝飾元素偶爾會超出視窗幾 px；裁掉就不會出現橫向捲軸（clip 不影響 sticky） */
+  html,
+  body {
+    overflow-x: clip;
+  }
 }
 
 /* Custom variants */
@@ -871,18 +876,6 @@
 @media (max-width: 640px) {
   .letter-paper {
     padding: 2.5rem 1.25rem 2rem;
-    box-shadow:
-      0 6px 14px var(--paper-shadow),
-      6px 7px 3px var(--paper-shadow),
-      12px 16px 10px var(--paper-shadow);
-  }
-  /* 頁面左右只留 16px：底紙往右最多露出 12px（再加毛邊多出的 4px 剛好 16px），
-   * 否則底紙超出視窗，手機上會多出一條橫向捲軸 */
-  .letter-sheet:nth-of-type(1) {
-    translate: 6px 6px;
-  }
-  .letter-sheet:nth-of-type(2) {
-    translate: 12px 12px;
   }
 }
 
