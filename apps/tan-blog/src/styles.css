@@ -874,6 +874,13 @@
   }
 }
 
+@media (pointer: coarse), (hover: none), (max-width: 1024px) {
+  .letter-paper,
+  .dark .letter-paper {
+    --paper-texture: none;
+  }
+}
+
 /* 花箋角落的季節花木：淡彩、在文字之下，從右上角垂下 */
 .letter-sprig {
   /* 右上角垂下的枝條（上下翻轉），避開右下角的落款與印章 */
