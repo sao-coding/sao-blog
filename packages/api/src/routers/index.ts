@@ -27,6 +27,8 @@ import contentRouter from "./content";
 import adminSearchRouter from "./admin/search";
 import adminSecurityRouter from "./admin/security";
 import adminCounterRouter from "./admin/counter";
+import friendRouter from "./friend";
+import adminFriendRouter from "./admin/friend";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -50,6 +52,7 @@ export const appRouter = {
   topic: topicRouter,
   menu: menuRouter,
   content: contentRouter,
+  friend: friendRouter,
   admin: adminProcedure.prefix('/admin').router({
     post: adminPostRouter,
     category: adminCategoryRouter,
@@ -65,6 +68,7 @@ export const appRouter = {
     search: adminSearchRouter,
     security: adminSecurityRouter,
     counter: adminCounterRouter,
+    friend: adminFriendRouter,
   })
 };
 export type AppRouter = typeof appRouter;

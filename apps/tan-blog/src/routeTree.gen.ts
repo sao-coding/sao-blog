@@ -20,6 +20,7 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as OgIndexRouteImport } from './routes/og/index'
 import { Route as LayouthomeIndexRouteImport } from './routes/_layout/(home)/index'
 import { Route as LayoutCategoriesSlugRouteImport } from './routes/_layout/categories/$slug'
+import { Route as LayoutFriendsIndexRouteImport } from './routes/_layout/friends/index'
 import { Route as LayoutNotesIndexRouteImport } from './routes/_layout/notes/index'
 import { Route as LayoutNotesIdRouteImport } from './routes/_layout/notes/$id'
 import { Route as LayoutPostsIndexRouteImport } from './routes/_layout/posts/index'
@@ -83,6 +84,11 @@ const LayouthomeIndexRoute = LayouthomeIndexRouteImport.update({
 const LayoutCategoriesSlugRoute = LayoutCategoriesSlugRouteImport.update({
   id: '/categories/$slug',
   path: '/categories/$slug',
+  getParentRoute: () => LayoutRouteRoute,
+} as any)
+const LayoutFriendsIndexRoute = LayoutFriendsIndexRouteImport.update({
+  id: '/friends/',
+  path: '/friends/',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
 const LayoutNotesIndexRoute = LayoutNotesIndexRouteImport.update({
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/posts/$slug': typeof LayoutPostsSlugRoute
   '/og/notes/$id': typeof OgNotesIdRoute
   '/og/posts/$slug': typeof OgPostsSlugRoute
+  '/friends/': typeof LayoutFriendsIndexRoute
   '/notes/': typeof LayoutNotesIndexRoute
   '/posts/': typeof LayoutPostsIndexRoute
   '/thinking/': typeof LayoutThinkingIndexRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/og/notes/$id': typeof OgNotesIdRoute
   '/og/posts/$slug': typeof OgPostsSlugRoute
   '/': typeof LayouthomeIndexRoute
+  '/friends': typeof LayoutFriendsIndexRoute
   '/notes': typeof LayoutNotesIndexRoute
   '/posts': typeof LayoutPostsIndexRoute
   '/thinking': typeof LayoutThinkingIndexRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/og/notes/$id': typeof OgNotesIdRoute
   '/og/posts/$slug': typeof OgPostsSlugRoute
   '/_layout/(home)/': typeof LayouthomeIndexRoute
+  '/_layout/friends/': typeof LayoutFriendsIndexRoute
   '/_layout/notes/': typeof LayoutNotesIndexRoute
   '/_layout/posts/': typeof LayoutPostsIndexRoute
   '/_layout/thinking/': typeof LayoutThinkingIndexRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/og/notes/$id'
     | '/og/posts/$slug'
+    | '/friends/'
     | '/notes/'
     | '/posts/'
     | '/thinking/'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/og/notes/$id'
     | '/og/posts/$slug'
     | '/'
+    | '/friends'
     | '/notes'
     | '/posts'
     | '/thinking'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/og/notes/$id'
     | '/og/posts/$slug'
     | '/_layout/(home)/'
+    | '/_layout/friends/'
     | '/_layout/notes/'
     | '/_layout/posts/'
     | '/_layout/thinking/'
@@ -364,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCategoriesSlugRouteImport
       parentRoute: typeof LayoutRouteRoute
     }
+    '/_layout/friends/': {
+      id: '/_layout/friends/'
+      path: '/friends'
+      fullPath: '/friends/'
+      preLoaderRoute: typeof LayoutFriendsIndexRouteImport
+      parentRoute: typeof LayoutRouteRoute
+    }
     '/_layout/notes/': {
       id: '/_layout/notes/'
       path: '/'
@@ -459,6 +478,7 @@ interface LayoutRouteRouteChildren {
   LayoutCategoriesSlugRoute: typeof LayoutCategoriesSlugRoute
   LayoutPostsSlugRoute: typeof LayoutPostsSlugRoute
   LayouthomeIndexRoute: typeof LayouthomeIndexRoute
+  LayoutFriendsIndexRoute: typeof LayoutFriendsIndexRoute
   LayoutPostsIndexRoute: typeof LayoutPostsIndexRoute
   LayoutThinkingIndexRoute: typeof LayoutThinkingIndexRoute
   LayoutTimelineIndexRoute: typeof LayoutTimelineIndexRoute
@@ -469,6 +489,7 @@ const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
   LayoutCategoriesSlugRoute: LayoutCategoriesSlugRoute,
   LayoutPostsSlugRoute: LayoutPostsSlugRoute,
   LayouthomeIndexRoute: LayouthomeIndexRoute,
+  LayoutFriendsIndexRoute: LayoutFriendsIndexRoute,
   LayoutPostsIndexRoute: LayoutPostsIndexRoute,
   LayoutThinkingIndexRoute: LayoutThinkingIndexRoute,
   LayoutTimelineIndexRoute: LayoutTimelineIndexRoute,

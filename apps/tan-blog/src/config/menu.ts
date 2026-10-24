@@ -5,6 +5,7 @@ import {
   IconBubbleText,
   IconFenceFilled,
   IconHistory,
+  IconFriends,
 } from '@tabler/icons-react'
 import {
   IconBrandFacebook,
@@ -102,6 +103,12 @@ export function getNavLinks(): NavLinks {
       text: m.nav_more(),
       card: 'more',
       children: [
+        {
+          icon: IconFriends,
+          href: '/friends',
+          text: m.nav_friends(),
+          show: true,
+        },
         {
           icon: IconBrandGithub,
           href: 'https://github.com/sao-coding',

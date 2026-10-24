@@ -7,6 +7,7 @@ import {
   LayoutDashboardIcon,
   MessageCircleHeartIcon,
   MessageSquareIcon,
+  HandshakeIcon,
   NotebookPenIcon,
   ShieldIcon,
   SquarePenIcon,
@@ -51,6 +52,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: '互動',
     items: [
       { title: '留言', to: '/comments', icon: MessageSquareIcon, keywords: ['comment', '審核', 'moderation'] },
+      { title: '友鏈', to: '/friends', icon: HandshakeIcon, keywords: ['friend', 'link', '朋友圈'] },
       { title: '安全設定', to: '/security', icon: ShieldIcon, keywords: ['security', '限流', 'rate limit', '封鎖', 'block', 'turnstile'] },
     ],
   },

@@ -14,6 +14,7 @@ import { Route as ApiKeysIndexRouteImport } from './routes/api-keys/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as CommentsIndexRouteImport } from './routes/comments/index'
 import { Route as FilesIndexRouteImport } from './routes/files/index'
+import { Route as FriendsIndexRouteImport } from './routes/friends/index'
 import { Route as NotesIndexRouteImport } from './routes/notes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as SecurityIndexRouteImport } from './routes/security/index'
@@ -51,6 +52,11 @@ const CommentsIndexRoute = CommentsIndexRouteImport.update({
 const FilesIndexRoute = FilesIndexRouteImport.update({
   id: '/files/',
   path: '/files/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FriendsIndexRoute = FriendsIndexRouteImport.update({
+  id: '/friends/',
+  path: '/friends/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotesIndexRoute = NotesIndexRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/categories/': typeof CategoriesIndexRoute
   '/comments/': typeof CommentsIndexRoute
   '/files/': typeof FilesIndexRoute
+  '/friends/': typeof FriendsIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/security/': typeof SecurityIndexRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesIndexRoute
   '/comments': typeof CommentsIndexRoute
   '/files': typeof FilesIndexRoute
+  '/friends': typeof FriendsIndexRoute
   '/notes': typeof NotesIndexRoute
   '/posts': typeof PostsIndexRoute
   '/security': typeof SecurityIndexRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/categories/': typeof CategoriesIndexRoute
   '/comments/': typeof CommentsIndexRoute
   '/files/': typeof FilesIndexRoute
+  '/friends/': typeof FriendsIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/security/': typeof SecurityIndexRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/categories/'
     | '/comments/'
     | '/files/'
+    | '/friends/'
     | '/notes/'
     | '/posts/'
     | '/security/'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/comments'
     | '/files'
+    | '/friends'
     | '/notes'
     | '/posts'
     | '/security'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/categories/'
     | '/comments/'
     | '/files/'
+    | '/friends/'
     | '/notes/'
     | '/posts/'
     | '/security/'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   CommentsIndexRoute: typeof CommentsIndexRoute
   FilesIndexRoute: typeof FilesIndexRoute
+  FriendsIndexRoute: typeof FriendsIndexRoute
   NotesIndexRoute: typeof NotesIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   SecurityIndexRoute: typeof SecurityIndexRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/files'
       fullPath: '/files/'
       preLoaderRoute: typeof FilesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/friends/': {
+      id: '/friends/'
+      path: '/friends'
+      fullPath: '/friends/'
+      preLoaderRoute: typeof FriendsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notes/': {
@@ -402,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesIndexRoute: CategoriesIndexRoute,
   CommentsIndexRoute: CommentsIndexRoute,
   FilesIndexRoute: FilesIndexRoute,
+  FriendsIndexRoute: FriendsIndexRoute,
   NotesIndexRoute: NotesIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   SecurityIndexRoute: SecurityIndexRoute,
