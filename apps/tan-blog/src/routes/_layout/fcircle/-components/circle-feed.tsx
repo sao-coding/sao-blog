@@ -140,18 +140,18 @@ export function CircleFeed({ data, author }: { data: FriendCircleData; author?: 
                     >
                       <time
                         dateTime={a.published ?? undefined}
-                        className="pt-0.5 font-mono text-xs text-muted-foreground tabular-nums"
+                        className="pt-0.5 font-mono text-sm text-muted-foreground tabular-nums"
                       >
                         {a.published ? dayjs(a.published).format('MM-DD') : ''}
                       </time>
                       <div className="min-w-0">
-                        <p className="font-wenkai text-base leading-snug text-foreground transition-colors group-hover:text-ink">
+                        <p className="font-wenkai text-lg leading-snug text-foreground transition-colors group-hover:text-ink">
                           {a.title}
                         </p>
                         {a.summary && (
-                          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{a.summary}</p>
+                          <p className="mt-1 line-clamp-2 text-base leading-relaxed text-muted-foreground">{a.summary}</p>
                         )}
-                        <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
                           <Avatar src={a.avatar} name={a.author} className="size-4" />
                           {a.author}
                         </p>
