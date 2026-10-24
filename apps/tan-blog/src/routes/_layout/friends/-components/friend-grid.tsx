@@ -45,7 +45,7 @@ export function FriendGrid({ items }: { items: FriendItem[] }) {
 
             <FriendPreviewLink href={friend.url} className="relative flex flex-1 flex-col gap-3 p-4">
               <div className="flex items-center gap-3">
-                <span className="rounded-full p-0.5" style={{ background: 'color-mix(in oklch, var(--accent) 45%, transparent)' }}>
+                <span className="rounded-full shrink-0 p-0.5" style={{ background: 'color-mix(in oklch, var(--accent) 45%, transparent)' }}>
                   {friend.avatar ? (
                     <img
                       src={friend.avatar}
