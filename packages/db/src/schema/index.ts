@@ -828,6 +828,8 @@ export const friends = pgTable(
     feedUrl: varchar('feed_url', { length: 500 }), // 空值時由 <link rel="alternate"> 自動發現
     email: varchar('email', { length: 255 }), // 不公開
     backlinkUrl: varchar('backlink_url', { length: 500 }), // 對方放置本站友鏈的頁面
+    // 卡片主色 #rrggbb：對方首頁的 theme-color，沒有就取頭像主色（lib/friend-accent.ts）
+    accentColor: varchar('accent_color', { length: 7 }),
 
     // 審核與顯示
     status: friendStatusEnum('status').default('pending').notNull(),

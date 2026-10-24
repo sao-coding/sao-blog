@@ -8,7 +8,7 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from '@sao-blog/ui/components/drawer'
-import { getNavLinks } from '@/config/menu'
+import { getNavLinks, isDocumentLink } from '@/config/menu'
 import { orpc } from '@/lib/orpc'
 import { siteName } from '@/lib/seo'
 import { ChevronDownIcon, ChevronUpIcon, MenuIcon, SearchIcon, X } from 'lucide-react'
@@ -18,11 +18,16 @@ import { m } from '#/paraglide/messages'
 import { currentContentLocale } from '@/lib/content-locale'
 import { useSearchStore } from '@/store/search-store'
 
+// 外部網址與 /rss.xml 這類伺服器路由用原生 <a>（新分頁），其餘走站內路由
+const MenuLink = ({ href, ...props }: Omit<React.ComponentProps<'a'>, 'href'> & { href: string }) =>
+    isDocumentLink(href)
+        ? <a href={href} target="_blank" rel="noopener noreferrer" {...props} />
+        : <Link to={href} {...props} />
+
 const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
     const setSearchOpen = useSearchStore(state => state.setOpen)
-    const navLinks = getNavLinks()
-    const moreLinks = navLinks.find(link => !link.href && !link.icon)
-    const mainLinks = navLinks.filter(link => link !== moreLinks)
+    // 「更多」跟其他有子項的項目一樣放在折疊選單裡
+    const mainLinks = getNavLinks()
 
     // 「文章」分類改為與電腦版一致，動態抓取真實分類清單，而非用設定檔寫死的清單
     // 僅在手機版時才啟用查詢，避免桌機版（此元件雖有渲染但被 CSS 隱藏）也發出多餘請求
@@ -132,9 +137,21 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                         value={String(index)}
                                         className="flex flex-col"
                                     >
-                                        {/* Header 行：左側連結、右側展開按鈕各自獨立 */}
+                                        {/* Header 行：左側連結、右側展開按鈕各自獨立；
+                                            沒有自己頁面的項目（更多）整列都是展開按鈕 */}
                                         <AccordionPrimitive.Header className="flex items-center">
-                                            {/* 左側：點擊導航（若有 href） */}
+                                            {!link.href ? (
+                                                <AccordionPrimitive.Trigger
+                                                    className="group/trigger flex flex-1 items-center justify-between min-h-12 pl-5 text-base text-foreground/70 hover:text-foreground tracking-wide transition-colors duration-150 outline-none"
+                                                >
+                                                    {link.text}
+                                                    <span className="flex items-center justify-center w-14 text-foreground/30">
+                                                        <ChevronDownIcon className="size-3.5 pointer-events-none group-aria-expanded/trigger:hidden" />
+                                                        <ChevronUpIcon className="size-3.5 pointer-events-none hidden group-aria-expanded/trigger:inline" />
+                                                    </span>
+                                                </AccordionPrimitive.Trigger>
+                                            ) : (<>
+                                            {/* 左側：點擊導航 */}
                                             {link.href ? (
                                                 <DrawerClose render={
                                                     <Link
@@ -158,6 +175,7 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                                 <ChevronDownIcon className="size-3.5 pointer-events-none group-aria-expanded/trigger:hidden" />
                                                 <ChevronUpIcon className="size-3.5 pointer-events-none hidden group-aria-expanded/trigger:inline" />
                                             </AccordionPrimitive.Trigger>
+                                            </>)}
                                         </AccordionPrimitive.Header>
 
                                         {/* 子項目面板 */}
@@ -165,13 +183,13 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                                             <div className="flex flex-col pb-1.5">
                                                 {visibleChildren.map((child, childIndex) => (
                                                     <DrawerClose key={childIndex} render={
-                                                        <Link
-                                                            to={child.href}
+                                                        <MenuLink
+                                                            href={child.href}
                                                             className="flex items-center pl-9 pr-5 min-h-10 text-base text-foreground/40 hover:text-foreground/70 transition-colors duration-150"
                                                         >
                                                             <span className="w-3 h-px bg-foreground/20 mr-3 shrink-0" />
                                                             {child.text}
-                                                        </Link>
+                                                        </MenuLink>
                                                     } />
                                                 ))}
                                             </div>
@@ -182,28 +200,6 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
                         </AccordionPrimitive.Root>
                     </nav>
 
-                    {/* 更多連結區塊 */}
-                    {moreLinks?.children && (
-                        <div className="px-5 pt-4 pb-6 border-t border-border">
-                            <p className="text-base text-foreground/20 tracking-widest uppercase mb-3 select-none">
-                                {m.mobile_menu_more()}
-                            </p>
-                            <div className="flex flex-wrap gap-x-5 gap-y-2.5">
-                                {moreLinks.children
-                                    .filter(child => child.show)
-                                    .map((child, index) => (
-                                        <DrawerClose key={index} render={
-                                            <Link
-                                                to={child.href}
-                                                className="text-base text-foreground/40 hover:text-foreground/70 tracking-wide transition-colors duration-150"
-                                            >
-                                                {child.text}
-                                            </Link>
-                                        } />
-                                    ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* 底部 — 讀者登錄 */}

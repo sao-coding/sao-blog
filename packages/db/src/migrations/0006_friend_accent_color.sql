@@ -1,0 +1,1 @@
+ALTER TABLE "friends" ADD COLUMN "accent_color" varchar(7);

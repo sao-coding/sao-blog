@@ -20,6 +20,7 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as OgIndexRouteImport } from './routes/og/index'
 import { Route as LayouthomeIndexRouteImport } from './routes/_layout/(home)/index'
 import { Route as LayoutCategoriesSlugRouteImport } from './routes/_layout/categories/$slug'
+import { Route as LayoutFcircleIndexRouteImport } from './routes/_layout/fcircle/index'
 import { Route as LayoutFriendsIndexRouteImport } from './routes/_layout/friends/index'
 import { Route as LayoutNotesIndexRouteImport } from './routes/_layout/notes/index'
 import { Route as LayoutNotesIdRouteImport } from './routes/_layout/notes/$id'
@@ -84,6 +85,11 @@ const LayouthomeIndexRoute = LayouthomeIndexRouteImport.update({
 const LayoutCategoriesSlugRoute = LayoutCategoriesSlugRouteImport.update({
   id: '/categories/$slug',
   path: '/categories/$slug',
+  getParentRoute: () => LayoutRouteRoute,
+} as any)
+const LayoutFcircleIndexRoute = LayoutFcircleIndexRouteImport.update({
+  id: '/fcircle/',
+  path: '/fcircle/',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
 const LayoutFriendsIndexRoute = LayoutFriendsIndexRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/posts/$slug': typeof LayoutPostsSlugRoute
   '/og/notes/$id': typeof OgNotesIdRoute
   '/og/posts/$slug': typeof OgPostsSlugRoute
+  '/fcircle/': typeof LayoutFcircleIndexRoute
   '/friends/': typeof LayoutFriendsIndexRoute
   '/notes/': typeof LayoutNotesIndexRoute
   '/posts/': typeof LayoutPostsIndexRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/og/notes/$id': typeof OgNotesIdRoute
   '/og/posts/$slug': typeof OgPostsSlugRoute
   '/': typeof LayouthomeIndexRoute
+  '/fcircle': typeof LayoutFcircleIndexRoute
   '/friends': typeof LayoutFriendsIndexRoute
   '/notes': typeof LayoutNotesIndexRoute
   '/posts': typeof LayoutPostsIndexRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/og/notes/$id': typeof OgNotesIdRoute
   '/og/posts/$slug': typeof OgPostsSlugRoute
   '/_layout/(home)/': typeof LayouthomeIndexRoute
+  '/_layout/fcircle/': typeof LayoutFcircleIndexRoute
   '/_layout/friends/': typeof LayoutFriendsIndexRoute
   '/_layout/notes/': typeof LayoutNotesIndexRoute
   '/_layout/posts/': typeof LayoutPostsIndexRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/og/notes/$id'
     | '/og/posts/$slug'
+    | '/fcircle/'
     | '/friends/'
     | '/notes/'
     | '/posts/'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/og/notes/$id'
     | '/og/posts/$slug'
     | '/'
+    | '/fcircle'
     | '/friends'
     | '/notes'
     | '/posts'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/og/notes/$id'
     | '/og/posts/$slug'
     | '/_layout/(home)/'
+    | '/_layout/fcircle/'
     | '/_layout/friends/'
     | '/_layout/notes/'
     | '/_layout/posts/'
@@ -374,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/categories/$slug'
       fullPath: '/categories/$slug'
       preLoaderRoute: typeof LayoutCategoriesSlugRouteImport
+      parentRoute: typeof LayoutRouteRoute
+    }
+    '/_layout/fcircle/': {
+      id: '/_layout/fcircle/'
+      path: '/fcircle'
+      fullPath: '/fcircle/'
+      preLoaderRoute: typeof LayoutFcircleIndexRouteImport
       parentRoute: typeof LayoutRouteRoute
     }
     '/_layout/friends/': {
@@ -478,6 +497,7 @@ interface LayoutRouteRouteChildren {
   LayoutCategoriesSlugRoute: typeof LayoutCategoriesSlugRoute
   LayoutPostsSlugRoute: typeof LayoutPostsSlugRoute
   LayouthomeIndexRoute: typeof LayouthomeIndexRoute
+  LayoutFcircleIndexRoute: typeof LayoutFcircleIndexRoute
   LayoutFriendsIndexRoute: typeof LayoutFriendsIndexRoute
   LayoutPostsIndexRoute: typeof LayoutPostsIndexRoute
   LayoutThinkingIndexRoute: typeof LayoutThinkingIndexRoute
@@ -489,6 +509,7 @@ const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
   LayoutCategoriesSlugRoute: LayoutCategoriesSlugRoute,
   LayoutPostsSlugRoute: LayoutPostsSlugRoute,
   LayouthomeIndexRoute: LayouthomeIndexRoute,
+  LayoutFcircleIndexRoute: LayoutFcircleIndexRoute,
   LayoutFriendsIndexRoute: LayoutFriendsIndexRoute,
   LayoutPostsIndexRoute: LayoutPostsIndexRoute,
   LayoutThinkingIndexRoute: LayoutThinkingIndexRoute,

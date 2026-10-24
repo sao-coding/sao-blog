@@ -5,6 +5,7 @@ import { friends } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { normalizeSiteUrl, sanitizePublicUrl } from "@sao-blog/api/lib/friend-url";
 import { notifyApplicantReviewed } from "@sao-blog/api/lib/friend-mail";
+import { refreshAccentColorInBackground } from "@sao-blog/api/lib/friend-accent";
 
 const friendStatusSchema = z.enum(["pending", "approved", "rejected", "hidden"]);
 
@@ -109,6 +110,7 @@ const createFriend = adminProcedure
                 reviewedBy: context.session.user.id,
             })
             .returning();
+        if (row) refreshAccentColorInBackground(row);
 
         return {
             status: "success",
@@ -130,6 +132,8 @@ const updateFriend = adminProcedure
             .set({ ...parsed.values, updatedAt: new Date() })
             .where(eq(friends.id, input.id))
             .returning();
+        // 網址或頭像可能換了，重新取色
+        if (row) refreshAccentColorInBackground(row);
 
         return {
             status: "success",
@@ -170,6 +174,7 @@ const setFriendStatus = adminProcedure
         if (next === "approved" || next === "rejected") {
             for (const row of rows) {
                 if (wasPending.has(row.id)) await notifyApplicantReviewed(row, next);
+                if (next === "approved" && !row.accentColor) refreshAccentColorInBackground(row);
             }
         }
 

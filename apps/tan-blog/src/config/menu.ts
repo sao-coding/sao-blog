@@ -1,11 +1,12 @@
 import {
-  IconBrandLine,
   IconBrandThreads,
   IconBrandX,
   IconBubbleText,
   IconFenceFilled,
   IconHistory,
   IconFriends,
+  IconRss,
+  IconUsersGroup,
 } from '@tabler/icons-react'
 import {
   IconBrandFacebook,
@@ -36,6 +37,14 @@ type NavLinks = {
   card?: NavCard
   children?: { icon?: Icon; href: string; text: string; show: boolean }[]
 }[]
+
+/**
+ * 不能走站內路由、要整頁載入的連結：外部網址，或 /rss.xml 這類伺服器路由（路徑結尾有副檔名）。
+ * 選單渲染時這些要用原生 <a>，用 <Link> 會被當成前端路由而找不到頁面。
+ */
+export function isDocumentLink(href: string): boolean {
+  return /^https?:\/\//.test(href) || /\.[a-z0-9]+$/i.test(href.split(/[?#]/)[0] ?? '')
+}
 
 // 文案含翻譯訊息函式，須在元件內每次渲染呼叫，才能反映當前 request 的 locale
 // （模組頂層常數在 SSR 下只會用初始化當下的 locale，跨語言請求會拿到錯誤文字）。
@@ -110,6 +119,12 @@ export function getNavLinks(): NavLinks {
           show: true,
         },
         {
+          icon: IconUsersGroup,
+          href: '/fcircle',
+          text: m.nav_fcircle(),
+          show: true,
+        },
+        {
           icon: IconBrandGithub,
           href: 'https://github.com/sao-coding',
           text: m.nav_github(),
@@ -144,12 +159,6 @@ export const SOCIAL_LINKS: SocialLinks = [
     color: 'bg-blue-700',
   },
   {
-    name: 'LINE',
-    icon: IconBrandLine,
-    link: 'https://line.me/ti/p/t7Fr6CQFLi',
-    color: 'bg-green-700',
-  },
-  {
     name: 'Instagram',
     icon: IconBrandInstagram,
     link: 'https://www.instagram.com/_xox._.xox._.xox._.xox._.xox_',
@@ -166,5 +175,11 @@ export const SOCIAL_LINKS: SocialLinks = [
     icon: IconBrandX,
     link: 'https://twitter.com/sao_coding',
     color: 'bg-gray-800',
+  },
+  {
+    name: 'RSS',
+    icon: IconRss,
+    link: '/rss.xml',
+    color: 'bg-orange-600',
   },
 ]

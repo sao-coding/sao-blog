@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { discoverFeedLinks, parseFeed, type FeedItem } from './feed'
+import { applyAiSummaries } from './summarize'
 
 // 朋友圈聚合器：讀友鏈 → 抓各站 feed → 整理成文章 → 寫回自己的後端。
 // 由 GitHub Action 定時執行，也可以在本機跑：
@@ -60,6 +61,9 @@ interface Article {
   summaryModel: string | null
   contentHash: string | null
 }
+
+/** 爬取階段的文章：多帶內文與是否需要摘要，寫回前會拿掉 */
+type CrawledArticle = Article & { text: string; needsSummary: boolean }
 
 function required(name: string): string {
   const v = process.env[name]
@@ -134,7 +138,7 @@ function summarize(text: string): string | null {
   return text.length > SUMMARY_CHARS ? `${text.slice(0, SUMMARY_CHARS).trimEnd()}…` : text
 }
 
-function toArticle(source: Source, item: FeedItem, cached: Map<string, Cached>): Article | null {
+function toArticle(source: Source, item: FeedItem, cached: Map<string, Cached>): CrawledArticle | null {
   if (!item.title || !item.link) return null
   const contentHash = hash(`${item.title}\n${item.text}`)
   const prev = cached.get(item.link)
@@ -151,12 +155,14 @@ function toArticle(source: Source, item: FeedItem, cached: Map<string, Cached>):
     summarySource: summary ? 'feed' : 'none',
     summaryModel: null,
     contentHash,
+    text: item.text,
+    needsSummary: !keepPrev,
   }
 }
 
 const byDateDesc = (a: FeedItem, b: FeedItem) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? '')
 
-async function crawl(source: Source, cached: Map<string, Cached>): Promise<{ result: Result; articles: Article[] }> {
+async function crawl(source: Source, cached: Map<string, Cached>): Promise<{ result: Result; articles: CrawledArticle[] }> {
   const base: Result = {
     id: source.id,
     fetchStatus: 'error',
@@ -184,7 +190,7 @@ async function crawl(source: Source, cached: Map<string, Cached>): Promise<{ res
 
     const items = parseFeed(body, res.url || feedUrl).sort(byDateDesc).slice(0, KEEP)
     const seen = new Set<string>()
-    const articles: Article[] = []
+    const articles: CrawledArticle[] = []
     for (const item of items) {
       if (seen.has(item.link)) continue
       seen.add(item.link)
@@ -232,7 +238,10 @@ async function main() {
   })
 
   const results = crawled.map((c) => c.result)
-  const articles = crawled.flatMap((c) => c.articles)
+  const crawledArticles = crawled.flatMap((c) => c.articles)
+  const aiCalls = await applyAiSummaries(crawledArticles)
+  if (aiCalls > 0) console.log(`AI 摘要 ${aiCalls} 篇`)
+  const articles: Article[] = crawledArticles.map(({ text: _text, needsSummary: _needs, ...a }) => a)
   const failed = results.filter((r) => r.fetchStatus === 'error').length
 
   if (DRY_RUN) {

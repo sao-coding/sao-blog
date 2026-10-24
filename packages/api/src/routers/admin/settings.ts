@@ -8,9 +8,10 @@ import {
     siteSettingsSchema,
     type MailSettings,
 } from "@sao-blog/db/site-settings";
+import { createElement } from "react";
 import z from "zod";
 import { sendMailWith } from "@sao-blog/api/lib/mailer";
-import { TestMailEmail } from "@sao-blog/api/emails/test-mail";
+import { TestMailEmail } from "../../emails/test-mail";
 
 // 後台「網站設定」：網站基本資料與寄信 SMTP。
 // SMTP 密碼不回傳給前端；儲存時密碼留空代表沿用原本的。
@@ -66,7 +67,7 @@ const sendTestMail = adminProcedure
             await sendMailWith(mail, {
                 to: input.to,
                 subject: `[${site.name || "部落格"}] 測試信`,
-                react: <TestMailEmail siteName={site.name || "部落格"} />,
+                react: createElement(TestMailEmail, { siteName: site.name || "部落格" }),
             });
             return { status: "success", message: `已寄出測試信到 ${input.to}` }
         } catch (err) {

@@ -5,6 +5,7 @@ import { friendArticles, friends } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { sanitizePublicUrl } from "@sao-blog/api/lib/friend-url";
 import { invalidateFriendCircleJson } from "@sao-blog/api/lib/friend-circle";
+import { backfillAccentColors } from "@sao-blog/api/lib/friend-accent";
 
 // 給聚合器（GitHub Action）用，以 API Key 呼叫：
 //   GET /api/admin/friend-circle/sources  讀要抓的站、條件請求標頭與摘要快取
@@ -159,6 +160,8 @@ const ingest = adminProcedure
         }
 
         invalidateFriendCircleJson();
+        // 順手補上舊友鏈還沒算過的卡片主色
+        await backfillAccentColors();
 
         return {
             status: "success",

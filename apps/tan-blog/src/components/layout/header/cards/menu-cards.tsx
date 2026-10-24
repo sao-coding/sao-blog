@@ -12,9 +12,8 @@ import { orpc, type client } from '@/lib/orpc'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
 import type { NavCard } from '@/config/menu'
-import { SOCIAL_LINKS } from '@/config/menu'
+import { SOCIAL_LINKS, getNavLinks, isDocumentLink } from '@/config/menu'
 import {
-  MORE_LINKS,
   PROFILE_PAGE_LINKS,
   SITE_OWNER,
 } from '@/config/mega-menu'
@@ -36,8 +35,6 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="mb-2 text-xs font-medium text-muted-foreground">{children}</p>
 )
 
-const isExternal = (href: string) => /^https?:\/\//.test(href)
-
 const CardLink = ({
   href,
   onNavigate,
@@ -51,7 +48,8 @@ const CardLink = ({
   className?: string
   children: React.ReactNode
 }) => {
-  if (isExternal(href)) {
+  // 外部網址與 /rss.xml 這類伺服器路由用原生 <a>，新分頁開啟
+  if (isDocumentLink(href)) {
     return (
       <a
         href={href}
@@ -425,20 +423,25 @@ const TimelineCard = ({
   </div>
 )
 
-const MoreCard = ({ onNavigate }: { onNavigate?: () => void }) => (
-  <div className="w-44 p-1">
-    {MORE_LINKS.map((link) => (
-      <CardLink
-        key={link.text}
-        href={link.href}
-        onNavigate={onNavigate}
-        className="block rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-ink"
-      >
-        {link.text}
-      </CardLink>
-    ))}
-  </div>
-)
+// 跟手機選單共用 config/menu.ts 的「更多」項目，新增連結只要改一個地方
+const MoreCard = ({ onNavigate }: { onNavigate?: () => void }) => {
+  const links = getNavLinks().find((l) => l.card === 'more')?.children?.filter((l) => l.show) ?? []
+  return (
+    <div className="w-44 p-1">
+      {links.map((link) => (
+        <CardLink
+          key={link.href}
+          href={link.href}
+          onNavigate={onNavigate}
+          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-ink"
+        >
+          {link.icon && <link.icon className="size-4 shrink-0 text-muted-foreground" />}
+          {link.text}
+        </CardLink>
+      ))}
+    </div>
+  )
+}
 
 // 卡片頁尾（左連結 + 右側文字或連結）
 const CardFooter = ({

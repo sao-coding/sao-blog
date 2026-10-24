@@ -1,13 +1,14 @@
 import { publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { asc, eq } from "drizzle-orm";
-import { friends } from "@sao-blog/db/schema/index";
+import { asc, eq, sql } from "drizzle-orm";
+import { friendArticles, friends } from "@sao-blog/db/schema/index";
 import { getSecuritySettings } from "@sao-blog/db/settings";
 import z from "zod";
 import { normalizeSiteUrl, sanitizePublicUrl } from "@sao-blog/api/lib/friend-url";
 import { consumeRateLimit, formatRetryAfter, HOUR } from "@sao-blog/api/lib/rate-limit";
 import { turnstileEnabled, verifyTurnstile } from "@sao-blog/api/lib/turnstile";
 import { friendMailEnabled, notifyOwnerFriendApplied } from "@sao-blog/api/lib/friend-mail";
+import { buildFriendCircleJson } from "@sao-blog/api/lib/friend-circle";
 
 // 友鏈頁：只回 approved，不含 email / ip 等私人欄位
 const getFriends = publicProcedure
@@ -21,15 +22,32 @@ const getFriends = publicProcedure
                 avatar: friends.avatar,
                 description: friends.description,
                 group: friends.group,
+                accentColor: friends.accentColor,
             })
             .from(friends)
             .where(eq(friends.status, "approved"))
             .orderBy(asc(friends.group), asc(friends.sortOrder), asc(friends.createdAt));
 
+        // 每個站在朋友圈裡最新的一篇（卡片上顯示「最近」）；沒加入朋友圈或沒抓到的站就沒有
+        const latest = await db
+            .selectDistinctOn([friendArticles.friendId], {
+                friendId: friendArticles.friendId,
+                title: friendArticles.title,
+                link: friendArticles.link,
+                publishedAt: friendArticles.publishedAt,
+            })
+            .from(friendArticles)
+            .where(eq(friendArticles.hidden, false))
+            .orderBy(friendArticles.friendId, sql`${friendArticles.publishedAt} desc nulls last`);
+        const latestByFriend = new Map(latest.map((a) => [a.friendId, a]));
+
         return {
             status: "success",
             message: "友鏈列表取得成功",
-            data: rows,
+            data: rows.map((f) => {
+                const a = latestByFriend.get(f.id);
+                return { ...f, latest: a ? { title: a.title, link: a.link, publishedAt: a.publishedAt } : null };
+            }),
         }
     });
 
@@ -112,8 +130,18 @@ const applyFriend = publicProcedure
         return { status: "success", message: successMessage }
     });
 
+// 朋友圈：與 GET /friends.json 同一份資料（給自己的前台 SSR 用）
+const getCircle = publicProcedure
+    .route({ method: "GET", path: "/friends/circle" })
+    .handler(async () => ({
+        status: "success",
+        message: "朋友圈取得成功",
+        data: await buildFriendCircleJson(),
+    }));
+
 export default {
     getFriends,
+    getCircle,
     applyFriend,
 }
 

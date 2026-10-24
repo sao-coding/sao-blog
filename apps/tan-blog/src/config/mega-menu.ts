@@ -16,13 +16,7 @@ export const PROFILE_PAGE_LINKS: MegaMenuLink[] = [
   { text: '贊助', href: '#' },
 ]
 
-// 更多卡片清單
-export const MORE_LINKS: MegaMenuLink[] = [
-  { text: 'GitHub', href: 'https://github.com/sao-coding' },
-  { text: '標籤', href: '#' },
-  { text: '關於', href: '#' },
-  { text: 'RSS', href: '#' },
-]
+// 「更多」卡片的連結改由 config/menu.ts 的 getNavLinks() 提供（與手機選單同一份）
 
 // 站長資訊
 export const SITE_OWNER = {

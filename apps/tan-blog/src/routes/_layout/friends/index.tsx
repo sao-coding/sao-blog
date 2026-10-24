@@ -1,10 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { client } from '@/lib/orpc'
 import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { pageShellClass } from '@/components/layout/page-shell'
-import { FriendGrid, type FriendItem } from './-components/friend-grid'
+import { FriendDirectory } from './-components/friend-directory'
 import { FriendApplyForm } from './-components/friend-apply-form'
 
 export const Route = createFileRoute('/_layout/friends/')({
@@ -26,49 +26,34 @@ export const Route = createFileRoute('/_layout/friends/')({
   component: FriendsPage,
 })
 
-/** 依 group 分組，保留後端排序（group → sortOrder） */
-function groupFriends(items: FriendItem[]) {
-  const groups = new Map<string, FriendItem[]>()
-  for (const item of items) {
-    const list = groups.get(item.group)
-    if (list) list.push(item)
-    else groups.set(item.group, [item])
-  }
-  return [...groups]
-}
-
 function FriendsPage() {
   const data = Route.useLoaderData()
   const friends = data?.data ?? []
-  const groups = groupFriends(friends)
 
   return (
     <>
       <div className={pageShellClass}>
-        <header className="mb-10 max-w-xl sm:mb-14">
+        <header className="mb-10 sm:mb-14">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_friends_title()}</h1>
-          <p className="mt-3 font-wenkai text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-3 max-w-xl font-wenkai text-sm leading-relaxed text-muted-foreground">
             <span className="mr-1.5 font-mono text-ink tabular-nums">{friends.length}</span>
             {m.friends_intro()}
           </p>
+          {/* 兩個去處：看朋友們最近寫了什麼、或直接跳到申請表單 */}
+          <nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2 font-wenkai text-sm">
+            <Link to="/fcircle" className="text-ink underline-offset-4 hover:underline">
+              {m.friends_link_circle()} →
+            </Link>
+            <a href="#apply" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+              {m.friends_apply_jump()} ↓
+            </a>
+          </nav>
         </header>
 
         {friends.length === 0 ? (
           <p className="my-20 text-center font-wenkai text-xl text-muted-foreground">{m.friends_empty()}</p>
         ) : (
-          <div className="space-y-12">
-            {groups.map(([group, items]) => (
-              <section key={group}>
-                {/* 只有一組時不顯示組名 */}
-                {groups.length > 1 && (
-                  <h2 className="mb-5 font-wenkai text-xl text-foreground">
-                    {group === 'friend' ? m.friends_group_friend() : group}
-                  </h2>
-                )}
-                <FriendGrid items={items} />
-              </section>
-            ))}
-          </div>
+          <FriendDirectory friends={friends} />
         )}
 
         <FriendApplyForm />
