@@ -1,0 +1,7 @@
+{
+  "extends": "@sao-blog/config/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src"]
+}

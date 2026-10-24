@@ -30,6 +30,7 @@ import adminCounterRouter from "./admin/counter";
 import friendRouter from "./friend";
 import adminFriendRouter from "./admin/friend";
 import adminSettingsRouter from "./admin/settings";
+import adminFriendCircleRouter from "./admin/friend-circle";
 
 export const appRouter = {
   // healthCheck: publicProcedure.handler(() => {
@@ -71,6 +72,7 @@ export const appRouter = {
     counter: adminCounterRouter,
     friend: adminFriendRouter,
     settings: adminSettingsRouter,
+    friendCircle: adminFriendCircleRouter,
   })
 };
 export type AppRouter = typeof appRouter;

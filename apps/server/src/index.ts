@@ -12,6 +12,7 @@ import { env } from "@sao-blog/env/server";
 import { devicesRoutes } from "./devices";
 import { mcpRoutes } from "./mcp";
 import { initGeoIp } from "@sao-blog/api/lib/geoip";
+import { buildFriendCircleJson } from "@sao-blog/api/lib/friend-circle";
 import { Elysia } from "elysia";
 
 const rpcHandler = new RPCHandler(appRouter, {
@@ -104,6 +105,12 @@ new Elysia()
   .get("/.well-known/oauth-protected-resource", async ({ request }) =>
     reflectCorsOrigin(await oAuthProtectedResourceMetadata(auth)(request), request),
   )
+  // 朋友圈（跨 blog 共用的 JSON 規格）：任何網站都能讀，所以 CORS 用 *、不帶 cookie
+  .get("/friends.json", async ({ set }) => {
+    set.headers["access-control-allow-origin"] = "*";
+    set.headers["cache-control"] = "public, max-age=300, stale-while-revalidate=600";
+    return buildFriendCircleJson();
+  })
   .get("/", () => "OK")
   .listen(3000, () => {
     console.log(`Server is running at ${env.SERVER_URL}`);

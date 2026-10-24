@@ -1,0 +1,45 @@
+name: Friend circle
+
+# 定時抓朋友們的 RSS，寫回 blog-api（/friends.json 由後端輸出）。
+# 需要的 Secrets：
+#   FC_API_URL  後端網址，例如 https://blog-api.sao-x.com
+#   FC_API_KEY  後台「API Keys」建立的金鑰（管理員帳號）
+
+on:
+  schedule:
+    # 每 4 小時一次（UTC）
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: friend-circle
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    # 刻意用 GitHub 託管的 runner，不用家裡的 self-hosted：
+    # 網址來自外部表單，抓取時不該身在自己的內網
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      # 只裝聚合器自己的依賴（workspace 的 catalog: 版本需要 pnpm 解析）
+      - name: Install
+        run: pnpm install --frozen-lockfile --filter @sao-blog/friend-circle
+
+      - name: Crawl
+        working-directory: packages/friend-circle
+        env:
+          FC_API_URL: ${{ secrets.FC_API_URL }}
+          FC_API_KEY: ${{ secrets.FC_API_KEY }}
+          FC_KEEP_PER_FRIEND: "10"
+        run: bun run src/index.ts
