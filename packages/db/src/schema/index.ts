@@ -809,6 +809,100 @@ export const categoryTranslationsRelations = relations(categoryTranslations, ({ 
   }),
 }))
 
+// 友鏈 / 朋友圈：同一張表，circle_enabled 決定是否抓 feed
+export const friendStatusEnum = pgEnum('friend_status', ['pending', 'approved', 'rejected', 'hidden'])
+export const friendFetchStatusEnum = pgEnum('friend_fetch_status', ['ok', 'error', 'not_modified'])
+// manual = 後台改過，聚合器永不覆蓋
+export const summarySourceEnum = pgEnum('summary_source', ['ai', 'feed', 'manual', 'none'])
+
+export const friends = pgTable(
+  'friends',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    name: varchar('name', { length: 100 }).notNull(),
+    url: varchar('url', { length: 500 }).notNull().unique(), // 正規化後的首頁
+    avatar: varchar('avatar', { length: 500 }),
+    description: varchar('description', { length: 200 }),
+    feedUrl: varchar('feed_url', { length: 500 }), // 空值時由 <link rel="alternate"> 自動發現
+    email: varchar('email', { length: 255 }), // 不公開
+    backlinkUrl: varchar('backlink_url', { length: 500 }), // 對方放置本站友鏈的頁面
+
+    // 審核與顯示
+    status: friendStatusEnum('status').default('pending').notNull(),
+    circleEnabled: boolean('circle_enabled').default(true).notNull(),
+    group: varchar('group', { length: 50 }).default('friend').notNull(),
+    sortOrder: integer('sort_order').default(0).notNull(),
+    reviewNote: text('review_note'),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    reviewedBy: uuid('reviewed_by').references(() => user.id, { onDelete: 'set null' }),
+
+    // 防垃圾，不公開
+    applyIp: varchar('apply_ip', { length: 45 }),
+    applyUa: varchar('apply_ua', { length: 500 }),
+
+    // 聚合器回寫
+    fetchStatus: friendFetchStatusEnum('fetch_status'),
+    fetchError: text('fetch_error'),
+    failCount: integer('fail_count').default(0).notNull(),
+    lastFetchedAt: timestamp('last_fetched_at', { withTimezone: true }),
+    etag: varchar('etag', { length: 200 }),
+    lastModified: varchar('last_modified', { length: 100 }),
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('friends_status_idx').on(table.status),
+    index('friends_group_sort_idx').on(table.group, table.sortOrder),
+  ]
+)
+
+// 朋友圈文章，兼 AI 摘要快取（以 link 為鍵）
+export const friendArticles = pgTable(
+  'friend_articles',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    friendId: uuid('friend_id')
+      .notNull()
+      .references(() => friends.id, { onDelete: 'cascade' }),
+    link: varchar('link', { length: 1000 }).notNull().unique(), // 正規化後（去 utm 等參數）
+    title: varchar('title', { length: 300 }).notNull(),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }),
+    summary: text('summary'), // 純文字
+    summarySource: summarySourceEnum('summary_source').default('none').notNull(),
+    summaryModel: varchar('summary_model', { length: 100 }),
+    contentHash: varchar('content_hash', { length: 64 }),
+    hidden: boolean('hidden').default(false).notNull(),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('friend_articles_friend_pub_idx').on(table.friendId, table.publishedAt),
+    index('friend_articles_pub_idx').on(table.publishedAt),
+  ]
+)
+
+export const friendsRelations = relations(friends, ({ many }) => ({
+  articles: many(friendArticles),
+}))
+
+export const friendArticlesRelations = relations(friendArticles, ({ one }) => ({
+  friend: one(friends, {
+    fields: [friendArticles.friendId],
+    references: [friends.id],
+  }),
+}))
+
 // Convenience exported select-model types so other packages can import them directly
 export type PostModel = InferSelectModel<typeof posts>
 export type CategoryModel = InferSelectModel<typeof categories>
@@ -819,3 +913,5 @@ export type FileModel = InferSelectModel<typeof files>
 export type PostTranslationModel = InferSelectModel<typeof postTranslations>
 export type NoteTranslationModel = InferSelectModel<typeof noteTranslations>
 export type CategoryTranslationModel = InferSelectModel<typeof categoryTranslations>
+export type FriendModel = InferSelectModel<typeof friends>
+export type FriendArticleModel = InferSelectModel<typeof friendArticles>
