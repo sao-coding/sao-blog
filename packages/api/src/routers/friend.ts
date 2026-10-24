@@ -7,6 +7,7 @@ import z from "zod";
 import { normalizeSiteUrl, sanitizePublicUrl } from "@sao-blog/api/lib/friend-url";
 import { consumeRateLimit, formatRetryAfter, HOUR } from "@sao-blog/api/lib/rate-limit";
 import { turnstileEnabled, verifyTurnstile } from "@sao-blog/api/lib/turnstile";
+import { friendMailEnabled, notifyOwnerFriendApplied } from "@sao-blog/api/lib/friend-mail";
 
 // 友鏈頁：只回 approved，不含 email / ip 等私人欄位
 const getFriends = publicProcedure
@@ -51,9 +52,13 @@ const applyFriend = publicProcedure
         const settings = await getSecuritySettings();
         const ip = context.ip;
 
+        const successMessage = (await friendMailEnabled())
+            ? "已送出申請，審核後會以 email 通知"
+            : "已送出申請，通過後會出現在友鏈頁"
+
         // 蜜罐有值：假裝成功，不存
         if (settings.filters.honeypot && input.hp) {
-            return { status: "success", message: "已送出申請，審核後會以 email 通知" }
+            return { status: "success", message: successMessage }
         }
 
         if (settings.filters.turnstile && turnstileEnabled()) {
@@ -88,12 +93,13 @@ const applyFriend = publicProcedure
             }
         }
 
+        const email = input.email.toLowerCase();
         await db.insert(friends).values({
             name: input.name,
             url,
             avatar,
             description: input.description,
-            email: input.email.toLowerCase(),
+            email,
             feedUrl,
             backlinkUrl,
             circleEnabled: input.circleEnabled,
@@ -101,7 +107,9 @@ const applyFriend = publicProcedure
             applyUa: context.userAgent?.slice(0, 500) ?? null,
         });
 
-        return { status: "success", message: "已送出申請，審核後會以 email 通知" }
+        await notifyOwnerFriendApplied({ name: input.name, url, email, description: input.description });
+
+        return { status: "success", message: successMessage }
     });
 
 export default {

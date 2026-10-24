@@ -10,6 +10,7 @@ import {
   HandshakeIcon,
   NotebookPenIcon,
   ShieldIcon,
+  SettingsIcon,
   SquarePenIcon,
   TagIcon,
   type LucideIcon,
@@ -60,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: '系統',
     items: [
       { title: '檔案', to: '/files', icon: FilesIcon, keywords: ['file', 'upload', '圖片'] },
+      { title: '網站設定', to: '/settings', icon: SettingsIcon, keywords: ['settings', 'site', 'smtp', 'email', '寄信'] },
       { title: '儲存設定', to: '/storage-settings', icon: CloudIcon, keywords: ['storage', 's3'] },
       { title: 'API 金鑰', to: '/api-keys', icon: KeyRoundIcon, keywords: ['api', 'key', 'mcp'] },
     ],

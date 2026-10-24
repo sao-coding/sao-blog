@@ -1,9 +1,10 @@
 import { adminProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { asc, count, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
 import { friends } from "@sao-blog/db/schema/index";
 import z from "zod";
 import { normalizeSiteUrl, sanitizePublicUrl } from "@sao-blog/api/lib/friend-url";
+import { notifyApplicantReviewed } from "@sao-blog/api/lib/friend-mail";
 
 const friendStatusSchema = z.enum(["pending", "approved", "rejected", "hidden"]);
 
@@ -137,7 +138,8 @@ const updateFriend = adminProcedure
         }
     });
 
-// 審核 / 下架（可批次）；note 有給才覆寫備註
+// 審核 / 下架（可批次）；note 有給才覆寫備註。
+// 只有從「待審」變成通過 / 拒絕才寄信給申請人，下架後重新上架不寄
 const setFriendStatus = adminProcedure
     .route({ method: "PATCH", path: "/friends/status" })
     .input(z.object({
@@ -147,6 +149,11 @@ const setFriendStatus = adminProcedure
     }))
     .handler(async ({ input, context }) => {
         const now = new Date();
+        const pendingRows = await db
+            .select({ id: friends.id })
+            .from(friends)
+            .where(and(inArray(friends.id, input.ids), eq(friends.status, "pending")));
+        const wasPending = new Set(pendingRows.map((r) => r.id));
         const rows = await db
             .update(friends)
             .set({
@@ -157,7 +164,14 @@ const setFriendStatus = adminProcedure
                 ...(input.note !== undefined ? { reviewNote: input.note || null } : {}),
             })
             .where(inArray(friends.id, input.ids))
-            .returning({ id: friends.id });
+            .returning();
+
+        const next = input.status;
+        if (next === "approved" || next === "rejected") {
+            for (const row of rows) {
+                if (wasPending.has(row.id)) await notifyApplicantReviewed(row, next);
+            }
+        }
 
         return {
             status: "success",
