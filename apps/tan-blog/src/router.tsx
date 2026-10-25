@@ -5,6 +5,7 @@ import { deLocalizeUrl, localizeUrl } from '#/paraglide/runtime'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { RouteError } from './components/route-error'
 import { getContext } from './components/providers/query-context'
+import { postTransitionTypes, supportsPostTransitions } from './lib/post-transitions'
 
 export function getRouter() {
   const context = getContext()
@@ -17,6 +18,8 @@ export function getRouter() {
     defaultErrorComponent: RouteError,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    // 文章列表 ⇄ 文章的展卷／收卷、文章之間翻頁（見 lib/post-transitions.ts）
+    defaultViewTransition: supportsPostTransitions() ? { types: postTransitionTypes } : false,
     rewrite: {
       input: ({ url }) => deLocalizeUrl(url),
       output: ({ url }) => localizeUrl(url),
