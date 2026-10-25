@@ -266,5 +266,10 @@
   "friends_no_description": "No description yet.",
   "fcircle_expand": "Show all {count}",
   "fcircle_collapse": "Show less",
-  "friends_no_preview": "No preview available for this site."
+  "friends_no_preview": "No preview available for this site.",
+  "login_dialog_title": "Sign in to {site}",
+  "login_dialog_description": "Sign in to comment and like posts",
+  "logout": "Sign out",
+  "post_like": "Like this post",
+  "post_liked": "Liked"
 }

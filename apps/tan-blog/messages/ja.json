@@ -266,5 +266,10 @@
   "friends_no_description": "紹介文はまだありません。",
   "fcircle_expand": "全 {count} 人を表示",
   "fcircle_collapse": "閉じる",
-  "friends_no_preview": "このサイトのプレビューはありません。"
+  "friends_no_preview": "このサイトのプレビューはありません。",
+  "login_dialog_title": "{site} にログイン",
+  "login_dialog_description": "ログインするとコメントやいいねができます",
+  "logout": "ログアウト",
+  "post_like": "この記事にいいね",
+  "post_liked": "いいね済み"
 }

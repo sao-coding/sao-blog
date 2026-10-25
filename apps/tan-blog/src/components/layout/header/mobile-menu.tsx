@@ -17,6 +17,7 @@ import { VisuallyHidden } from 'radix-ui'
 import { m } from '#/paraglide/messages'
 import { currentContentLocale } from '@/lib/content-locale'
 import { useSearchStore } from '@/store/search-store'
+import { openLoginDialog } from '@/store/login-dialog-store'
 
 // 外部網址與 /rss.xml 這類伺服器路由用原生 <a>（新分頁），其餘走站內路由
 const MenuLink = ({ href, ...props }: Omit<React.ComponentProps<'a'>, 'href'> & { href: string }) =>
@@ -204,14 +205,12 @@ const MobileMenu = ({ isMobile }: { isMobile: boolean }) => {
 
                 {/* 底部 — 讀者登錄 */}
                 <div className="flex justify-end px-5 py-3 border-t border-border">
-                    <DrawerClose render={
-                        <Link
-                            to="/login"
-                            className="text-xs text-red-500 hover:text-red-400 tracking-widest transition-colors duration-150"
-                        >
-                            {m.reader_login()}
-                        </Link>
-                    } />
+                    <DrawerClose
+                        onClick={openLoginDialog}
+                        className="text-xs text-red-500 hover:text-red-400 tracking-widest transition-colors duration-150"
+                    >
+                        {m.reader_login()}
+                    </DrawerClose>
                 </div>
             </DrawerContent>
         </div>

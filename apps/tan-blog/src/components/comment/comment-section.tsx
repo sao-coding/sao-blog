@@ -18,6 +18,7 @@ import { CommentList, CommentSortToggle } from './comment-list'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { resolveRefType, toCommentTree } from '@/utils/comment'
 import { m } from '#/paraglide/messages'
+import { openLoginDialog } from '@/store/login-dialog-store'
 
 interface CommentSectionProps {
   postId: string
@@ -128,6 +129,13 @@ function CommentSectionContent({ postId }: { postId: string }) {
       return { previousData }
     },
 
+    onSuccess: (res, _vars, context) => {
+      // 限流等狀況 API 回 status: "error"（不 throw），要自己還原
+      if (res.status === 'success') return
+      if (context?.previousData !== undefined) queryClient.setQueryData(queryKey, context.previousData)
+      toast.add({ title: res.message || m.comment_action_failed(), type: 'error' })
+    },
+
     onError: (_err, _vars, context) => {
       if (context?.previousData !== undefined) {
         queryClient.setQueryData(queryKey, context.previousData)
@@ -141,8 +149,12 @@ function CommentSectionContent({ postId }: { postId: string }) {
   })
 
   const handleLike = useCallback(
-    (commentId: string) => likeCommentMutation.mutate({ id: commentId, like: true }),
-    [likeCommentMutation]
+    (commentId: string) => {
+      // 未登入時不打 API（protectedProcedure 只會回錯誤），改開登入對話框
+      if (!isAuthenticated) return openLoginDialog()
+      likeCommentMutation.mutate({ id: commentId, like: true })
+    },
+    [likeCommentMutation, isAuthenticated]
   )
 
   const userName = session?.user.name ?? undefined

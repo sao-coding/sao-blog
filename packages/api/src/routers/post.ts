@@ -1,6 +1,6 @@
-import { publicProcedure } from "@sao-blog/api/index";
+import { protectedProcedure, publicProcedure } from "@sao-blog/api/index";
 import { db } from "@sao-blog/db";
-import { posts, categories, postTags, tags, user } from "@sao-blog/db/schema/index";
+import { posts, postLikes, categories, postTags, tags, user } from "@sao-blog/db/schema/index";
 import { type TagModel } from "@sao-blog/db/schema/index";
 import { PostResponseSchema, PostsResponseSchema } from "../schema/post";
 import { eq, inArray, desc, and, sql } from "drizzle-orm";
@@ -9,6 +9,7 @@ import { mdxToExcerpt } from "../lib/mdx-to-text";
 import { env } from "@sao-blog/env/server";
 import { ensureCompiled, localizedCategories, localizePosts } from "../lib/i18n";
 import { localeInput } from "../schema/i18n";
+import { guardLike } from "../lib/comment-guard";
 
 const getPosts = publicProcedure
     .route({ method: "GET", path: "/posts" })
@@ -163,8 +164,64 @@ const addView = publicProcedure
         return { status: "success", message: "ok" };
     });
 
+// 按讚數與自己是否按過。詳情頁有 ISR 快取，likeCount 會過期，所以和閱讀數一樣由前端另外抓
+const getLikes = publicProcedure
+    .route({ method: "GET", path: "/posts/{id}/likes" })
+    .input(z.object({ id: z.uuid() }))
+    .handler(async ({ input, context }) => {
+        const userId = context.session?.user.id;
+        const [post] = await db
+            .select({ likes: posts.likeCount })
+            .from(posts)
+            .where(and(eq(posts.id, input.id), eq(posts.status, "published")))
+            .limit(1);
+        if (!post) return { status: "error" as const, message: "文章不存在", data: { likes: 0, liked: false } };
+
+        const liked = userId
+            ? !!(await db.query.postLikes.findFirst({
+                where: (l) => and(eq(l.postId, input.id), eq(l.userId, userId)),
+                columns: { postId: true },
+            }))
+            : false;
+        return { status: "success" as const, message: "ok", data: { likes: post.likes, liked } };
+    });
+
+// 按讚 / 再按一次取消（需登入）
+const likePost = protectedProcedure
+    .route({ method: "POST", path: "/posts/{id}/like" })
+    .input(z.object({ id: z.uuid() }))
+    .handler(async ({ input, context }) => {
+        const userId = context.session.user.id;
+        const limited = await guardLike(userId);
+        if (limited) return { status: "error" as const, message: limited, data: null };
+
+        const post = await db.query.posts.findFirst({
+            where: (p) => and(eq(p.id, input.id), eq(p.status, "published")),
+            columns: { id: true },
+        });
+        if (!post) return { status: "error" as const, message: "文章不存在", data: null };
+
+        const data = await db.transaction(async (tx) => {
+            const removed = await tx
+                .delete(postLikes)
+                .where(and(eq(postLikes.postId, input.id), eq(postLikes.userId, userId)))
+                .returning({ postId: postLikes.postId });
+            const liked = removed.length === 0;
+            if (liked) await tx.insert(postLikes).values({ postId: input.id, userId }).onConflictDoNothing();
+            const [row] = await tx
+                .update(posts)
+                .set({ likeCount: liked ? sql`${posts.likeCount} + 1` : sql`greatest(${posts.likeCount} - 1, 0)` })
+                .where(eq(posts.id, input.id))
+                .returning({ likes: posts.likeCount });
+            return { liked, likes: row?.likes ?? 0 };
+        });
+        return { status: "success" as const, message: "ok", data };
+    });
+
 export default {
     getPosts,
     getPost,
     addView,
+    getLikes,
+    likePost,
 };

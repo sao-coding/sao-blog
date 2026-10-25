@@ -62,6 +62,7 @@
 /* 結果片段 */
 .search-snippet {
   margin-top: 0.25rem;
+  overflow-wrap: anywhere;
   font-size: 0.8125rem;
   line-height: 1.65;
   color: var(--muted-foreground);
@@ -100,6 +101,13 @@
 
 /* ── ⌘K 面板：一張紙色的箋，髮絲線邊框，分組標題像頁邊小字 ─────────────── */
 .search-palette {
+  /* DialogContent 是 grid：預設欄寬吃 min-content，片段裡的長網址／長英文字會把欄撐寬，
+   * 再被 overflow: hidden 裁掉。鎖成 minmax(0, 1fr) 讓內容跟著面板寬度折行 */
+  grid-template-columns: minmax(0, 1fr);
+  /* 面板從 15vh 開始往下長：限制總高在可視範圍內（dvh 會扣掉手機鍵盤），
+   * 讓清單自己捲動，而不是整個面板超出畫面底部被切掉 */
+  grid-template-rows: minmax(0, 1fr);
+  max-height: calc(100dvh - 15vh - 1rem);
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: 0.75rem;
@@ -114,6 +122,11 @@
     0 1px 2px oklch(0 0 0 / 0.3),
     0 18px 40px -12px oklch(0 0 0 / 0.6);
 }
+.search-palette [cmdk-root] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 .search-palette-head {
   padding: 1.125rem 1.25rem 0.75rem;
 }
@@ -123,6 +136,8 @@
   padding: 0 1.25rem 0.5rem;
 }
 .search-palette-list {
+  flex: 1 1 auto;
+  min-height: 0;
   max-height: min(60vh, 26rem);
   overflow-y: auto;
   overscroll-behavior: contain;

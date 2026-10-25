@@ -3,6 +3,7 @@ import { useLocation } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { useHeaderStore } from '@/store/header-store'
 import { AnimatePresence, motion } from 'motion/react'
+import { isDetailPath } from './header'
 
 type Props = {
   showBackground: boolean
@@ -15,19 +16,14 @@ type Props = {
  */
 const HeaderTitle: React.FC<Props> = ({ showBackground }) => {
   const pathname = useLocation({ select: (l) => l.pathname })
-  const { postState, noteState, clearAll } = useHeaderStore()
+  const postState = useHeaderStore((s) => s.postState)
+  const noteState = useHeaderStore((s) => s.noteState)
+  const clearAll = useHeaderStore((s) => s.clearAll)
 
   // 當路由變動且不在 detail page 時，清除 store 狀態
   // 特別處理 /notes/topics：它是 topics 列表，不應被視為 note detail，故需清除
   useEffect(() => {
-    const isPostDetail = pathname?.startsWith('/posts/')
-    // notes 下有多種頁面，/notes/topics 應視為 list，而非 detail
-    const isNoteDetail =
-      pathname?.startsWith('/notes/') && !pathname?.startsWith('/notes/topics')
-
-    if (!isPostDetail && !isNoteDetail) {
-      clearAll()
-    }
+    if (!isDetailPath(pathname)) clearAll()
   }, [pathname, clearAll])
 
   const title = postState?.title ?? noteState?.title

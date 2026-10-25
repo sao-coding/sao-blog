@@ -6,6 +6,7 @@ import { useHeaderStore } from '@/store/header-store'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { BackToTopFAB } from '@/components/fab'
 import { CommentSection } from '@/components/comment'
+import { PostLikeButton } from '@/components/post-like-button'
 import { useAdminShortcutStore } from '@/store/admin-shortcut-store'
 import { WrittenOn } from '@/components/written-season'
 import { LetterPaper, LetterSignature } from '@/components/letter-paper'
@@ -102,6 +103,7 @@ export function PostClientPage({
             </article>
             <LetterSignature date={writtenAt} />
           </LetterPaper>
+          <PostLikeButton postId={postId} className="mb-12" />
           <div ref={viewSentinelRef} aria-hidden />
           <CommentSection postId={postId} lazyLoad />
         </div>

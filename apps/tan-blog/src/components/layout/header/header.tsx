@@ -6,64 +6,39 @@ import Nav from './nav'
 import SiteOwnerAvatar from './site-owner-avatar'
 import HeaderTitle from './header-title'
 import { useIsMobile } from '@/hooks/use-mobile'
-import {
-  Drawer,
-} from '@sao-blog/ui/components/drawer'
+import { Drawer } from '@sao-blog/ui/components/drawer'
 import MobileMenu from './mobile-menu'
-import {
-  usePageScrollLocation,
-  usePageScrollDirection,
-} from '@/hooks/use-page-scroll'
+import { useScrollStore } from '@/store/scroll-store'
 import UserButton from './user-button'
 import { SearchCommand } from './search-command'
+import { LoginDialog } from '@/components/login-dialog'
 
 /** 判斷「已滾動」的閾值（px） */
 const SCROLL_THRESHOLD = 50
+
+/** 文章 / 日記詳情頁（/notes/topics 是專欄列表，不算） */
+export function isDetailPath(pathname: string) {
+  return (
+    pathname.startsWith('/posts/') ||
+    (pathname.startsWith('/notes/') && !pathname.startsWith('/notes/topics'))
+  )
+}
 
 const Header = () => {
   const pathname = useLocation({ select: (l) => l.pathname })
   const [drawerOpen, setDrawerOpen] = useState(false)
   const isMobile = useIsMobile(1024)
+  const isDetailPage = isDetailPath(pathname)
 
-  // 從共用 store 取得滾動位置與方向
-  const scrollTop = usePageScrollLocation()
-  const scrollDirection = usePageScrollDirection()
-
-  const isScrolled = scrollTop > SCROLL_THRESHOLD
-
-  // 派生狀態計算
-  const isTargetPage =
-    pathname === '/' ||
-    pathname?.startsWith('/posts') ||
-    // 將 /notes/topics 視為列表而非目標頁（不顯示背景）
-    (pathname?.startsWith('/notes') && !pathname?.startsWith('/notes/topics'))
-
-  const showBackground = isTargetPage && isScrolled
-
-  const isDetailPage =
-    pathname?.startsWith('/posts/') ||
-    (pathname?.startsWith('/notes/') && !pathname?.startsWith('/notes/topics'))
-
-  const showPinnedNav =
-    isDetailPage && isScrolled && scrollDirection === 'up'
-
-  // 中央導航的樣式
-  const centralNavClass = cn(
-    'transition-all duration-300 ease-in-out',
-    isDetailPage && isScrolled
-      ? 'opacity-0 -translate-y-1 pointer-events-none'
-      : 'opacity-100 translate-y-0'
+  // 只訂閱布林值：原本訂閱 scrollTop，每個 scroll 事件都會重繪整個 header
+  const isScrolled = useScrollStore((s) => s.scrollTop > SCROLL_THRESHOLD)
+  const showPinnedNav = useScrollStore(
+    (s) => isDetailPage && s.scrollTop > SCROLL_THRESHOLD && s.direction === 'up'
   )
 
-  // 固定導航的樣式
-  const pinnedNavClass = cn(
-    'fixed top-[3.375rem] left-1/2 -translate-x-1/2 z-50',
-    'bg-background',
-    'transition-all duration-300 ease-in-out',
-    showPinnedNav && isDetailPage
-      ? 'opacity-100 translate-y-0'
-      : 'opacity-0 -translate-y-4 pointer-events-none'
-  )
+  // 所有頁面捲動後都顯示毛玻璃背景（原本只限首頁 / 文章 / 日記，新頁面如 /fcircle 會漏掉）
+  const showBackground = isScrolled
+  const navVariant = showBackground ? 'integrated' : 'default'
 
   return (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
@@ -78,25 +53,28 @@ const Header = () => {
       >
         <div className="grid grid-cols-[4.5rem_auto_4.5rem] max-w-7xl mx-auto h-full lg:px-8">
           <MobileMenu isMobile={isMobile} />
-          <div>
-            <div className="relative flex justify-center items-center space-x-4 h-full">
-              {/* 如果是手機模式 並且 showBackground 就顯示標題 不然就顯示 SiteOwnerAvatar DevicesStatus */}
-              {showBackground && isMobile === true ? (
-                <HeaderTitle showBackground={showBackground} />
-              ) : (
-                <>
-                  <SiteOwnerAvatar />
-                  <DevicesStatus />
-                </>
-              )}
-            </div>
+          <div className="relative flex justify-center items-center space-x-4 h-full">
+            {/* 手機版捲動後顯示標題，否則顯示站長頭像與裝置狀態 */}
+            {showBackground && isMobile ? (
+              <HeaderTitle showBackground={showBackground} />
+            ) : (
+              <>
+                <SiteOwnerAvatar />
+                <DevicesStatus />
+              </>
+            )}
           </div>
-          {isMobile === false && (
+          {!isMobile && (
             <div className="relative grow justify-center items-center hidden lg:flex">
               <Nav
                 id="central"
-                variant={showBackground ? 'integrated' : 'default'}
-                className={centralNavClass}
+                variant={navVariant}
+                className={cn(
+                  'transition-all duration-300 ease-in-out',
+                  isDetailPage && isScrolled
+                    ? 'opacity-0 -translate-y-1 pointer-events-none'
+                    : 'opacity-100 translate-y-0'
+                )}
               />
               <HeaderTitle showBackground={showBackground} />
             </div>
@@ -108,16 +86,23 @@ const Header = () => {
           </div>
         </div>
 
-        {/* 固定導航 - 使用條件渲染配合 CSS 過渡 */}
-        {isMobile === false && (
+        {/* 詳情頁往上捲時浮出的導航 */}
+        {!isMobile && isDetailPage && (
           <Nav
             id="pinned"
-            className={pinnedNavClass}
-            variant={showBackground ? 'integrated' : 'default'}
+            variant={navVariant}
+            className={cn(
+              'fixed top-[3.375rem] left-1/2 -translate-x-1/2 z-50 bg-background',
+              'transition-all duration-300 ease-in-out',
+              showPinnedNav
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-4 pointer-events-none'
+            )}
           />
         )}
       </header>
-    </Drawer >
+      <LoginDialog />
+    </Drawer>
   )
 }
 

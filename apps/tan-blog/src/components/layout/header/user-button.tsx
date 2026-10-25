@@ -1,10 +1,4 @@
 import { useEffect, useState } from "react"
-import { siteName } from "@/lib/seo"
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@sao-blog/ui/components/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,17 +10,13 @@ import {
 } from "@sao-blog/ui/components/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from '@sao-blog/ui/components/avatar'
 import { Button } from '@sao-blog/ui/components/button'
-import { SITE_OWNER } from '@/config/mega-menu'
-import { IconBrandGithub, IconBrandGoogle, IconUserBolt } from '@tabler/icons-react'
+import { IconLogout, IconUserBolt } from '@tabler/icons-react'
 import { authClient } from "@/lib/auth-client"
-import { useLocation } from "@tanstack/react-router"
+import { openLoginDialog } from "@/store/login-dialog-store"
 import { m } from '#/paraglide/messages'
-
 
 const UserButton = () => {
   const { data: session } = authClient.useSession()
-
-  const pathname = useLocation({ select: (l) => l.pathname })
 
   // Avoid hydration mismatch: better-auth's session store can resolve
   // synchronously on the client (from its cookie cache) before hydration
@@ -38,66 +28,40 @@ const UserButton = () => {
     setMounted(true)
   }, [])
 
-  const signIn = async (provider: string) => {
-    await authClient.signIn.social({
-      provider,
-      callbackURL: `${window.location.origin}${pathname}`,
-    })
+  if (!mounted || !session?.user) {
+    return (
+      <Button
+        variant="outline"
+        size="icon-lg"
+        className="rounded-full size-10"
+        aria-label={m.reader_login()}
+        title={m.reader_login()}
+        onClick={openLoginDialog}
+      >
+        <IconUserBolt className='size-6' />
+      </Button>
+    )
   }
 
   return (
-    <Dialog>
-      {mounted && session?.user ? (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar className="size-10 cursor-pointer">
-                <AvatarImage src={session.user.image as string} />
-                <AvatarFallback>{session.user.name?.[0] || "U"}</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Button variant="outline" className="w-full" onClick={() => authClient.signOut()}>
-                    登出
-                  </Button>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </>
-      ) : (
-        <>
-          <DialogTrigger render={
-            <Button variant="outline" size="icon-lg" className="rounded-full size-10" aria-label={m.reader_login()}>
-              <IconUserBolt className='size-6 cursor-pointer' />
-            </Button>
-          } />
-        </>
-      )}
-      <DialogContent>
-        <div className="relative flex justify-center pt-8">
-          <Avatar className="size-14 absolute -top-11 left-1/2 -translate-x-1/2">
-            <AvatarImage src={SITE_OWNER.avatar} />
-            <AvatarFallback>{SITE_OWNER.fallback}</AvatarFallback>
-          </Avatar>
-          <div className="gap-4 flex flex-col items-center">
-            登入到 {siteName()}
-            <div className="flex gap-4">
-              <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("github")} aria-label={m.login_github()}>
-                <IconBrandGithub className='size-6' />
-              </Button>
-              <Button variant="outline" size="icon-lg" className="rounded-full" onClick={() => signIn("google")} aria-label={m.login_google()}>
-                <IconBrandGoogle className='size-6' />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <DropdownMenu>
+      <DropdownMenuTrigger className="rounded-full">
+        <Avatar className="size-10 cursor-pointer">
+          <AvatarImage src={session.user.image ?? undefined} alt={session.user.name} />
+          <AvatarFallback>{session.user.name?.[0] || "U"}</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => authClient.signOut()}>
+          <IconLogout />
+          {m.logout()}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

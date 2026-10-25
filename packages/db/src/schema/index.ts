@@ -484,6 +484,24 @@ export const commentLikes = pgTable(
   ]
 )
 
+// 文章按讚（一人一篇一次，再按取消）；posts.like_count 是它的計數快取
+export const postLikes = pgTable(
+  'post_likes',
+  {
+    userId: varchar('user_id', { length: 256 }).notNull(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => posts.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.postId] }),
+    index('post_likes_post_idx').on(table.postId),
+  ]
+)
+
 export const user = pgTable('user', {
   id: uuid('id')
     .primaryKey()

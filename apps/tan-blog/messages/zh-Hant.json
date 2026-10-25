@@ -266,5 +266,10 @@
   "friends_no_description": "這位朋友還沒有留下介紹。",
   "fcircle_expand": "展開全部 {count} 位",
   "fcircle_collapse": "收起",
-  "friends_no_preview": "這個網站沒有提供預覽。"
+  "friends_no_preview": "這個網站沒有提供預覽。",
+  "login_dialog_title": "登入到 {site}",
+  "login_dialog_description": "登入後即可留言與按讚",
+  "logout": "登出",
+  "post_like": "喜歡這篇文章",
+  "post_liked": "已按讚"
 }
