@@ -40,3 +40,25 @@ export function rememberViewedPost(slug: string) {
 export function isLastViewedPost(slug: string) {
   return lastViewedPost === slug
 }
+
+// 轉場進行中使用者一碰螢幕／滾滾輪就直接跳到結果：轉場期間看到的是截圖，若同時捲動，
+// 底下的頁面在動、截圖裡的標題卻還照原路線飛，結束時一跳回實際位置，手機上會像在抖。
+// TanStack Router 直接呼叫 document.startViewTransition，所以在這裡包一層記下目前的轉場。
+let guarded = false
+export function installTransitionInterruptGuard() {
+  if (guarded || typeof document === 'undefined' || typeof document.startViewTransition !== 'function') return
+  guarded = true
+  let current: ViewTransition | null = null
+  const start = document.startViewTransition.bind(document)
+  document.startViewTransition = ((arg?: Parameters<typeof start>[0]) => {
+    const transition = start(arg)
+    current = transition
+    transition.finished.finally(() => {
+      if (current === transition) current = null
+    })
+    return transition
+  }) as typeof document.startViewTransition
+  const skip = () => current?.skipTransition()
+  window.addEventListener('touchstart', skip, { passive: true })
+  window.addEventListener('wheel', skip, { passive: true })
+}

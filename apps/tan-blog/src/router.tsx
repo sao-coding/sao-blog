@@ -5,7 +5,7 @@ import { deLocalizeUrl, localizeUrl } from '#/paraglide/runtime'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { RouteError } from './components/route-error'
 import { getContext } from './components/providers/query-context'
-import { postTransitionTypes, supportsPostTransitions } from './lib/post-transitions'
+import { installTransitionInterruptGuard, postTransitionTypes, supportsPostTransitions } from './lib/post-transitions'
 
 export function getRouter() {
   const context = getContext()
@@ -27,6 +27,7 @@ export function getRouter() {
   })
 
   setupRouterSsrQueryIntegration({ router, queryClient: context.queryClient })
+  if (supportsPostTransitions()) installTransitionInterruptGuard()
 
   return router
 }
