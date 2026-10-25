@@ -10,9 +10,11 @@ import { useAdminShortcutStore } from '@/store/admin-shortcut-store'
 import { WrittenOn } from '@/components/written-season'
 import { LetterPaper, LetterSignature } from '@/components/letter-paper'
 import { client } from '@/lib/orpc'
+import { postTitleTransitionName, rememberViewedPost } from '@/lib/post-transitions'
 
 type PostClientPageProps = {
   children: ReactNode
+  slug: string
   postId: string
   writtenAt: Date | string
   showToc: boolean
@@ -27,6 +29,7 @@ type PostClientPageProps = {
 
 export function PostClientPage({
   children,
+  slug,
   postId,
   writtenAt,
   showToc,
@@ -47,6 +50,9 @@ export function PostClientPage({
       url: metaData.url,
     })
   }, [metaData])
+
+  // 回到列表時，標題要飛回這一篇那一列
+  useEffect(() => rememberViewedPost(slug), [slug])
 
   useEffect(() => {
     setOverridePath(`/admin/posts/editor/${postId}`)
@@ -83,7 +89,10 @@ export function PostClientPage({
           <LetterPaper date={writtenAt} className="mb-12">
             {/* 文章標題：原本只出現在捲動後的 header，手機與首屏都看不到 */}
             <header className="mb-8">
-              <h1 className="font-wenkai text-3xl leading-snug text-foreground text-balance sm:text-4xl">
+              <h1
+                className="font-wenkai text-3xl leading-snug text-foreground text-balance [view-transition-class:post-title] sm:text-4xl"
+                style={{ viewTransitionName: postTitleTransitionName(slug) }}
+              >
                 {metaData.title}
               </h1>
               <WrittenOn date={writtenAt} className="mt-3" />

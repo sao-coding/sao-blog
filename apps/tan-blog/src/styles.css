@@ -712,6 +712,156 @@
   100% { translate: calc(var(--sway) * -0.5) -62vh; opacity: 0; }
 }
 
+/* 3D 夜航山水：在星點之上、燈籠之下；建立成功（.is-3d）才淡入，同時把 SVG 山層淡出 */
+.ink-voyage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.ink-layer {
+  transition: opacity 1.6s ease;
+}
+.ink-landscape.is-3d .ink-voyage {
+  opacity: 1;
+}
+.ink-landscape.is-3d .ink-layer {
+  opacity: 0;
+}
+
+/* ── 展卷：文章換頁的 View Transitions（types 由 lib/post-transitions.ts 依路徑決定）────────────────
+ * unroll    進入文章：舊頁淡成底紙，新頁像手卷由上往下攤開（遮罩的柔邊就是卷軸邊緣），標題由列表飛過來
+ * roll-up   回到列表：反過來，列表由下往上捲開，標題飛回原本那一列
+ * turn-page 文章之間：舊頁往左翻走、新頁從右邊翻進來
+ * header 自成一層（site-header）不參與動畫 */
+@property --vt-roll {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+@keyframes vt-unroll {
+  from { --vt-roll: 0%; }
+  to { --vt-roll: 125%; }
+}
+@keyframes vt-dim {
+  to { opacity: 0.18; filter: blur(2px); }
+}
+@keyframes vt-turn-out {
+  to { opacity: 0; transform: translateX(-8%) rotateY(8deg); }
+}
+@keyframes vt-turn-in {
+  from { opacity: 0; transform: translateX(8%) rotateY(-8deg); }
+}
+html:active-view-transition-type(unroll, roll-up, turn-page)::view-transition-group(*) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+/* 標題飛行時新舊兩行字不要疊在一起：舊的很快淡掉、新的稍晚浮出 */
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+html:active-view-transition-type(unroll, roll-up, turn-page)::view-transition-old(*.post-title) {
+  animation: vt-fade-out 0.18s ease-out both;
+}
+html:active-view-transition-type(unroll, roll-up, turn-page)::view-transition-new(*.post-title) {
+  animation: vt-fade-in 0.35s 0.12s ease-out both;
+}
+html:active-view-transition-type(unroll, roll-up)::view-transition-old(root) {
+  animation: vt-dim 0.45s ease-out both;
+}
+html:active-view-transition-type(unroll)::view-transition-new(root) {
+  animation: vt-unroll 0.8s cubic-bezier(0.35, 0.6, 0.2, 1) both;
+  mask-image: linear-gradient(to bottom, #000 calc(var(--vt-roll) - 25%), transparent var(--vt-roll));
+}
+html:active-view-transition-type(roll-up)::view-transition-new(root) {
+  animation: vt-unroll 0.7s cubic-bezier(0.35, 0.6, 0.2, 1) both;
+  mask-image: linear-gradient(to top, #000 calc(var(--vt-roll) - 25%), transparent var(--vt-roll));
+}
+html:active-view-transition-type(turn-page)::view-transition-old(root) {
+  animation: vt-turn-out 0.4s ease-in both;
+}
+html:active-view-transition-type(turn-page)::view-transition-new(root) {
+  animation: vt-turn-in 0.5s 0.1s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* 換頁慢的時候，頂端用節氣色寫出一筆（InkProgress）：筆觸邊緣用噪聲遮罩做出飛白 */
+.ink-progress {
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: 100;
+  height: 3px;
+  width: var(--ink-progress, 0%);
+  background: linear-gradient(90deg, color-mix(in oklch, var(--season) 40%, transparent), var(--season) 30%, var(--season));
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='6'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.02 .9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.4 -.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  mask-size: 240px 100%;
+  border-radius: 0 999px 999px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 6s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.4s ease;
+}
+.ink-progress:not([data-state]) {
+  transition: none;
+}
+.ink-progress[data-state='writing'] {
+  --ink-progress: 85%;
+  opacity: 1;
+}
+.ink-progress[data-state='done'] {
+  --ink-progress: 100%;
+  opacity: 0;
+  transition: width 0.25s ease-out, opacity 0.4s ease 0.2s;
+}
+
+/* 進站開場（每次整頁載入都播，見 lib/ink-intro.ts）：流體引擎接手前，先用一層底色＋節氣名蓋住頁面 */
+.ink-intro-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+}
+html[data-ink-intro] .ink-intro-veil {
+  opacity: 1;
+  visibility: visible;
+  transition: none;
+}
+
+/* 開場時浮在墨面上的節氣名：晝是紙上的墨字，夜是夜色上的節氣色 */
+.ink-loading-term {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: 0.5em;
+  margin-right: -0.5em;
+  color: var(--foreground);
+  opacity: 0.85;
+  animation: ink-term-breathe 2.4s ease-in-out infinite;
+}
+.dark .ink-loading-term {
+  color: color-mix(in oklch, var(--season) 75%, white);
+  text-shadow: 0 0 24px color-mix(in oklch, var(--season) 45%, transparent);
+}
+@keyframes ink-term-breathe {
+  50% { opacity: 0.55; }
+}
+
 .ink-fade {
   position: absolute;
   inset: auto 0 0 0;

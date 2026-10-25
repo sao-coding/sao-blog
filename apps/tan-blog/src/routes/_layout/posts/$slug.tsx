@@ -70,6 +70,7 @@ function PostDetailPage() {
 
   return (
     <PostClientPage
+      slug={slug}
       postId={data.id}
       writtenAt={data.createdAt}
       showToc={data.frontmatter.showToc !== false}

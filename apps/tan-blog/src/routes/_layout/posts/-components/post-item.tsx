@@ -7,6 +7,7 @@ import { TermMark } from '@/components/written-season'
 import type { SearchHit } from '@sao-blog/api/lib/search/query'
 import { Highlighted, SearchSnippet } from '@/components/search/search-hit'
 import { siteTime } from '@/lib/site-time'
+import { isLastViewedPost, postTitleTransitionName } from '@/lib/post-transitions'
 
 export type PostListItem = z.infer<typeof postSchema>
 
@@ -46,10 +47,19 @@ export function PostItem({
       </div>
 
       <div className="min-w-0">
-        <h2 className="font-wenkai text-lg leading-snug text-foreground sm:text-xl">
+        {/* 標題與文章頁的 h1 共用 view-transition-name：點下去時才掛上（同名一頁只能一個），
+            從文章回來時，剛看完的那一列預先掛著，標題才飛得回來 */}
+        <h2
+          className="font-wenkai text-lg leading-snug text-foreground [view-transition-class:post-title] sm:text-xl"
+          style={isLastViewedPost(post.slug) ? { viewTransitionName: postTitleTransitionName(post.slug) } : undefined}
+        >
           <Link
             to="/posts/$slug"
             params={{ slug: post.slug }}
+            onClick={(e) => {
+              const title = e.currentTarget.parentElement
+              if (title) title.style.viewTransitionName = postTitleTransitionName(post.slug)
+            }}
             className={cn(
               'bg-[linear-gradient(var(--ink),var(--ink))] bg-no-repeat [background-position:0_100%] [background-size:0%_1px]',
               'transition-[background-size,color] duration-500 ease-out',

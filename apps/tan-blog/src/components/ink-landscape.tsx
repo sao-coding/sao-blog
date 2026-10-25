@@ -1,12 +1,14 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
 import { afterLoadIdle } from '@/lib/after-load'
 import { SeasonParticles } from '@/components/season-particles'
+import type { InkVoyage } from '@/components/ink-voyage'
 
 // 首頁主視覺：夢州夜色的水墨山水。
 // - 五層由遠到近的山稜，水墨畫「稜線濃、山腳化入霧氣」的畫法：每層用由上而下淡出的漸層
 // - 山層之間夾著緩慢漂移的霧帶；捲動時各層位移速度不同，產生景深
 // - 天空只有少量靜態星點（部分微微閃爍）與從山谷升起的燈籠（呼應「蜃雲燈影」）
 // - 季節粒子只出現在這裡，不再撒滿全站
+// - 支援 WebGL 時，載入完成後換成 three.js 的 3D 夜航山水（ink-voyage.ts），SVG 山層淡出；SSR 與首屏仍是 SVG
 // 所有圖形都由程式產生，顏色全部來自季節變數（見 styles.css 的 .ink-landscape）。
 
 // 固定種子的亂數：SSR 與瀏覽器算出完全相同的山形與星點，不會 hydration mismatch
@@ -83,12 +85,33 @@ const LANTERNS = (() => {
 
 export function InkLandscape() {
   const rootRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // 燈籠、霧、星星的 CSS 動畫先暫停，頁面載入完、主執行緒空下來才開始（見 styles.css 的 .is-live）
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
     return afterLoadIdle(() => root.classList.add('is-live'))
+  }, [])
+
+  // 3D 山水：three.js 另外切成一個 chunk，主執行緒空下來才載入；建立成功才把 SVG 山層換掉
+  useEffect(() => {
+    const root = rootRef.current
+    const canvas = canvasRef.current
+    if (!root || !canvas) return
+    let voyage: InkVoyage | undefined
+    let disposed = false
+    const cancel = afterLoadIdle(async () => {
+      const { createInkVoyage } = await import('@/components/ink-voyage')
+      if (disposed) return
+      voyage = createInkVoyage(canvas, root)
+      if (voyage) root.classList.add('is-3d')
+    }, 200)
+    return () => {
+      disposed = true
+      cancel()
+      voyage?.dispose()
+    }
   }, [])
 
   // 捲動視差：只更新 CSS 變數，各層自己用 calc 算位移
@@ -127,6 +150,9 @@ export function InkLandscape() {
           />
         ))}
       </svg>
+
+      {/* 3D 夜航山水（載入後才顯示） */}
+      <canvas ref={canvasRef} className="ink-voyage" />
 
       {/* 燈籠：從山谷緩慢升起，左右輕晃，越高越淡 */}
       <div className="ink-lanterns">

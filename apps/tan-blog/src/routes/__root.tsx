@@ -18,6 +18,9 @@ import { m } from '#/paraglide/messages'
 
 import appCss from '../styles.css?url'
 import { RouteError } from '../components/route-error'
+import { InkIntro } from '../components/ink-intro'
+import { InkProgress } from '../components/ink-progress'
+import { INK_INTRO_INIT_SCRIPT } from '../lib/ink-intro'
 import { siteDescription, siteName } from '../lib/seo'
 
 import type { QueryClient } from '@tanstack/react-query'
@@ -120,6 +123,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <ScriptOnce>{THEME_INIT_SCRIPT}</ScriptOnce>
         <ScriptOnce>{SEASON_INIT_SCRIPT}</ScriptOnce>
+        <ScriptOnce>{INK_INTRO_INIT_SCRIPT}</ScriptOnce>
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere]">
@@ -127,6 +131,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <Toaster>
             {children}
             <div aria-hidden className="cloud-sea" />
+            <InkIntro term={now.term} />
+            <InkProgress />
           </Toaster>
         </ThemeProvider>
         <TanStackDevtools
