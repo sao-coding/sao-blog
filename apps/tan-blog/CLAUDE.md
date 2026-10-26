@@ -382,7 +382,8 @@ tan-blog 自己的 Nitro server，不依赖任何外部 CDN/Caddy/Nginx purge：
 ## 文档指南
 
 **必读**：
-- [`DESIGN.md`](./DESIGN.md)（整站設計風格：中國水墨＋日式鳥居／和紙、顏色、動態節奏；做任何 UI／動畫前先讀）
+- [`DESIGN.md`](./DESIGN.md)（整站設計風格：三遠構圖——遠是 3D 夜航江山、中是枯山水庭、近是信箋；字層／畫層、三樣材料、三條規則、頁面對照、轉場；做任何 UI／動畫前先讀）
+- [`REDESIGN-PLAN.md`](./REDESIGN-PLAN.md)（三遠改造的階段計畫與進度；動到 UI 前先看目前在哪一階段）
 - [`MIGRATION-TDD.md`](./MIGRATION-TDD.md)（10 阶段迁移计划、所有设计决策 & ADR）
 - [README.md](./README.md)（项目快速开始 & 部署指南）
 
