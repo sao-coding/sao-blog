@@ -150,7 +150,7 @@ export const SOCIAL_LINKS: SocialLinks = [
     name: 'GitHub',
     icon: IconBrandGithub,
     link: 'https://github.com/sao-coding',
-    color: 'bg-gray-900',
+    color: 'bg-black',
   },
   {
     name: 'Facebook',
@@ -174,7 +174,7 @@ export const SOCIAL_LINKS: SocialLinks = [
     name: 'X',
     icon: IconBrandX,
     link: 'https://twitter.com/sao_coding',
-    color: 'bg-gray-800',
+    color: 'bg-black',
   },
   {
     name: 'RSS',

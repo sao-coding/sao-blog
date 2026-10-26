@@ -5,6 +5,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { GardenLayer } from '@/components/garden/garden-layer'
 import { CircleFeed } from './-components/circle-feed'
 
 const searchSchema = z.object({
@@ -39,6 +40,7 @@ function FriendCirclePage() {
 
   return (
     <>
+      <GardenLayer stones={false} scene="stepping-stones" />
       <div className={pageShellClass}>
         <header className="mb-10 sm:mb-12">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_fcircle_title()}</h1>

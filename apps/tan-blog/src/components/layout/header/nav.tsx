@@ -255,7 +255,7 @@ const Nav = ({
         'relative mx-auto h-9 max-w-fit items-center justify-between rounded-full border px-4 md:flex overflow-visible group transition-all duration-100',
         variant === 'integrated'
           ? 'bg-transparent border-transparent shadow-none'
-          : 'bg-background/75 backdrop-blur-md border-border shadow-lg',
+          : 'glass-strong border-rule shadow-sm',
         className
       )}
       onMouseMove={handleMouseMove}
@@ -343,7 +343,7 @@ const Nav = ({
                 {isActive && shouldAnimate && (
                   <m.span
                     layoutId={`active-nav-underline-${id}`}
-                    className="absolute inset-x-0 bottom-px h-px bg-gradient-to-r from-transparent via-ink to-transparent pointer-events-none rounded-full"
+                    className="brush-stroke absolute inset-x-0 bottom-px h-0.5 pointer-events-none"
                     transition={{
                       type: 'spring',
                       stiffness: 350,
@@ -358,8 +358,7 @@ const Nav = ({
                 {!shouldAnimate && (
                   <span
                     className={cn(
-                      'absolute inset-x-0 bottom-px h-0.5 pointer-events-none rounded-full transition-all duration-300 ease-out',
-                      'bg-gradient-to-r from-transparent via-ink to-transparent',
+                      'brush-stroke absolute inset-x-0 bottom-px h-0.5 pointer-events-none transition-all duration-300 ease-out',
                       isActive
                         ? 'opacity-100 scale-x-100'
                         : 'opacity-0 scale-x-0'
@@ -444,7 +443,7 @@ const Nav = ({
                   damping: 32,
                   mass: 0.8,
                 }}
-                className="absolute top-full mt-3 bg-popover/95 backdrop-blur-md border border-border rounded-lg shadow-xl overflow-hidden z-50"
+                className="absolute top-full mt-3 glass-strong border border-rule rounded-lg shadow-sm overflow-hidden z-50"
                 onMouseEnter={handleDropdownMouseEnter}
                 onMouseLeave={handleDropdownMouseLeave}
               >

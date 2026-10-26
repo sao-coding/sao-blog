@@ -12,6 +12,7 @@ import { PostsSidebar, type TagStat } from './-components/posts-sidebar'
 import { currentContentLocale } from '@/lib/content-locale'
 import { runSearch } from '@/components/search/search-api'
 import { siteTime } from '@/lib/site-time'
+import { GardenLayer } from '@/components/garden/garden-layer'
 
 const SORTS = ['newest', 'oldest', 'updated'] as const
 type Sort = (typeof SORTS)[number]
@@ -138,6 +139,8 @@ function PostsIndexPage() {
   const activeTagName = tag ? (view?.tags.find((t) => t.slug === tag)?.name ?? tag) : undefined
 
   return (
+    <>
+    <GardenLayer />
     <PageWithSidebar sidebar={<PostsSidebar tags={view?.tags ?? []} activeTag={tag} query={q} />}>
       <header className="mb-10">
         <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
@@ -238,6 +241,7 @@ function PostsIndexPage() {
         </>
       )}
     </PageWithSidebar>
+    </>
   )
 }
 

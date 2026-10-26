@@ -7,7 +7,7 @@ import { siteTime } from '@/lib/site-time'
 
 const Footer = () => {
   return (
-    <footer className="relative mt-32 w-full border-t border-rule bg-background/40 py-6 text-center backdrop-blur-sm">
+    <footer className="relative mt-32 w-full border-t border-rule glass py-6 text-center">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-4 px-4 md:flex-row md:justify-between">
         <p className="text-sm text-muted-foreground">
           {m.footer_copyright({ year: String(siteTime(new Date()).year()), siteName: siteName() })}

@@ -4,6 +4,7 @@ import { BackToTopFAB } from '@/components/fab'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { GardenLayer } from '@/components/garden/garden-layer'
 import { FriendDirectory } from './-components/friend-directory'
 import { FriendApplyForm } from './-components/friend-apply-form'
 
@@ -32,6 +33,7 @@ function FriendsPage() {
 
   return (
     <>
+      <GardenLayer stones={false} />
       <div className={pageShellClass}>
         <header className="mb-10 sm:mb-14">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_friends_title()}</h1>

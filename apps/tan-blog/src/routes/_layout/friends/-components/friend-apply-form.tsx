@@ -71,6 +71,8 @@ export function FriendApplyForm() {
         value={values[key]}
         required={opts.required}
         maxLength={opts.maxLength ?? 500}
+        // 紙底：擋住後面庭的砂紋
+        className="bg-background dark:bg-background"
         onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
       />
     </label>

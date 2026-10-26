@@ -4,6 +4,8 @@ import { BookmarkIcon } from 'lucide-react'
 import { CalendarLeaf } from '@/components/calendar-leaf'
 import { TermMark } from '@/components/written-season'
 import { siteTime } from '@/lib/site-time'
+import { inkDryness } from '@/lib/season-spec'
+import { cn } from '@/lib/utils'
 
 export interface JournalNote {
   id: string
@@ -89,13 +91,17 @@ function JournalEntry({ note }: { note: JournalNote }) {
   return (
     <article
       id={`n-${note.id}`}
-      className="group relative scroll-mt-28 border-b border-dashed border-rule pb-5 last:border-b-0 not-first:pt-5"
+      className={cn(
+        'ink-row',
+        `ink-${inkDryness(note.createdAt)}`,
+        'group relative scroll-mt-28 border-b border-dashed border-rule pb-5 last:border-b-0 not-first:pt-5',
+      )}
     >
-      <h3 className="flex items-start justify-between gap-3 font-wenkai text-lg leading-snug text-foreground sm:text-xl">
+      <h3 className="flex items-start justify-between gap-3 ink-title font-wenkai text-lg leading-snug sm:text-xl">
         <Link
           to="/notes/$id"
           params={{ id: note.id }}
-          className="bg-[linear-gradient(var(--ink),var(--ink))] bg-no-repeat [background-position:0_100%] [background-size:0%_1px] transition-[background-size,color] duration-500 ease-out group-hover:text-ink group-hover:[background-size:100%_1px] after:absolute after:inset-0 after:content-['']"
+          className="bg-[linear-gradient(var(--ink),var(--ink))] bg-no-repeat [background-position:0_100%] [background-size:0%_1px] transition-[background-size] duration-500 ease-out group-hover:[background-size:100%_1px] after:absolute after:inset-0 after:content-['']"
         >
           {note.title}
         </Link>

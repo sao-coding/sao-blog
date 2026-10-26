@@ -6,10 +6,10 @@ import { AnimatePresence, m } from 'motion/react'
 const getTextClass = (depth?: number, isActive?: boolean) => {
   if (isActive) return 'text-primary'
   switch (depth) {
-    case 1: return 'font-medium text-slate-900 dark:text-slate-100'
-    case 2: return 'text-slate-700 dark:text-slate-300'
-    case 3: return 'text-slate-600 dark:text-slate-400'
-    default: return 'text-slate-600 dark:text-slate-400'
+    case 1: return 'font-medium text-foreground'
+    case 2: return 'text-foreground/80'
+    case 3: return 'text-foreground/70'
+    default: return 'text-foreground/70'
   }
 }
 

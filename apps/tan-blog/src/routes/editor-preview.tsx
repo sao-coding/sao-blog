@@ -102,7 +102,7 @@ function EditorPreviewPage() {
     // overflow-x-clip 保險，預覽窗格很窄時也不會出現橫向捲軸
     <div className="mx-auto w-full max-w-[920px] overflow-x-clip py-4 pr-7 pl-3 sm:py-6 sm:pr-9 sm:pl-5">
       {errors.length > 0 && (
-        <div className="sticky top-2 z-10 mb-4 rounded-lg border border-destructive/40 bg-background/95 p-3 text-xs text-destructive shadow-sm backdrop-blur">
+        <div className="sticky top-2 z-10 mb-4 rounded-lg border border-destructive/40 glass-strong p-3 text-xs text-destructive shadow-sm">
           {errors.slice(0, 3).map((e, i) => (
             <p key={i}>
               {e.line ? `第 ${e.line} 行：` : ''}

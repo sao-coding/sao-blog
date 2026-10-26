@@ -10,6 +10,7 @@ import { Timeline } from './-components/timeline'
 import { ArticlePreviewModal } from '@/components/preview/article-preview-modal'
 import ProgressNumber from '@/components/animation/progress-number'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { GardenLayer } from '@/components/garden/garden-layer'
 import { TermMark } from '@/components/written-season'
 import { currentContentLocale } from '@/lib/content-locale'
 
@@ -66,6 +67,7 @@ function TimelinePage() {
 
   return (
     <>
+      <GardenLayer stones={false} />
       {posts.length === 0 ? (
         <div className="mt-40 text-center font-wenkai text-xl text-muted-foreground">尚無資料</div>
       ) : (

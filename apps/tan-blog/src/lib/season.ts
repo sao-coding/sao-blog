@@ -33,7 +33,7 @@ function termDay(year: number, index: number) {
 }
 
 // 站主時區的「今天」年月日
-function localYmd(date: Date) {
+export function localYmd(date: Date) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: SITE_TZ,
     year: 'numeric',

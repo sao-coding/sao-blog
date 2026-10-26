@@ -101,10 +101,18 @@ export function InkLandscape() {
     if (!root || !canvas) return
     let voyage: InkVoyage | undefined
     let disposed = false
+    // 低階裝置（省流量、記憶體或核心很少）直接留在 SVG 的靜態山水
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } }
+    if (nav.connection?.saveData || (nav.deviceMemory ?? 8) <= 2 || (nav.hardwareConcurrency ?? 8) <= 2) return
     const cancel = afterLoadIdle(async () => {
       const { createInkVoyage } = await import('@/components/ink-voyage')
       if (disposed) return
-      voyage = createInkVoyage(canvas, root)
+      // 開頭幾秒幀率太低：釋放 3D，SVG 山層淡回來
+      voyage = createInkVoyage(canvas, root, () => {
+        root.classList.remove('is-3d')
+        voyage?.dispose()
+        voyage = undefined
+      })
       if (voyage) root.classList.add('is-3d')
     }, 200)
     return () => {

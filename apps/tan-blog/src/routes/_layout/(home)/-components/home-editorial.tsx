@@ -67,7 +67,7 @@ export function HomeEditorial({
           />
           <span
             aria-hidden
-            className="pointer-events-none absolute top-2 left-[18px] h-[58%] w-0.5 bg-gradient-to-b from-primary to-transparent"
+            className="pointer-events-none absolute top-2 left-[18px] h-[58%] w-[3px] brush-stroke-down"
           />
 
           {recentWriting.map((item, index) => {

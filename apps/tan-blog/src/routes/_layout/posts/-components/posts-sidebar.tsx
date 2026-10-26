@@ -48,7 +48,7 @@ export function PostsSidebar({
     <aside
       className={cn(
         'flex flex-col gap-8 text-sm',
-        !inline && 'sticky top-28 rounded-xl border border-rule bg-card/40 p-5 backdrop-blur-sm',
+        !inline && 'sticky top-28 rounded-xl border border-rule glass p-5',
       )}
     >
       <SearchField label={m.posts_search_label()}>
