@@ -366,8 +366,6 @@
   --garden-ink: var(--foreground);
 }
 .garden-layer svg { width: 100%; height: 100%; display: block; }
-/* 推近／拉遠（components/ink-push.tsx）：轉場那一層裡的庭疊在紙上，而不是頁面後面 */
-.ink-push .garden-layer { position: absolute; z-index: auto; }
 .garden-rake { fill: none; stroke: var(--garden-ink); stroke-opacity: 0.26; stroke-width: 1.1; stroke-linecap: round; }
 .garden-rake path { fill: none; }
 .dark .garden-rake { stroke-opacity: 0.18; }
@@ -867,6 +865,24 @@ html:active-view-transition-type(turn-page)::view-transition-old(root) {
 }
 html:active-view-transition-type(turn-page)::view-transition-new(root) {
   animation: vt-turn-in 0.5s 0.1s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+/* 列表之間（list）：只有舊內容很快淡掉。新舊兩張的庭與 header 一模一樣，交叉淡化時看起來不動；
+ * 新頁是活的畫面，標題與列自己浮上來（.page-enter，見 lib/page-enter.ts） */
+html:active-view-transition-type(list)::view-transition-group(*) {
+  animation-duration: 0.1s;
+}
+html:active-view-transition-type(list)::view-transition-old(*) {
+  animation: vt-fade-out 0.1s linear both;
+}
+html:active-view-transition-type(list)::view-transition-new(*) {
+  animation: vt-fade-in 0.1s linear both;
+}
+/* 新頁的字層進場：標題先出、列一行一行跟上，只有 opacity 與小幅位移 */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+}
+.page-enter {
+  animation: page-enter 0.18s var(--enter-delay, 0ms) cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 /* 減少動態效果：所有換頁（type = fade，見 postTransitionTypes）只淡入淡出，不位移、不展卷 */
 @media (prefers-reduced-motion: reduce) {

@@ -2,7 +2,10 @@
 // - 進入文章（unroll）：點到的那列標題飛到文章頁的標題位置，內文像手卷由上往下展開
 // - 回到列表（roll-up）：標題飛回原本那一列，列表由下往上捲開
 // - 文章之間（turn-page）：像翻過一頁紙
-// 其他換頁不做轉場（列表之間的暈染、首頁推近另有 components/ink-wash.tsx、ink-push.tsx）；減少動態效果時所有換頁只淡入。只在支援 view transition types 的瀏覽器啟用，其餘直接換頁。
+// - 列表之間、首頁 ⇄ 列表（list）：舊內容 0.1s 淡掉，庭與 header 新舊一樣、看起來不動；新內容的進場見 lib/page-enter.ts
+// 其他換頁不做轉場；減少動態效果時所有換頁只淡入。只在支援 view transition types 的瀏覽器啟用，其餘直接換頁。
+
+import { isSceneSwap } from './list-pages'
 
 const POST_PATH = /^\/posts\/[^/]+\/?$/
 
@@ -14,13 +17,14 @@ interface LocationChange {
 
 export function postTransitionTypes({ fromLocation, toLocation, pathChanged }: LocationChange): string[] | false {
   if (!pathChanged || !fromLocation) return false
-  // 減少動態效果：每次換頁都只淡入（暈染、推近這時不攔，換頁照樣走到這裡）
+  // 減少動態效果：每次換頁都只淡入
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return ['fade']
   const fromPost = POST_PATH.test(fromLocation.pathname)
   const toPost = POST_PATH.test(toLocation.pathname)
   if (fromPost && toPost) return ['turn-page']
   if (toPost) return ['unroll']
   if (fromPost) return ['roll-up']
+  if (isSceneSwap(fromLocation.pathname, toLocation.pathname)) return ['list']
   return false
 }
 
@@ -48,10 +52,6 @@ export function isLastViewedPost(slug: string) {
 // TanStack Router 直接呼叫 document.startViewTransition，所以在這裡包一層記下目前的轉場。
 let guarded = false
 let current: ViewTransition | null = null
-// 展卷／翻頁正在播：暈染、推近這時不攔，直接換頁（View Transition 的畫面在最上層，墨會被蓋在底下）
-export function isPostTransitionActive() {
-  return current !== null
-}
 export function installTransitionInterruptGuard() {
   if (guarded || typeof document === 'undefined' || typeof document.startViewTransition !== 'function') return
   guarded = true

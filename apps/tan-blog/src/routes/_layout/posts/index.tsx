@@ -12,7 +12,6 @@ import { PostsSidebar, type TagStat } from './-components/posts-sidebar'
 import { currentContentLocale } from '@/lib/content-locale'
 import { runSearch } from '@/components/search/search-api'
 import { siteTime } from '@/lib/site-time'
-import { GardenLayer } from '@/components/garden/garden-layer'
 
 const SORTS = ['newest', 'oldest', 'updated'] as const
 type Sort = (typeof SORTS)[number]
@@ -140,7 +139,6 @@ function PostsIndexPage() {
 
   return (
     <>
-    <GardenLayer />
     <PageWithSidebar sidebar={<PostsSidebar tags={view?.tags ?? []} activeTag={tag} query={q} />}>
       <header className="mb-10">
         <h1 className="font-wenkai text-4xl text-foreground">{m.page_posts_title()}</h1>
@@ -170,7 +168,7 @@ function PostsIndexPage() {
 
       {view && (
         <>
-          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-rule pb-3 text-xs text-muted-foreground">
+          <div data-enter className="flex flex-wrap items-baseline justify-between gap-3 border-b border-rule pb-3 text-xs text-muted-foreground">
             <div className="flex flex-wrap items-baseline gap-3">
               <span className="font-mono tabular-nums">{m.posts_total({ count: String(view.total) })}</span>
               {activeTagName && (
@@ -222,7 +220,7 @@ function PostsIndexPage() {
           ) : (
             view.groups.map((group) => (
               <section key={group.year} className="relative mt-12 first-of-type:mt-8">
-                <h2 className="mb-1 flex items-baseline gap-3 font-wenkai">
+                <h2 data-enter className="mb-1 flex items-baseline gap-3 font-wenkai">
                   <span className="text-5xl leading-none text-ink/25 tabular-nums select-none">{group.year}</span>
                   <span className="font-mono text-xs text-muted-foreground">
                     {m.posts_year_count({ count: String(group.posts.length) })}

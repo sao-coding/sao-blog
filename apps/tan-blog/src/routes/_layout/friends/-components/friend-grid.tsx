@@ -33,6 +33,7 @@ export function FriendGrid({ items }: { items: FriendItem[] }) {
         return (
           <li
             key={friend.id}
+            data-enter
             style={{ '--accent': accent } as React.CSSProperties}
             className="group relative flex flex-col overflow-hidden rounded-xl border border-rule bg-card/60 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklch,var(--accent)_55%,transparent)] hover:shadow-[0_10px_24px_-16px_var(--accent)]"
           >

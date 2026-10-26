@@ -19,7 +19,7 @@ export function PageWithSidebar({ children, sidebar }: { children: ReactNode; si
       <div className="mx-auto grid w-full max-w-[65rem] gap-12 lg:grid-cols-[minmax(0,44rem)_18rem] 2xl:max-w-[73rem] 2xl:grid-cols-[minmax(0,52rem)_18rem]">
         <main className="mx-auto w-full min-w-0 max-w-[44rem] 2xl:max-w-[52rem]">{children}</main>
         {/* 側欄只在 lg 以上顯示；lg 以下只留置中的列表 */}
-        <div className="hidden lg:block">{sidebar}</div>
+        <div data-enter="aside" className="hidden lg:block">{sidebar}</div>
       </div>
     </div>
   )

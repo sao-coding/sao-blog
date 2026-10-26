@@ -126,12 +126,12 @@ export function CircleFeed({ data, author }: { data: FriendCircleData; author?: 
         <div className="space-y-10">
           {months.map(([month, items]) => (
             <section key={month || 'undated'}>
-              <h2 className="mb-2 font-wenkai text-sm text-ink/70">
+              <h2 data-enter className="mb-2 font-wenkai text-sm text-ink/70">
                 {month ? monthFormat.format(dayjs(`${month}-01`).toDate()) : '—'}
               </h2>
               <ol className="divide-y divide-dashed divide-rule border-t border-dashed border-rule">
                 {items.map((a) => (
-                  <li key={a.link}>
+                  <li key={a.link} data-enter>
                     <a
                       href={a.link}
                       target="_blank"

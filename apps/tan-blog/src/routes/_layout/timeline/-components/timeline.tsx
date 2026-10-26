@@ -1,5 +1,4 @@
 import { TimelineSchema } from '@sao-blog/api/schema/timeline'
-import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import type { MouseEvent } from 'react'
@@ -8,8 +7,6 @@ import type z from 'zod'
 import { openArticlePreview } from '@/components/preview/preview-url'
 import { MONTH_NAMES, TermMark } from '@/components/written-season'
 import { siteTime } from '@/lib/site-time'
-
-const EASE = [0.25, 0.1, 0.25, 1] as const
 
 type Article = z.infer<typeof TimelineSchema>['items'][number]
 
@@ -22,7 +19,6 @@ interface MonthGroup {
 interface TimelineProps {
   year: number
   count: number
-  groupIndex?: number
   articles: Article[]
 }
 
@@ -46,11 +42,11 @@ function groupByMonth(articles: Article[]): MonthGroup[] {
   return groups
 }
 
-export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProps) {
+// 進場（年份、月份、各列）由 _layout 換頁時統一排（lib/page-enter.ts 的 data-enter）
+export function Timeline({ year, count, articles }: TimelineProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
-  const yearDelay = groupIndex * 0.04
 
   const grouped = useMemo(() => groupByMonth(articles), [articles])
 
@@ -100,12 +96,7 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
 
   return (
     <>
-      <motion.header
-        initial={{ opacity: 0, y: 12, filter: 'blur(5px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 0.48, delay: yearDelay, ease: EASE }}
-        className="mb-4 flex items-baseline gap-3 pl-6"
-      >
+      <header data-enter className="mb-4 flex items-baseline gap-3 pl-6">
         <h2 className="font-wenkai text-5xl leading-none text-ink/25 tabular-nums select-none">
           <time dateTime={String(year)}>{year}</time>
         </h2>
@@ -113,38 +104,21 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
           <span className="sr-only">共有</span>
           {count} 篇文章
         </span>
-      </motion.header>
+      </header>
 
-      <motion.ul
+      <ul
         ref={listRef}
         className="relative timeline-indicator sao-timeline"
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: {},
-          show: {
-            transition: {
-              delayChildren: yearDelay + 0.12,
-              staggerChildren: 0.06,
-            },
-          },
-        }}
         onMouseLeave={() => setHoveredIndex(null)}
       >
         {grouped.map(({ month, startIndex, items }) => (
           <div key={month}>
-            <motion.div
-              className="flex items-center gap-3 px-7 py-2"
-              variants={{
-                hidden: { opacity: 0 },
-                show: { opacity: 1, transition: { duration: 0.3 } },
-              }}
-            >
+            <div data-enter className="flex items-center gap-3 px-7 py-2">
               <span className="shrink-0 font-wenkai text-sm text-muted-foreground">
                 {MONTH_NAMES[month]}
               </span>
               <span className="flex-1 border-t border-dashed border-rule" />
-            </motion.div>
+            </div>
 
             {items.map((article, i) => {
               const idx = startIndex + i
@@ -155,22 +129,14 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                 article.type === 'note' ? `notes/${article.slug}` : `posts/${article.slug}`
 
               return (
-                <motion.li
+                <li
                   key={article.id}
+                  data-enter
                   ref={(el) => {
                     itemRefs.current[idx] = el
                   }}
                   onMouseEnter={() => setHoveredIndex(idx)}
                   className="group py-3 px-7"
-                  variants={{
-                    hidden: { opacity: 0, y: 8, filter: 'blur(3px)' },
-                    show: {
-                      opacity: 1,
-                      y: 0,
-                      filter: 'blur(0px)',
-                      transition: { duration: 0.36, ease: EASE },
-                    },
-                  }}
                 >
                   <Link
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,12 +165,12 @@ export function Timeline({ year, count, groupIndex = 0, articles }: TimelineProp
                       )}
                     </span>
                   </Link>
-                </motion.li>
+                </li>
               )
             })}
           </div>
         ))}
-      </motion.ul>
+      </ul>
     </>
   )
 }
