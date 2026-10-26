@@ -9,7 +9,7 @@ import {
 import { env } from '@sao-blog/env/tan-blog'
 
 // Types
-type WindowInfo = {
+export type WindowInfo = {
   time: string
   type: 'window'
   status: 'active' | 'idle'
@@ -18,7 +18,7 @@ type WindowInfo = {
   title: string
 }
 
-type MusicInfo = {
+export type MusicInfo = {
   time: string
   type: 'music'
   status: 'playing' | 'paused' | 'idle'
@@ -26,7 +26,7 @@ type MusicInfo = {
   artist: string
 }
 
-type ServerMessage = {
+export type ServerMessage = {
   status: string
   message: string
   data: {
@@ -45,7 +45,7 @@ type SpringTransition = {
 }
 
 // Constants
-const CDN_DOMAIN =
+export const CDN_DOMAIN =
   'https://fastly.jsdelivr.net/gh/sao-coding/apppulse-assets@master'
 const WS_URL = `${env.VITE_WS_URL}/api/devices/ws`
 const MAX_RECONNECT_ATTEMPTS = 6
@@ -59,7 +59,7 @@ const SUPER_BOUNCY_SPRING: SpringTransition = {
 }
 
 // Custom hooks
-function useWebSocket(onMessage: (data: ServerMessage) => void) {
+export function useWebSocket(onMessage: (data: ServerMessage) => void) {
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectAttemptsRef = useRef(0)
   const reconnectTimerRef = useRef<number | null>(null)
@@ -147,7 +147,7 @@ function useWebSocket(onMessage: (data: ServerMessage) => void) {
   return { initialize }
 }
 
-function useAssets() {
+export function useAssets() {
   const [appIcons, setAppIcons] = useState<Record<string, string> | null>(null)
   const [appDescriptions, setAppDescriptions] = useState<Record<
     string,
@@ -192,7 +192,7 @@ function useAssets() {
 }
 
 // Utility functions
-const isMusicActive = (music?: MusicInfo) => {
+export const isMusicActive = (music?: MusicInfo) => {
   if (!music) return false
   const hasMetadata = Boolean(
     (music.title && music.title.trim() !== '') ||
@@ -219,7 +219,7 @@ const resolveAppIconId = (
   return foundKey ? appIcons[foundKey] : null
 }
 
-const getAppIconUrl = (
+export const getAppIconUrl = (
   processName?: string,
   appIcons?: Record<string, string> | null
 ) => {

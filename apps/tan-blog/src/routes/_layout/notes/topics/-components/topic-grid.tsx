@@ -1,11 +1,8 @@
 import { topicPublicSchema } from '@sao-blog/api/schema/topic'
-import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import type z from 'zod'
 
 type Topic = z.infer<typeof topicPublicSchema>
-
-const EASE = [0.25, 0.1, 0.25, 1] as const
 
 interface TopicGridProps {
   topics: Topic[]
@@ -13,30 +10,10 @@ interface TopicGridProps {
 
 export function TopicGrid({ topics }: TopicGridProps) {
   return (
-    <motion.div
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2"
-      initial="hidden"
-      animate="show"
-      variants={{
-        hidden: {},
-        show: {
-          transition: { delayChildren: 0.08, staggerChildren: 0.07 },
-        },
-      }}
-    >
+    <div
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {topics.map((topic) => (
-        <motion.div
-          key={topic.id}
-          variants={{
-            hidden: { opacity: 0, y: 10, filter: 'blur(4px)' },
-            show: {
-              opacity: 1,
-              y: 0,
-              filter: 'blur(0px)',
-              transition: { duration: 0.38, ease: EASE },
-            },
-          }}
-        >
+        <div key={topic.id} data-enter>
           <Link
             to="/notes/topics/$slug"
             params={{ slug: topic.slug }}
@@ -68,8 +45,8 @@ export function TopicGrid({ topics }: TopicGridProps) {
               <span>篇筆記</span>
             </div>
           </Link>
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   )
 }

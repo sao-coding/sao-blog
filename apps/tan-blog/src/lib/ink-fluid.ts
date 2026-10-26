@@ -86,9 +86,7 @@ export interface InkTheme {
 export interface InkFluid {
   // 進站開場：墨面先蓋滿，墨滴落下暈開；之後呼叫 reveal 被水沖淡、露出網站
   intro: (theme: InkTheme) => Promise<void>
-  reveal: (ms?: number) => Promise<void>
-  // 換頁的暈染：螢幕上 (px, py) 滴一滴墨，暈開到蓋滿畫面就 resolve；之後呼叫 reveal 洗淡
-  spread: (theme: InkTheme, px: number, py: number, ms?: number) => Promise<void>
+  reveal: () => Promise<void>
   // 指標移動（螢幕像素與位移）：動畫進行中才攪動墨流
   stir: (px: number, py: number, dx: number, dy: number) => void
   dispose: () => void
@@ -422,32 +420,11 @@ export function createInkFluid(canvas: HTMLCanvasElement): InkFluid | undefined 
       splatVel(x, y, dx * 9, -dy * 9, 0.25)
       splatDye(x, y, [0.18, 0.06, 0], 0.06)
     },
-    async spread(t, px, py, ms = 380) {
-      theme = t
-      resize()
-      clearAll()
-      densDiss = 0.4
-      const a = aspect()
-      const x = px / window.innerWidth
-      const y = 1 - py / window.innerHeight
-      // 暈到最遠的角落再多一圈，邊緣的噪聲起伏才不會在角落留下沒蓋到的紙
-      const far = Math.hypot(Math.max(x, 1 - x) * a, Math.max(y, 1 - y)) + 0.45
-      Object.assign(state, { center: [x, y], coverR: 0.04, reveal: 0, coverOn: 1, seed: Math.random() * 50 })
-      splatDye(x, y, [2.2, 0.5, 0], 0.004)
-      for (let k = 0; k < 10; k++) {
-        const ang = (k / 10) * 6.28 + Math.random()
-        const s = 200 + Math.random() * 220
-        splatVel(x + (Math.cos(ang) * 0.02) / a, y + Math.sin(ang) * 0.02, Math.cos(ang) * s, Math.sin(ang) * s, 0.02)
-      }
-      await run(ms, (t) => {
-        state.coverR = 0.04 + far * (1 - Math.pow(1 - t, 3))
-      })
-    },
-    async reveal(ms = 1000) {
+    async reveal() {
       release?.()
       release = null
       densDiss = 1.6
-      await run(ms, (t) => {
+      await run(1000, (t) => {
         state.reveal = ease(t)
         if (Math.random() < 0.5) {
           const ang = Math.random() * 6.28

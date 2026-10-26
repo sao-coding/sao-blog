@@ -112,11 +112,11 @@
 | 時機 | 做法 | 實作 |
 |---|---|---|
 | 整頁載入（重新整理／從外部進站） | 墨暈開場：節氣名 → 墨滴落下 → 被水沖淡 | `components/ink-intro.tsx`、`lib/ink-fluid.ts` |
-| 首頁 → 列表（遠 → 中） | **推近**：鏡頭順著江往鳥居推進，紙色漫上來、庭的砂紋淡入 | `components/ink-push.tsx`、`ink-voyage.ts` |
-| 列表 ⇄ 列表（中 → 中） | **暈染**：點下去的地方滴一滴墨，暈開蓋住舊景，再被水洗淡，露出另一處景 | `lib/ink-fluid.ts` |
+| 首頁 ⇄ 列表（遠 ⇄ 中） | 同列表之間：舊內容很快淡掉，往列表時列表逐行進場；回首頁交給 hero（原本的推近已拿掉，見 REDESIGN-PLAN 階段 8） | 同下 |
+| 列表 ⇄ 列表（中 → 中） | **庭不動，只有字進出**：舊內容 0.1s 淡掉；新頁標題先出、列一行一行跟上（每行 32ms，整體 < 400ms），只用 opacity 與小幅位移。換頁不等動畫 | `routes/_layout/route.tsx`、`lib/page-enter.ts`、`lib/post-transitions.ts`（type `list`） |
 | 列表 ⇄ 文章（中 ⇄ 近） | 既有的**展卷／收卷**（View Transitions：標題飛行＋由上展開） | `lib/post-transitions.ts`、styles.css「展卷」 |
 | 文章之間 | 既有的**翻頁** | 同上 |
-| 往外走（近 → 中 → 遠） | 反向：收卷、拉遠 | — |
+| 往外走（近 → 中 → 遠） | 反向：收卷；回首頁同首頁 ⇄ 列表 | — |
 | 換頁慢於 300ms | 頂端節氣色毛筆一筆 | `components/ink-progress.tsx` |
 | 篩選、分頁、切語系 | 不做轉場，只淡入 | — |
 
@@ -135,7 +135,7 @@
 | 元件 | 處理 |
 |---|---|
 | `ink-voyage.ts`、`ink-boat.ts`、`ink-landscape.tsx`（3D 夜航山水） | **保留**，是首頁的遠景；補上水中鳥居（`ink-torii.ts`） |
-| `ink-intro.tsx`、`lib/ink-fluid.ts`（墨暈開場） | 保留；暈染也拿來做列表之間的轉場 |
+| `ink-intro.tsx`、`lib/ink-fluid.ts`（墨暈開場） | 保留，只用在進站開場（列表之間的暈染已拿掉） |
 | `lib/post-transitions.ts`（展卷／收卷／翻頁） | 保留 |
 | `letter-paper.tsx`、`lib/ganzhi.ts`（信箋與落款） | 保留，是「近」的主體 |
 | `ink-progress.tsx`（毛筆進度條） | 保留 |

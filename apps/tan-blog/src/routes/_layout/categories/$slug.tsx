@@ -6,7 +6,6 @@ import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { CategoriesTimeline } from './-components/categories-timeline'
 import { pageShellClass } from '@/components/layout/page-shell'
-import { GardenLayer } from '@/components/garden/garden-layer'
 import { currentContentLocale } from '@/lib/content-locale'
 
 export const Route = createFileRoute('/_layout/categories/$slug')({
@@ -45,7 +44,6 @@ function CategoryDetailPage() {
 
   return (
     <>
-      <GardenLayer stones={false} />
       {posts.length === 0 ? (
         <div className="mt-40 text-center font-wenkai text-xl text-muted-foreground">
           該分類下尚無文章

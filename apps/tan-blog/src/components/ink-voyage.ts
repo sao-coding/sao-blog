@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { createInkBoat } from './ink-boat'
 import { createInkTorii } from './ink-torii'
-import { DOLLY_EVENT, consumePullOut, type DollyDetail } from '@/lib/ink-push'
 
 // 首頁主視覺的 3D 層：沿江夜航的水墨山水（three.js）。
 // - 地形由噪聲即時產生：江道蜿蜒，兩岸稜線加上桂林式孤峰；三個區塊在鏡頭前方輪替，永遠走不到盡頭
@@ -324,17 +323,14 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement, on
   let camZ = 120
   let scroll = 0
   let time = 0
-  // 推近（0 → 1）：鏡頭順江往鳥居推進、略壓低，見 lib/ink-push.ts
-  let dolly = 0
   function place() {
-    const z = camZ - scroll * 0.06 - dolly * 62
+    const z = camZ - scroll * 0.06
     const cx = riverX(z)
-    camera.position.set(cx, 10 + Math.sin(time * 0.4) * 0.3 - scroll * 0.004 - dolly * 3.5, z)
-    camera.lookAt(riverX(z - 90), 9 - scroll * 0.015 - dolly * 2, z - 90)
+    camera.position.set(cx, 10 + Math.sin(time * 0.4) * 0.3 - scroll * 0.004, z)
+    camera.lookAt(riverX(z - 90), 9 - scroll * 0.015, z - 90)
     terrainU.uCam.value.copy(camera.position)
     water.position.set(cx, 0, z)
-    // 推近時船不跟著鏡頭走：鏡頭從船旁經過，船往畫面外退開
-    const bz = z + dolly * 62 - 40 + Math.sin(time * 0.12) * 3
+    const bz = z - 40 + Math.sin(time * 0.12) * 3
     const bx = riverX(bz) + 5
     // 船斜泊江心、船頭偏向左岸，讓鏡頭看到側影（正對船尾只剩一個點）
     const yaw = Math.atan2(riverX(bz - 1) - riverX(bz), -1) + 1.15
@@ -411,30 +407,6 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement, on
     scroll = Math.min(window.scrollY, window.innerHeight)
     if (!running) render()
   }
-  // 推近／拉遠：往裡走先慢後快（被江水帶進去），往外走先快後慢
-  let dollyRaf = 0
-  function animateDolly(to: number, ms: number) {
-    const from = dolly
-    const t0 = performance.now()
-    const ease = to > from ? (t: number) => t * t : (t: number) => 1 - Math.pow(1 - t, 3)
-    cancelAnimationFrame(dollyRaf)
-    const tick = (now: number) => {
-      const t = ms > 0 ? Math.min((now - t0) / ms, 1) : 1
-      dolly = from + (to - from) * ease(t)
-      if (!running) render()
-      if (t < 1) dollyRaf = requestAnimationFrame(tick)
-    }
-    dollyRaf = requestAnimationFrame(tick)
-  }
-  const onDolly = (e: Event) => {
-    const { to, ms } = (e as CustomEvent<DollyDetail>).detail
-    animateDolly(to, ms)
-  }
-  window.addEventListener(DOLLY_EVENT, onDolly)
-  if (consumePullOut() && !reduced) {
-    dolly = 1
-    animateDolly(0, 1400)
-  }
 
   const ro = new ResizeObserver(resize)
   ro.observe(host)
@@ -494,8 +466,6 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement, on
     refresh,
     dispose() {
       running = false
-      cancelAnimationFrame(dollyRaf)
-      window.removeEventListener(DOLLY_EVENT, onDolly)
       ro.disconnect()
       io.disconnect()
       mo.disconnect()

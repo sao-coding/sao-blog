@@ -12,6 +12,9 @@ import { useScrollStore } from '@/store/scroll-store'
 import UserButton from './user-button'
 import { SearchCommand } from './search-command'
 import { LoginDialog } from '@/components/login-dialog'
+import ProtoHeader from './proto/proto-header'
+import { useNavProto } from './proto/nav-model'
+import { ProtoSwitch } from './proto/proto-parts'
 
 /** 判斷「已滾動」的閾值（px） */
 const SCROLL_THRESHOLD = 50
@@ -24,7 +27,18 @@ export function isDetailPath(pathname: string) {
   )
 }
 
+// 階段 9 原型：開發時左下角可以切換現行／墨帶＋燈（定案後拿掉）
 const Header = () => {
+  const proto = useNavProto()
+  return (
+    <>
+      {proto === 'current' ? <CurrentHeader /> : <ProtoHeader />}
+      {import.meta.env.DEV && <ProtoSwitch />}
+    </>
+  )
+}
+
+const CurrentHeader = () => {
   const pathname = useLocation({ select: (l) => l.pathname })
   const [drawerOpen, setDrawerOpen] = useState(false)
   const isMobile = useIsMobile(1024)

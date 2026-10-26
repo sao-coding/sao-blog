@@ -58,7 +58,7 @@ export function NotesJournal({ notes }: { notes: JournalNote[] }) {
     <div>
       {months.map((month) => (
         <section key={month.key} id={`m-${month.key}`} className="mt-14 scroll-mt-28 first:mt-0">
-          <h2 className="mb-6 flex items-baseline gap-2 border-b border-rule pb-2 font-wenkai">
+          <h2 data-enter className="mb-6 flex items-baseline gap-2 border-b border-rule pb-2 font-wenkai">
             <span className="text-4xl leading-none text-ink/30 tabular-nums select-none">{month.date.format('MM')}</span>
             <span className="font-mono text-sm text-muted-foreground">{month.date.format('YYYY')}</span>
           </h2>
