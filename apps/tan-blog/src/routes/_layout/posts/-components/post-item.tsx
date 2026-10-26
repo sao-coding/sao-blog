@@ -7,6 +7,7 @@ import { TermMark } from '@/components/written-season'
 import type { SearchHit } from '@sao-blog/api/lib/search/query'
 import { Highlighted, SearchSnippet } from '@/components/search/search-hit'
 import { siteTime } from '@/lib/site-time'
+import { inkDryness } from '@/lib/season-spec'
 import { isLastViewedPost, postTitleTransitionName } from '@/lib/post-transitions'
 
 export type PostListItem = z.infer<typeof postSchema>
@@ -33,7 +34,7 @@ export function PostItem({
   const extraTags = post.tags.length - MAX_VISIBLE_TAGS
 
   return (
-    <article className="group relative grid grid-cols-[3.75rem_minmax(0,1fr)] gap-x-4 border-b border-dashed border-rule py-5 sm:grid-cols-[4.5rem_minmax(0,1fr)]">
+    <article className={cn('ink-row', `ink-${inkDryness(post[dateKey])}`, 'group relative grid grid-cols-[3.75rem_minmax(0,1fr)] gap-x-4 border-b border-dashed border-rule py-5 sm:grid-cols-[4.5rem_minmax(0,1fr)]')}>
       <div className="pt-1 font-mono text-sm leading-none text-muted-foreground tabular-nums sm:text-lg">
         {pinned ? (
           <span className="font-wenkai text-sm text-ink">{m.posts_pinned()}</span>
@@ -50,7 +51,7 @@ export function PostItem({
         {/* 標題與文章頁的 h1 共用 view-transition-name：點下去時才掛上（同名一頁只能一個），
             從文章回來時，剛看完的那一列預先掛著，標題才飛得回來 */}
         <h2
-          className="font-wenkai text-lg leading-snug text-foreground [view-transition-class:post-title] sm:text-xl"
+          className="ink-title font-wenkai text-lg leading-snug [view-transition-class:post-title] sm:text-xl"
           style={isLastViewedPost(post.slug) ? { viewTransitionName: postTitleTransitionName(post.slug) } : undefined}
         >
           <Link
@@ -63,7 +64,7 @@ export function PostItem({
             className={cn(
               'bg-[linear-gradient(var(--ink),var(--ink))] bg-no-repeat [background-position:0_100%] [background-size:0%_1px]',
               'transition-[background-size,color] duration-500 ease-out',
-              'group-hover:text-ink group-hover:[background-size:100%_1px]',
+              'group-hover:[background-size:100%_1px]',
               "after:absolute after:inset-0 after:content-['']",
             )}
           >

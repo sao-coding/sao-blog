@@ -336,9 +336,88 @@
   }
 }
 
+/* 毛玻璃：全站只有這兩階。邊一律搭配 border-rule 髮絲線。
+ * glass：常駐的面（header、footer、側欄卡片）；glass-strong：浮在內容上的面（導覽、下拉、FAB），要更不透明才讀得清楚 */
+.glass {
+  background-color: color-mix(in oklab, var(--background) 55%, transparent);
+  backdrop-filter: blur(12px);
+}
+.glass-strong {
+  background-color: color-mix(in oklab, var(--background) 85%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+/* 一筆朱：有起筆、行筆、收筆，兩端收尖（取代漸層線） */
+.brush-stroke {
+  background-color: var(--ink);
+  clip-path: polygon(0 60%, 5% 20%, 30% 0, 100% 40%, 94% 70%, 60% 100%, 12% 90%);
+}
+.brush-stroke-down {
+  background-color: var(--primary);
+  clip-path: polygon(0 0, 100% 0, 70% 60%, 50% 100%, 30% 60%);
+}
+
+/* 庭的畫層（components/garden）：一張水墨石庭的 SVG，固定在字層後、不攔截操作 */
+.garden-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  --garden-ink: var(--foreground);
+}
+.garden-layer svg { width: 100%; height: 100%; display: block; }
+/* 推近／拉遠（components/ink-push.tsx）：轉場那一層裡的庭疊在紙上，而不是頁面後面 */
+.ink-push .garden-layer { position: absolute; z-index: auto; }
+.garden-rake { fill: none; stroke: var(--garden-ink); stroke-opacity: 0.26; stroke-width: 1.1; stroke-linecap: round; }
+.garden-rake path { fill: none; }
+.dark .garden-rake { stroke-opacity: 0.18; }
+/* 石的淡墨面是不透明的（紙上加墨），擋住後面的砂紋 */
+.garden-stone-wash { fill: color-mix(in oklab, var(--garden-ink) 16%, var(--background)); }
+.garden-stone-shade { fill: color-mix(in oklab, var(--garden-ink) 30%, var(--background)); }
+.dark .garden-stone-wash { fill: color-mix(in oklab, var(--garden-ink) 10%, var(--background)); }
+.dark .garden-stone-shade { fill: color-mix(in oklab, var(--garden-ink) 5%, var(--background)); }
+.garden-stone-ink path { fill: none; stroke: var(--garden-ink); stroke-opacity: 0.72; stroke-linecap: round; stroke-linejoin: round; }
+.dark .garden-stone-ink path { stroke-opacity: 0.5; }
+.garden-stone-dot ellipse { fill: var(--garden-ink); fill-opacity: 0.7; }
+.garden-moss-wash { fill: color-mix(in oklab, var(--moss) 24%, var(--background)); }
+.garden-moss-dot circle { fill: var(--moss); fill-opacity: 0.4; }
+.dark .garden-moss-wash { fill: color-mix(in oklab, var(--moss) 14%, var(--background)); }
+/* 石組只在畫面右側有空白時出現，避免壓到列表與側欄的字 */
+.garden-narrow { display: none; }
+@media (max-width: 1279px) {
+  .garden-wide { display: none; }
+  .garden-narrow { display: inline; }
+}
+@media (max-width: 767px) {
+  .garden-layer { opacity: 0.7; }
+}
+
+/* 墨分乾濕（DESIGN.md 規則一）：列表標題的墨色看發文時間。
+   .ink-row 掛在整列、狀態 .ink-wet/.ink-dry/.ink-faded 設濃淡、.ink-title 掛在標題上。
+   濕 = 這個節氣寫的；乾 = 今年；淡 = 更早。滑過或鍵盤聚焦那一列，標題暫時變濕。
+   字一律清楚可讀（淡墨 66% 在紙上仍過 AA），拿掉這組 class 版面不變。 */
+.ink-wet { --ink-tone: 100%; }
+.ink-dry { --ink-tone: 86%; }
+.ink-faded { --ink-tone: 66%; }
+.ink-title {
+  color: color-mix(in oklab, var(--foreground) var(--ink-tone, 100%), var(--background));
+  text-shadow: 0 0 0 transparent;
+  transition: color 180ms ease-out, text-shadow 180ms ease-out;
+}
+.ink-row:is(:hover, :focus-within) .ink-title {
+  color: var(--foreground);
+  text-shadow:
+    0 0 0.5px color-mix(in oklab, var(--foreground) 40%, transparent),
+    0 0 7px color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-title { transition: none; }
+  .ink-row:is(:hover, :focus-within) .ink-title { text-shadow: none; }
+}
+
 .sao-link {
   @apply underline decoration-[oklch(0.2103_0.0059_285.89_/_.2)] underline-offset-3;
-  @apply bg-linear-to-r from-(--ink) to-(--ink) bg-size-[0_1.5px] bg-no-repeat bg-[left_1.3em];
+  @apply bg-linear-to-r from-(--ink) to-(--ink) bg-size-[0_1.5px] bg-no-repeat bg-[left_1.3em]; /* design-ok: 單色朱線，不是漸層 */
   @apply transition-all duration-250;
   @apply hover:bg-size-[100%_1.5px] hover:no-underline;
   @variant dark {
@@ -789,11 +868,18 @@ html:active-view-transition-type(turn-page)::view-transition-old(root) {
 html:active-view-transition-type(turn-page)::view-transition-new(root) {
   animation: vt-turn-in 0.5s 0.1s cubic-bezier(0.3, 0.7, 0.2, 1) both;
 }
+/* 減少動態效果：所有換頁（type = fade，見 postTransitionTypes）只淡入淡出，不位移、不展卷 */
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
+  ::view-transition-group(*) {
     animation: none !important;
+  }
+  ::view-transition-old(*) {
+    animation: vt-fade-out 0.2s ease-out both !important;
+    mask-image: none !important;
+  }
+  ::view-transition-new(*) {
+    animation: vt-fade-in 0.25s ease-out both !important;
+    mask-image: none !important;
   }
 }
 

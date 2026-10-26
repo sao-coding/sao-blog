@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 import { createInkBoat } from './ink-boat'
+import { createInkTorii } from './ink-torii'
+import { DOLLY_EVENT, consumePullOut, type DollyDetail } from '@/lib/ink-push'
 
 // 首頁主視覺的 3D 層：沿江夜航的水墨山水（three.js）。
 // - 地形由噪聲即時產生：江道蜿蜒，兩岸稜線加上桂林式孤峰；三個區塊在鏡頭前方輪替，永遠走不到盡頭
@@ -200,7 +202,8 @@ function lanternTexture() {
   return new THREE.CanvasTexture(c)
 }
 
-export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): InkVoyage | undefined {
+export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement, onSlow?: () => void): InkVoyage | undefined {
+  const coarse = window.matchMedia('(pointer: coarse)').matches
   let renderer: THREE.WebGLRenderer
   try {
     renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: 'low-power' })
@@ -209,7 +212,7 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
   }
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace
   renderer.setClearColor(0x000000, 0)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5))
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const scene = new THREE.Scene()
@@ -269,6 +272,16 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
   boat.group.scale.setScalar(1.15)
   scene.add(boat.group)
 
+  // 江中的朱色鳥居（見 ink-torii.ts）：是這段夜航遙遙的去處，跟船一樣停在前方；捲動時鏡頭往它推近
+  const torii = createInkTorii()
+  torii.group.scale.setScalar(1.45)
+  scene.add(torii.group)
+  const placeTorii = (z: number) => {
+    torii.group.position.set(riverX(z) + 1, 0, z)
+    // 斜斜地朝向下游，看得到稚児柱
+    torii.group.rotation.y = Math.atan2(riverX(z + 1) - riverX(z), 1) + 0.42
+  }
+
   const read = colorReader(host)
   function refresh() {
     const root = document.documentElement
@@ -297,20 +310,31 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
     // 夜裡深墨剪影會融進江面：改成被月光照亮的淺灰剪影
     boat.setColors(dark ? far.clone().lerp(cloud, 0.35) : ink, dark ? new THREE.Color(1, 0.78, 0.45) : read('oklch(0.55 0.17 30)'), dark)
     waterU.uLamp.value.z = dark ? 1 : 0
+    torii.setColors({
+      vermilion: read('var(--zhu)').multiplyScalar(dark ? 0.6 : 1),
+      cap: dark ? far.clone().multiplyScalar(0.6) : ink.clone(),
+      edge: dark ? read('var(--sky-top)') : ink,
+      mist: terrainU.uMistCol.value,
+      rim: terrainU.uRimCol.value,
+      dark,
+    })
     if (!running) render()
   }
 
   let camZ = 120
   let scroll = 0
   let time = 0
+  // 推近（0 → 1）：鏡頭順江往鳥居推進、略壓低，見 lib/ink-push.ts
+  let dolly = 0
   function place() {
-    const z = camZ - scroll * 0.06
+    const z = camZ - scroll * 0.06 - dolly * 62
     const cx = riverX(z)
-    camera.position.set(cx, 10 + Math.sin(time * 0.4) * 0.3 - scroll * 0.004, z)
-    camera.lookAt(riverX(z - 90), 9 - scroll * 0.015, z - 90)
+    camera.position.set(cx, 10 + Math.sin(time * 0.4) * 0.3 - scroll * 0.004 - dolly * 3.5, z)
+    camera.lookAt(riverX(z - 90), 9 - scroll * 0.015 - dolly * 2, z - 90)
     terrainU.uCam.value.copy(camera.position)
     water.position.set(cx, 0, z)
-    const bz = z - 40 + Math.sin(time * 0.12) * 3
+    // 推近時船不跟著鏡頭走：鏡頭從船旁經過，船往畫面外退開
+    const bz = z + dolly * 62 - 40 + Math.sin(time * 0.12) * 3
     const bx = riverX(bz) + 5
     // 船斜泊江心、船頭偏向左岸，讓鏡頭看到側影（正對船尾只剩一個點）
     const yaw = Math.atan2(riverX(bz - 1) - riverX(bz), -1) + 1.15
@@ -320,6 +344,8 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
     waterU.uBoat.value.set(bx, bz, Math.sin(yaw), Math.cos(yaw))
     waterU.uLamp.value.x = boat.lampWorld.x
     waterU.uLamp.value.y = boat.lampWorld.z
+    placeTorii(camZ - 105)
+    torii.update(time, camera.position, terrainU.uFog.value, boat.lampWorld, waterU.uLamp.value.z)
     // 地形區塊輪替：被拋在身後的區塊搬到最前方重建
     for (const m of chunks) {
       if (m.userData.zc - CH_L / 2 > z + 30) build(m, Math.min(...chunks.map((c) => c.userData.zc as number)) - CH_L)
@@ -343,10 +369,29 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
   let running = false
   let visible = true
   let last = 0
+  // 手機（觸控）只畫 30fps 省電；開頭幾秒量一下幀率，跑不動就交回 ink-landscape 的靜態山水
+  const frameBudget = coarse ? 1000 / 30 - 2 : 0
+  let probeFrames = 0
+  let probeStart = 0
   function loop(now: number) {
     if (!running) return
+    if (now - last < frameBudget) {
+      requestAnimationFrame(loop)
+      return
+    }
     const dt = Math.min((now - last) / 1000, 1 / 30)
     last = now
+    if (onSlow && time > 1 && probeFrames >= 0) {
+      if (probeFrames++ === 0) probeStart = now
+      else if (now - probeStart > 4000) {
+        const fps = (probeFrames - 1) / ((now - probeStart) / 1000)
+        probeFrames = -1
+        if (fps < 20) {
+          onSlow()
+          return
+        }
+      }
+    }
     time += dt
     camZ -= 2.2 * dt // 船行很慢，像看一幅長卷
     waterU.uTime.value = time
@@ -366,6 +411,31 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
     scroll = Math.min(window.scrollY, window.innerHeight)
     if (!running) render()
   }
+  // 推近／拉遠：往裡走先慢後快（被江水帶進去），往外走先快後慢
+  let dollyRaf = 0
+  function animateDolly(to: number, ms: number) {
+    const from = dolly
+    const t0 = performance.now()
+    const ease = to > from ? (t: number) => t * t : (t: number) => 1 - Math.pow(1 - t, 3)
+    cancelAnimationFrame(dollyRaf)
+    const tick = (now: number) => {
+      const t = ms > 0 ? Math.min((now - t0) / ms, 1) : 1
+      dolly = from + (to - from) * ease(t)
+      if (!running) render()
+      if (t < 1) dollyRaf = requestAnimationFrame(tick)
+    }
+    dollyRaf = requestAnimationFrame(tick)
+  }
+  const onDolly = (e: Event) => {
+    const { to, ms } = (e as CustomEvent<DollyDetail>).detail
+    animateDolly(to, ms)
+  }
+  window.addEventListener(DOLLY_EVENT, onDolly)
+  if (consumePullOut() && !reduced) {
+    dolly = 1
+    animateDolly(0, 1400)
+  }
+
   const ro = new ResizeObserver(resize)
   ro.observe(host)
   const io = new IntersectionObserver(([entry]) => {
@@ -424,6 +494,8 @@ export function createInkVoyage(canvas: HTMLCanvasElement, host: HTMLElement): I
     refresh,
     dispose() {
       running = false
+      cancelAnimationFrame(dollyRaf)
+      window.removeEventListener(DOLLY_EVENT, onDolly)
       ro.disconnect()
       io.disconnect()
       mo.disconnect()

@@ -19,6 +19,8 @@ import { m } from '#/paraglide/messages'
 import appCss from '../styles.css?url'
 import { RouteError } from '../components/route-error'
 import { InkIntro } from '../components/ink-intro'
+import { InkWash } from '../components/ink-wash'
+import { InkPush } from '../components/ink-push'
 import { InkProgress } from '../components/ink-progress'
 import { INK_INTRO_INIT_SCRIPT } from '../lib/ink-intro'
 import { siteDescription, siteName } from '../lib/seo'
@@ -132,6 +134,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             {children}
             <div aria-hidden className="cloud-sea" />
             <InkIntro term={now.term} />
+            <InkWash />
+            <InkPush />
             <InkProgress />
           </Toaster>
         </ThemeProvider>

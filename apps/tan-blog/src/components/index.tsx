@@ -6,5 +6,5 @@ export function ErrorComponent({ error }: { error: string | Error }) {
 }
 
 export function LoadingComponent() {
-  return <div className="animate-pulse text-gray-400">載入中...</div>
+  return <div className="animate-pulse text-muted-foreground">載入中...</div>
 }

@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { CommentMarkdownRenderer } from '@/components/comment/comment-markdown-renderer'
 import { m } from '#/paraglide/messages'
 import { TermMark } from '@/components/written-season'
+import { inkDryness } from '@/lib/season-spec'
 
 dayjs.extend(relativeTime)
 
@@ -96,10 +97,16 @@ export function ThinkingList({ items }: { items: Thinking[] }) {
 function ThinkingEntry({ thinking }: { thinking: Thinking }) {
   const created = local(thinking.createdAt)
   return (
-    <article className="border-b border-dashed border-rule pb-5 last:border-b-0 not-first:pt-5">
+    <article
+      className={cn(
+        'ink-row',
+        `ink-${inkDryness(thinking.createdAt)}`,
+        'border-b border-dashed border-rule pb-5 last:border-b-0 not-first:pt-5',
+      )}
+    >
       <div
         className={cn(
-          'font-wenkai text-foreground/90',
+          'ink-title font-wenkai',
           isShort(thinking) ? 'text-xl leading-snug' : 'text-[15px] leading-relaxed',
         )}
       >

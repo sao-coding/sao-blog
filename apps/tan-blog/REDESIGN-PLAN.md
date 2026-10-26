@@ -16,11 +16,11 @@
 
 | 項目 | 現況 | 目標 |
 |---|---|---|
-| 首頁畫層 | `InkLandscape`（3D 夜航＋`SeasonParticles`） | 保留，補水中鳥居與流出畫面的遣水 |
+| 首頁畫層 | `InkLandscape`（3D 夜航＋`SeasonParticles`） | 保留，補水中鳥居（遣水移到階段 6 的推近時才畫） |
 | 文章頁 | `LetterPaper`、`LetterSignature`、`WrittenOn` | 保留（近景已到位） |
 | 開場／換頁 | `ink-intro`、`post-transitions`（展卷／收卷／翻頁）、`ink-progress` | 保留，另加列表之間的暈染與首頁推近 |
 | 列表頁畫層 | 沒有 | 庭（各頁一隅） |
-| 違反「紙與墨」的樣式 | 毛玻璃、漸層、粗陰影、Tailwind 原色，約十處（見階段 1） | 清掉 |
+| 違反「紙與墨」的樣式 | 漸層、粗陰影、Tailwind 原色，約十處（見階段 1）；毛玻璃已統一為 `.glass` / `.glass-strong` | 清掉（毛玻璃保留） |
 | 新舊的表現 | 只有文字日期 | 標題墨色乾濕 |
 
 ---
@@ -29,81 +29,131 @@
 
 讓後面每一階段都有共用的東西可以叫。
 
-- [ ] `src/lib/season-spec.ts`：純函式、只有數字
+- [x] `src/lib/season-spec.ts`：純函式、只有數字
   - `inkDryness(publishedAt, now)` → `'wet' | 'dry' | 'faded'`（這個節氣／今年／更早）
   - `rakePattern(termIndex)` → 二十四種耙紋之一（先定 4–6 種，其餘輪替）
   - `mossTone(season)`、`mistDensity(termIndex)`
   - 單元測試：節氣邊界（立春換年、冬至）、站主時區
-- [ ] `scripts/check-design.ts` ＋ `pnpm check:design`：擋掉 `backdrop-blur`、`bg-gradient-*`、`shadow-lg/xl`、Tailwind 原色（`zinc-`、`neutral-` 等），`components/ui/` 與白名單除外；先只警告，階段 1 清完再改成會失敗
-- [ ] 加進 `typecheck` 同一條 CI／pre-commit
+- [x] `scripts/check-design.ts` ＋ `pnpm check:design`：擋掉 `backdrop-blur`、`bg-gradient-*`、`shadow-lg/xl`、Tailwind 原色（`zinc-`、`neutral-` 等），`components/ui/` 與白名單除外；先只警告，階段 1 清完再改成會失敗
+- [x] 加進 `typecheck` 同一條 CI／pre-commit
 
 **完成條件**：測試通過；`check:design` 列得出階段 1 的清單。
+
+> 完成（2026-10-26）：`pnpm test`（node --test）、`pnpm check:design`、`pnpm typecheck`（tsc＋check:design）。pre-commit 目前只有空的 lint-staged，沒有掛上。
 
 ## 階段 1：清違規（小改、立即見效）
 
 每一處改成「紙上加幾 % 墨＋髮絲線」或暈染：
 
-- [ ] `components/layout/header/header.tsx:50` — 捲動後的毛玻璃底
-- [ ] `components/layout/header/nav.tsx:258` — 毛玻璃＋`shadow-lg`
-- [ ] `components/layout/header/nav.tsx:346,362` — 底線的漸層 → 一筆有起收的朱線
-- [ ] `components/layout/header/nav.tsx:447` — 下拉選單毛玻璃＋`shadow-xl`
-- [ ] `components/layout/footer/index.tsx:10` — 毛玻璃
-- [ ] `components/fab/fab-container.tsx:54-56` — 毛玻璃、`shadow-lg`、`zinc-50`
-- [ ] `routes/_layout/(home)/-components/home-editorial.tsx:70` — 漸層豎線 → 筆觸
-- [ ] `routes/_layout/notes/-components/notes-calendar.tsx:43` — 毛玻璃卡片
-- [ ] `routes/_layout/posts/-components/posts-sidebar.tsx:51` — 毛玻璃卡片
-- [ ] `check:design` 改成會失敗
+- [x] `components/layout/header/header.tsx:50` — 捲動後的毛玻璃底
+- [x] `components/layout/header/nav.tsx:258` — 毛玻璃＋`shadow-lg`
+- [x] `components/layout/header/nav.tsx:346,362` — 底線的漸層 → 一筆有起收的朱線
+- [x] `components/layout/header/nav.tsx:447` — 下拉選單毛玻璃＋`shadow-xl`
+- [x] `components/layout/footer/index.tsx:10` — 毛玻璃
+- [x] `components/fab/fab-container.tsx:54-56` — 毛玻璃、`shadow-lg`、`zinc-50`
+- [x] `routes/_layout/(home)/-components/home-editorial.tsx:70` — 漸層豎線 → 筆觸
+- [x] `routes/_layout/notes/-components/notes-calendar.tsx:43` — 毛玻璃卡片
+- [x] `routes/_layout/posts/-components/posts-sidebar.tsx:51` — 毛玻璃卡片
+- [x] `check:design` 改成會失敗
 
 **完成條件**：`check:design` 零錯誤；晝夜、手機各看一次。
 
+> 完成：另外清掉計畫外的 toc-list、welcome、menu、editor-preview 等處；毛玻璃已由站主統一為 `.glass` / `.glass-strong`。
+
 ## 階段 2：字層的墨分乾濕
 
-- [ ] 標題樣式：`.ink-wet` / `.ink-dry` / `.ink-faded`（styles.css，只用 `--foreground` 混色與低透明度 `text-shadow`），對比度都過 AA
-- [ ] 套到：文章列表 `post-item.tsx`、筆記 `notes-journal.tsx`、碎念 `thinking-list.tsx`、分類 `categories-timeline.tsx`
-- [ ] 滑過：該列標題暫時變濕（150–200ms），鍵盤聚焦同樣效果
-- [ ] reduced-motion 下只換濃淡、不做暈
+- [x] 標題樣式：`.ink-wet` / `.ink-dry` / `.ink-faded`（styles.css，只用 `--foreground` 混色與低透明度 `text-shadow`），對比度都過 AA
+- [x] 套到：文章列表 `post-item.tsx`、筆記 `notes-journal.tsx`、碎念 `thinking-list.tsx`、分類 `categories-timeline.tsx`
+- [x] 滑過：該列標題暫時變濕（150–200ms），鍵盤聚焦同樣效果
+- [x] reduced-motion 下只換濃淡、不做暈
 
 **完成條件**：這個節氣的文章一眼看得出「剛寫的」；拿掉樣式後版面完全不變。
 
-## 階段 3：庭的原型（只做 `/posts`）⚑ 決策點
+> 完成：`.ink-row` / `.ink-wet|dry|faded` / `.ink-title`；滑過時標題由朱色改為「墨變濕」，朱色底線保留。
 
-- [ ] `src/components/garden/garden-layer.tsx`：畫層容器（`aria-hidden`、固定在字層後、`afterLoadIdle` 才建立、不可見暫停）
-- [ ] `src/components/garden/karesansui.ts`：純 canvas，畫砂紋（照 `rakePattern`）、一組石、霧；筆觸有起收
-- [ ] 只掛在 `/posts`；手機只留右下一角
-- [ ] 晝（宣紙上的庭）、夜（燈下的庭）兩套
-- [ ] 效能：首次互動不受影響（Lighthouse TBT／INP 不退步）
+## 階段 3：庭的原型（只做 `/posts`）⚑ 決策點 ✅
 
-**決策點**：站主看過原型後決定——
-- 庭的感覺對 → 進階段 4
-- 不對 → 回頭改 DESIGN.md 第 1、4 節，再做一次原型（後面的階段都不受影響）
+> 完成（2026-10-26），站主已同意。最後的做法：**一張水墨石庭的 SVG**（`components/garden/garden-layer.tsx`、`garden-paths.ts`）。
+> - 構圖參考龍安寺石庭：從斜上方看，透視壓縮的平行耙紋（遠密近疏），往上、往左淡進紙裡
+> - 石參考雪舟的水墨石：低而寬、有稜面；輪廓粗細不一且在轉折處斷開，面的交界用折帶皴，頂上點苔，淡墨填面（不透明，擋住砂紋）
+> - 石組坐在苔島上，島周圍繞四圈很扁的橢圓水紋；苔色隨季節（`mossTone`）
+> - 筆觸邊緣用 `feTurbulence` + `feDisplacementMap` 打毛
+> - 石組只在 ≥1280px（畫面右側有空白）時出現，避免壓到列表與側欄；窄螢幕只留砂紋
+> - 晝：宣紙上的墨；夜：暗剪影、輪廓被月光勾亮。晝夜都在 1600×900 看過
+>
+> **走過的彎路（不要再走）**
+> - 純 canvas 2D：圓斑狀的石頭不像石頭
+> - 幾何 SVG（多邊形石、平塗、等寬線）：太像玩具、貼紙
+> - three.js 3D（寫實打光的石、竹、燈籠……）：在部落格裡很突兀，像兩個焦點在搶；列表頁開 WebGL 成本也不值
+> - 一頁一種景、九種景一次鋪開：違反「先驗證再鋪開」，而且中景不該搶字層
+> - **原則**：庭是「畫」不是「物件」——照真實的參考圖與水墨畫法去畫；點景最多一處，大量留白；先只做一頁、給站主看過再鋪開
+>
+> **還沒做**：六種節氣耙紋目前只有直紋、波紋兩種在透視下畫出來，斜紋／同心圓／渦紋／青海波暫時歸到直紋或波紋。
 
-## 階段 4：庭鋪到各列表頁
+## 階段 4：庭鋪到各列表頁（依階段 3 的教訓重新規劃）✅
 
-照 DESIGN.md 第 4 節，每頁一隅；共用 `garden-layer`，各頁只給一份「這一隅有什麼」的設定：
+> 完成（2026-10-26），站主逐頁同意。七個列表頁都只放砂紋（`GardenLayer stones={false}`），只有朋友圈加一處點景（飛石）；其他頁站主決定不加點景。
 
-- [ ] 分類 `/categories/$slug`（一隅由 slug 決定）
-- [ ] 筆記 `/notes`（苔庭）
-- [ ] 專欄 `/notes/topics`（飛石小徑）
-- [ ] 碎念 `/thinking`（竹枝與風）
-- [ ] 時間線 `/timeline`（遣水）
-- [ ] 友鏈 `/friends`（借景遠山）
-- [ ] 朋友圈 `/fcircle`（牆頭的枝）
+原本的「每頁一隅、九種景」已放棄（見階段 3 的彎路）。重新規劃：
 
-**完成條件**：每頁開著和關掉畫層各看一次；八頁的砂紋在同一個節氣是同一種。
+- [x] 先補完六種節氣耙紋在透視下的畫法（`garden-paths.ts` 的 `rakePaths`），同一個節氣各頁都一樣
+  > 斜紋＝收向右外側消失點的斜線；同心圓＝島外再繞 7 圈扁橢圓、其外直紋；渦紋＝扁螺旋、其外波紋；青海波＝扇形列、近列蓋遠列。`GardenLayer` 加 `stones={false}`（只有砂紋）。
+  > 分類 `/categories/$slug`：已放砂紋，站主同意。
+  > 筆記 `/notes`（列表＋側欄）、專欄 `/notes/topics`：已放砂紋，站主同意。
+  > `rakePattern` 改為每輪完六種錯開一格（四季代表節氣 5／11／17／23 原本都落在斜紋，頁尾預覽看不出差別）；現在依序是斜紋／直紋／波紋／青海波。
+  > 碎念 `/thinking`（單欄）：已放砂紋，站主同意。
+  > 時間線 `/timeline`（單欄）：已放砂紋，站主同意。
+  > 友鏈 `/friends`（單欄）：已放砂紋，申請表單輸入框加紙底（`bg-background`）擋住砂紋，站主同意。
+  > 朋友圈 `/fcircle`（單欄）：已放砂紋，站主同意。點景：飛石（`GardenLayer scene="stepping-stones"`、`garden-paths.ts` 的 `STEPPING_STONES`）。參考 Wikimedia Commons 上踏石穿過礫石的照片（扁、橫寬、越遠越小越密、左右交錯）與雪舟山水裡的岸石（淡墨面、近緣一道斷續重墨）。一串踏石從右下畫面外往左上走，只在 ≥1280px 出現；1280 時最遠的石與字欄仍有空隙。站主同意。
+- [x] 其他列表頁（分類、筆記、專欄、碎念、時間線、友鏈、朋友圈）先只放砂紋，**一頁一頁**給站主看，看過才放下一頁
+- [x] 要不要加點景、加什麼，逐頁和站主討論；畫之前先找真實參考圖（照片＋水墨畫），最多一處，避開字層
+- [x] 版面寬度不同的頁（單欄 `PageShell` vs 列表＋側欄）各自確認石組位置不壓字
+  > 除 `/posts` 外都只有砂紋、沒有石組；單欄（分類、專欄、碎念、時間線、友鏈、朋友圈）與列表＋側欄（筆記）都在 1600×900 與手機看過，砂紋淡、不搶字。
 
-## 階段 5：遠景補完（首頁）
+**完成條件**：每頁晝夜、手機、桌機各看一次；同一個節氣各頁砂紋一致；站主逐頁同意。
 
-- [ ] `ink-voyage.ts`：江中一座朱色鳥居（畫面唯一的高彩度物件，燈籠映在它身上）
-- [ ] 江的一側引出一道遣水，流出畫面（接階段 6 的推近）
-- [ ] `SeasonParticles` 確認只在首頁出現
-- [ ] 手機上 3D 的幀率與耗電檢查；低階裝置退回 `ink-landscape` 的靜態版
+## 階段 5：遠景補完（首頁）✅
 
-## 階段 6：轉場
+> 完成（2026-10-26），站主已同意。遣水移到階段 6。
 
-- [ ] 列表 ⇄ 列表：**暈染**——點擊處一滴墨暈開蓋住舊景、水洗淡、露出新景（重用 `lib/ink-fluid.ts`）
-- [ ] 首頁 → 列表：**推近**——鏡頭順江推進、遣水化成庭的砂紋；反方向拉遠
-- [ ] 列表 ⇄ 文章、文章之間：維持既有展卷／翻頁，確認跟暈染不會疊在一起
-- [ ] 一碰螢幕／捲動／按鍵立即跳到結果；reduced-motion 只淡入
+- [x] `ink-voyage.ts`：江中一座朱色鳥居（畫面唯一的高彩度物件，燈籠映在它身上）
+  > 新檔 `components/ink-torii.ts`。參考：Wikimedia Commons 上嚴島神社大鳥居的照片（兩部鳥居：笠木上翹且覆黑、島木、貫出柱外、額束、前後各兩支稚児柱；夜裡倒影拉得很長）。
+  > 畫法跟山同一套 GLSL：朱讀 `--zhu`（夜裡 `--ink` 會換成燈色），沿構件長向的乾筆筆絲＋飛白（露出紙）、輪廓與背光積墨、柱腳化進江霧、premultiplied alpha。夜裡朱壓暗、船上燈籠的暖光照在朝船那面，月光勾稜線。倒影是鏡像的同一組構件，被水紋扯碎、往下淡掉。
+  > 鳥居停在鏡頭前方 105 單位（跟船一樣隨夜航前進，是「遙遙的去處」），捲動時往它推近——之後階段 6 的推近可以順著它。手機寬度時鳥居落在問候文字後方，字仍清楚。
+  > 站主已同意。
+- [x] ~~江的一側引出一道遣水，流出畫面~~ → **移到階段 6**：推近時才從江面引出遣水、化成庭的砂紋（站主同意）
+  > 試過的做法：右岸留低平沙洲，遣水畫在地形 shader 上、位置跟著鏡頭。看得到，但只是遠處一條細線，不像畫的一部分，已移除。
+  > 彎路：在地形上直接刻溝——鏡頭低、遣水遠，透視壓成一兩個像素；3D 地形上的細流先天吃虧。遣水是轉場裡的一筆，不是常駐的景。
+- [x] `SeasonParticles` 確認只在首頁出現
+  > 只有 `InkLandscape` 用到，而 `InkLandscape` 只在 `(home)/index.tsx`。
+- [x] 手機上 3D 的幀率與耗電檢查；低階裝置退回 `ink-landscape` 的靜態版
+  > 觸控裝置（`pointer: coarse`）只畫 30fps、pixel ratio 上限 1.25。省流量模式、`deviceMemory ≤ 2` 或 `hardwareConcurrency ≤ 2` 直接不載 3D，留在 SVG 山水。載入後開頭約 4 秒量幀率，低於 20fps 就釋放 3D、拿掉 `.is-3d`，SVG 山層淡回來。
+  > 只在瀏覽器的手機模擬（375px、觸控）看過 3D 正常、沒有錯誤；真機的幀率與耗電、以及低幀率退回的那條路，還沒有在實機上驗證。
+
+## 階段 6：轉場 ✅
+
+> 完成（2026-10-27），站主逐項同意。列表之間暈染、首頁⇄列表推近／拉遠（遣水拿掉）、展卷／翻頁與兩者不重疊、所有轉場可中斷、reduced-motion 只淡入。手機寬度與真的 reduced-motion 設定還沒實際看過。
+
+- [x] 列表 ⇄ 列表：**暈染**——點擊處一滴墨暈開蓋住舊景、水洗淡、露出新景（重用 `lib/ink-fluid.ts`）
+  > 站主已同意。`components/ink-wash.tsx`（掛在 `__root`）在捕獲階段攔下站內連結點擊，`lib/ink-wash.ts` 判斷前後都是列表頁（文章、分類/$slug、筆記、專欄、碎念、時間線、友鏈、朋友圈）且路徑不同才做；同頁換篩選／分頁不做。`ink-fluid.ts` 新增 `spread`（點擊處暈開 380ms 蓋滿）與 `reveal(ms)`，換頁後 650ms 洗淡。每次才建 WebGL、播完釋放。轉場中按下、滾輪、按鍵直接換頁並撤掉墨；reduced-motion 不攔。晝夜在 800px 寬看過。
+- [x] 首頁 → 列表：**推近**——鏡頭順江往鳥居推進、紙色漫上來接到列表頁的砂紋；反方向拉遠（原本要畫的遣水試過後拿掉，見下）
+  > 站主已同意。以下第二、三段是最初的做法，遣水部分已拿掉。3D 與 SVG 的接法：兩邊不直接接，中間隔一層 2D 疊層（`components/ink-push.tsx`，掛在 `__root`），用 window 事件跟 3D 溝通（`lib/ink-push.ts`）。
+  > 推近（約 1.1s）：`ink-voyage.ts` 加 `dolly`，鏡頭順江前進 62 單位、略壓低，停在鳥居前（不穿過去），先慢後快。3D 回報鏡頭前方江面一點的螢幕座標，遣水從那裡畫出：一筆淡墨水面加一道濃墨水線，蜿蜒流向右下、出畫面。接著紙色漫上來，疊層裡的 `GardenLayer`（與列表頁同一張、同一節氣耙紋）淡入。蓋滿才換頁，然後撤掉紙和遣水，砂紋原地接上列表頁自己的庭。
+  > 拉遠：先蓋上紙、砂紋、遣水再換回首頁，遣水縮回江面、紙退去。首頁的 3D 要等主執行緒空下來才建（約 0.6s），建好時從推近的位置拉回（1.4s，先快後慢）；3D 沒載入（低階裝置）時只有 2D 那一層。
+  > 轉場中按下、滾輪、按鍵直接換頁並撤掉疊層；reduced-motion 不攔。晝夜在 800px 寬看過。
+  > 站主回饋「船和那條線很突兀」→ 推近時船不跟鏡頭走（鏡頭從旁經過、船退出畫面）。
+  > **遣水已拿掉**（站主：沒人看得懂在幹嘛）。現在推近＝鏡頭推向鳥居＋紙色漫上來、砂紋淡入；拉遠＝紙與砂紋退去＋鏡頭拉回。DESIGN.md 第 1、5 節同步改了。
+  > 彎路：遣水試過兩次（階段 5 畫在 3D 地形上、這裡畫成 2D 墨線），都不像畫的一部分。轉場不需要「解釋」江怎麼變成庭，紙漫上來就夠了。
+- [x] 列表 ⇄ 文章、文章之間：維持既有展卷／翻頁，確認跟暈染不會疊在一起
+  > 站主已同意。觸發條件本來就不重疊：展卷／收卷／翻頁只在一端是 `/posts/$slug` 時才有（`postTransitionTypes`）；暈染、推近只攔列表 ⇄ 列表、首頁 ⇄ 列表。補了兩個時間上的邊界：
+  > 1. 暈染／推近被中斷、那一下又剛好點在文章連結上：展卷會馬上截圖，所以中斷時墨與紙立刻設成 `visibility: hidden`，不等 React 移除。
+  > 2. 展卷／翻頁還在播時點列表連結：`post-transitions.ts` 新增 `isPostTransitionActive()`，這時暈染、推近不攔，直接換頁（View Transition 的畫面在最上層，墨會被蓋在底下）。
+  > 瀏覽器實測：列表 → 文章（展卷）、文章 → 列表（收卷）、暈染中斷後立刻點文章，轉場期間畫面上都沒有墨或紙；換頁都正確。
+- [x] 一碰螢幕／捲動／按鍵立即跳到結果；reduced-motion 只淡入
+  > 站主已同意。
+  > 中斷：暈染、推近原本就會在按下、滾輪、按鍵時跳到結果。展卷／翻頁原本只認觸控與滾輪，補上按下與按鍵（`installTransitionInterruptGuard`）。進站開場（`ink-intro.tsx`）原本不能跳過，現在按下、滾輪、按鍵就撤掉墨面、露出網站。
+  > reduced-motion：暈染、推近、開場都不播。原本所有換頁都是硬切，現在 `postTransitionTypes` 對每次換頁回傳 `fade`，`styles.css` 的 reduced-motion 區塊讓新舊頁淡出淡入（0.2–0.25s），不位移、不展卷、標題不飛。
+  > 驗證：開場按鍵跳過、在瀏覽器裡實測。reduced-motion 是用改寫 `matchMedia` 模擬：確認暈染沒攔、換頁帶的是 `fade`。淡入本身靠 CSS 的 `@media`，瀏覽器面板無法模擬，還沒親眼看過；也不支援 view transition types 的瀏覽器（如舊版 Firefox）仍是直接換頁。
 
 ## 階段 7：細節頁
 
@@ -117,6 +167,6 @@
 
 ## 待決定
 
-- 庭的畫法：純 2D canvas（輕、好控制）還是共用 3D 夜航的 three.js（能做推近，但列表頁變重）？建議原型先用 2D，推近時用截圖或簡化場景接起來。
+- ~~庭的畫法~~：已定案為 SVG 水墨（見階段 3）。階段 6 的「推近」要另外想怎麼從 3D 江山接到 SVG 的庭。
 - 二十四種耙紋要全做，還是 4–6 種輪替？建議先輪替，看效果再補。
 - 夜裡的庭要不要有燈（石燈籠）？會多一個暖色光源，要跟「強調色只有朱」對齊。

@@ -5,6 +5,7 @@ import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { TopicGrid } from './-components/topic-grid'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { GardenLayer } from '@/components/garden/garden-layer'
 
 export const Route = createFileRoute('/_layout/notes/topics/')({
   loader: async ({ context }) => {
@@ -35,6 +36,7 @@ function NoteTopicsIndexPage() {
 
   return (
     <>
+      <GardenLayer stones={false} />
       <div className={pageShellClass}>
         <header className="mb-12">
           <h1 className="font-wenkai text-4xl text-foreground">專欄</h1>

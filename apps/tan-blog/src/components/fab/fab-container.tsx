@@ -51,10 +51,8 @@ export const FABBase = ({
           className={cn(
             'mt-2 flex items-center justify-center',
             'size-12 text-lg md:size-10 md:text-base',
-            'rounded-xl border backdrop-blur-lg',
-            'border-zinc-400/20 dark:border-zinc-500/30',
-            'bg-zinc-50/80 shadow-lg dark:bg-neutral-900/80',
-            'dark:text-zinc-200',
+            'rounded-xl border border-rule glass-strong shadow-sm',
+            'text-foreground',
             'outline-accent hover:opacity-100 focus:opacity-100 focus:outline-none',
             className,
           )}

@@ -21,6 +21,24 @@ export function InkIntro({ term }: { term: string }) {
     let cancelled = false
     let dispose: (() => void) | undefined
     const endVeil = () => delete root.dataset.inkIntro
+    // 開場不可阻擋操作：一按、滾輪、按鍵就直接撤掉，露出網站
+    const skip = () => {
+      if (cancelled) return
+      cancelled = true
+      unlisten()
+      endVeil()
+      dispose?.()
+      dispose = undefined
+      setStage('done')
+    }
+    const unlisten = () => {
+      removeEventListener('pointerdown', skip, true)
+      removeEventListener('wheel', skip)
+      removeEventListener('keydown', skip, true)
+    }
+    addEventListener('pointerdown', skip, true)
+    addEventListener('wheel', skip, { passive: true })
+    addEventListener('keydown', skip, true)
 
     ;(async () => {
       const { createInkFluid } = await import('@/lib/ink-fluid')
@@ -28,6 +46,7 @@ export function InkIntro({ term }: { term: string }) {
       if (cancelled) return
       const fluid = createInkFluid(canvas)
       if (!fluid) {
+        unlisten()
         endVeil()
         setStage('done')
         return
@@ -46,13 +65,16 @@ export function InkIntro({ term }: { term: string }) {
       if (cancelled) return
       setStage('leaving')
       await fluid.reveal()
+      if (cancelled) return
+      unlisten()
       setStage('done')
-      dispose()
+      dispose?.()
       dispose = undefined
     })()
 
     return () => {
       cancelled = true
+      unlisten()
       if (!dispose) return
       endVeil()
       dispose()

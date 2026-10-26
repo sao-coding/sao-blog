@@ -47,7 +47,7 @@ const Header = () => {
           // view-transition-name：文章換頁的展卷動畫時 header 自成一層、維持不動
           'fixed inset-x-0 top-0 z-50 h-[4.5rem] border-b transition-colors duration-300 [view-transition-name:site-header]',
           showBackground
-            ? 'border-border bg-background/40 backdrop-blur-md'
+            ? 'border-rule glass'
             : 'border-transparent'
         )}
       >

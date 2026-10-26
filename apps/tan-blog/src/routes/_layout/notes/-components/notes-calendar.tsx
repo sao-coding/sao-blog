@@ -40,7 +40,7 @@ export function NotesCalendar({ notes }: { notes: JournalNote[] }) {
   }
 
   return (
-    <aside className="sticky top-28 flex flex-col gap-6 rounded-xl border border-rule bg-card/40 p-5 text-sm backdrop-blur-sm">
+    <aside className="sticky top-28 flex flex-col gap-6 rounded-xl border border-rule glass p-5 text-sm">
       <section>
         <h2 className="mb-3 font-wenkai text-xs text-muted-foreground">{m.notes_footprint()}</h2>
 

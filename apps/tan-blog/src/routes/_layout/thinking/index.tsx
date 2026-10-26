@@ -5,6 +5,7 @@ import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { ThinkingList } from './-components/thinking-list'
 import { pageShellClass } from '@/components/layout/page-shell'
+import { GardenLayer } from '@/components/garden/garden-layer'
 
 export const Route = createFileRoute('/_layout/thinking/')({
   loader: async () => {
@@ -32,6 +33,7 @@ function ThinkingPage() {
 
   return (
     <>
+      <GardenLayer stones={false} />
       <div className={pageShellClass}>
         <header className="mb-10 max-w-xl sm:mb-14">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_thinking_title()}</h1>

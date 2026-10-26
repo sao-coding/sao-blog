@@ -6,6 +6,7 @@ import { CompiledMdx } from '@/lib/mdx/compiled-mdx'
 import { pageHead } from '@/lib/seo'
 import { m } from '#/paraglide/messages'
 import { PageWithSidebar } from '@/components/layout/page-shell'
+import { GardenLayer } from '@/components/garden/garden-layer'
 import { NotePreviewCard } from './-components/note-preview-card'
 import { NotesJournal, type JournalNote } from './-components/notes-journal'
 import { NotesCalendar } from './-components/notes-calendar'
@@ -74,6 +75,8 @@ function NotesIndexPage() {
   const earlier = journal.filter((note) => note.id !== current.id)
 
   return (
+    <>
+    <GardenLayer stones={false} />
     <PageWithSidebar sidebar={<NotesCalendar notes={journal} />}>
       <header className="mb-12">
         <h1 className="font-wenkai text-4xl text-foreground">{m.page_notes_title()}</h1>
@@ -93,5 +96,6 @@ function NotesIndexPage() {
         </div>
       )}
     </PageWithSidebar>
+    </>
   )
 }

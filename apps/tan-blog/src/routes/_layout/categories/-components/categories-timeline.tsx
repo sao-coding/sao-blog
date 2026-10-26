@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import { TermMark } from '@/components/written-season'
 import { siteTime } from '@/lib/site-time'
+import { inkDryness } from '@/lib/season-spec'
+import { cn } from '@/lib/utils'
 
 interface Article {
   id: string
@@ -61,7 +63,7 @@ export function CategoriesTimeline({ articles }: CategoriesTimelineProps) {
               key={article.id}
               ref={(el) => { itemRefs.current[index] = el }}
               onMouseEnter={() => setHoveredIndex(index)}
-              className="group"
+              className={cn('ink-row group', `ink-${inkDryness(date)}`)}
             >
               <Link
                 to="/posts/$slug"
@@ -72,7 +74,7 @@ export function CategoriesTimeline({ articles }: CategoriesTimelineProps) {
                   <time className="text-muted-foreground tabular-nums group-hover:text-ink">{formattedDate}</time>
                   <TermMark date={date} className="hidden text-xs md:inline" />
                 </span>
-                <span className="line-clamp-2 min-w-0 text-foreground transition-colors group-hover:text-ink md:line-clamp-1">
+                <span className="ink-title line-clamp-2 min-w-0 md:line-clamp-1">
                   {article.title}
                 </span>
               </Link>
