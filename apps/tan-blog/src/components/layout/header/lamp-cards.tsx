@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils'
 import { currentContentLocale } from '@/lib/content-locale'
 import { SOCIAL_LINKS, getNavLinks, type NavCard } from '@/config/menu'
 import { SITE_OWNER } from '@/config/mega-menu'
-import { ProtoLink, termOf } from './proto-parts'
+import { m } from '#/paraglide/messages'
+import { NavLink, termOf } from './nav-parts'
 import { ActivityLine, OwnerAvatar, type useOwnerActivity } from './owner-mark'
 
 type MenuData = NonNullable<InferClientOutputs<typeof client>['menu']['getMenu']['data']>
@@ -23,13 +24,13 @@ const row = 'ink-row flex items-baseline gap-3 py-1.5 outline-none'
 function Entry({ href, title, at, aside, onNavigate, i }: { href: string; title: string; at: string; aside?: string; onNavigate?: () => void; i: number }) {
   const t = termOf(at)
   return (
-    <ProtoLink href={href} onClick={onNavigate} className={cn(row, 'group/e')} {...rise(i)}>
+    <NavLink href={href} onClick={onNavigate} className={cn(row, 'group/e')} {...rise(i)}>
       <span className={cn('w-8 shrink-0 font-wenkai text-[11px] tracking-wider', t.wet ? 'text-ink' : 'text-foreground/40')}>{t.term}</span>
       <span className={cn('ink-title line-clamp-1 font-wenkai text-[14px] tracking-[0.04em]', `ink-${t.dryness}`, 'group-focus-visible/e:underline decoration-ink/60 underline-offset-4')}>
         {title}
       </span>
       {aside && <span className="ml-auto shrink-0 font-wenkai text-[11px] text-foreground/40">{aside}</span>}
-    </ProtoLink>
+    </NavLink>
   )
 }
 
@@ -61,7 +62,7 @@ function Shelf({
         const isHot = hot === it.key
         return (
           <li key={it.key} {...rise(i)}>
-            <ProtoLink
+            <NavLink
               href={it.href}
               title={it.text}
               onClick={onNavigate}
@@ -75,15 +76,15 @@ function Shelf({
               {isHot && <span aria-hidden="true" className="absolute left-0 top-1/2 size-[3px] -translate-y-1/2 rounded-full bg-(--lamp)" />}
               <span className="min-w-0 flex-1 truncate">{it.text}</span>
               {it.count != null && <span className="shrink-0 font-mono text-[10px] tracking-normal text-foreground/40">{it.count}</span>}
-            </ProtoLink>
+            </NavLink>
           </li>
         )
       })}
       {rest && (
         <li {...rise(items.length)}>
-          <ProtoLink href={rest.href} onClick={onNavigate} className={cn('block py-1 pl-3 font-wenkai text-xs tracking-[0.12em] text-foreground/40', footLink)}>
+          <NavLink href={rest.href} onClick={onNavigate} className={cn('block py-1 pl-3 font-wenkai text-xs tracking-[0.12em] text-foreground/40', footLink)}>
             {rest.text} →
-          </ProtoLink>
+          </NavLink>
         </li>
       )}
     </ul>
@@ -111,10 +112,10 @@ function PostsCard({ data, onNavigate }: { data: MenuData; onNavigate?: () => vo
     <div className="flex w-[32rem] gap-5 px-6 py-5">
       <Shelf
         items={[
-          { key: '', href: '/posts', text: '全部', count: data.postTotal },
+          { key: '', href: '/posts', text: m.nav_all(), count: data.postTotal },
           ...top.map((c) => ({ key: c.slug, href: `/categories/${c.slug}`, text: c.name, count: c.postCount })),
         ]}
-        rest={restCount > 0 ? { href: '/posts', text: `其他 ${restCount} 類` } : undefined}
+        rest={restCount > 0 ? { href: '/posts', text: m.nav_rest_categories({ count: restCount }) } : undefined}
         hot={slug ?? ''}
         onHover={(k) => setSlug(k || null)}
         onNavigate={onNavigate}
@@ -125,13 +126,13 @@ function PostsCard({ data, onNavigate }: { data: MenuData; onNavigate?: () => vo
           {posts.slice(0, 5).map((p, i) => (
             <Entry key={p.id} href={`/posts/${p.slug}`} title={p.title} at={p.createdAt} onNavigate={onNavigate} i={i + 1} />
           ))}
-          {posts.length === 0 && <p className="py-2 font-wenkai text-sm text-foreground/40">還沒有文章</p>}
+          {posts.length === 0 && <p className="py-2 font-wenkai text-sm text-foreground/40">{m.nav_no_posts()}</p>}
         </div>
         <Foot i={7}>
-          <span className="min-w-0 truncate">{cat ? cat.name : '近期'}</span>
-          <ProtoLink href={cat ? `/categories/${cat.slug}` : '/posts'} onClick={onNavigate} className={cn('shrink-0', footLink)}>
-            {cat ? `${cat.postCount} 篇` : `共 ${data.postTotal} 篇`} →
-          </ProtoLink>
+          <span className="min-w-0 truncate">{cat ? cat.name : m.nav_recent()}</span>
+          <NavLink href={cat ? `/categories/${cat.slug}` : '/posts'} onClick={onNavigate} className={cn('shrink-0', footLink)}>
+            {cat ? m.nav_post_count({ count: cat.postCount }) : m.nav_post_total({ count: data.postTotal })} →
+          </NavLink>
         </Foot>
       </div>
     </div>
@@ -146,10 +147,10 @@ function NotesCard({ data, onNavigate }: { data: MenuData; onNavigate?: () => vo
     <div className={cn('flex gap-5 px-6 py-5', top.length > 0 ? 'w-[30rem]' : 'w-[24rem]')}>
       {top.length > 0 && (
         <div className="shrink-0">
-          <p className={cn(label, 'mb-1 pl-3')} {...rise(0)}>專欄</p>
+          <p className={cn(label, 'mb-1 pl-3')} {...rise(0)}>{m.page_topics_title()}</p>
           <Shelf
             items={top.map((t) => ({ key: String(t.id), href: `/notes/topics/${t.slug}`, text: t.name }))}
-            rest={restCount > 0 ? { href: '/notes/topics', text: `其他 ${restCount} 個` } : undefined}
+            rest={restCount > 0 ? { href: '/notes/topics', text: m.nav_rest_topics({ count: restCount }) } : undefined}
             hot={hot}
             onHover={setHot}
             onNavigate={onNavigate}
@@ -161,8 +162,8 @@ function NotesCard({ data, onNavigate }: { data: MenuData; onNavigate?: () => vo
           <Entry key={n.id} href={`/notes/${n.id}`} title={n.title} at={n.createdAt} onNavigate={onNavigate} i={i + 1} />
         ))}
         <Foot i={7}>
-          <ProtoLink href="/notes/topics" onClick={onNavigate} className={footLink}>全部專欄</ProtoLink>
-          <ProtoLink href="/notes" onClick={onNavigate} className={footLink}>全部手記 →</ProtoLink>
+          <NavLink href="/notes/topics" onClick={onNavigate} className={footLink}>{m.nav_all_topics()}</NavLink>
+          <NavLink href="/notes" onClick={onNavigate} className={footLink}>{m.nav_all_notes()} →</NavLink>
         </Foot>
       </div>
     </div>
@@ -176,22 +177,22 @@ function ThinkingCard({ data, onNavigate }: { data: MenuData; onNavigate?: () =>
       {data.recentThinkings.slice(0, 3).map((t, i) => {
         const term = termOf(t.createdAt)
         return (
-          <ProtoLink key={t.id} href="/thinking" onClick={onNavigate} className="ink-row block py-2 outline-none focus-visible:underline decoration-ink/60 underline-offset-4" {...rise(i)}>
+          <NavLink key={t.id} href="/thinking" onClick={onNavigate} className="ink-row block py-2 outline-none focus-visible:underline decoration-ink/60 underline-offset-4" {...rise(i)}>
             <span className={cn('ink-title line-clamp-2 font-wenkai text-[14px] leading-relaxed tracking-[0.04em]', `ink-${term.dryness}`)}>「{t.content}」</span>
             <span className={cn('mt-0.5 block text-right font-wenkai text-[11px] tracking-wider', term.wet ? 'text-ink' : 'text-foreground/40')}>{term.term}</span>
-          </ProtoLink>
+          </NavLink>
         )
       })}
-      {data.recentThinkings.length === 0 && <p className="py-2 font-wenkai text-sm text-foreground/40">還沒有想法</p>}
+      {data.recentThinkings.length === 0 && <p className="py-2 font-wenkai text-sm text-foreground/40">{m.nav_no_thinking()}</p>}
       <Foot i={4}>
         <span />
-        <ProtoLink href="/thinking" onClick={onNavigate} className={footLink}>全部想法 →</ProtoLink>
+        <NavLink href="/thinking" onClick={onNavigate} className={footLink}>{m.nav_all_thinking()} →</NavLink>
       </Foot>
     </div>
   )
 }
 
-const ACTIVITY = { post: '文', note: '記' } as const
+const ACTIVITY = { post: m.nav_activity_post, note: m.nav_activity_note } as const
 
 function TimelineCard({ data, onNavigate }: { data: MenuData; onNavigate?: () => void }) {
   const children = getNavLinks().find((l) => l.card === 'timeline')?.children ?? []
@@ -200,14 +201,14 @@ function TimelineCard({ data, onNavigate }: { data: MenuData; onNavigate?: () =>
       {/* 篩選是設定檔裡固定的三項（手記／文章／專欄），不會變多 */}
       <div className="flex gap-5 whitespace-nowrap" {...rise(0)}>
         {children.map((c) => (
-          <ProtoLink key={c.href} href={c.href} onClick={onNavigate} className="nav-ink font-wenkai text-[13px] tracking-[0.12em] text-foreground/55 outline-none">
+          <NavLink key={c.href} href={c.href} onClick={onNavigate} className="nav-ink font-wenkai text-[13px] tracking-[0.12em] text-foreground/55 outline-none">
             {c.text}
-          </ProtoLink>
+          </NavLink>
         ))}
       </div>
       <div className="mt-3">
         {data.recentActivity.slice(0, 5).map((a, i) => (
-          <Entry key={`${a.type}-${a.id}`} href={a.href} title={a.title} at={a.createdAt} aside={ACTIVITY[a.type]} onNavigate={onNavigate} i={i + 1} />
+          <Entry key={`${a.type}-${a.id}`} href={a.href} title={a.title} at={a.createdAt} aside={ACTIVITY[a.type]()} onNavigate={onNavigate} i={i + 1} />
         ))}
       </div>
     </div>
@@ -217,9 +218,9 @@ function TimelineCard({ data, onNavigate }: { data: MenuData; onNavigate?: () =>
 /** 首頁：站主落款＋寫了多少＋社群 */
 function HomeCard({ data, activity }: { data: MenuData; activity: ReturnType<typeof useOwnerActivity> }) {
   const stats = [
-    { value: data.stats.writingCount, unit: '篇' },
-    { value: data.stats.wordCountWan, unit: '萬字' },
-    { value: data.stats.days, unit: '日' },
+    { value: data.stats.writingCount, unit: m.nav_unit_posts() },
+    { value: data.stats.wordCountWan, unit: m.nav_unit_words() },
+    { value: data.stats.days, unit: m.nav_unit_days() },
   ]
   return (
     <div className="w-[22rem] px-6 py-5">
@@ -255,10 +256,10 @@ function MoreCard({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="w-48 px-5 py-4">
       {links.map((l, i) => (
-        <ProtoLink key={l.href} href={l.href} onClick={onNavigate} className="nav-ink flex items-center gap-3 py-1.5 font-wenkai text-sm tracking-[0.14em] text-foreground/65 outline-none" {...rise(i)}>
+        <NavLink key={l.href} href={l.href} onClick={onNavigate} className="nav-ink flex items-center gap-3 py-1.5 font-wenkai text-sm tracking-[0.14em] text-foreground/65 outline-none" {...rise(i)}>
           {l.icon && <l.icon size={15} stroke={1.5} className="text-foreground/40" />}
           {l.text}
-        </ProtoLink>
+        </NavLink>
       ))}
     </div>
   )
@@ -268,7 +269,7 @@ export function LampCard({ card, activity, onNavigate }: { card: NavCard; activi
   const { data: res } = useQuery(orpc.menu.getMenu.queryOptions({ input: { locale: currentContentLocale() } }))
   if (card === 'more') return <MoreCard onNavigate={onNavigate} />
   if (!res || res.status !== 'success') {
-    return <div className="flex h-32 w-72 items-center justify-center font-wenkai text-sm tracking-[0.3em] text-foreground/35">{res ? '空無一物' : '磨墨中…'}</div>
+    return <div className="flex h-32 w-72 items-center justify-center font-wenkai text-sm tracking-[0.3em] text-foreground/35">{res ? m.nav_card_empty() : m.nav_card_loading()}</div>
   }
   const data = res.data
   switch (card) {

@@ -20,7 +20,7 @@ import {
 import type { Icon } from '@tabler/icons-react'
 import { m } from '#/paraglide/messages'
 
-// 導覽列 hover 卡片類型（對應 components/layout/header/cards）
+// 導覽列 hover 卡片類型（對應 components/layout/header/lamp-cards.tsx）
 export type NavCard =
   | 'home'
   | 'posts'

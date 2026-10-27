@@ -33,6 +33,13 @@ function FriendsPage() {
   return (
     <>
       <div className={pageShellClass}>
+        {/* 繪馬與繪馬掛共用的乾筆濾鏡（友鏈與奉納預覽都用） */}
+        <svg aria-hidden className="absolute size-0">
+          <filter id="ema-dry">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves={2} seed={7} />
+            <feDisplacementMap in="SourceGraphic" scale="1.8" />
+          </filter>
+        </svg>
         <header className="mb-10 sm:mb-14">
           <h1 className="font-wenkai text-4xl text-foreground">{m.page_friends_title()}</h1>
           <p className="mt-3 max-w-xl font-wenkai text-sm leading-relaxed text-muted-foreground">

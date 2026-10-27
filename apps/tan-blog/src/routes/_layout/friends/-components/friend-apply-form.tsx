@@ -8,6 +8,7 @@ import { client } from '@/lib/orpc'
 import { cn } from '@/lib/utils'
 import { Turnstile, turnstileSiteKey, type TurnstileHandle } from '@/components/turnstile'
 import { m } from '#/paraglide/messages'
+import { EmaBoard } from './friend-grid'
 
 const EMPTY = {
   name: '',
@@ -25,6 +26,7 @@ export function FriendApplyForm() {
   const [values, setValues] = useState(EMPTY)
   const [circleEnabled, setCircleEnabled] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [offered, setOffered] = useState<{ name: string; avatar: string } | null>(null)
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null)
   const honeypotRef = useRef<HTMLInputElement | null>(null)
   const turnstileRef = useRef<TurnstileHandle>(null)
@@ -50,7 +52,10 @@ export function FriendApplyForm() {
         turnstileToken: turnstileToken ?? undefined,
       })
       setResult({ ok: res.status === 'success', message: res.message })
-      if (res.status === 'success') setValues(EMPTY)
+      if (res.status === 'success') {
+        setOffered({ name: values.name, avatar: values.avatar })
+        setValues(EMPTY)
+      }
     } catch {
       setResult({ ok: false, message: m.friends_failed() })
     } finally {
@@ -79,7 +84,18 @@ export function FriendApplyForm() {
   )
 
   return (
-    <section id="apply" className="mt-20 max-w-2xl scroll-mt-24">
+    <section id="apply" className="mt-20 grid max-w-3xl scroll-mt-24 gap-x-10 sm:grid-cols-[auto_minmax(0,1fr)]">
+      {/* 奉納的繪馬：邊填邊寫上去；送出後留著，寫上「已奉納」 */}
+      <div aria-hidden className="ema-preview hidden sm:block">
+        <EmaBoard
+          name={(offered?.name ?? values.name) || m.friends_offer()}
+          avatar={offered?.avatar ?? (/^https?:\/\//.test(values.avatar) ? values.avatar : null)}
+        />
+        <p className="mt-3 text-center font-wenkai text-xs text-muted-foreground">
+          {offered ? m.friends_offered() : m.friends_offer_preview()}
+        </p>
+      </div>
+      <div>
       <h2 className="font-wenkai text-2xl text-foreground">{m.friends_apply_title()}</h2>
       <p className="mt-2 font-wenkai text-sm leading-relaxed text-muted-foreground">{m.friends_apply_intro()}</p>
 
@@ -120,6 +136,7 @@ export function FriendApplyForm() {
           )}
         </div>
       </form>
+      </div>
     </section>
   )
 }

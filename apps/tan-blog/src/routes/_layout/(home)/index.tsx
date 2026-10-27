@@ -3,11 +3,7 @@ import { orpc } from '@/lib/orpc'
 import { HOME_TITLE, pageHead, websiteJsonLd } from '@/lib/seo'
 import Welcome from './-components/welcome'
 import { InkLandscape } from '@/components/ink-landscape'
-import { HomeEditorial } from './-components/home-editorial'
-import LocationCard from './-components/location-card'
-import SkillsCard from './-components/skills-card'
-import { WritingTimelineStrip } from './-components/writing-timeline-strip'
-import { HomeFooter } from './-components/home-footer'
+import { ShojiCalendar } from './-components/shoji-calendar'
 import { currentContentLocale } from '@/lib/content-locale'
 
 export const Route = createFileRoute('/_layout/(home)/')({
@@ -40,21 +36,8 @@ function HomePage() {
         </div>
       </div>
 
-      <div className="relative mx-auto w-full max-w-6xl py-12">
-        <HomeEditorial
-          recentWriting={data.recentWriting}
-          musings={data.musings}
-          letters={data.letters}
-        />
-
-        <section className="mx-auto mt-32 grid max-w-6xl grid-cols-1 gap-x-16 gap-y-12 px-5 lg:grid-cols-2">
-          <LocationCard />
-          <SkillsCard />
-        </section>
-
-        <WritingTimelineStrip timeline={data.timeline} />
-
-        <HomeFooter totalLetters={data.stats.totalLetters} />
+      <div className="relative mx-auto w-full max-w-6xl py-16 md:py-24">
+        <ShojiCalendar items={data.timeline.items} musings={data.musings} />
       </div>
     </div>
   )
