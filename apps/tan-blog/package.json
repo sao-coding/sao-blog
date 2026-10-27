@@ -10,7 +10,7 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/lib/season-spec.test.ts",
+    "test": "node --test src/lib/season-spec.test.ts src/lib/saijiki.test.ts",
     "check:design": "node scripts/check-design.ts",
     "typecheck": "tsc --noEmit && node scripts/check-design.ts"
   },

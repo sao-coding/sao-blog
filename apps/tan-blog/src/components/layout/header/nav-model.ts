@@ -1,22 +1,21 @@
-// 階段 9 原型用：三個方向共用的導覽資料（選定後會併進正式的 nav）
-import { useSyncExternalStore } from 'react'
+// 導覽資料：設定檔的連結＋選單 API 的文章分類，標出目前所在（桌機墨帶與手機捲軸共用）
 import { useQuery } from '@tanstack/react-query'
 import { useLocation } from '@tanstack/react-router'
 import { getNavLinks, isDocumentLink, type NavCard } from '@/config/menu'
 import { orpc } from '@/lib/orpc'
 import { currentContentLocale } from '@/lib/content-locale'
 
-export type ProtoChild = { href: string; text: string; external: boolean; active: boolean; count?: number }
-export type ProtoItem = {
+export type NavChild = { href: string; text: string; external: boolean; active: boolean; count?: number }
+export type NavItem = {
   key: string
   text: string
   href?: string
   card?: NavCard
   active: boolean
-  children: ProtoChild[]
+  children: NavChild[]
 }
 
-export function useNavModel(): ProtoItem[] {
+export function useNavModel(): NavItem[] {
   const { pathname, searchStr } = useLocation({ select: (l) => ({ pathname: l.pathname, searchStr: l.searchStr }) })
   const { data: menuRes } = useQuery(orpc.menu.getMenu.queryOptions({ input: { locale: currentContentLocale() } }))
   const categories = menuRes?.status === 'success' ? menuRes.data.categories : null
@@ -27,7 +26,7 @@ export function useNavModel(): ProtoItem[] {
       link.card === 'posts' && categories
         ? categories.map((c) => ({ href: `/categories/${c.slug}`, text: c.name, show: true, count: c.postCount }))
         : (link.children?.filter((c) => c.show) ?? []).map((c) => ({ ...c, count: undefined as number | undefined }))
-    const children: ProtoChild[] = raw.map((c) => ({
+    const children: NavChild[] = raw.map((c) => ({
       href: c.href,
       text: c.text,
       count: c.count,
@@ -46,37 +45,4 @@ export function useNavModel(): ProtoItem[] {
       : Boolean(item.href) && (pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`)))
   }
   return items
-}
-
-// --- 原型切換（只在開發時出現） ---
-
-export type NavProto = 'current' | 'new'
-const KEY = 'navProto'
-const EVENT = 'nav-proto-change'
-
-function read(): NavProto {
-  try {
-    const v = localStorage.getItem(KEY)
-    return v === 'new' ? v : 'current'
-  } catch {
-    return 'current'
-  }
-}
-
-export function setNavProto(v: NavProto) {
-  try {
-    localStorage.setItem(KEY, v)
-  } catch {}
-  window.dispatchEvent(new Event(EVENT))
-}
-
-export function useNavProto(): NavProto {
-  return useSyncExternalStore(
-    (cb) => {
-      window.addEventListener(EVENT, cb)
-      return () => window.removeEventListener(EVENT, cb)
-    },
-    read,
-    () => 'current'
-  )
 }

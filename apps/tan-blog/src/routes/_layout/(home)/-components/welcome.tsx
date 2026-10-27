@@ -1,83 +1,84 @@
-import cx from 'clsx'
-import { motion } from 'motion/react'
-
-import AnimatedText from '@/components/animation/text'
 import { SOCIAL_LINKS } from '@/config/menu'
-import { ChevronDownIcon } from 'lucide-react'
+import { m } from '@/paraglide/messages'
+import { getLocale } from '@/paraglide/runtime'
 
+// hero 上方的字：學馬遠「一角」構圖，月亮（頭像）在一角，題字寫在對角的空處（REDESIGN-PLAN 階段 10）。
+// 背景的夜航江山不動。中文、日文直排；英文直排會躺著，改成靠右的橫排。
 const Welcome = () => {
+  const vertical = getLocale() !== 'en'
   return (
-    <>
-      <div className="flex w-full h-full flex-col items-center justify-center space-y-10 px-4 lg:flex-row lg:px-0">
-        <div className="flex w-full flex-col items-center justify-center lg:w-1/2">
-          <div className="flex flex-col gap-2">
-            <div className="group [&_*]:inline-block leading-[4]">
-              <AnimatedText
-                text={'嗨，我是唯一👋。'}
-                className="font-wenkai text-4xl text-center md:text-left w-full"
-                delay={0.1}
-              />
-              <br />
-              <AnimatedText
-                text={'一個正在學習的全端'}
-                className="font-wenkai text-4xl text-center w-full md:text-left md:w-fit"
-                delay={1}
-              />
-              <AnimatedText
-                text={'<Developer />'}
-                delay={1.1}
-                el="code"
-                className="mb-4 mr-2 self-end rounded-md px-1 text-3xl transition-colors duration-200 hover:bg-foreground/10 text-center md:text-left w-full md:w-fit"
-              />
-              <span className="relative top-2 inline-block h-8 w-[1px] self-end bg-foreground/80 opacity-0 transition-opacity duration-200 group-hover:animate-blink group-hover:opacity-100" />
-            </div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: [20, -10, 0] }}
-              transition={{ delay: 2 }}
-              className="text-center font-wenkai text-muted-foreground md:text-left"
-            >
-              喜歡寫程式、看動漫😆
-            </motion.div>
-            <div className="mt-10 flex items-center gap-2 justify-center md:justify-start">
-              {SOCIAL_LINKS.map((social, index) => (
-                <motion.div
-                  key={social.link}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: [20, -15, 0] }}
-                  transition={{ delay: 3 + index * 0.2, duration: 0.6 }}
-                >
-                  <a href={social.link} target="_blank" rel="noopener noreferrer" aria-label={social.name}>
-                    <social.icon
-                      className={cx(
-                        'h-9 w-9 rounded-full stroke-2 p-1 text-white',
-                        social.color
-                      )}
-                    />
-                  </a>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* 頭像當作山水畫裡的月亮（月暈見 styles.css 的 .moon-avatar）：手機排在文字上方，桌機往上提到山的上方 */}
-        <div className="order-first flex w-full justify-center lg:order-none lg:w-1/2 lg:-translate-y-[14vh]">
-          <div className="moon-avatar">
-            <img
-              className="size-44 rounded-full lg:size-60"
-              src="/img/avatar.webp"
-              width={480}
-              height={480}
-              alt=""
-              // 首屏最大的元素（LCP），要一開始就以高優先度下載，不能 lazy
-              loading="eager"
-              fetchPriority="high"
-            />
-          </div>
+    <div className="relative mx-auto h-full w-full max-w-6xl px-5">
+      {/* 頭像當作山水畫裡的月亮（白天是紅日，月暈見 styles.css 的 .moon-avatar） */}
+      <div className="absolute top-[14vh] left-6 md:top-[16vh] md:left-[8%]">
+        <div className="moon-avatar">
+          <img
+            className="size-24 rounded-full md:size-40 lg:size-48"
+            src="/img/avatar.webp"
+            width={480}
+            height={480}
+            alt=""
+            // 首屏最大的元素（LCP），要一開始就以高優先度下載，不能 lazy
+            loading="eager"
+            fetchPriority="high"
+          />
         </div>
       </div>
-      <ChevronDownIcon className="absolute bottom-4 h-6 w-full animate-bounce stroke-2" />
-    </>
+
+      <div
+        className={`absolute right-6 flex flex-col items-end gap-6 md:top-[15vh] md:right-[8%] md:gap-8 ${
+          // 英文橫排比較寬，手機上排到月亮下面，免得擠在一起
+          vertical ? 'top-[13vh]' : 'top-[30vh]'
+        }`}
+      >
+        <h1
+          className={`hero-inscription flex items-start font-wenkai ${
+            vertical ? 'flex-row-reverse gap-3 md:gap-5' : 'flex-col items-end gap-1 text-right'
+          }`}
+        >
+          <span
+            className={`hero-col flex items-center ${
+              vertical ? '[writing-mode:vertical-rl] tracking-[0.3em]' : 'gap-3'
+            } text-4xl md:text-5xl`}
+          >
+            {m.home_hero_name()}
+            <span
+              aria-hidden
+              className={`inline-block size-4 border border-ink text-center text-[10px] leading-[14px] tracking-normal text-ink ${
+                vertical ? 'mt-3' : ''
+              }`}
+            >
+              影
+            </span>
+          </span>
+          {[m.home_hero_line1(), m.home_hero_line2()].map((line, i) => (
+            <span
+              key={i}
+              className={`hero-col text-sm leading-relaxed text-muted-foreground md:text-base ${
+                vertical ? '[writing-mode:vertical-rl] tracking-[0.25em]' : ''
+              }`}
+              style={{ '--col': i + 1 } as React.CSSProperties}
+            >
+              {line}
+            </span>
+          ))}
+        </h1>
+
+        <ul className="hero-links flex flex-wrap justify-end gap-x-4 gap-y-1 font-wenkai text-xs text-muted-foreground md:text-sm">
+          {SOCIAL_LINKS.map((social) => (
+            <li key={social.link}>
+              <a
+                href={social.link}
+                target={social.link.startsWith('/') ? undefined : '_blank'}
+                rel={social.link.startsWith('/') ? undefined : 'noopener noreferrer'}
+                className="transition-colors hover:text-ink focus-visible:text-ink"
+              >
+                {social.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   )
 }
 

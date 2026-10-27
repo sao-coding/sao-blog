@@ -1,4 +1,4 @@
-// 站主落款：頭像右下一盞小燈（有在活動就點著），旁邊是正在用的 app 或正在聽的歌。
+// 站主現在在做什麼：正在用的 app 或正在聽的歌（首頁卡片裡另有頭像，右下一盞小燈，有在活動就點著）。
 // 邏輯照原本的 DevicesStatus：視窗與音樂兩種、點一下切換、視窗變 idle 自動換到音樂；
 // 外觀改成紙上的字：不用彈跳、換內容時墨暈出來，細節寫在垂下來的紙條上。
 import { useEffect, useState } from 'react'
@@ -13,12 +13,18 @@ import {
   type MusicInfo,
   type ServerMessage,
   type WindowInfo,
-} from '../devices-status'
-import { focusRing, protoText } from './proto-parts'
+} from './devices-feed'
+import { m } from '#/paraglide/messages'
+import { focusRing } from './nav-parts'
 
 type Mode = 'window' | 'music'
 
-const MUSIC_STATUS: Record<string, string> = { playing: '播放中', paused: '暫停', stopped: '停止', idle: '閒置' }
+const MUSIC_STATUS: Record<string, () => string> = {
+  playing: m.nav_music_playing,
+  paused: m.nav_music_paused,
+  stopped: m.nav_music_stopped,
+  idle: m.nav_music_idle,
+}
 
 export function useOwnerActivity() {
   const [windowInfo, setWindowInfo] = useState<WindowInfo | null>(null)
@@ -47,7 +53,7 @@ export function useOwnerActivity() {
   if (showing === 'window' && windowInfo) {
     const name = windowInfo.app || windowInfo.process || ''
     line = {
-      verb: protoText(name ? 'using' : 'lampOn'),
+      verb: name ? m.nav_using() : m.nav_owner_online(),
       what: name,
       detail: [appDescriptions?.[windowInfo.process ?? ''] || windowInfo.title, windowInfo.time].filter(Boolean),
       icon: getAppIconUrl(windowInfo.process, appIcons),
@@ -56,13 +62,13 @@ export function useOwnerActivity() {
     const active = isMusicActive(musicInfo)
     line = active
       ? {
-          verb: protoText('listening'),
-          what: `〈${musicInfo.title || '未知曲目'}〉`,
-          detail: [musicInfo.artist, MUSIC_STATUS[musicInfo.status] ?? '', musicInfo.time].filter(Boolean),
+          verb: m.nav_listening(),
+          what: `〈${musicInfo.title || m.nav_music_unknown()}〉`,
+          detail: [musicInfo.artist, MUSIC_STATUS[musicInfo.status]?.() ?? '', musicInfo.time].filter(Boolean),
           icon: null,
           music: musicInfo.status === 'playing' ? 'playing' : 'paused',
         }
-      : { verb: '', what: '目前沒有播放', detail: [musicInfo.time].filter(Boolean), icon: null, music: 'none' }
+      : { verb: '', what: m.nav_music_none(), detail: [musicInfo.time].filter(Boolean), icon: null, music: 'none' }
   }
 
   return {
@@ -105,12 +111,12 @@ function InkMusic({ state, className }: { state: 'playing' | 'paused' | 'none'; 
 
 export function OwnerAvatar({ lit, className }: { lit: boolean; className?: string }) {
   return (
-    <Link to="/" aria-label="回到首頁" className={cn('relative shrink-0 rounded-full', focusRing, className)}>
+    <Link to="/" aria-label={m.nav_back_home()} className={cn('relative shrink-0 rounded-full', focusRing, className)}>
       <Avatar className="size-10">
         <AvatarImage src="/img/avatar-96.webp" />
         <AvatarFallback>唯</AvatarFallback>
       </Avatar>
-      <span className="owner-lamp" data-lit={lit ? '' : undefined} role="img" aria-label={protoText(lit ? 'lampOn' : 'lampOff')} />
+      <span className="owner-lamp" data-lit={lit ? '' : undefined} role="img" aria-label={lit ? m.nav_owner_online() : m.nav_owner_offline()} />
     </Link>
   )
 }
@@ -135,7 +141,7 @@ export function ActivityLine({
   const iconSize = inline ? 'size-6' : 'size-9'
   // 窄的地方不在時什麼都不寫，頭像上那盞熄掉的燈就夠了
   if (!line && compact) return null
-  if (!line) return <span className={cn('font-wenkai text-xs tracking-[0.18em] text-foreground/35', className)}>{protoText('away')}</span>
+  if (!line) return <span className={cn('font-wenkai text-xs tracking-[0.18em] text-foreground/35', className)}>{m.nav_lamp_out()}</span>
 
   const said = `${line.verb} ${line.what}`.trim()
   const slip = compact ? [said, ...line.detail] : line.detail
@@ -147,19 +153,20 @@ export function ActivityLine({
         aria-disabled={!canToggle}
         aria-label={said}
         className={cn(
-          'flex max-w-[15rem] items-center gap-2 font-wenkai text-xs tracking-[0.12em] text-foreground/55 hover:text-foreground',
+          'flex items-center font-wenkai text-xs tracking-[0.12em] text-foreground/55 hover:text-foreground',
+          inline ? 'max-w-full gap-3 text-left' : 'max-w-[15rem] gap-2',
           !canToggle && 'cursor-default',
           focusRing
         )}
       >
         <span className={cn("relative flex shrink-0 items-center justify-center", iconSize)}>
           {line.music ? (
-            <InkMusic key="music" state={line.music} className={cn("proto-rise", iconSize)} />
+            <InkMusic key="music" state={line.music} className={cn("nav-rise", iconSize)} />
           ) : line.icon ? (
             // key：換 app／換到音樂時，墨重新暈出來
-            <img key={line.icon} src={line.icon} alt="" className={cn("proto-rise", iconSize)} />
+            <img key={line.icon} src={line.icon} alt="" className={cn("nav-rise", iconSize)} />
           ) : (
-            <span key={line.what} className="proto-rise flex size-7 items-center justify-center rounded-[3px] border border-rule font-mono text-xs text-foreground/50">
+            <span key={line.what} className="nav-rise flex size-7 items-center justify-center rounded-[3px] border border-rule font-mono text-xs text-foreground/50">
               {line.what.charAt(0) || '#'}
             </span>
           )}
@@ -171,16 +178,18 @@ export function ActivityLine({
           )}
         </span>
         {!compact && (
-          <span key={said} className="proto-rise flex min-w-0 items-baseline gap-1.5">
-            {line.verb && <span className="shrink-0 text-foreground/40">{line.verb}</span>}
-            <span className="truncate">{line.what}</span>
+          <span key={said} className="nav-rise flex min-w-0 flex-col">
+            <span className="flex min-w-0 items-baseline gap-1.5">
+              {line.verb && <span className="shrink-0 text-foreground/40">{line.verb}</span>}
+              <span className="truncate">{line.what}</span>
+            </span>
+            {inline && line.detail.length > 0 && (
+              // 在卡片裡：細節排在名字下面（佔位置），跟圖示並排，不浮在別的東西上
+              <span className="mt-1 truncate text-[11px] leading-snug tracking-[0.06em] text-foreground/40">{line.detail.join(' · ')}</span>
+            )}
           </span>
         )}
       </button>
-      {inline && line.detail.length > 0 && (
-        // 在卡片裡：細節排在下面一行（佔位置），不浮在別的東西上
-        <span className="mt-0.5 block truncate font-wenkai text-[11px] tracking-[0.06em] text-foreground/40">{line.detail.join(' · ')}</span>
-      )}
       {!inline && slip.length > 0 && (
         <span
           role="tooltip"
@@ -197,7 +206,7 @@ export function ActivityLine({
               {s}
             </span>
           ))}
-          {canToggle && <span className="mt-1 block text-[10px] text-foreground/35">點一下切換</span>}
+          {canToggle && <span className="mt-1 block text-[10px] text-foreground/35">{m.nav_tap_toggle()}</span>}
         </span>
       )}
     </span>

@@ -91,7 +91,7 @@ export function FriendDirectory({ friends }: { friends: FriendItem[] }) {
         <p className="my-12 text-center font-wenkai text-muted-foreground">{m.friends_no_match()}</p>
       ) : (
         <div className="space-y-12">
-          {groups.map(([group, items]) => (
+          {groups.map(([group, items], i) => (
             <section key={group} id={`group-${encodeURIComponent(group)}`} className="scroll-mt-28">
               {showGroupNames && (
                 <h2 className="mb-4 flex items-baseline gap-2 font-wenkai text-xl text-foreground">
@@ -99,7 +99,7 @@ export function FriendDirectory({ friends }: { friends: FriendItem[] }) {
                   <span className="text-sm text-muted-foreground tabular-nums">{items.length}</span>
                 </h2>
               )}
-              <FriendGrid items={items} />
+              <FriendGrid items={items} offering={!query && i === groups.length - 1} />
             </section>
           ))}
         </div>

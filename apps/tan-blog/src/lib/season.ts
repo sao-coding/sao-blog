@@ -26,7 +26,7 @@ const TERMS: { name: string; c: number }[] = [
   { name: '大雪', c: 7.18 }, { name: '冬至', c: 21.94 }, // 12 月
 ]
 
-function termDay(year: number, index: number) {
+export function termDay(year: number, index: number) {
   const y = year % 100
   const leap = index < 4 ? Math.floor((y - 1) / 4) : Math.floor(y / 4)
   return Math.floor(y * 0.2422 + TERMS[index].c) - leap
