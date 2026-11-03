@@ -1,0 +1,294 @@
+import { protectedProcedure } from "@sao-blog/api/index";
+import { db } from "@sao-blog/db";
+import { eq, desc, and, inArray, sql } from "drizzle-orm";
+import { notes, topics } from "@sao-blog/db/schema/index";
+import z from "zod";
+import { noteInputSchema } from "@sao-blog/api/schema/note";
+import { notifyBlogRevalidate } from "../../lib/notify-blog-revalidate";
+import { queueSearchSync } from "../../lib/search";
+import { checkMdxForSave } from "../../lib/mdx-validate";
+import { upsertSourceNoteTranslation } from "../../lib/source-translation";
+import { listTranslationStatus, noteTranslationProcedures } from "./translation";
+
+async function getTopicSlug(topicId: string | null | undefined) {
+    if (!topicId) return null;
+    const [row] = await db
+        .select({ slug: topics.slug })
+        .from(topics)
+        .where(eq(topics.id, topicId))
+        .limit(1);
+    return row?.slug ?? null;
+}
+
+const getNotes = protectedProcedure
+    .route({ method: "GET", path: "/notes" })
+    .handler(async () => {
+        const result = await db
+            .select()
+            .from(notes)
+            .orderBy(desc(notes.createdAt));
+
+        // 各語言版本狀態（後台列表 badge；outdated = 原文改過、譯文待更新）
+        const translations = await listTranslationStatus("note", result.map((r) => r.id));
+
+        return {
+            status: "success",
+            message: "筆記列表取得成功",
+            data: result.map((r) => ({ ...r, translations: translations.get(r.id) ?? [] })),
+        }
+    });
+
+const getNote = protectedProcedure
+    .route({ method: "GET", path: "/notes/{id}" })
+    .input(z.object({
+        id: z.string(),
+    }))
+    .handler(async ({ input }) => {
+        const { id } = input;
+        const [row] = await db
+            .select()
+            .from(notes)
+            .where(eq(notes.id, id))
+            .limit(1);
+
+        if (!row) {
+            return {
+                status: "error",
+                message: "筆記不存在",
+                data: null,
+            }
+        }
+
+        return {
+            status: "success",
+            message: "筆記取得成功",
+            data: row,
+        }
+    });
+
+const createNote = protectedProcedure
+    .route({ method: "POST", path: "/notes", summary: "建立日記（status: true 為發布）。content 為 MDX，存檔前以前台同一條管線驗證：發布狀態下有錯誤會被拒絕（錯誤含行號），草稿則可存但會回傳警告。建議先用 admin_content_previewMdx 驗證、用 admin_content_getComponents 查可用元件。" })
+    .input(noteInputSchema)
+    .handler(async ({ input, context }) => {
+        // protectedProcedure 已經確保 context.session?.user 是存在的
+        const { title, mood, weather, bookmark, coordinates, location, status, content, topicId } = input;
+        const authorId = context.session?.user.id;
+
+        // 用前台同一條編譯管線驗證 MDX：發布時有錯誤直接拒絕存檔（錯誤帶行號）
+        const mdx = await checkMdxForSave(content, { profile: "note", publish: status });
+        if (!mdx.ok) {
+            return { status: "error", message: mdx.message, data: null };
+        }
+
+        const [newNote] = await db
+            .insert(notes)
+            .values({
+                title,
+                mood,
+                weather,
+                bookmark,
+                coordinates,
+                location,
+                status,
+                content,
+                topicId,
+                authorId,
+            })
+            .returning();
+
+        if (!newNote) {
+            return {
+                status: "error",
+                message: "筆記建立失敗",
+                data: null,
+            }
+        }
+
+        await upsertSourceNoteTranslation({
+            noteId: newNote.id,
+            locale: newNote.defaultLocale,
+            title,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
+
+        if (topicId) {
+            await db
+                .update(topics)
+                .set({ noteCount: sql`${topics.noteCount} + 1` })
+                .where(eq(topics.id, topicId));
+        }
+
+        queueSearchSync("note", [newNote.id]);
+        const topicSlug = await getTopicSlug(topicId);
+        await notifyBlogRevalidate([
+            "/notes",
+            `/notes/${newNote.id}`,
+            ...(topicSlug ? [`/notes/topics/${topicSlug}`] : []),
+        ]);
+
+        return {
+            status: "success",
+            message: mdx.warning ? `筆記建立成功。${mdx.warning}` : "筆記建立成功",
+            data: newNote,
+        };
+    });
+
+const updateNote = protectedProcedure
+    .route({ method: "PUT", path: "/notes/{id}", summary: "更新日記（status: true 為發布）。content 為 MDX，存檔前以前台同一條管線驗證：發布狀態下有錯誤會被拒絕（錯誤含行號），草稿則可存但會回傳警告。建議先用 admin_content_previewMdx 驗證、用 admin_content_getComponents 查可用元件。" })
+    .input(noteInputSchema.merge(z.object({ id: z.string() })))
+    .handler(async ({ input, context }) => {
+        const { id, title, mood, weather, bookmark, coordinates, location, status, content, topicId } = input;
+        const authorId = context.session?.user.id;
+
+        // 驗證 MDX（規則同 createNote）
+        const mdx = await checkMdxForSave(content, { profile: "note", publish: status });
+        if (!mdx.ok) {
+            return { status: "error", message: mdx.message, data: null };
+        }
+
+        const [currentNote] = await db
+            .select({ topicId: notes.topicId })
+            .from(notes)
+            .where(eq(notes.id, id))
+            .limit(1);
+
+        const [updatedNote] = await db
+            .update(notes)
+            .set({
+                title,
+                mood,
+                weather,
+                bookmark,
+                coordinates,
+                location,
+                status,
+                content,
+                topicId,
+            })
+            .where(and(eq(notes.id, id), eq(notes.authorId, authorId)))
+            .returning();
+
+        if (!updatedNote) {
+            return {
+                status: "error",
+                message: "筆記更新失敗，可能是筆記不存在或沒有權限",
+                data: null,
+            }
+        }
+
+        await upsertSourceNoteTranslation({
+            noteId: updatedNote.id,
+            locale: updatedNote.defaultLocale,
+            title,
+            content,
+            status,
+            artifacts: mdx.artifacts,
+        });
+
+        // 若專欄變更，調整舊專欄 -1、新專欄 +1
+        const oldTopicId = currentNote?.topicId ?? null;
+        const newTopicId = topicId ?? null;
+        if (oldTopicId !== newTopicId) {
+            if (oldTopicId) {
+                await db
+                    .update(topics)
+                    .set({ noteCount: sql`GREATEST(${topics.noteCount} - 1, 0)` })
+                    .where(eq(topics.id, oldTopicId));
+            }
+            if (newTopicId) {
+                await db
+                    .update(topics)
+                    .set({ noteCount: sql`${topics.noteCount} + 1` })
+                    .where(eq(topics.id, newTopicId));
+            }
+        }
+
+        queueSearchSync("note", [updatedNote.id]);
+        const [oldSlug, newSlug] = await Promise.all([
+            getTopicSlug(oldTopicId),
+            getTopicSlug(newTopicId),
+        ]);
+        const topicSlugs = [...new Set([oldSlug, newSlug].filter((s): s is string => s !== null))];
+        await notifyBlogRevalidate([
+            "/notes",
+            `/notes/${updatedNote.id}`,
+            ...topicSlugs.map((slug) => `/notes/topics/${slug}`),
+        ]);
+
+        return {
+            status: "success",
+            message: mdx.warning ? `筆記更新成功。${mdx.warning}` : "筆記更新成功",
+            data: updatedNote,
+        };
+    });
+
+// 可以一次刪除多個筆記
+const deleteNote = protectedProcedure
+    .route({ method: "DELETE", path: "/notes" })
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .handler(async ({ input }) => {
+        const { ids } = input;
+
+        try {
+            const deletedNotes = await db
+                .delete(notes)
+                .where(inArray(notes.id, ids))
+                .returning();
+
+            if (deletedNotes.length === 0) {
+                return {
+                    status: "error",
+                    message: "沒有筆記被刪除，可能是筆記不存在或沒有權限",
+                    data: null,
+                }
+            }
+
+            // 更新受影響專欄的日記數量
+            const topicIds = [
+                ...new Set(
+                    deletedNotes.map((n) => n.topicId).filter((id): id is string => id !== null)
+                ),
+            ];
+            for (const tid of topicIds) {
+                const count = deletedNotes.filter((n) => n.topicId === tid).length;
+                await db
+                    .update(topics)
+                    .set({ noteCount: sql`GREATEST(${topics.noteCount} - ${count}, 0)` })
+                    .where(eq(topics.id, tid));
+            }
+
+            queueSearchSync("note", deletedNotes.map((n) => n.id));
+            const topicSlugs = (await Promise.all(topicIds.map(getTopicSlug))).filter(
+                (s): s is string => s !== null
+            );
+            await notifyBlogRevalidate([
+                "/notes",
+                ...deletedNotes.map((n) => `/notes/${n.id}`),
+                ...topicSlugs.map((slug) => `/notes/topics/${slug}`),
+            ]);
+
+            return {
+                status: "success",
+                message: "筆記刪除成功",
+                data: deletedNotes,
+            };
+        } catch (error) {
+            console.error("刪除筆記失敗:", error);
+            return {
+                status: "error",
+                message: "刪除筆記失敗，請稍後再試",
+                data: null,
+            };
+        }
+    });
+
+export default {
+    getNotes,
+    getNote,
+    createNote,
+    updateNote,
+    deleteNote,
+    ...noteTranslationProcedures,
+}

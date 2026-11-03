@@ -1,0 +1,94 @@
+import { publicProcedure } from "@sao-blog/api/index";
+import { db } from "@sao-blog/db";
+import { notes, topics } from "@sao-blog/db/schema/index";
+import { eq, desc, and } from "drizzle-orm";
+import z from "zod";
+import { toIso } from "../lib/datetime";
+import { TopicListResponseSchema, TopicWithNotesResponseSchema } from "../schema/topic";
+import { localizedTitles } from "../lib/i18n";
+import { localeInput } from "../schema/i18n";
+
+const getTopics = publicProcedure
+    .route({ method: "GET", path: "/topics" })
+    .output(TopicListResponseSchema)
+    .handler(async () => {
+        const result = await db
+            .select()
+            .from(topics)
+            .orderBy(desc(topics.noteCount));
+
+        return {
+            status: "success",
+            message: "專欄列表取得成功",
+            data: result.map((t) => ({
+                ...t,
+                description: t.description ?? null,
+                color: t.color ?? null,
+                createdAt: toIso(t.createdAt),
+                updatedAt: toIso(t.updatedAt),
+            })),
+        };
+    });
+
+const getTopicBySlug = publicProcedure
+    .route({ method: "GET", path: "/topics/{slug}" })
+    .input(z.object({ slug: z.string(), ...localeInput }))
+    .output(TopicWithNotesResponseSchema)
+    .handler(async ({ input }) => {
+        const [topic] = await db
+            .select()
+            .from(topics)
+            .where(eq(topics.slug, input.slug))
+            .limit(1);
+
+        if (!topic) {
+            return {
+                status: "error",
+                message: "專欄不存在",
+                data: null,
+            };
+        }
+
+        const noteRows = await db
+            .select({
+                id: notes.id,
+                title: notes.title,
+                mood: notes.mood,
+                weather: notes.weather,
+                createdAt: notes.createdAt,
+                updatedAt: notes.updatedAt,
+            })
+            .from(notes)
+            .where(and(eq(notes.topicId, topic.id), eq(notes.status, true)))
+            .orderBy(desc(notes.createdAt));
+
+        // 日記標題疊上請求語系（無譯文時沿用原文）
+        const titles = await localizedTitles("note", noteRows.map((n) => n.id), input.locale);
+
+        return {
+            status: "success",
+            message: "專欄取得成功",
+            data: {
+                topic: {
+                    ...topic,
+                    description: topic.description ?? null,
+                    color: topic.color ?? null,
+                    createdAt: toIso(topic.createdAt),
+                    updatedAt: toIso(topic.updatedAt),
+                },
+                notes: noteRows.map((n) => ({
+                    id: n.id,
+                    title: titles.get(n.id) ?? n.title,
+                    mood: n.mood,
+                    weather: n.weather,
+                    createdAt: toIso(n.createdAt),
+                    updatedAt: toIso(n.updatedAt),
+                })),
+            },
+        };
+    });
+
+export default {
+    getTopics,
+    getTopicBySlug,
+};

@@ -1,0 +1,1649 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@import 'tw-animate-css';
+@import 'katex/dist/katex.min.css';
+/* 字型：Fontsource 依 unicode-range 分包，頁面只會下載實際用到的字（用哪套見下方 --locale-*） */
+@import '@fontsource/lxgw-wenkai-tc/400.css';
+@import '@fontsource/lxgw-wenkai-tc/700.css';
+@import '@fontsource/noto-serif-tc/400.css';
+@import '@fontsource/noto-serif-tc/600.css';
+@import '@fontsource/klee-one/400.css';
+@import '@fontsource/klee-one/600.css';
+@import '@fontsource/noto-serif-jp/400.css';
+@import '@fontsource/noto-serif-jp/600.css';
+@import '@fontsource-variable/newsreader/opsz.css';
+@import '@fontsource-variable/newsreader/opsz-italic.css';
+@import '@sao-blog/ui/theme.css';
+@import './components/mdx/blocks.css';
+@import './components/search/search.css';
+
+@source '../../../packages/ui/src';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── 字（DESIGN.md 第 2 節）────────────────────────────────────────────
+ * 依 lang 切換：--locale-display 是標題／人話，--locale-body 是內文。
+ * 寫在 :lang() 上而不是只寫在 html，內容另外標 lang 時（英日介面裡的中文內容）字型會跟著換。
+ * 西文字型放最前面、CJK 接在後面，混排時西文用西文字型、漢字落到後面的 CJK 字型。
+ */
+:root,
+:lang(zh-Hant) {
+  --locale-display: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  --locale-body: 'Noto Serif TC', 'LXGW WenKai TC', serif;
+}
+:lang(ja) {
+  --locale-display: 'Klee One', 'Noto Serif JP', serif;
+  --locale-body: 'Noto Serif JP', 'Klee One', serif;
+}
+:lang(en) {
+  --locale-display: 'Newsreader Variable', 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  --locale-body: 'Newsreader Variable', 'Noto Serif TC', serif;
+}
+
+/* ── 動態 token（DESIGN.md 第 7 節）；JS 端是 lib/motion.ts，兩邊由 motion.test.ts 比對 */
+:root {
+  --dur-out: 200ms;
+  --dur-in: 340ms;
+  --dur-move: 480ms;
+  --stagger: 24ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-move: cubic-bezier(0.6, 0, 0.2, 1);
+  --dur-in-delay: 110ms;
+  --dur-fade-out: 150ms;
+  --dur-fade-in: 200ms;
+  --shift-out-x: 10px;
+  --shift-out-y: 6px;
+  --shift-in-x: 12px;
+  --shift-in-y: 6px;
+  --blur-out: 5px;
+  --blur-in: 4px;
+}
+
+/* ── 首頁筆跡的顏料（DESIGN.md 第 0、5 節，2026-11-03 站主加）：只給首頁筆跡模式的筆用，不進一般 UI。
+ * 墨用 --foreground、朱用 --zhu；另外三種國畫顏料，彩度壓低、像紙上的顏料。夜裡提亮，不然在深色紙上看不見 */
+:root {
+  --pigment-zhemo: oklch(0.38 0.04 50); /* 赭墨：赭石調墨，枝幹 */
+  --pigment-zheshi: oklch(0.5 0.08 55); /* 赭石 */
+  --pigment-tenghuang: oklch(0.68 0.12 85); /* 藤黃 */
+  --pigment-zhilu: oklch(0.52 0.09 135); /* 汁綠：花青調藤黃，葉 */
+  --pigment-shilu: oklch(0.6 0.07 165); /* 石綠：礦物綠，苔、嫩葉 */
+  --pigment-huaqing: oklch(0.44 0.07 245); /* 花青 */
+}
+.dark {
+  --pigment-zhemo: oklch(0.66 0.04 55);
+  --pigment-zheshi: oklch(0.72 0.08 60);
+  --pigment-tenghuang: oklch(0.83 0.11 90);
+  --pigment-zhilu: oklch(0.75 0.09 135);
+  --pigment-shilu: oklch(0.79 0.07 165);
+  --pigment-huaqing: oklch(0.74 0.07 240);
+}
+
+@theme inline {
+  --font-display: var(--locale-display);
+  --font-body: var(--locale-body);
+  /* 舊名：既有元件還在用，跟著標題字切換；後面階段改成 font-display 後拿掉 */
+  --font-wenkai: var(--locale-display);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-ink-5: var(--ink-5);
+  --color-zhu: var(--zhu);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-neutral-10: var(--foreground);
+  --color-jade: var(--jade);
+  --color-season: var(--season);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-timeline-line: var(--timeline-line);
+  --color-timeline-dot: var(--timeline-dot);
+  --color-timeline-date: var(--timeline-date);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+}
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    font-size: 14px;
+  }
+  body {
+    color: var(--foreground);
+    background-color: var(--background);
+  }
+  /* 信箋底紙、裝飾元素偶爾會超出視窗幾 px；裁掉就不會出現橫向捲軸（clip 不影響 sticky） */
+  html,
+  body {
+    overflow-x: clip;
+  }
+  /* 紙紋：事先畫好的纖維圖（public/paper-fiber.svg，scripts/paper-fiber.mjs 產生）當 mask，
+     顏色用前景墨，晝是紙裡的深色纖維、夜是燈下浮起的淺色纖維。
+     固定在視窗、不跟著捲，只合成一次，不像以前即時算的 SVG 雜訊會讓手機捲動卡住 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--foreground);
+    opacity: var(--paper-fiber, 0.07);
+    mask: url('/paper-fiber.svg') 0 0 / 480px 480px repeat;
+  }
+  .dark body::before {
+    --paper-fiber: 0.06;
+  }
+}
+
+/* Custom variants */
+@custom-variant data-open {
+  &:where([data-state="open"]),
+  &:where([data-open]:not([data-open="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-closed {
+  &:where([data-state="closed"]),
+  &:where([data-closed]:not([data-closed="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-checked {
+  &:where([data-state="checked"]),
+  &:where([data-checked]:not([data-checked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-unchecked {
+  &:where([data-state="unchecked"]),
+  &:where([data-unchecked]:not([data-unchecked="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-selected {
+  &:where([data-selected="true"]) {
+    @slot;
+  }
+}
+
+@custom-variant data-disabled {
+  &:where([data-disabled="true"]),
+  &:where([data-disabled]:not([data-disabled="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-active {
+  &:where([data-state="active"]),
+  &:where([data-active]:not([data-active="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-horizontal {
+  &:where([data-orientation="horizontal"]) {
+    @slot;
+  }
+}
+
+@custom-variant data-vertical {
+  &:where([data-orientation="vertical"]) {
+    @slot;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* classname prose 裡面 的 pre 裡面若是 mermaid 的話，則pre 無背景 */
+.prose pre:has(.mermaid) {
+  background-color: transparent;
+}
+
+/* beautiful-mermaid 輸出的 SVG：置中、窄螢幕縮小不溢出 */
+.prose .mermaid-beautiful {
+  display: flex;
+  justify-content: center;
+}
+.prose .mermaid-beautiful svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Excalidraw 圖：透明底直接畫在紙上；夜讀時整張反相（白底黑線 → 深底淺線），hue-rotate 把顏色轉回原本色相 */
+.excalidraw-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+}
+.dark .excalidraw-canvas svg {
+  filter: invert(93%) hue-rotate(180deg);
+}
+.excalidraw-placeholder {
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+  background: color-mix(in oklch, var(--foreground) 5%, transparent);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  .note-content > .mdx-wrapper > p:first-of-type::first-letter {
+    float: left;
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 0.75;
+    margin-right: 0.75rem;
+    color: var(--tw-prose-primary);
+  }
+}
+
+/* 卷軸樣式 只有在電腦版才會出現 */
+@media screen and (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 12px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333;
+  }
+
+  ::-webkit-scrollbar-track-piece {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+
+/* 主要內容 */
+.fill-content {
+  min-height: calc(100vh - 12.5rem);
+}
+
+@layer components {
+  .active-underline {
+    pointer-events: none;
+    will-change: transform, opacity;
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 140ms linear;
+  }
+
+  .underline-fallback {
+    transform-origin: left center;
+    transform: scaleX(0);
+    opacity: 0;
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 120ms linear;
+    pointer-events: none;
+  }
+
+  .underline-fallback.opacity-100 {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .active-underline,
+    .underline-fallback {
+      box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+    }
+  }
+}
+
+/* 毛玻璃：全站只有這兩階。邊一律搭配 border-rule 髮絲線。
+ * glass：常駐的面（header、footer、側欄卡片）；glass-strong：浮在內容上的面（導覽、下拉、FAB），要更不透明才讀得清楚 */
+.glass {
+  background-color: color-mix(in oklab, var(--background) 55%, transparent);
+  backdrop-filter: blur(12px);
+}
+.glass-strong {
+  background-color: color-mix(in oklab, var(--background) 85%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+/* 一筆朱：有起筆、行筆、收筆，兩端收尖（取代漸層線） */
+.brush-stroke {
+  background-color: var(--ink);
+  clip-path: polygon(0 60%, 5% 20%, 30% 0, 100% 40%, 94% 70%, 60% 100%, 12% 90%);
+}
+.brush-stroke-down {
+  background-color: var(--primary);
+  clip-path: polygon(0 0, 100% 0, 70% 60%, 50% 100%, 30% 60%);
+}
+
+/* 時間線：每篇一個「、」（routes/_layout/timeline/-components/brush-line.tsx），濃墨，滑過那一列轉朱 */
+.tl-dot { fill: var(--ink-1); transition: fill var(--dur-out) var(--ease-out); }
+.ink-row[data-old] .tl-dot { fill: var(--ink-2); }
+.ink-row:is(:hover, :focus-within) .tl-dot { fill: var(--zhu); }
+/* 捲到才寫出來：線由上往下等速露出，點在筆經過時落下、從暈開收乾（延遲照點的位置算，所以線要等速） */
+.tl-box[data-tl] .tl-line { clip-path: inset(0 0 100% 0); }
+.tl-box[data-tl] [data-tl-dot] { opacity: 0; filter: blur(2px); scale: 1.4; }
+.tl-box[data-tl='written'] .tl-line {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--tl-dur, 1.5s) linear;
+}
+.tl-box[data-tl='written'] [data-tl-dot] {
+  opacity: 1; filter: none; scale: 1;
+  transition: opacity 240ms ease-out, filter 320ms ease-out, scale 320ms var(--ease-out);
+  transition-delay: var(--tl-delay, 0s);
+}
+
+/* 首頁的円相（routes/_layout/(home)/-components/enso.tsx）：墨用 --foreground、寫到今天的那一段用朱；「、」滑過轉朱。
+   捲到才寫：一段一段照順序寫（pathLength=1 的 dash），點在筆經過時落下；伺服器畫的頁面不藏，JS 標上 data-enso 才藏 */
+.enso-ink { color: var(--foreground); }
+.enso-now { color: var(--zhu); }
+.enso-dot:is(:hover, :focus-visible) .tl-dot { fill: var(--zhu); }
+.enso[data-enso] path { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.enso[data-enso] [data-enso-dot] { opacity: 0; filter: blur(2px); scale: 1.4; }
+.enso[data-enso='written'] path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--enso-dur, 0.1s) linear var(--enso-delay, 0s);
+}
+.enso[data-enso='written'] [data-enso-dot] {
+  opacity: 1; filter: none; scale: 1;
+  transition: opacity 240ms ease-out, filter 320ms ease-out, scale 320ms var(--ease-out);
+  transition-delay: var(--enso-delay, 0s);
+}
+
+/* 列表的一列（DESIGN.md 第 8 節）：.ink-row 掛在整列、.ink-title 掛在標題上。
+   標題是 --ink-1，今年以前寫的（data-old）退一階 --ink-2；滑過或鍵盤聚焦那一列，標題轉朱。列之間只靠留白。 */
+.ink-title {
+  color: var(--ink-1);
+  transition: color var(--dur-out) var(--ease-out);
+}
+.ink-row[data-old] .ink-title { color: var(--ink-2); }
+.ink-row:is(:hover, :focus-within) .ink-title,
+.ink-row[data-old]:is(:hover, :focus-within) .ink-title { color: var(--zhu); }
+@media (prefers-reduced-motion: reduce) {
+  .ink-title { transition: none; }
+}
+
+.sao-link {
+  @apply underline decoration-[oklch(0.2103_0.0059_285.89_/_.2)] underline-offset-3;
+  @apply bg-linear-to-r from-(--ink) to-(--ink) bg-size-[0_1.5px] bg-no-repeat bg-[left_1.3em]; /* design-ok: 單色朱線，不是漸層 */
+  @apply transition-all duration-250;
+  @apply hover:bg-size-[100%_1.5px] hover:no-underline;
+  @variant dark {
+    @apply decoration-[oklch(0.9674_0.0013_286.37_/_.2)];
+  }
+}
+
+@layer utilities {
+  .prose :where(p):not(:where([class~=not-prose],[class~=not-prose] *)) {
+    @apply leading-[1.7];
+  }
+}
+
+/* 滑鼠反白效果 */
+.mdx-wrapper {
+  > :nth-child(6n)::selection,
+  > :nth-child(6n) ::selection,
+  > :nth-child(6n)::target-text,
+  > :nth-child(6n) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 0);
+    background: oklch(var(--selection-background-color-lightness) 0.111 0 / 35%);
+  }
+  > :nth-child(6n + 1)::selection,
+  > :nth-child(6n + 1) ::selection,
+  > :nth-child(6n + 1)::target-text,
+  > :nth-child(6n + 1) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 60);
+    background: oklch(var(--selection-background-color-lightness) 0.111 60 / 35%);
+  }
+  > :nth-child(6n + 2)::selection,
+  > :nth-child(6n + 2) ::selection,
+  > :nth-child(6n + 2)::target-text,
+  > :nth-child(6n + 2) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 120);
+    background: oklch(var(--selection-background-color-lightness) 0.111 120 / 35%);
+  }
+  > :nth-child(6n + 3)::selection,
+  > :nth-child(6n + 3) ::selection,
+  > :nth-child(6n + 3)::target-text,
+  > :nth-child(6n + 3) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 180);
+    background: oklch(var(--selection-background-color-lightness) 0.111 180 / 35%);
+  }
+  > :nth-child(6n + 4)::selection,
+  > :nth-child(6n + 4) ::selection,
+  > :nth-child(6n + 4)::target-text,
+  > :nth-child(6n + 4) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 240);
+    background: oklch(var(--selection-background-color-lightness) 0.111 240 / 35%);
+  }
+  > :nth-child(6n + 5)::selection,
+  > :nth-child(6n + 5) ::selection,
+  > :nth-child(6n + 5)::target-text,
+  > :nth-child(6n + 5) ::target-text {
+    color: oklch(var(--selection-color-lightness) 0.111 300);
+    background: oklch(var(--selection-background-color-lightness) 0.111 300 / 35%);
+  }
+}
+
+/* ── /thinking 便條紙 ───────────────────────────────────────────────────────
+ * 擬真 Post-it：上緣有背膠所以貼平，下緣離開牆面微微翹起、右下角翹得最多。
+ * - 紙面：背膠區略亮、往下漸暗（翹起處受光少）、疊一層極淡的紙纖維雜訊
+ * - 右下角用橢圓圓角做出捲曲的弧線
+ * - ::before / ::after 是兩塊旋轉過的陰影，從翹起的兩角下方透出來
+ * 注意：便條本身不能有 transform/rotate，否則會自成 stacking context，
+ * z-index:-1 的陰影會蓋到紙上；旋轉放在外層 <li>。
+ */
+.sticky-note {
+  --paper: oklch(0.82 0.05 88);
+  --note-ink: oklch(0.31 0.035 55);
+  position: relative;
+  color: var(--note-ink);
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .35 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgb(255 255 255 / 0.14) 0 1.75rem, rgb(0 0 0 / 0.025) 1.75rem calc(1.75rem + 1px), transparent calc(1.75rem + 1px)),
+    radial-gradient(90% 55% at 100% 100%, rgb(0 0 0 / 0.16), transparent 70%),
+    linear-gradient(180deg, transparent 45%, rgb(0 0 0 / 0.09) 100%),
+    linear-gradient(100deg, transparent 65%, rgb(0 0 0 / 0.05) 100%);
+  background-blend-mode: multiply, normal, normal, normal, normal;
+  border-radius: 1px 1px 0.75rem 3rem / 1px 1px 0.2rem 0.7rem;
+  /* 深色背景上黑色投影幾乎看不見，所以翹起感主要靠紙面本身：
+     右下角的暗部漸層 + 沿著翹起邊緣的一道細亮線（紙張邊緣反光） */
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.35),
+    inset 0 -2px 2px -1px rgb(255 255 255 / 0.28),
+    inset -1px 0 1px -0.5px rgb(255 255 255 / 0.12);
+}
+.sticky-note::before,
+.sticky-note::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  bottom: 0.7rem;
+  width: 45%;
+  height: 35%;
+  transition:
+    rotate 0.35s ease-out,
+    box-shadow 0.35s ease-out;
+}
+.sticky-note::before {
+  left: 0.5rem;
+  rotate: -2.5deg;
+  box-shadow: 0 10px 14px rgb(0 0 0 / 0.75);
+}
+.sticky-note::after {
+  right: 0.6rem;
+  rotate: 4.5deg;
+  box-shadow: 0 16px 18px rgb(0 0 0 / 0.85);
+}
+.sticky-note-wrap:hover .sticky-note::after {
+  rotate: 6.5deg;
+  box-shadow: 0 24px 22px rgb(0 0 0 / 0.55);
+}
+.sticky-note-wrap:hover .sticky-note::before {
+  box-shadow: 0 14px 16px rgb(0 0 0 / 0.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticky-note::before,
+  .sticky-note::after {
+    transition: none;
+  }
+}
+
+/* ── 紙膠帶（washi tape）───────────────────────────────────────────────────
+ * - 半透明底色，能透出底下的紙與背景；斜紋＋上亮下暗模擬和紙的纖維與光澤
+ * - 兩端用 clip-path 鋸齒做出手撕的毛邊
+ * - clip-path 會裁掉自身的 box-shadow，所以陰影放在外層 .washi-tape 用 drop-shadow
+ * 用 --tape 換顏色、--tape-rotate 換角度。
+ */
+.washi-tape {
+  /* 紙膠帶跟著季節換色 */
+  --tape: color-mix(in oklch, var(--season) 55%, transparent);
+  --tape-rotate: -6deg;
+  position: absolute;
+  z-index: 1;
+  top: -0.85rem;
+  left: 42%;
+  width: 7.25rem;
+  height: 1.7rem;
+  translate: -50% 0;
+  rotate: var(--tape-rotate);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.22));
+  pointer-events: none;
+}
+.washi-tape::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--tape);
+  background-image:
+    linear-gradient(180deg, rgb(255 255 255 / 0.28), transparent 45%, rgb(0 0 0 / 0.06)),
+    repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.1) 0 3px, transparent 3px 8px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  clip-path: polygon(
+    3px 0, calc(100% - 2px) 0,
+    100% 9%, calc(100% - 3px) 20%, 100% 31%, calc(100% - 2px) 44%, 100% 56%,
+    calc(100% - 3px) 68%, 100% 80%, calc(100% - 2px) 91%, calc(100% - 4px) 100%,
+    2px 100%,
+    0 89%, 3px 77%, 0 66%, 2px 53%, 0 41%, 3px 29%, 0 17%, 2px 7%
+  );
+}
+
+/* ── 雲海 ──────────────────────────────────────────────────────────────────
+ * 畫面下方兩層緩慢漂移的雲。每層是一排橢圓漸層（雲團）組成的橫向重複圖樣，
+ * 每團雲都落在圖樣寬度內且邊緣淡出到透明，所以重複接縫處不會出現線條；
+ * 再加 blur 讓雲團邊緣更柔。疊在 body 背景之上、所有內容之下。
+ */
+.cloud-sea {
+  position: fixed;
+  inset: auto 0 0 0;
+  /* -1：畫在 body 背景之上、所有內容之下 */
+  z-index: -1;
+  height: 50vh;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.7) 35%, transparent 100%);
+}
+.cloud-sea::before,
+.cloud-sea::after {
+  content: '';
+  position: absolute;
+  /* 下緣往外多延伸，避免 blur 讓底部邊緣變淡出現一條亮帶 */
+  top: 0;
+  bottom: -60px;
+  left: -200px;
+  width: calc(100% + 200px + 1600px);
+  background-image:
+    radial-gradient(16% 38% at 12% 78%, color-mix(in oklch, var(--cloud) 70%, transparent), transparent 70%),
+    radial-gradient(12% 30% at 27% 88%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(18% 42% at 46% 74%, color-mix(in oklch, var(--cloud) 65%, transparent), transparent 70%),
+    radial-gradient(11% 28% at 63% 90%, color-mix(in oklch, var(--cloud) 50%, transparent), transparent 70%),
+    radial-gradient(17% 40% at 82% 80%, color-mix(in oklch, var(--cloud) 70%, transparent), transparent 70%);
+  background-size: 1600px 100%;
+  background-repeat: repeat-x;
+  filter: blur(18px);
+  opacity: 0.22;
+  animation: cloud-drift 160s linear infinite;
+}
+.cloud-sea::after {
+  width: calc(100% + 200px + 2200px);
+  background-image:
+    radial-gradient(20% 34% at 18% 60%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(14% 26% at 44% 72%, color-mix(in oklch, var(--cloud) 45%, transparent), transparent 70%),
+    radial-gradient(22% 38% at 70% 58%, color-mix(in oklch, var(--cloud) 55%, transparent), transparent 70%),
+    radial-gradient(12% 24% at 90% 74%, color-mix(in oklch, var(--cloud) 40%, transparent), transparent 70%);
+  background-size: 2200px 100%;
+  filter: blur(28px);
+  opacity: 0.16;
+  animation-name: cloud-drift-far;
+  animation-duration: 260s;
+}
+@keyframes cloud-drift {
+  to {
+    translate: -1600px 0;
+  }
+}
+@keyframes cloud-drift-far {
+  to {
+    translate: -2200px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cloud-sea::before,
+  .cloud-sea::after {
+    animation: none;
+  }
+}
+/* 晝沒有雲海 */
+:root:not(.dark) .cloud-sea {
+  display: none;
+}
+
+/* ── 墨洇：換頁（DESIGN.md 第 7 節）。types 由 lib/page-transition.ts 決定，方向由 lib/page-depth.ts 算 ─────────
+ * ink ＋ ink-left|right|down|up：舊頁的截圖（root）像被水打濕，暈開、淡掉、順著方向微移；
+ *   新頁不用截圖動畫，是活的畫面，字自己從暈開的墨收乾（.ink-in，lib/page-enter.ts）
+ * 錨字（*.ink-anchor）：列表 ⇄ 內頁時被點的標題不暈，直接移到新位置
+ * fade：篩選、分頁、切語系、不認得的頁、減少動態效果，只淡入淡出
+ * header 與導覽的墨自成一層，不截圖、照常顯示活的畫面（打開的選單自己會收）。不蓋任何疊層，只有字在動 */
+html {
+  --ink-blur-out: var(--blur-out);
+  --ink-blur-in: var(--blur-in);
+}
+/* 低階裝置只淡入、位移，不模糊（isLowEndDevice） */
+html[data-motion-lite] {
+  --ink-blur-out: 0px;
+  --ink-blur-in: 0px;
+}
+/* 方向：-1／1 乘上位移。換頁中掛在 html 上（舊頁截圖用），進場中掛在內容那一層（新頁的字用） */
+html:active-view-transition-type(ink-left) { --ink-dx: -1; --ink-dy: 0; }
+html:active-view-transition-type(ink-right) { --ink-dx: 1; --ink-dy: 0; }
+html:active-view-transition-type(ink-down) { --ink-dx: 0; --ink-dy: 1; }
+html:active-view-transition-type(ink-up) { --ink-dx: 0; --ink-dy: -1; }
+[data-ink-move='left'] { --ink-dx: -1; --ink-dy: 0; }
+[data-ink-move='right'] { --ink-dx: 1; --ink-dy: 0; }
+[data-ink-move='down'] { --ink-dx: 0; --ink-dy: 1; }
+[data-ink-move='up'] { --ink-dx: 0; --ink-dy: -1; }
+
+@keyframes ink-out {
+  to {
+    opacity: 0;
+    filter: blur(var(--ink-blur-out));
+    translate: calc(var(--ink-dx, 0) * var(--shift-out-x)) calc(var(--ink-dy, 0) * var(--shift-out-y));
+  }
+}
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    filter: blur(var(--ink-blur-in));
+    translate: calc(var(--ink-dx, 0) * -1 * var(--shift-in-x)) calc(var(--ink-dy, 0) * -1 * var(--shift-in-y));
+  }
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+
+/* 舊頁蓋在新頁上面暈掉；新頁的截圖不動（底下的字還沒出來，看到的是紙） */
+html:active-view-transition-type(ink)::view-transition-old(root) {
+  z-index: 1;
+  mix-blend-mode: normal;
+  animation: ink-out var(--dur-out) ease-in both;
+}
+html:active-view-transition-type(ink)::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+html:active-view-transition-type(ink)::view-transition-group(*.ink-anchor) {
+  animation-duration: var(--dur-move);
+  animation-timing-function: var(--ease-move);
+}
+/* 列表的小字與內頁的大字不要疊在一起：舊的先淡掉，新的稍晚浮出（都不模糊） */
+html:active-view-transition-type(ink)::view-transition-old(*.ink-anchor) {
+  mix-blend-mode: normal;
+  animation: vt-fade-out var(--dur-out) ease-in both;
+}
+html:active-view-transition-type(ink)::view-transition-new(*.ink-anchor) {
+  mix-blend-mode: normal;
+  animation: vt-fade-in var(--dur-in) var(--dur-in-delay) var(--ease-out) both;
+}
+/* 只有一邊有錨字（例如從首頁的水面點進文章）：當成一般的行 */
+html:active-view-transition-type(ink)::view-transition-old(*.ink-anchor):only-child {
+  animation: ink-out var(--dur-out) ease-in both;
+}
+html:active-view-transition-type(ink)::view-transition-new(*.ink-anchor):only-child {
+  animation: ink-in var(--dur-in) var(--dur-in-delay) var(--ease-out) both;
+}
+
+html:active-view-transition-type(fade)::view-transition-group(*) {
+  animation: none;
+}
+html:active-view-transition-type(fade)::view-transition-old(*) {
+  animation: vt-fade-out var(--dur-fade-out) ease-out both;
+}
+html:active-view-transition-type(fade)::view-transition-new(*) {
+  animation: vt-fade-in var(--dur-fade-in) ease-out both;
+}
+
+/* header、導覽的墨、日記內頁左邊的清單：直接是新的活畫面（清單有自己的 framer 動畫，日記之間換頁時不能被截圖蓋住） */
+::view-transition-group(site-header),
+::view-transition-group(nav-ink),
+::view-transition-group(note-rail),
+::view-transition-new(site-header),
+::view-transition-new(nav-ink),
+::view-transition-new(note-rail) {
+  animation: none;
+}
+::view-transition-old(site-header),
+::view-transition-old(nav-ink),
+::view-transition-old(note-rail) {
+  display: none;
+}
+
+/* 新頁的字：從暈開的墨收乾，順著方向移入（延遲由 page-enter.ts 依行排好） */
+.ink-in {
+  animation: ink-in var(--dur-in) var(--enter-delay, var(--dur-in-delay)) var(--ease-out) both;
+}
+
+/* 切語系是整頁重新載入：跨文件的 View Transition，只淡入 */
+@view-transition {
+  navigation: auto;
+  types: fade;
+}
+
+/* 減少動態效果：不模糊、不位移、錨字不移，只淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) {
+    animation: none !important;
+  }
+  ::view-transition-old(*) {
+    animation: vt-fade-out var(--dur-fade-out) ease-out both !important;
+  }
+  ::view-transition-new(*) {
+    animation: vt-fade-in var(--dur-fade-in) ease-out both !important;
+  }
+  .ink-in {
+    animation: none;
+  }
+}
+
+/* 換頁慢的時候，頂端用節氣色寫出一筆（InkProgress）：筆觸邊緣用噪聲遮罩做出飛白 */
+.ink-progress {
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: 100;
+  height: 3px;
+  width: var(--ink-progress, 0%);
+  background: linear-gradient(90deg, color-mix(in oklch, var(--season) 40%, transparent), var(--season) 30%, var(--season));
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='6'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.02 .9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.4 -.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  mask-size: 240px 100%;
+  border-radius: 0 999px 999px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 6s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.4s ease;
+}
+.ink-progress:not([data-state]) {
+  transition: none;
+}
+.ink-progress[data-state='writing'] {
+  --ink-progress: 85%;
+  opacity: 1;
+}
+.ink-progress[data-state='done'] {
+  --ink-progress: 100%;
+  opacity: 0;
+  transition: width 0.25s ease-out, opacity 0.4s ease 0.2s;
+}
+
+/* 進站開場（每次整頁載入都播，見 lib/ink-intro.ts）：流體引擎接手前，先用一層底色＋節氣名蓋住頁面 */
+.ink-intro-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+}
+html[data-ink-intro] .ink-intro-veil {
+  opacity: 1;
+  visibility: visible;
+  transition: none;
+}
+
+/* 開場時浮在墨面上的節氣名：晝是紙上的墨字，夜是夜色上的節氣色 */
+.ink-loading-term {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: 0.5em;
+  margin-right: -0.5em;
+  color: var(--foreground);
+  opacity: 0.85;
+  animation: ink-term-breathe 2.4s ease-in-out infinite;
+}
+.dark .ink-loading-term {
+  color: color-mix(in oklch, var(--season) 75%, white);
+  text-shadow: 0 0 24px color-mix(in oklch, var(--season) 45%, transparent);
+}
+@keyframes ink-term-breathe {
+  50% { opacity: 0.55; }
+}
+
+/* ── 信箋（文章／日記內頁，letter-paper.tsx）─────────────────────────────────
+ * 2026-11-02 站主：全拿掉太單調 → 只留兩樣：朱色「文武線」箋框（外粗內細的雙線）與文末的朱印。
+ * 疊紙、陰影、毛邊、紙紋、花木都不回來；紙就是頁面的紙，框只是兩條朱線。 */
+.letter-paper {
+  --frame: color-mix(in oklch, var(--zhu) 55%, transparent);
+  position: relative;
+  padding: 3.5rem 2.75rem 3rem;
+}
+.letter-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--frame);
+  outline: 1px solid color-mix(in oklch, var(--frame) 70%, transparent);
+  outline-offset: -6px;
+  pointer-events: none;
+}
+.dark .letter-paper {
+  --frame: color-mix(in oklch, var(--zhu) 40%, transparent);
+}
+@media (max-width: 640px) {
+  .letter-paper {
+    padding: 2.5rem 1.25rem 2rem;
+  }
+}
+
+/* 朱印：白文方印（字留紙色、底為朱），邊緣斑駁、微微歪斜；斑駁是一張 60px 的小遮罩，不是整張紙的濾鏡 */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  rotate: -4deg;
+  background: var(--zhu);
+  border-radius: 3px 5px 4px 6px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  mask-size: cover;
+}
+.seal-text {
+  writing-mode: vertical-rl;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--background);
+}
+
+/* ── 蓋印與分類朱印（components/post-reading）─────────────────────────────── */
+/* 讀者的印：彩色頭像裁成微歪的方印，外面一道朱框 */
+.reader-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1.5px solid var(--zhu);
+  border-radius: 2px 3px 2px 4px;
+  background: var(--background);
+}
+.reader-seal img { width: 100%; height: 100%; object-fit: cover; }
+.reader-seal-text { font-family: var(--font-display); font-size: 0.8em; color: var(--zhu); line-height: 1; }
+/* 還沒蓋：朱色虛線方框，直書「蓋印」 */
+.stamp-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed color-mix(in oklch, var(--zhu) 60%, transparent);
+  border-radius: 2px 3px 2px 4px;
+  writing-mode: vertical-rl;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--zhu);
+  transition: border-color var(--dur-out) var(--ease-out), border-style 0s;
+}
+button:hover > .stamp-slot,
+button:focus-visible > .stamp-slot { border-style: solid; border-color: var(--zhu); }
+/* 閱讀島的「印」鈕：還沒蓋是朱色虛線框的「印」，蓋了是實心朱底、紙色字（reading-island.tsx） */
+.island-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border: 1.5px dashed var(--zhu);
+  border-radius: 2px 3px 2px 4px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--zhu);
+  transition: background-color var(--dur-out) var(--ease-out), color var(--dur-out) var(--ease-out);
+}
+.island-stamp-on { border-style: solid; background: var(--zhu); color: var(--background); }
+/* 分類印：朱文方印（朱色雙線框、朱字，刻分類名的第一個字），微歪；跟留言區標題的印同一個擺法 */
+.category-seal {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  rotate: -6deg;
+  border: 2px solid var(--zhu);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 2px var(--background), inset 0 0 0 3px var(--zhu); /* design-ok: 印的內框線，不是陰影 */
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--zhu);
+  transition: rotate var(--dur-in) var(--ease-out);
+}
+.category-seal:hover { rotate: 0deg; }
+
+/* ── 燈箱（圖片／mermaid／Excalidraw 放大檢視）──────────────────────────────
+ * 底色用頁面背景色半透明＋模糊，晝夜都順；內容置中、最大 92vw × 84vh，
+ * 縮放與平移由 transform 處理（見 components/mdx/renderers/zoomable.tsx） */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: color-mix(in oklch, var(--background) 96%, transparent);
+  backdrop-filter: blur(6px);
+  animation: lightbox-in 160ms ease-out;
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+.lightbox-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+.lightbox-content {
+  transform-origin: center;
+  will-change: transform;
+}
+.lightbox-content > svg,
+.lightbox-content > img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 92vw;
+  max-height: 84vh;
+  pointer-events: none;
+}
+/* SVG 是向量圖，直接撐滿可用區域（viewBox 的 meet 會維持比例、置中），小圖也會放大到看得清楚 */
+.lightbox-content > svg {
+  width: 92vw;
+  height: 84vh;
+}
+.lightbox-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  color: var(--foreground);
+  background: var(--card);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 8px 24px -8px oklch(0 0 0 / 0.25);
+}
+.lightbox-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  transition: background-color 120ms;
+}
+.lightbox-toolbar button:hover {
+  background: var(--accent);
+}
+/* 上方：圖說＋拍攝資訊（EXIF） */
+.lightbox-header {
+  position: absolute;
+  left: 50%;
+  top: 1.25rem;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 80vw;
+  text-align: center;
+  pointer-events: none;
+}
+.lightbox-caption {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.lightbox-exif {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.875rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklch, var(--muted-foreground) 80%, transparent);
+  white-space: pre;
+}
+/* 相簿左右切換鈕：桌機放在兩側垂直置中；手機改靠下、避開工具列 */
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  color: var(--foreground);
+  background: var(--card);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 8px 24px -8px oklch(0 0 0 / 0.25);
+  transition:
+    background-color 120ms,
+    opacity 160ms ease;
+}
+.lightbox-nav:hover {
+  background: var(--accent);
+}
+.lightbox-nav[data-side='prev'] {
+  left: 1.25rem;
+}
+.lightbox-nav[data-side='next'] {
+  right: 1.25rem;
+}
+@media (max-width: 640px) {
+  .lightbox-nav {
+    top: auto;
+    bottom: 1.5rem;
+    translate: none;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  .lightbox-nav[data-side='prev'] {
+    left: 0.75rem;
+  }
+  .lightbox-nav[data-side='next'] {
+    right: 0.75rem;
+  }
+}
+/* 關閉中：內容由 FLIP 飛回原位，底色與工具列同時淡出、不再接受操作 */
+.lightbox {
+  transition:
+    background-color 240ms ease,
+    backdrop-filter 240ms ease;
+}
+.lightbox[data-closing] {
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+}
+.lightbox-toolbar,
+.lightbox-header {
+  transition: opacity 160ms ease;
+}
+.lightbox[data-closing] :is(.lightbox-toolbar, .lightbox-header, .lightbox-nav) {
+  opacity: 0;
+}
+
+/* ── 文章圖片（components/mdx/renderers/image.tsx）──────────────────────────
+ * 預設：8px 圓角＋內側半透明髮絲線（淺色截圖貼在淺色紙上也看得出邊）＋
+ * 幾層帶紙色調的柔和陰影（讓圖片微微浮在信箋上，不用純黑陰影）。
+ * title 寫 "screenshot" 時改成把截圖放在襯底上、底部貼齊，像截圖美化工具的做法。
+ * 圖說：自動編號「圖 N」（前綴由 CompiledMdx 依語系帶入 --mdx-figure-label），上方一條髮絲線。
+ * 載入中顯示流光骨架，載完由模糊轉清晰淡入；滑過時圖片微微放大提示可點開。 */
+.mdx-wrapper {
+  counter-reset: mdx-figure mdx-sidenote;
+}
+.mdx-figure {
+  --hairline: oklch(0.3 0.03 60 / 0.14);
+  --photo-shadow:
+    0 1px 1px oklch(0.35 0.04 60 / 0.06),
+    0 2px 4px oklch(0.35 0.04 60 / 0.06),
+    0 6px 12px -2px oklch(0.35 0.04 60 / 0.08),
+    0 16px 28px -8px oklch(0.35 0.04 60 / 0.12);
+  --screenshot-bg: color-mix(in oklch, var(--card), oklch(0.55 0.05 70) 14%);
+}
+.dark .mdx-figure {
+  --hairline: oklch(1 0 0 / 0.1);
+  --photo-shadow:
+    0 1px 1px oklch(0 0 0 / 0.2),
+    0 2px 4px oklch(0 0 0 / 0.2),
+    0 6px 12px -2px oklch(0 0 0 / 0.25),
+    0 16px 28px -8px oklch(0 0 0 / 0.35);
+  --screenshot-bg: color-mix(in oklch, var(--card), white 5%);
+}
+.mdx-photo {
+  position: relative;
+  display: block;
+}
+.mdx-image-frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: var(--photo-shadow);
+}
+/* 髮絲線疊在圖片上面（inset），才不會被圖片本身的顏色吃掉 */
+.mdx-image-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  pointer-events: none;
+}
+.mdx-image-frame[data-status='loading'] {
+  background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklch, var(--background) 70%, transparent) 50%,
+      transparent 70%
+    )
+    var(--muted);
+  background-size: 200% 100%;
+  animation: mdx-image-shimmer 1.4s linear infinite;
+}
+@keyframes mdx-image-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+/* margin: 0 蓋掉 prose 給 img 的上下外距，不然外框會把空白也框進去 */
+.mdx-image-frame .mdx-image {
+  display: block;
+  margin: 0;
+  /* 載入前先以 16:9 預留空間，載入後改用圖片本身的比例（auto）：避免捲動途中圖片陸續撐高版面、
+   * 把 TOC 跳轉的目標往下推，也降低 CLS */
+  aspect-ratio: auto 16 / 9;
+  transition:
+    opacity 500ms ease,
+    filter 700ms ease,
+    scale 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* 有模糊預覽時用它取代骨架的流光：16px 的小圖放大後本身就是模糊的 */
+.mdx-image-frame[data-blur][data-status='loading'] {
+  background-size: cover;
+  background-position: center;
+  animation: none;
+}
+.mdx-image-frame[data-blur]:not([data-status='loading']) {
+  background-image: none !important;
+}
+
+/* 骨架高度撐在 img 本身，lazy 圖片還沒載入前也有實際面積可以被判定進入視窗 */
+.mdx-image-frame[data-status='loading'] .mdx-image {
+  min-height: 12rem;
+  opacity: 0;
+  filter: blur(12px);
+  scale: 1.04;
+}
+/* 已知實際尺寸時照比例佔位，不需要最小高度（不然寬扁的圖會先被撐高、載完又縮回去） */
+.mdx-image-frame[data-status='loading'] .mdx-image[width][height] {
+  min-height: 0;
+}
+.zoomable:hover .mdx-image-frame[data-status='loaded'] .mdx-image {
+  scale: 1.015;
+}
+/* 夜讀時把圖片壓暗一點，亮色截圖才不刺眼；滑過或點開燈箱（燈箱裡的複本沒有 frame）就恢復原亮度 */
+.dark .mdx-image-frame[data-status='loaded'] .mdx-image {
+  filter: brightness(0.85);
+}
+.dark .zoomable:hover .mdx-image-frame[data-status='loaded'] .mdx-image {
+  filter: none;
+}
+
+.mdx-photo[data-variant='screenshot'] {
+  padding: clamp(1rem, 4%, 2rem) clamp(1rem, 6%, 2.75rem) 0;
+  overflow: hidden;
+  background: var(--screenshot-bg);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.mdx-photo[data-variant='screenshot'] .mdx-image-frame {
+  border-radius: 8px 8px 0 0;
+}
+
+/* 拍立得：白色相紙、下緣留寬，圖說用文楷寫在下緣；整張微斜，滑過轉正 */
+.mdx-photo[data-variant='polaroid'] {
+  width: fit-content;
+  max-width: min(100%, 26rem);
+  margin-inline: auto;
+  padding: 0.75rem 0.75rem 0;
+  background: oklch(0.985 0.004 85);
+  border-radius: 3px;
+  box-shadow: var(--photo-shadow);
+  rotate: -1.2deg;
+  transition: rotate 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.dark .mdx-photo[data-variant='polaroid'] {
+  background: oklch(0.86 0.008 85);
+}
+.zoomable:hover .mdx-photo[data-variant='polaroid'] {
+  rotate: 0deg;
+}
+.mdx-photo[data-variant='polaroid'] .mdx-image-frame {
+  border-radius: 1px;
+  box-shadow: none;
+}
+.mdx-polaroid-caption {
+  display: block;
+  padding: 0.75rem 0.25rem 1rem;
+  min-height: 3rem;
+  font-family: var(--font-wenkai);
+  font-size: 1rem;
+  line-height: 1.4;
+  text-align: center;
+  color: oklch(0.32 0.02 60);
+}
+.mdx-photo[data-variant='polaroid']:not(:has(.mdx-polaroid-caption)) {
+  padding-bottom: 3rem;
+}
+
+.mdx-figcaption {
+  counter-increment: mdx-figure;
+  display: flex;
+  gap: 0.625rem;
+  align-items: baseline;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--hairline);
+  font-family: var(--font-wenkai);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+.mdx-figcaption::before {
+  content: var(--mdx-figure-label, '圖') ' ' counter(mdx-figure);
+  flex: none;
+  color: var(--ink, var(--primary));
+}
+
+.mdx-image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 8rem;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mdx-image-frame[data-status='loading'] {
+    animation: none;
+  }
+  .mdx-image-frame .mdx-image,
+  .mdx-photo[data-variant='polaroid'] {
+    transition: none;
+  }
+}
+
+/* ── 留言區：朱印與對話氣泡 ─────────────────────────────────────────────────
+ * 文章本體是信箋（.letter-paper），留言區刻意改成「茶席閒談」的對話氣泡，
+ * 避免版面跟正文一樣而審美疲勞。朱印用 --ink（晝為朱砂、夜讀為主色）。
+ */
+.comment-seal {
+  display: inline-grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: var(--font-wenkai);
+  line-height: 1;
+  box-shadow: inset 0 0 0 2px var(--background), inset 0 0 0 3px var(--ink);
+  rotate: -6deg;
+  /* 印泥不均：用遮罩做出斑駁感 */
+  mask-image: radial-gradient(circle at 30% 20%, #000 60%, oklch(0 0 0 / 0.75) 100%);
+}
+.comment-seal-sm {
+  padding: 0.1rem 0.3rem;
+  border-width: 1.5px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  box-shadow: none;
+  rotate: 8deg;
+  opacity: 0.85;
+}
+
+/* 名字旁的「作者」小印：不旋轉，跟文字對齊 */
+.comment-seal-flat {
+  rotate: none;
+  padding: 0.05rem 0.25rem;
+  font-size: 0.65rem;
+  opacity: 1;
+}
+
+.comment-bubble {
+  position: relative;
+  border-radius: 1.1rem;
+  background: var(--card);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 6px 16px -10px oklch(0.3 0.02 60 / 0.35);
+}
+.dark .comment-bubble {
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 6px 16px -10px oklch(0 0 0 / 0.6);
+}
+.comment-bubble[data-side='left'] {
+  border-top-left-radius: 0.25rem;
+}
+.comment-bubble[data-mine] {
+  background: color-mix(in oklch, var(--ink) 9%, var(--card));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--ink) 22%, transparent),
+    0 6px 16px -10px color-mix(in oklch, var(--ink) 45%, transparent);
+}
+
+/* 回覆串的連接線
+ * 線色用不透明色：半透明的線段重疊處會變深，看起來粗細不一。
+ * --rail-x = 回覆串縮排 − 上層頭像中心，讓彎折線剛好對齊頭像下方的直線。
+ */
+.comment-rail,
+.comment-thread {
+  --rail-color: color-mix(in oklch, var(--foreground) 16%, var(--background));
+  --rail-w: 2px;
+}
+.comment-rail {
+  width: var(--rail-w);
+  border-radius: 999px;
+  background: var(--rail-color);
+}
+.comment-thread[data-depth='root'] {
+  --rail-x: 1.125rem; /* ml-9 (2.25rem) − size-9 頭像中心 (1.125rem) */
+}
+.comment-thread[data-depth='nested'] {
+  --rail-x: 1.25rem; /* ml-8 (2rem) − sm 頭像中心 (0.75rem) */
+}
+.comment-thread > .comment-thread-item {
+  position: relative;
+}
+.comment-thread > .comment-thread-item::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--rail-x) - var(--rail-w) / 2);
+  top: -1.25rem; /* 接住 pt-5 / space-y-5 的間距 */
+  width: calc(var(--rail-x) - 0.35rem);
+  /* 底邊落在回覆頭像（sm）的垂直中心 0.75rem */
+  height: calc(2rem + var(--rail-w) / 2);
+  border-left: var(--rail-w) solid var(--rail-color);
+  border-bottom: var(--rail-w) solid var(--rail-color);
+  border-bottom-left-radius: 0.75rem;
+}
+.comment-thread > .comment-thread-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--rail-x) - var(--rail-w) / 2);
+  top: 0;
+  bottom: -1.25rem;
+  border-left: var(--rail-w) solid var(--rail-color);
+}
+
+@keyframes comment-like-pop {
+  0% { scale: 1; }
+  40% { scale: 1.35; }
+  100% { scale: 1; }
+}
+.comment-like-pop {
+  animation: comment-like-pop 320ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .comment-like-pop { animation: none; }
+}
+
+/* 友鏈：游絲（routes/_layout/friends/-components/friend-list.tsx、yousi.ts）
+   一排一條橫貫的長波浪細墨，朋友的頭像像珠子串在線上；捲到才由左往右寫出來。
+   滑過或鍵盤移到哪一位：站名轉朱、頭像框轉朱並透出原色，桌機浮出他的小卡。 */
+.yousi-ink { fill: currentColor; }
+.yousi-reveal {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.yousi[data-written='true'] .yousi-reveal {
+  animation: yousi-write 1.6s cubic-bezier(0.45, 0.05, 0.4, 1) both;
+  animation-delay: calc(var(--i) * 0.35s);
+}
+@keyframes yousi-write {
+  to { stroke-dashoffset: 0; }
+}
+.friend:is(:hover, :focus-within) { z-index: 10; }
+.friend .friend-name,
+.friend .friend-avatar { transition: color var(--dur-out) var(--ease-out), border-color var(--dur-out) var(--ease-out); }
+.friend:is(:hover, :focus-within) .friend-name { color: var(--zhu); }
+.friend:is(:hover, :focus-within) .friend-avatar { border-color: var(--zhu); }
+.friend .friend-link:focus-visible { outline: 1.5px solid var(--zhu); outline-offset: 4px; border-radius: 999px; }
+.friend-avatar img {
+  filter: grayscale(0.6);
+  opacity: 0.9;
+  transition: filter var(--dur-in) var(--ease-out), opacity var(--dur-in) var(--ease-out);
+}
+.dark .friend-avatar img { opacity: 0.8; }
+.friend:is(:hover, :focus-within) .friend-avatar img { filter: none; opacity: 1; }
+.friend-pop {
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 -4px;
+  transition: opacity var(--dur-out) var(--ease-out), translate var(--dur-out) var(--ease-out), visibility 0s var(--dur-out);
+}
+.friend:is(:hover, :focus-within) .friend-pop {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition: opacity var(--dur-in) var(--ease-out), translate var(--dur-in) var(--ease-out), visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .yousi-reveal { stroke-dashoffset: 0; }
+  .yousi[data-written='true'] .yousi-reveal { animation: none; }
+  .friend-pop { translate: none; }
+}
+
+/* 朋友圈（routes/_layout/fcircle/-components/circle-feed.tsx）：一筆垂直的細墨，每篇一滴墨與扁扁的漣漪
+   滑過那一列：標題轉朱、那一滴的漣漪轉淡朱、頭像透出原色。漣漪捲進畫面時往外泛一次。 */
+.circle-drop ellipse[stroke] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: circle-ripple 1.6s var(--ease-out) both;
+  transition: stroke var(--dur-out) var(--ease-out);
+}
+.circle-row:hover .circle-drop ellipse[stroke] { stroke: color-mix(in oklab, var(--zhu) 60%, transparent); }
+.circle-row:is(:hover, :focus-within) .friend-avatar img { filter: none; opacity: 1; }
+.circle-row a:focus-visible { outline: none; }
+.circle-row:has(a:focus-visible) { outline: 1.5px solid var(--zhu); outline-offset: 2px; border-radius: 4px; }
+@keyframes circle-ripple {
+  from { opacity: 0; transform: scale(0.5); }
+}
+.circle-select { transition: border-color var(--dur-out) var(--ease-out); }
+.circle-select:hover { border-color: var(--ink-4); }
+.circle-select:focus-visible { outline: none; border-color: var(--zhu); }
+@media (prefers-reduced-motion: reduce) {
+  .circle-drop ellipse[stroke] { animation: none; }
+}
+
+/* 欄位：只有底下一條 --ink-5 髮絲線，聚焦時轉朱（友鏈的申請表單、搜尋） */
+.ink-field {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--ink-5);
+  background: transparent;
+  padding: 0.35rem 0;
+  color: var(--ink-1);
+  outline: none;
+  transition: border-color var(--dur-out) var(--ease-out);
+}
+.ink-field::placeholder { color: var(--ink-4); }
+.ink-field:hover { border-bottom-color: var(--ink-4); }
+.ink-field:focus { border-bottom-color: var(--zhu); }
+
+/* ── 墨點（components/layout/nav/site-nav.tsx 的 InkDot）─────────────────
+ * 平時洇痕慢慢一呼一吸（墨還在滲進紙裡）；滑過時墨芯鼓起、洇痕漲開；
+ * 打開：墨芯往下一墜、縮小消失（落進水裡），洇痕淡掉，原地泛出一圈漣漪後停在那裡當收起鈕。
+ */
+.ink-dot :is(.ink-dot-halo, .ink-dot-soak, .ink-dot-core, .ink-dot-specks, .ink-dot-ripple) {
+  transform-box: view-box;
+  transform-origin: 16px 16px;
+}
+.ink-dot .ink-dot-soak {
+  animation: ink-dot-soak 6.5s ease-in-out infinite alternate;
+}
+.ink-dot .ink-dot-halo,
+.ink-dot .ink-dot-core,
+.ink-dot .ink-dot-specks {
+  transition:
+    transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.32s ease-out;
+}
+.ink-dot .ink-dot-ripple {
+  opacity: 0;
+  transform: scale(0.3);
+}
+.group:hover .ink-dot[data-state='idle'] .ink-dot-core {
+  transform: translateY(0.6px) scale(1.14);
+}
+.group:hover .ink-dot[data-state='idle'] .ink-dot-halo {
+  transform: scale(1.18);
+}
+.ink-dot:not([data-state='idle']) .ink-dot-core {
+  transform: translateY(3px) scale(0.2);
+  opacity: 0;
+  transition-duration: 0.26s;
+  transition-timing-function: cubic-bezier(0.6, 0, 1, 1);
+}
+.ink-dot:not([data-state='idle']) .ink-dot-halo,
+.ink-dot:not([data-state='idle']) .ink-dot-specks {
+  opacity: 0;
+}
+.ink-dot[data-state='open'] .ink-dot-ripple {
+  animation: ink-dot-ripple 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.12s both;
+}
+.group:hover .ink-dot[data-state='open'] .ink-dot-ripple {
+  stroke-width: 1.2;
+}
+@keyframes ink-dot-soak {
+  from { transform: scale(0.93); opacity: 0.8; }
+  to { transform: scale(1.07); opacity: 1; }
+}
+@keyframes ink-dot-ripple {
+  0% { opacity: 0; transform: scale(0.3); }
+  25% { opacity: 0.9; }
+  60% { opacity: 0.35; transform: scale(1.5); }
+  100% { opacity: 0.55; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-dot .ink-dot-soak { animation: none; }
+  .ink-dot[data-state='open'] .ink-dot-ripple { animation: none; opacity: 0.55; transform: none; }
+}
+.dark .ink-dot .ink-dot-sheen {
+  fill-opacity: 0.18;
+}
+.dark .ink-dot .ink-dot-ripple {
+  stroke: var(--ink-3);
+}
+.ink-dot .ink-dot-pulse {
+  transform-box: view-box;
+  transform-origin: 16px 16px;
+  opacity: 0;
+}
+.ink-dot[data-state='idle'] .ink-dot-pulse {
+  animation: ink-dot-pulse 4.5s cubic-bezier(0.2, 0.7, 0.2, 1) 1.2s infinite;
+}
+.ink-dot[data-state='idle'] .ink-dot-pulse-2 {
+  animation-delay: 1.55s;
+}
+@keyframes ink-dot-pulse {
+  0% { opacity: 0; transform: scale(0.7); }
+  6% { opacity: 1; }
+  24% { opacity: 0.9; }
+  50% { opacity: 0; transform: scale(2); }
+  100% { opacity: 0; transform: scale(2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-dot[data-state='idle'] .ink-dot-pulse { animation: none; }
+}
+
+/* ── 收尾一筆（components/layout/footer 的 FinalStroke）──────────────────
+ * 捲到頁底才從左往右寫出來：起筆稍停、中段順、收筆放慢。減少動態效果時直接是寫好的樣子。
+ */
+.final-stroke {
+  clip-path: inset(0 100% 0 0);
+}
+.final-stroke[data-written='true'] {
+  animation: final-stroke-write 1.1s cubic-bezier(0.6, 0, 0.2, 1) 0.15s both;
+}
+@keyframes final-stroke-write {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .final-stroke,
+  .final-stroke[data-written='true'] { clip-path: none; animation: none; }
+}

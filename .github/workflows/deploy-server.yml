@@ -1,0 +1,82 @@
+name: Deploy server to NAS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/server/**"
+      - "packages/**"
+      - "docker-compose.yml"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "package.json"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    # 跑在你已綁定的 PVE CT self-hosted runner（效能好，build 快）
+    runs-on: self-hosted
+    environment:
+      name: Production – sao-blog-server
+      url: https://blog-api.sao-x.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build docker image
+        run: docker build -t sao-blog-server:latest -f apps/server/Dockerfile .
+
+      - name: Save image to tar
+        run: docker save sao-blog-server:latest -o sao-blog-server.tar
+
+      - name: Prepare non-interactive SSH password helper
+        env:
+          SSH_PASS: ${{ secrets.NAS_PASSWORD }}
+        run: |
+          ASKPASS=$(mktemp)
+          cat > "$ASKPASS" << 'EOF'
+          #!/bin/sh
+          echo "$SSH_PASS"
+          EOF
+          chmod +x "$ASKPASS"
+          echo "SSH_ASKPASS=$ASKPASS" >> "$GITHUB_ENV"
+          echo "SSH_ASKPASS_REQUIRE=force" >> "$GITHUB_ENV"
+
+      - name: Copy image + compose file to NAS
+        env:
+          SSH_PASS: ${{ secrets.NAS_PASSWORD }}
+        run: |
+          scp -O -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+            sao-blog-server.tar docker-compose.yml \
+            ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }}:/volume1/docker/blog-server/
+
+      - name: Load image & restart container on NAS
+        env:
+          SSH_PASS: ${{ secrets.NAS_PASSWORD }}
+        run: |
+          ssh -p ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }} '
+              export PATH=$PATH:/usr/local/bin &&
+              cd /volume1/docker/blog-server &&
+              docker load -i sao-blog-server.tar &&
+              docker compose --env-file apps/server/.env up -d --no-build &&
+              rm -f sao-blog-server.tar &&
+              docker image prune -f
+            '
+
+      - name: Remove SSH password helper
+        if: always()
+        run: rm -f "$SSH_ASKPASS"
+
+      - name: Cleanup runner workspace
+        if: always()
+        run: rm -f sao-blog-server.tar
+
+      - name: Prune unused images/containers & cap build cache size
+        if: always()
+        run: |
+          docker container prune -f
+          docker image prune -f
+          docker builder prune -f --max-used-space 3GB

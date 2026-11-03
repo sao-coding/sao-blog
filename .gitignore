@@ -1,0 +1,74 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env*.local
+
+# IDEs and editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Turbo
+.turbo
+
+# Better-T-Stack
+.alchemy
+
+# Testing
+coverage
+.nyc_output
+
+# Typesense 資料（docker-compose.yml 的 volume）
+/typesense-data
+
+# Misc
+*.tgz
+.cache
+tmp
+temp
+
+# START Ruler Generated Files
+/.clinerules
+/.clinerules.bak
+/.codex/config.toml
+/.codex/config.toml.bak
+/.idx/airules.md
+/.idx/airules.md.bak
+/.kiro/steering/ruler_kiro_instructions.md
+/.kiro/steering/ruler_kiro_instructions.md.bak
+/.roo/mcp.json
+/.roo/mcp.json.bak
+/AGENTS.md
+/AGENTS.md.bak
+/CLAUDE.md
+/CLAUDE.md.bak
+/opencode.json
+/opencode.json.bak
+# END Ruler Generated Files
+
+/.darft

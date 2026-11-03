@@ -1,0 +1,17 @@
+{
+  "name": "@sao-blog/friend-circle",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.2.5"
+  },
+  "devDependencies": {
+    "@sao-blog/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}

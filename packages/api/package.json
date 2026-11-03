@@ -1,0 +1,50 @@
+{
+  "name": "@sao-blog/api",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1153.0",
+    "@modelcontextprotocol/sdk": "catalog:",
+    "@orpc/client": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "@react-email/components": "^1.0.12",
+    "@sao-blog/auth": "workspace:*",
+    "@sao-blog/db": "workspace:*",
+    "@sao-blog/env": "workspace:*",
+    "@sao-blog/mdx": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.4",
+    "maxmind": "^5.0.7",
+    "nodemailer": "^10.2.1",
+    "opencc-js": "^1.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "sharp": "^0.34.5",
+    "strip-markdown": "^6.0.0",
+    "unified": "^11.0.5",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@sao-blog/config": "workspace:*",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "elysia": "catalog:",
+    "typescript": "catalog:"
+  }
+}

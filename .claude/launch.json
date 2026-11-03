@@ -1,0 +1,48 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "admin", "run", "dev"],
+      "port": 3003
+    },
+    {
+      "name": "server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "server", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "tan-blog",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "tan-blog", "run", "dev"],
+      "port": 3004
+    },
+    {
+      "name": "tan-blog-alt",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "tan-blog", "exec", "vite", "dev", "--port", "3024"],
+      "port": 3024
+    },
+    {
+      "name": "admin-alt",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "admin", "exec", "vite", "dev", "--port", "3023"],
+      "port": 3023
+    },
+    {
+      "name": "ink-proto",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/JETERL~1/AppData/Local/Temp/claude/D--code-nextjs-sao-blog/a35f4a9e-ef2b-4bd3-9f71-dbcce70c41e2/scratchpad/serve.mjs"],
+      "port": 5577
+    },
+    {
+      "name": "tan-blog-prod",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["apps/tan-blog/.output/server/index.mjs"],
+      "env": { "PORT": "3014", "REVALIDATE_SECRET": "local-prod-preview-secret" },
+      "port": 3014
+    }
+  ]
+}

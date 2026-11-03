@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1783796702800,
+      "tag": "0000_slim_zombie",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783962156116,
+      "tag": "0000_1_restore_storage_files",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784393986208,
+      "tag": "0001_cold_hellfire_club",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784644169970,
+      "tag": "0002_lame_microchip",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792425108658,
+      "tag": "0003_content_translations",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792554738984,
+      "tag": "0004_comment_moderation",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792832995118,
+      "tag": "0005_friends",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792842424143,
+      "tag": "0006_friend_accent_color",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792944454853,
+      "tag": "0007_post_likes",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793712369232,
+      "tag": "0008_home_strokes",
+      "breakpoints": true
+    }
+  ]
+}

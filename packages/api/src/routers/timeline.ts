@@ -1,0 +1,112 @@
+import { publicProcedure } from "@sao-blog/api/index";
+import { db } from "@sao-blog/db";
+import { categories, notes, posts } from "@sao-blog/db/schema/index";
+import { eq } from "drizzle-orm";
+import { TimelineInputSchema, TimelineResponseSchema } from "../schema/timeline";
+import { toIso } from "../lib/datetime";
+import { localizedCategories, localizedTitles } from "../lib/i18n";
+
+const getTimeLine = publicProcedure
+    .route({ method: "GET", path: "/timeline" })
+    .input(TimelineInputSchema)
+    .output(TimelineResponseSchema)
+    .handler(async ({ input }) => {
+        const includePosts = !input.type || input.type === "post";
+        const includeNotes = !input.type || input.type === "note";
+
+        const postRows = includePosts
+            ? await db
+                .select({
+                    id: posts.id,
+                    slug: posts.slug,
+                    title: posts.title,
+                    category: categories.name,
+                    categoryId: posts.categoryId,
+                    createdAt: posts.createdAt,
+                    updatedAt: posts.updatedAt,
+                })
+                .from(posts)
+                .leftJoin(categories, eq(posts.categoryId, categories.id))
+                .where(eq(posts.status, "published"))
+            : [];
+
+        const noteRows = includeNotes
+            ? await db
+                .select({
+                    id: notes.id,
+                    title: notes.title,
+                    weather: notes.weather,
+                    mood: notes.mood,
+                    createdAt: notes.createdAt,
+                    updatedAt: notes.updatedAt,
+                })
+                .from(notes)
+                .where(eq(notes.status, true))
+            : [];
+
+        // 疊上請求語系的標題與分類名稱（無譯文時沿用原文）
+        const [postTitles, noteTitles, categoryNames] = await Promise.all([
+            localizedTitles("post", postRows.map((p) => p.id), input.locale),
+            localizedTitles("note", noteRows.map((n) => n.id), input.locale),
+            localizedCategories(postRows.map((p) => p.categoryId), input.locale),
+        ]);
+
+        const timelineItems = [
+            ...postRows.map((post) => ({
+                id: String(post.id),
+                title: postTitles.get(post.id) ?? post.title,
+                slug: post.slug,
+                type: "post" as const,
+                category: (post.categoryId && categoryNames.get(post.categoryId)?.name) || post.category,
+                weather: null,
+                mood: null,
+                createdAt: toIso(post.createdAt),
+                updatedAt: toIso(post.updatedAt),
+            })),
+            ...noteRows.map((note) => ({
+                id: String(note.id),
+                title: noteTitles.get(note.id) ?? note.title,
+                slug: String(note.id),
+                type: "note" as const,
+                category: null,
+                weather: note.weather,
+                mood: note.mood,
+                createdAt: toIso(note.createdAt),
+                updatedAt: toIso(note.updatedAt),
+            })),
+        ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        const groupedByYear = new Map<number, typeof timelineItems>();
+
+        for (const item of timelineItems) {
+            const year = new Date(item.createdAt).getFullYear();
+            const items = groupedByYear.get(year) ?? [];
+            items.push(item);
+            groupedByYear.set(year, items);
+        }
+
+        const timeline = Array.from(groupedByYear.entries())
+            .sort((a, b) => b[0] - a[0])
+            .map(([year, items]) => ({
+                year,
+                count: items.length,
+                items,
+            }));
+
+        // 計算數量
+        const total = timeline.reduce((acc, group) => acc + group.count, 0);
+
+        return {
+            status: "success",
+            message: "時間軸資料取得成功",
+            meta: {
+                total
+            },
+            data: timeline,
+        };
+
+    });
+
+export default {
+    getTimeLine,
+};

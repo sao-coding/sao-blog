@@ -1,0 +1,106 @@
+'use client'
+
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@sao-blog/ui/components/dropdown-menu'
+import { Loader2 } from 'lucide-react'
+import { type Row } from '@tanstack/react-table'
+import { toast } from 'sonner'
+import { Link } from '@tanstack/react-router'
+import type { InferClientOutputs } from '@orpc/client'
+import type { client } from '@/utils/orpc'
+import { ActionMenu } from '@/components/overlay/action-menu'
+import { useOverlay } from '@/hooks/use-overlay'
+import { useMutation } from '@tanstack/react-query'
+import { orpc, queryClient } from '@/utils/orpc'
+
+type RouterOutputs = InferClientOutputs<typeof client>;
+type Post = RouterOutputs['admin']['post']['getPosts']['data'][number]
+
+interface PostRowActionsProps {
+  row: Row<Post>
+}
+
+export function PostRowActions({ row }: PostRowActionsProps) {
+  const { openAlertDialog } = useOverlay()
+  const post = row.original
+
+  const deletePostMutation = useMutation(
+    orpc.admin.post.deletePosts.mutationOptions()
+  )
+
+  const openDeletePostDialog = () => {
+    openAlertDialog({
+      id: `delete-post-${post.id}`,
+      render: ({ isPending }) => ({
+        title: `確定刪除文章「${post.title}」嗎？`,
+        description: '此操作無法復原，刪除後將無法還原文章內容。',
+        cancelLabel: '取消',
+        confirmLabel: isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <Loader2 className="size-4 animate-spin" />
+            刪除中...
+          </span>
+        ) : (
+          '確定刪除'
+        ),
+        confirmVariant: 'destructive',
+      }),
+      onConfirm: async ({ close }) => {
+        try {
+          const res = await deletePostMutation.mutateAsync({ ids: [post.id] })
+          if (res.status === 'error') {
+            toast.error(res.message ?? '刪除文章時發生錯誤，請稍後再試。')
+            return
+          }
+          await queryClient.invalidateQueries({
+            queryKey: orpc.admin.post.getPosts.queryOptions().queryKey,
+          })
+          toast.success(`已刪除文章：${post.title}`)
+          close()
+        } catch {
+          toast.error('刪除文章時發生錯誤，請稍後再試。')
+        }
+      },
+    })
+  }
+
+  return (
+    <ActionMenu
+      triggerSrLabel="開啟文章操作"
+      renderItems={() => (
+        <>
+          <DropdownMenuItem
+            onClick={() => {
+              navigator.clipboard.writeText(post.id)
+              toast.success('已複製文章 ID')
+            }}
+          >
+            複製文章 ID
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            render={
+              <Link params={{ postId: post.id }} to="/posts/editor/$postId">
+                編輯文章
+              </Link>
+            }
+          />
+          {/* TODO: 使用env 新增 主網域 */}
+          <DropdownMenuItem
+            render={
+              <a href={`/posts/${post.slug}`} target="_blank" rel="noreferrer">
+                查看文章
+              </a>
+            }
+          />
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" onClick={openDeletePostDialog}>
+            刪除文章
+          </DropdownMenuItem>
+        </>
+      )}
+    />
+  )
+}

@@ -1,0 +1,232 @@
+'use client'
+
+import { useMutation } from '@tanstack/react-query'
+import { Button } from '@sao-blog/ui/components/button'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { storageConfigInputSchema } from '@sao-blog/api/schema/storage'
+import { Controller, useForm } from 'react-hook-form'
+import type z from 'zod'
+import { toast } from 'sonner'
+import { Loader2Icon } from 'lucide-react'
+import { orpc, queryClient } from '@/utils/orpc'
+
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@sao-blog/ui/components/field'
+import { Input } from '@sao-blog/ui/components/input'
+import { Switch } from '@sao-blog/ui/components/switch'
+import type { InferClientOutputs } from '@orpc/client'
+import type { client } from '@/utils/orpc'
+
+type RouterOutputs = InferClientOutputs<typeof client>
+type StorageConfig = RouterOutputs['admin']['storageConfig']['getConfigs']['data'][number]
+type StorageConfigFormValues = z.input<typeof storageConfigInputSchema>
+
+interface StorageConfigFormProps {
+  mode: 'create' | 'edit'
+  config?: StorageConfig
+  onSuccess?: () => void
+  onCancel?: () => void
+}
+
+const emptyConfig: StorageConfigFormValues = {
+  name: '',
+  endpoint: '',
+  region: 'us-east-1',
+  bucket: '',
+  accessKeyId: '',
+  secretAccessKey: '',
+  publicUrl: '',
+  forcePathStyle: true,
+}
+
+export function StorageConfigForm({ mode, config, onSuccess, onCancel }: StorageConfigFormProps) {
+  const isEditMode = mode === 'edit'
+
+  const form = useForm<StorageConfigFormValues>({
+    resolver: zodResolver(storageConfigInputSchema),
+    values:
+      isEditMode && config
+        ? {
+            name: config.name,
+            endpoint: config.endpoint,
+            region: config.region,
+            bucket: config.bucket,
+            accessKeyId: config.accessKeyId,
+            secretAccessKey: '',
+            publicUrl: config.publicUrl ?? '',
+            forcePathStyle: config.forcePathStyle,
+          }
+        : emptyConfig,
+  })
+
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = form
+
+  const createMutation = useMutation(orpc.admin.storageConfig.createConfig.mutationOptions())
+  const updateMutation = useMutation(orpc.admin.storageConfig.updateConfig.mutationOptions())
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending
+
+  const submitLabel = isEditMode ? '儲存變更' : '新增設定'
+  const submittingLabel = isEditMode ? '儲存中...' : '新增中...'
+
+  const onSubmit = async (values: StorageConfigFormValues) => {
+    try {
+      if (isEditMode && config) {
+        await updateMutation.mutateAsync({ id: config.id, ...values })
+        toast.success('儲存設定更新成功！')
+      } else {
+        await createMutation.mutateAsync(values)
+        toast.success('儲存設定新增成功！')
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: orpc.admin.storageConfig.getConfigs.queryOptions().queryKey,
+      })
+      onSuccess?.()
+    } catch {
+      toast.error(isEditMode ? '更新儲存設定時發生錯誤，請稍後再試。' : '新增儲存設定時發生錯誤，請稍後再試。')
+    }
+  }
+
+  const onValidationError = () => {
+    toast.error('表單驗證失敗，請確認欄位內容。')
+  }
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={form.handleSubmit(onSubmit, onValidationError)}
+    >
+      <FieldGroup className="space-y-4">
+        <Field data-invalid={!!errors.name}>
+          <FieldLabel>設定名稱</FieldLabel>
+          <Input
+            {...register('name')}
+            placeholder="例如：RustFS 本機"
+            aria-invalid={!!errors.name}
+          />
+          <FieldError errors={errors.name ? [errors.name] : []} />
+        </Field>
+
+        <Field data-invalid={!!errors.endpoint}>
+          <FieldLabel>Endpoint</FieldLabel>
+          <Input
+            {...register('endpoint')}
+            placeholder="https://s3.example.com"
+            aria-invalid={!!errors.endpoint}
+          />
+          {errors.endpoint ? (
+            <FieldError errors={[errors.endpoint]} />
+          ) : (
+            <FieldDescription>S3 API 位址，含 http(s)://，例如 http://rustfs:9000。</FieldDescription>
+          )}
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field data-invalid={!!errors.region}>
+            <FieldLabel>Region</FieldLabel>
+            <Input
+              {...register('region')}
+              placeholder="us-east-1"
+              aria-invalid={!!errors.region}
+            />
+            <FieldError errors={errors.region ? [errors.region] : []} />
+          </Field>
+
+          <Field data-invalid={!!errors.bucket}>
+            <FieldLabel>Bucket</FieldLabel>
+            <Input
+              {...register('bucket')}
+              placeholder="my-bucket"
+              aria-invalid={!!errors.bucket}
+            />
+            <FieldError errors={errors.bucket ? [errors.bucket] : []} />
+          </Field>
+        </div>
+
+        <Field data-invalid={!!errors.accessKeyId}>
+          <FieldLabel>Access Key ID</FieldLabel>
+          <Input
+            {...register('accessKeyId')}
+            autoComplete="off"
+            aria-invalid={!!errors.accessKeyId}
+          />
+          <FieldError errors={errors.accessKeyId ? [errors.accessKeyId] : []} />
+        </Field>
+
+        <Field data-invalid={!!errors.secretAccessKey}>
+          <FieldLabel>Secret Access Key</FieldLabel>
+          <Input
+            {...register('secretAccessKey')}
+            type="password"
+            autoComplete="off"
+            placeholder={isEditMode ? '留空表示不變更' : undefined}
+            aria-invalid={!!errors.secretAccessKey}
+          />
+          {errors.secretAccessKey ? (
+            <FieldError errors={[errors.secretAccessKey]} />
+          ) : (
+            <FieldDescription>
+              {isEditMode ? '目前的金鑰不會顯示；留空表示沿用原本的。' : '儲存後不會再顯示。'}
+            </FieldDescription>
+          )}
+        </Field>
+
+        <Field data-invalid={!!errors.publicUrl}>
+          <FieldLabel>公開網址（選填）</FieldLabel>
+          <Input
+            {...register('publicUrl')}
+            placeholder="https://cdn.example.com（留空則使用 endpoint/bucket）"
+            aria-invalid={!!errors.publicUrl}
+          />
+          <FieldError errors={errors.publicUrl ? [errors.publicUrl] : []} />
+        </Field>
+
+        <Field orientation="horizontal">
+          <FieldContent>
+            <FieldLabel htmlFor="storage-force-path-style">Path-style 存取</FieldLabel>
+            <FieldDescription>RustFS / MinIO 等自架服務建議開啟；AWS S3 通常關閉。</FieldDescription>
+          </FieldContent>
+          <Controller
+            name="forcePathStyle"
+            control={control}
+            render={({ field }) => (
+              <Switch id="storage-force-path-style" checked={field.value} onCheckedChange={field.onChange} />
+            )}
+          />
+        </Field>
+      </FieldGroup>
+
+      <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          取消
+        </Button>
+        <Button type="submit" disabled={isSubmitting} className="gap-2">
+          {isSubmitting ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" />
+              {submittingLabel}
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
+      </div>
+    </form>
+  )
+}

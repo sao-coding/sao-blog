@@ -1,0 +1,265 @@
+import React from 'react'
+import type { MDXComponents } from 'mdx/types'
+import type { MdxComponentName } from '@sao-blog/mdx/registry'
+import {
+  Mermaid,
+  Quote,
+  MdxImage,
+  MdxAlert,
+  MdxAccordion,
+  MdxAccordionItem,
+  MdxTabs,
+  MdxTab,
+  MdxCarousel,
+  MdxSlide,
+  MdxProgress,
+  MdxBenchmark,
+  MdxBenchmarkItem,
+  CodeBlockHeader,
+  MdxPlayground,
+  MdxPlaygroundFile,
+  MdxExcalidraw,
+  MdxSteps,
+  MdxStep,
+  MdxFileTree,
+  MdxLinkCard,
+  MdxKbd,
+  MdxRuby,
+  MdxSidenote,
+  MdxMark,
+  MdxTerminal,
+  MdxTweet,
+  MdxStickyNote,
+  MdxImageCompare,
+  MdxEmbed,
+} from './renderers'
+import EnhancedLink from './renderers/link'
+import { FootnoteBackref, isFootnoteBackref } from './renderers/footnote'
+import { m } from '#/paraglide/messages'
+import { cn } from '@/lib/utils'
+
+// 匯出個別 renderers
+export { Mermaid }
+
+// 把 React 節點樹（例如 Shiki 輸出的 <code><span>...</span></code>）攤平成純文字，
+// 用來算行數、複製到剪貼簿。
+function nodeToText(node: React.ReactNode): string {
+  if (typeof node === 'string') return node
+  if (typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(nodeToText).join('')
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return nodeToText(node.props.children)
+  }
+  return ''
+}
+
+// 複製用的文字：逐行取 Shiki 的 <span class="line">，跳過 [!code --] 標記的刪除行，
+// 讀者貼上的就是「改完之後」的程式碼
+function codeToCopyText(code: React.ReactNode): string {
+  if (!React.isValidElement<{ children?: React.ReactNode }>(code)) return nodeToText(code)
+  const lines = React.Children.toArray(code.props.children).filter(
+    (child): child is React.ReactElement<{ className?: string; children?: React.ReactNode }> =>
+      React.isValidElement<{ className?: string }>(child) &&
+      !!child.props.className?.split(' ').includes('line')
+  )
+  if (lines.length === 0) return nodeToText(code)
+  return lines
+    .filter((line) => !line.props.className?.split(' ').includes('remove'))
+    .map(nodeToText)
+    .join('\n')
+}
+
+// 文章用區塊元件（作者在 MDX 中直接以 JSX 標籤書寫）。
+// `satisfies` 確保 @sao-blog/mdx registry 登記的每個元件在 Web 端都有實作。
+const blockComponents = {
+  Quote,
+  Alert: MdxAlert,
+  Accordion: MdxAccordion,
+  AccordionItem: MdxAccordionItem,
+  Tabs: MdxTabs,
+  Tab: MdxTab,
+  Carousel: MdxCarousel,
+  Slide: MdxSlide,
+  Progress: MdxProgress,
+  Benchmark: MdxBenchmark,
+  BenchmarkItem: MdxBenchmarkItem,
+  Playground: MdxPlayground,
+  PlaygroundFile: MdxPlaygroundFile,
+  Excalidraw: MdxExcalidraw,
+  Steps: MdxSteps,
+  Step: MdxStep,
+  FileTree: MdxFileTree,
+  LinkCard: MdxLinkCard,
+  Kbd: MdxKbd,
+  Ruby: MdxRuby,
+  Sidenote: MdxSidenote,
+  Mark: MdxMark,
+  Terminal: MdxTerminal,
+  Tweet: MdxTweet,
+  StickyNote: MdxStickyNote,
+  ImageCompare: MdxImageCompare,
+  Embed: MdxEmbed,
+} satisfies Record<MdxComponentName, React.ComponentType<never>>
+
+// 預設 MDX components 配置
+export const defaultMDXComponents: MDXComponents = {
+  wrapper: function Wrapper({
+    children,
+  }: React.ComponentPropsWithoutRef<'div'>) {
+    return <div className="mdx-wrapper text-lg">{children}</div>
+  },
+  /* 為所有標題加上 scroll-margin-top（對應 sticky top-20） */
+  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h1 className="scroll-mt-20" {...props} />
+  ),
+  // 註腳區的標題是 remark-gfm 產生的英文 "Footnotes"（id="footnote-label"），換成三語
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) =>
+    props.id === 'footnote-label' ? (
+      <h2 className="scroll-mt-20" {...props}>
+        {m.footnotes_label()}
+      </h2>
+    ) : (
+      <h2 className="scroll-mt-20" {...props} />
+    ),
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h3 className="scroll-mt-20" {...props} />
+  ),
+  h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h4 className="scroll-mt-20" {...props} />
+  ),
+  h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h5 className="scroll-mt-20" {...props} />
+  ),
+  h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h6 className="scroll-mt-20" {...props} />
+  ),
+  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    if (isFootnoteBackref(props)) return <FootnoteBackref {...props} />
+    const href = props.href ?? ''
+    if (/^https?:\/\//.test(href)) {
+      return <EnhancedLink href={href} {...props} />
+    }
+    return <a {...props} />
+  },
+  // Shiki（rehype 階段）已將一般語言的 fenced code block 轉為帶語法高亮的 <pre class="shiki ...">，
+  // 這裡補上排版樣式，並用 not-prose 避開 typography 外掛的預設 pre 樣式。
+  pre: ({
+    className,
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLElement>) => {
+    // mermaid 的 code 元件回傳的是區塊元素（Mermaid），
+    // <pre> 的內容模型只允許 phrasing content，塞入 <div> 屬於不合法的 HTML
+    // 巢狀，會在 hydration 時炸掉，因此改用 <div> 包裹。
+    const childClassName = React.isValidElement<{ className?: string }>(children)
+      ? children.props.className
+      : undefined
+    if (childClassName === 'language-mermaid') {
+      return (
+        <div className={cn('mdx-block not-prose', className)} {...props}>
+          {children}
+        </div>
+      )
+    }
+
+    const isShiki = className?.split(' ').includes('shiki')
+    if (!isShiki) {
+      return (
+        <pre className={className} {...props}>
+          {children}
+        </pre>
+      )
+    }
+
+    const lang = childClassName?.startsWith('language-')
+      ? childClassName.slice('language-'.length)
+      : undefined
+    // ```ts title="vite.config.ts" 的檔名（highlight.ts 放在 data-title）
+    const { 'data-title': title, ...preProps } = props as typeof props & {
+      'data-title'?: string
+    }
+
+    return (
+      <CodeBlockHeader
+        lang={lang}
+        title={title}
+        codeText={nodeToText(children)}
+        copyText={codeToCopyText(children)}
+      >
+        <pre className={className} {...preProps}>
+          {children}
+        </pre>
+      </CodeBlockHeader>
+    )
+  },
+  code: ({
+    className,
+    children,
+    'data-svg': svg,
+  }: {
+    className?: string
+    children: React.ReactNode
+    // 編譯時預先算好的 mermaid SVG（見 @sao-blog/mdx 的 rehypeMermaid）
+    'data-svg'?: string
+  }) => {
+    const text = String(children ?? '').trim()
+    if (className === 'language-mermaid') {
+      return <Mermaid svg={svg}>{text}</Mermaid>
+    }
+    // 沒有語言標記的行內程式碼（例如 `foo`）
+    if (!className) {
+      return <code className="mdx-inline-code">{children}</code>
+    }
+    return <code className={className}>{children}</code>
+  },
+  img: MdxImage,
+  // 表格包一層：寬的表格在窄螢幕上自己橫向捲，不撐破內文
+  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+    <div className="mdx-table">
+      <table {...props} />
+    </div>
+  ),
+  // GFM 待辦清單（- [x]）的勾選框沒有 label，補上可讀名稱
+  input: (props: React.InputHTMLAttributes<HTMLInputElement>) =>
+    props.type === 'checkbox' ? (
+      <input {...props} aria-label={props.checked ? m.task_done() : m.task_todo()} />
+    ) : (
+      <input {...props} />
+    ),
+  ...blockComponents,
+}
+
+// 擴充的 MDX components 型別，允許 null/false 來禁用 components
+export type MDXComponentOverrides = {
+  [K in keyof MDXComponents]?: MDXComponents[K] | null | false
+}
+
+// 深度合併 MDX components 的工具函式
+export function mergeMDXComponents(
+  baseComponents: MDXComponents = {},
+  overrides: MDXComponentOverrides = {}
+): MDXComponents {
+  const merged = { ...baseComponents }
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === null || value === false) {
+      // 如果 override 為 null 或 false，則移除該 component
+      delete merged[key as keyof MDXComponents]
+    } else if (value !== undefined) {
+      // 否則設定或覆寫該 component
+      merged[key as keyof MDXComponents] = value as NonNullable<typeof value>
+    }
+  }
+
+  return merged
+}
+
+// 便利的工廠函式：建立自訂 MDX components
+export function createMDXComponents(
+  overrides: MDXComponentOverrides = {}
+): MDXComponents {
+  return mergeMDXComponents(defaultMDXComponents, overrides)
+}
+
+// 預設匯出（向後相容）
+export const components = defaultMDXComponents
