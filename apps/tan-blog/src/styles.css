@@ -876,7 +876,24 @@ html[data-ink-intro] .ink-intro-veil {
 .letter-paper {
   --frame: color-mix(in oklch, var(--zhu) 55%, transparent);
   position: relative;
+  isolation: isolate;
   padding: 3.5rem 2.75rem 3rem;
+}
+/* 紙的細顆粒（借 iki.moe）：只放在內容的紙上，不鋪全站。事先畫好的 128px 磁磚
+ * （public/paper-grain.png，scripts/paper-grain.mjs 產生）當 mask，只合成一次、不用即時濾鏡；
+ * 墊在文字後面（isolation + z-index:-1）。太髒就調低 --paper-grain */
+.letter-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--foreground);
+  opacity: var(--paper-grain, 0.1);
+  mask: url('/paper-grain.png') 0 0 / 128px 128px repeat;
+}
+.dark .letter-paper {
+  --paper-grain: 0.07;
 }
 .letter-paper::after {
   content: '';
