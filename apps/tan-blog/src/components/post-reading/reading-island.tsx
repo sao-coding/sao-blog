@@ -46,10 +46,27 @@ export function ReadingIsland({
   const box = useRef<HTMLDivElement>(null)
   const minutes = Math.max(1, Math.round(readingTime))
 
+  // 收回圓點要快、乾脆：外框短時間縮回，圓點幾乎同時淡入，不等外框縮完才冒出來（那段是空殼，看起來像卡住）
+  // 縮小（目錄／這一篇 → 工具列 → 圓點）也一樣：外框用 out 曲線，新內容不等外框。
+  // move 曲線一開始很慢，舊內容早淡光了、外框卻還沒動，中間那段空殼就是「不順」的來源。
+  const rank = view === 'dot' ? 0 : view === 'bar' ? 1 : 2
+  const prevRank = useRef(rank)
+  const shrinking = rank < prevRank.current
+  useEffect(() => {
+    prevRank.current = rank
+  }, [rank])
   const shape: Transition = reduce
     ? { duration: DURATION.out / 1000 }
-    : { duration: 0.44, ease: [...EASE.move] as [number, number, number, number] }
-  const inner: Transition = { duration: DURATION.in / 1000, ease: [...EASE.out] as [number, number, number, number], delay: reduce ? 0 : 0.12 }
+    : shrinking
+      ? { duration: 0.28, ease: [...EASE.out] as [number, number, number, number] }
+      : { duration: 0.44, ease: [...EASE.move] as [number, number, number, number] }
+  const inner: Transition = {
+    duration: shrinking ? 0.2 : DURATION.in / 1000,
+    ease: [...EASE.out] as [number, number, number, number],
+    delay: reduce ? 0 : shrinking ? 0.04 : 0.12,
+  }
+  // 離場的元素會沿用舊 props，所以固定值，不跟 shrinking 走
+  const leave: Transition = { duration: 0.16 }
 
   // 點外面、按 Esc、往下捲一段：收回圓點
   useEffect(() => {
@@ -79,31 +96,41 @@ export function ReadingIsland({
 
   const radius = view === 'dot' ? 26 : view === 'bar' ? 26 : 18
 
+  // 外框的寬高直接補間到「目前內容的自然大小」（+2 是髮絲線框）。
+  // 不用 layout：layout 是用 scale 變形，縮小時圓角會被拉成矩形，也不是從左上同時縮。
+  const content = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null)
+  useEffect(() => {
+    const el = content.current
+    if (!el) return
+    const measure = () => setSize({ w: el.offsetWidth + 2, h: el.offsetHeight + 2 })
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-end px-4 lg:hidden">
       <motion.div
         ref={box}
-        layout
         transition={shape}
         initial={false}
-        animate={{ borderRadius: radius }}
-        className={cn(
-          'pointer-events-auto relative overflow-hidden border border-ink-5 bg-background',
-          view === 'toc' || view === 'me' ? 'w-full max-w-md' : '',
-        )}
+        animate={size ? { width: size.w, height: size.h, borderRadius: radius } : { borderRadius: radius }}
+        className="pointer-events-auto relative overflow-hidden border border-ink-5 bg-background"
       >
+        <div ref={content} className="relative w-max">
         <AnimatePresence mode="popLayout" initial={false}>
           {view === 'dot' && (
             <motion.button
               key="dot"
               type="button"
-              layout="position"
               onClick={() => setView('bar')}
               aria-label={m.reading_open()}
               aria-expanded={false}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1, transition: inner }}
-              exit={{ opacity: 0, scale: 0.8, transition: { duration: DURATION.out / 1000 } }}
+              exit={{ opacity: 0, scale: 0.8, transition: leave }}
               className="relative block size-[50px]"
             >
               <Face me={me} progress={progress} ring />
@@ -113,10 +140,9 @@ export function ReadingIsland({
           {view === 'bar' && (
             <motion.div
               key="bar"
-              layout="position"
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0, transition: inner }}
-              exit={{ opacity: 0, transition: { duration: DURATION.out / 1000 } }}
+              exit={{ opacity: 0, transition: leave }}
               className="flex h-[50px] items-center gap-1 pr-1.5 pl-1"
             >
               <IslandButton label={m.reading_about()} onClick={() => setView('me')} className="size-[42px]">
@@ -194,6 +220,7 @@ export function ReadingIsland({
             </Panel>
           )}
         </AnimatePresence>
+        </div>
       </motion.div>
     </div>
   )
@@ -267,11 +294,10 @@ function Panel({
 }) {
   return (
     <motion.div
-      layout="position"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0, transition }}
-      exit={{ opacity: 0, transition: { duration: DURATION.out / 1000 } }}
-      className="px-5 pt-3 pb-5 font-display"
+      exit={{ opacity: 0, transition: { duration: 0.16 } }}
+      className="w-[min(calc(100vw-2rem-2px),28rem)] px-5 pt-3 pb-5 font-display"
     >
       <div className="mb-4 flex items-center justify-between">
         <button type="button" onClick={onBack} className="text-sm text-ink-3 transition-colors active:text-zhu">
