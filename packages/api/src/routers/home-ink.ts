@@ -15,11 +15,11 @@ import { consumeRateLimit } from "../lib/rate-limit";
 export const PIGMENTS = ["mo", "zhemo", "zheshi", "tenghuang", "zhilu", "shilu", "huaqing", "zhu"] as const;
 
 /** 一個人一天的墨（以鳥居高為 1 的長度 × 1000）：鳥居大約三個鳥居高寬，橫過首屏一筆大約 3000 */
-const DAILY_INK = 300_000;
+const DAILY_INK = 1_000_000;
 /** 朱是強調色，鳥居也用朱：寫起來比較費墨 */
 const ZHU_COST = 3;
 /** 一筆最多幾個點 */
-const MAX_POINTS = 1500;
+const MAX_POINTS = 3000;
 /** 今天的紙上最多留幾筆（新的優先） */
 const MAX_TODAY = 800;
 /** 同時看著首頁的連線上限（全站、同一個 IP） */
@@ -31,8 +31,8 @@ const PING_MS = 30_000;
 const pigmentSchema = z.enum(PIGMENTS);
 /** [x, y, 粗細, 距起筆的毫秒] */
 const pointSchema = z.tuple([
-  z.number().min(-8).max(8),
-  z.number().min(-5).max(4),
+  z.number().min(-12).max(12),
+  z.number().min(-5).max(40),
   z.number().min(0).max(0.25),
   z.number().int().min(0).max(120_000),
 ]);
@@ -178,7 +178,7 @@ const write = protectedProcedure
     if (context.session.user.banned) throw new ORPCError("FORBIDDEN");
     const limit = consumeRateLimit([
       { key: `ink:user:${userId}:second`, max: 30, windowMs: 1000 },
-      { key: `ink:user:${userId}:minute`, max: 900, windowMs: 60_000 },
+      { key: `ink:user:${userId}:minute`, max: 1800, windowMs: 60_000 },
     ]);
     if (!limit.ok) throw new ORPCError("TOO_MANY_REQUESTS");
 
