@@ -101,6 +101,19 @@ export const COMPONENT_SNIPPETS: Snippet[] = [
     body: '<Embed src="$0" />',
   },
   {
+    label: 'Model3D 3D 模型',
+    description: '預覽 .3mf / .stl 檔，可旋轉縮放',
+    body: '<Model3D src="$0" caption="" />',
+  },
+  {
+    label: 'Model3D 多零件',
+    description: '多個 .stl / .3mf 放同一畫面，自動排開',
+    body: '<Model3D caption="" layout="separate">
+  <ModelPart src="$0" />
+  <ModelPart src="" color="red" />
+</Model3D>',
+  },
+  {
     label: 'Mark 手繪標記（行內）',
     inline: true,
     description: 'highlight / underline / strike / circle / box',

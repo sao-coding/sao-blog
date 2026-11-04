@@ -32,6 +32,8 @@ import {
   MdxStickyNote,
   MdxImageCompare,
   MdxEmbed,
+  MdxModel3D,
+  MdxModelPart,
 } from './renderers'
 import EnhancedLink from './renderers/link'
 import { FootnoteBackref, isFootnoteBackref } from './renderers/footnote'
@@ -99,6 +101,8 @@ const blockComponents = {
   StickyNote: MdxStickyNote,
   ImageCompare: MdxImageCompare,
   Embed: MdxEmbed,
+  Model3D: MdxModel3D,
+  ModelPart: MdxModelPart,
 } satisfies Record<MdxComponentName, React.ComponentType<never>>
 
 // 預設 MDX components 配置

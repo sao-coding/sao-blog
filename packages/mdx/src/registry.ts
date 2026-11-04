@@ -278,6 +278,31 @@ export const componentRegistry = {
     children: false,
     translatableProps: ['title'],
   }),
+  Model3D: define({
+    description:
+      '3D 模型預覽（.3mf / .stl，例如 3D 列印檔）：瀏覽器端載入，讀者可拖曳旋轉、滾輪/兩指縮放；捲到附近才載入 three.js。' +
+      '單檔用 src；多個零件（例如盒子＋蓋子）放在同一畫面則改用子元素 ModelPart，會自動橫向排開；' +
+      '讀者可切換「組裝／分開」（組裝＝照各檔原本座標，零件需從同一個組裝檔分別匯出）',
+    props: {
+      src: assetUrl.optional(),
+      /** 單檔時的顏色（STL 沒有顏色；3MF 有顏色時以檔案為準） */
+      color: color.optional(),
+      /** 多零件時一開始的排法：separate（排開，預設）／assembled（照檔案座標組好）；讀者可用按鈕切換 */
+      layout: z.enum(['separate', 'assembled']).optional(),
+      /** 圖說，顯示在模型下方，同時作為無障礙替代文字 */
+      caption: z.string().optional(),
+    },
+    children: true,
+    translatableProps: ['caption'],
+  }),
+  ModelPart: define({
+    description: 'Model3D 裡的一個零件（.3mf / .stl），需放在 <Model3D> 內',
+    props: {
+      src: assetUrl,
+      color: color.optional(),
+    },
+    children: false,
+  }),
 } satisfies Record<string, ComponentSpec>
 
 export type MdxComponentName = keyof typeof componentRegistry

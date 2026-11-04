@@ -327,5 +327,10 @@
   "home_letter_thoughts": "つぶやき →",
   "home_enso_year": "今年書いたもの",
   "home_enso_count": "{count} 本",
-  "home_enso_now": "いまは {term}"
+  "home_enso_now": "いまは {term}",
+  "model3d_error": "3D モデルの読み込みに失敗しました：",
+  "model3d_reset": "視点をリセット",
+  "model3d_hint": "ドラッグで回転、ホイール／ピンチでズーム",
+  "model3d_assemble": "組み立て",
+  "model3d_separate": "分解"
 }

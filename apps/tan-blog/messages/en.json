@@ -327,5 +327,10 @@
   "home_letter_thoughts": "Thoughts →",
   "home_enso_year": "Written this year",
   "home_enso_count": "{count}",
-  "home_enso_now": "Now in {term}"
+  "home_enso_now": "Now in {term}",
+  "model3d_error": "Failed to load 3D model: ",
+  "model3d_reset": "Reset view",
+  "model3d_hint": "Drag to rotate, scroll or pinch to zoom",
+  "model3d_assemble": "Assemble",
+  "model3d_separate": "Explode"
 }

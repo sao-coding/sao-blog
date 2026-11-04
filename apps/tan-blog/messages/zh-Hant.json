@@ -327,5 +327,10 @@
   "home_letter_thoughts": "想法 →",
   "home_enso_year": "今年已寫",
   "home_enso_count": "{count} 篇",
-  "home_enso_now": "目前在 {term}"
+  "home_enso_now": "目前在 {term}",
+  "model3d_error": "3D 模型載入失敗：",
+  "model3d_reset": "重設視角",
+  "model3d_hint": "拖曳旋轉，滾輪或兩指縮放",
+  "model3d_assemble": "組裝",
+  "model3d_separate": "分開"
 }

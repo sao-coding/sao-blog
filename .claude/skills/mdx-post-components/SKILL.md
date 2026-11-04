@@ -1,6 +1,6 @@
 ---
 name: mdx-post-components
-description: Reference for the JSX block components available when writing article content (Alert, Accordion, Tabs, Carousel, Steps, FileTree, LinkCard, Tweet, Terminal, StickyNote, ImageCompare, Embed, Progress, Benchmark, Quote, Playground, Excalidraw, inline Mark/Kbd/Ruby/Sidenote, mermaid). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
+description: Reference for the JSX block components available when writing article content (Alert, Accordion, Tabs, Carousel, Steps, FileTree, LinkCard, Tweet, Terminal, StickyNote, ImageCompare, Embed, Model3D (.3mf/.stl), Progress, Benchmark, Quote, Playground, Excalidraw, inline Mark/Kbd/Ruby/Sidenote, mermaid). Use whenever asked to write, draft, or edit a blog post / article / note body for this project.
 ---
 
 # mdx-blog 文章區塊元件
@@ -296,6 +296,26 @@ Done in 4.2s
 ```
 
 - `src`: 必填，只支援 YouTube（watch / shorts / youtu.be）與 Bilibili（BV 號）；先顯示縮圖，點了才載入播放器
+
+### Model3D / ModelPart（3D 模型預覽）
+
+```mdx
+<Model3D src="/uploads/benchy.3mf" caption="3DBenchy 測試列印" />
+```
+
+多個零件（例如盒子＋蓋子）放同一畫面，用子元素 `ModelPart`，會各自落在平台上、自動橫向排開：
+
+```mdx
+<Model3D caption="ESP32-C3 外殼">
+  <ModelPart src="/uploads/box.stl" />
+  <ModelPart src="/uploads/lid.stl" color="red" />
+</Model3D>
+```
+
+- `src`: 單檔時填，`.3mf` 或 `.stl` 檔網址（通常是後台上傳的檔案），http(s) 或 `/` 開頭；外部網址需允許 CORS
+- `color`: 選填，blue / green / amber / red / purple / pink；STL 沒顏色時預設依序配色，3MF 有顏色以檔案為準（指定 color 則覆蓋）
+- `layout`: 選填，多零件時一開始的排法：`separate`（排開，預設）或 `assembled`（照各檔原本座標組好）。讀者可用「組裝／分開」按鈕切換，有動畫。組裝只在零件是從同一個組裝檔分別匯出（座標系一致）時才對；各自擺在平台原點的零件組起來會疊在一起
+- `caption`: 選填，同時當替代文字；讀者可拖曳旋轉、滾輪/兩指縮放，有「重設視角」按鈕
 
 ### 行內元件（寫在句子裡）
 
