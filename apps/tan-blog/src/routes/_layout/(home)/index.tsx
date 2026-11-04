@@ -67,7 +67,7 @@ function HomePage() {
         : ''
 
   return (
-    <div className={cn('relative', view === 'brush' && 'touch-pan-y')}>
+    <div>
       <section
         className={cn(
           'relative -mt-[4.5rem] h-[clamp(32rem,72svh,44rem)]',
@@ -78,8 +78,19 @@ function HomePage() {
         {view !== 'plain' && <ToriiLayer key={`torii-${theme}`} shore={shoreRef} onPainted={() => setPainted(true)} />}
         {view === 'water' && <WaterSurface key={`water-${theme}`} onLive={setLive} shore={shoreRef} reflect={painted} />}
         {view === 'brush' && <WaterReflection key={`refl-${theme}`} shore={shoreRef} reflect={painted} />}
+        {view === 'brush' && (
+          <BrushSurface
+            key={`brush-${theme}`}
+            onLive={setLive}
+            avoid={textRef}
+            shore={shoreRef}
+            demo={painted}
+            signedIn={signedIn}
+            onInkOut={() => setInkOut(true)}
+          />
+        )}
 
-        {/* 水線以上：名字、標語、社群連結（最後一行貼著水線） */}
+        {/* 水線以上：名字、標語、社群連結（最後一行貼著水線）。筆跡不寫在這一欄上 */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[58%] [html[data-home-view=plain]_&]:static [html[data-home-view=plain]_&]:h-auto [html[data-home-view=plain]_&]:pt-36">
           <div className="mx-auto flex h-full w-full max-w-7xl flex-col justify-end px-5 md:px-8">
             <div ref={textRef} className="w-fit">
@@ -160,17 +171,6 @@ function HomePage() {
           <Link to="/thinking">{m.home_letter_thoughts()}</Link>
         </nav>
       </section>
-      {/* 筆跡：整個首頁都是紙（畫布蓋在上面、不吃滑鼠，事件從這一層收） */}
-      {view === 'brush' && (
-        <BrushSurface
-          key={`brush-${theme}`}
-          onLive={setLive}
-          shore={shoreRef}
-          demo={painted}
-          signedIn={signedIn}
-          onInkOut={() => setInkOut(true)}
-        />
-      )}
     </div>
   )
 }

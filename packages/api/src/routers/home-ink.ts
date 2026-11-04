@@ -21,7 +21,7 @@ const ZHU_COST = 3;
 /** 一筆最多幾個點 */
 const MAX_POINTS = 3000;
 /** 今天的紙上最多留幾筆（新的優先） */
-const MAX_TODAY = 800;
+const MAX_TODAY = 150;
 /** 同時看著首頁的連線上限（全站、同一個 IP） */
 const MAX_LIVE = 500;
 const MAX_LIVE_PER_IP = 4;
