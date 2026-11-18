@@ -22,7 +22,7 @@ services:
     image: sao-blog-tan-blog:latest
     container_name: sao-blog-tan-blog
     env_file:
-      - apps/tan-blog/.env.local
+      - apps/tan-blog/.env
     build:
       context: .
       dockerfile: apps/tan-blog/Dockerfile

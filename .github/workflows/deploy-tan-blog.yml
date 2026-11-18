@@ -77,7 +77,7 @@ jobs:
                 --name sao-blog-tan-blog \
                 --restart unless-stopped \
                 --network sao-blog-network \
-                --env-file apps/tan-blog/.env.local \
+                --env-file apps/tan-blog/.env \
                 -p 3004:3000 \
                 sao-blog-tan-blog:latest &&
               rm -f sao-blog-tan-blog.tar &&
