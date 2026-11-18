@@ -55,7 +55,7 @@ jobs:
           SSH_PASS: ${{ secrets.NAS_PASSWORD }}
         run: |
           scp -O -P ${{ secrets.NAS_PORT }} -o StrictHostKeyChecking=no \
-            sao-blog-admin.tar docker-compose.yml \
+            sao-blog-admin.tar \
             ${{ secrets.NAS_USERNAME }}@${{ secrets.NAS_HOST }}:/volume1/docker/blog-server/
 
       - name: Load image and restart admin on NAS
@@ -67,7 +67,16 @@ jobs:
               export PATH=$PATH:/usr/local/bin &&
               cd /volume1/docker/blog-server &&
               docker load -i sao-blog-admin.tar &&
-              docker compose --env-file apps/admin/.env up -d --no-build admin &&
+              docker network inspect sao-blog-network >/dev/null 2>&1 ||
+                docker network create sao-blog-network &&
+              docker rm -f sao-blog-admin >/dev/null 2>&1 || true &&
+              docker run -d \
+                --name sao-blog-admin \
+                --restart unless-stopped \
+                --network sao-blog-network \
+                --env-file apps/admin/.env \
+                -p 3003:80 \
+                sao-blog-admin:latest &&
               rm -f sao-blog-admin.tar &&
               docker image prune -f
             '
