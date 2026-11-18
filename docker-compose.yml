@@ -18,6 +18,43 @@ services:
     depends_on:
       - typesense
 
+  tan-blog:
+    image: sao-blog-tan-blog:latest
+    container_name: sao-blog-tan-blog
+    env_file:
+      - apps/tan-blog/.env.local
+    build:
+      context: .
+      dockerfile: apps/tan-blog/Dockerfile
+      args:
+        VITE_SERVER_URL: ${VITE_SERVER_URL:-https://blog-api.sao-x.com}
+        VITE_WS_URL: ${VITE_WS_URL:-wss://blog-api.sao-x.com}
+        VITE_SITE_URL: ${VITE_SITE_URL:-https://blog.sao-x.com}
+    ports:
+      - "3004:3000"
+    restart: unless-stopped
+    networks:
+      - sao-blog-network
+    depends_on:
+      - app
+
+  admin:
+    image: sao-blog-admin:latest
+    container_name: sao-blog-admin
+    env_file:
+      - apps/admin/.env
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://blog-api.sao-x.com}
+        VITE_BLOG_URL: ${VITE_BLOG_URL:-https://blog.sao-x.com}
+    ports:
+      - "3003:80"
+    restart: unless-stopped
+    networks:
+      - sao-blog-network
+
   # 全文搜尋。不對外開 port，只給 server 經 sao-blog-network 連線（前台走 API proxy）
   typesense:
     image: typesense/typesense:30.2
